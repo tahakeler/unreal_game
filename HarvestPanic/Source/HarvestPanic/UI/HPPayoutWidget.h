@@ -21,12 +21,14 @@ protected:
 	virtual TSharedRef<SWidget> RebuildWidget() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
+public:
+	/** Called by AHPHUD when the widget is shown/hidden: toggles cursor + input mode. */
+	void SetMenuInput(bool bMenu);
+
 private:
 	void BuildTree();
 	void RebuildReceipt(const AHPGameState* GS);
 	void AddRow(const FString& Left, const FString& Right, const FLinearColor& Color, int32 Size = 16, bool bBold = false);
-	void SetMenuInput(bool bMenu);
-
 	UFUNCTION() void OnNextClicked();
 	UFUNCTION() void OnRestartClicked();
 

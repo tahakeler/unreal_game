@@ -200,14 +200,7 @@ void UHPPayoutWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 	{
 		return;
 	}
-	const bool bVisible = GS->Phase == EHPDayPhase::Payout || GS->Phase == EHPDayPhase::Sunday;
-	SetVisibility(bVisible ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
-	SetMenuInput(bVisible);
-	if (!bVisible)
-	{
-		BuiltKey = -1;
-		return;
-	}
+	// Visibility is driven by AHPHUD::Tick (a Collapsed widget gets no NativeTick, so it can't un-hide itself).
 	const int64 Key = (static_cast<int64>(GS->Phase) << 48) ^ (static_cast<int64>(GS->DayIndex) << 24)
 		^ (static_cast<int64>(GS->DayBlameEvents.Num()) << 8) ^ static_cast<int64>(GS->LastSummary.WalletAfter & 0xFF);
 	if (Key != BuiltKey)
@@ -223,6 +216,10 @@ void UHPPayoutWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 
 void UHPPayoutWidget::SetMenuInput(bool bMenu)
 {
+	if (!bMenu)
+	{
+		BuiltKey = -1; // rebuild next time it opens
+	}
 	if (bMenu == bMenuInput)
 	{
 		return;

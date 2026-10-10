@@ -104,8 +104,7 @@ void UHPDayHUDWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 		return;
 	}
 	const bool bVisible = GS->Phase == EHPDayPhase::Morning || GS->Phase == EHPDayPhase::Workday || GS->Phase == EHPDayPhase::Dusk;
-	SetVisibility(bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
-	if (!bVisible)
+	if (!bVisible) // visibility itself is driven by AHPHUD::Tick
 	{
 		return;
 	}

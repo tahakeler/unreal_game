@@ -16,6 +16,7 @@ class HARVESTPANIC_API AHPHUD : public AHUD
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 
 private:
 	UPROPERTY() TObjectPtr<UHPDayHUDWidget> DayWidget;
