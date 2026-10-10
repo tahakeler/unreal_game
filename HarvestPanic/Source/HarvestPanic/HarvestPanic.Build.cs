@@ -15,6 +15,8 @@ public class HarvestPanic : ModuleRules
 			"InputCore",
 			"EnhancedInput",
 			"AIModule",
+			"NavigationSystem",
+			"GameplayTasks",
 			"StateTreeModule",
 			"GameplayStateTreeModule",
 			"UMG",
