@@ -1,44 +1,90 @@
 # Game Concept: HARVEST PANIC
 
-**Status:** Final concept recommendation (Creative Director). The user makes the final call.
-**Engine:** UE 5.8 on Apple Silicon (Mac). Online co-op for 2–4 players.
-**Derived from:** `brainstorm-coop-concepts.md`. This is a mutation of HAUL ASS (physics carrying, chaos for damages, payout loop) and SOUP OR DIE (live ingredients that fight back), rebuilt around the owned assets.
-
-## Re-evaluation Against Owned Assets
-
-| Concept | Fit with Harvest Farm + Bridge + Pathfinding | Verdict |
-|---|---|---|
-| HAUL ASS | The farm reskin works and the farm buildings fit. The bridge is only set dressing. | Mutate |
-| SOUP OR DIE | Fleeing livestock and crops are an ideal use of AI pathfinding, and the farm kit fits. Cooking pushes it toward Overcooked. | Mutate |
-| THE BLIND HEIST | Needs indoor security assets that we don't own. | Drop |
-| DUCT TAPE DIVERS | Needs water and submarine assets. Nothing we own fits. | Drop |
-| LAST SIGNAL | Towers aren't covered. The bridge pack helps only a little. | Drop |
-
-**Merge:** keep HAUL ASS's physics carrying and payout loop, keep SOUP OR DIE's living, fleeing goods, and use the bridge as the chokepoint every run has to cross.
+**Status:** Final concept, revision 2: reworked into a long-form game (Creative Director). The user makes the final call.
+**Engine:** UE 5.8 on Apple Silicon (Mac). Online co-op for 2–4 players with proximity voice.
 
 ## Hook
-Your crew of broke farmhands has to round up feral livestock and runaway crops on a farm that changes every run, then haul them across one rickety bridge to the market before sundown.
+Your crew inherited a cursed, debt-ridden farm from Grandpa. The Landlord, a smiling man in a too-tall hat, wants his money weekly. Round up feral livestock and runaway crops, haul them across the rickety bridge to market, and survive the nights when the farm wakes up. You can pay off the debt, but you'll never escape the chaos.
 
-## Core Loop (one 12–15 minute run, called a "Market Day")
-1. **Order.** The market posts a manifest, for example "3 pigs, 1 prize pumpkin (4-person carry), 6 chickens, 0 bruises."
-2. **Round up.** Chase, corner and grab animals and crops that flee with smart pathfinding, using nets, lassos and buckets of feed as lures.
-3. **Haul.** Load a physics wagon or carry by hand across the bridge chokepoint. Cargo wriggles, struggles and escapes.
-4. **Sell and upgrade.** Get paid by value minus a bruise penalty, then spend the money on tools (better nets, wagon parts, a scarecrow decoy). The next Market Day has nastier modifiers.
+## Market Research (2025–2026 viral co-op)
+| Game | What makes streamers laugh | What keeps people playing for weeks |
+|---|---|---|
+| **R.E.P.O.** | Physics-wobbly carrying of fragile loot, monsters interrupting, friends breaking each other's loot | Escalating quotas, upgrades, levels that scale in difficulty (a "Moon Phase" system in v0.2), and big updates every few months: Museum, Monster with 10 enemies, and Cosmetics |
+| **PEAK** | Ragdoll climbing failures, rescuing friends, food and status-effect chaos | Procedural daily mountain, cosmetics and badges, very cheap ($7.99), 61% player overlap with R.E.P.O. |
+| **Lethal Company** | Proximity voice cutting off when someone dies, monster jump scares, mimics | Quota loop, moons that get harder, a huge modding scene |
+| **Schedule I** | Absurd systems run by friends, NPC chaos | Long empire-building progression with expanding territory and automation. Streamer-driven (caseoh_ alone had 745K hours watched) |
+| **Chained Together** | Physics tether, one person's mistake drops everyone, blame | Leaderboards and the "we'll get it this time" climb |
+| **Content Warning** | Filming your friends' failures is the actual goal | Viral footage shared outside the game |
+| **Meccha Chameleon** | Hide-and-seek by painting yourself to blend in | Called 2026's biggest "friendslop" hit |
+| **Gamble With Your Friends** (2026) | One shared bank account, so blame and betrayal | 1M copies in a week |
 
-## Clip-Worthy Friendship Moment
-Halfway across the swaying bridge, four friends are carrying a prize pumpkin while a pig escapes out of the wagon. Someone lets go to dive for it. The pumpkin tips, the wagon rolls, and the whole crew, the pumpkin and the pig ragdoll into the river while the last friend screams "THE PIG IS STILL WORTH MONEY" over proximity voice.
+**Takeaways:**
+1. Physics plus proximity voice plus failure is the comedy engine. Success is boring and failure is the clip.
+2. A shared resource (quota, bank, tether) creates blame, and blame is funny.
+3. Quotas that escalate, combined with an "a little further" goal, give the one-more-run pull. Long-term retention comes from meta progression and updates every 2–4 months.
+4. Low price ($8–15), low hardware requirements and a goofy tone are the formula. Streamers drive discovery.
+5. Procedural or daily variation replaces handcrafted content.
+6. Light horror or monsters add spikes of panic between comedic moments.
 
-## Why It's Replayable
-- **Systemic critters:** each species has a flee personality: chickens scatter, pigs bulldoze, goats climb roofs, and the turnips burrow. The pathfinding plugin means they really outsmart you.
-- **Daily modifiers:** rain (mud slows you down), stampede, a "golden goose" bonus target, a broken bridge plank, or a fox that steals cargo.
-- **Layout variation:** farm props and fences are rearranged with PCG on a fixed map footprint, so every run uses a new herding geometry with no new art.
-- **Manifest combinations** plus tool upgrades make each day a different puzzle.
+**Sources:** [Alinea Analytics, Steam June 2025](https://alineaanalytics.com/blog/steam_june_2025/) · [Alinea on streamer-friendly co-op](https://alineaanalytics.substack.com/p/last-week-was-wild-on-steam-and-not) · [Stream Hatchet, Schedule I](https://streamhatchet.com/blog/schedule-is-success-live-streaming-in-q1-2025/) · [Gfinity, Schedule I charts](https://www.gfinityesports.com/article/schedule-i-beats-inzoi-and-mh-wilds-steam-top-charts) · [R.E.P.O. on Wikipedia](https://en.wikipedia.org/wiki/R.E.P.O.) · [Automaton, R.E.P.O. v0.2](https://automaton-media.com/articles/newsjp/repo-20250627-346311/) · [Playday, R.E.P.O. patch notes](https://playday.one/2025/10/30/repo-patch-notes/) · [The Sixth Axis, R.E.P.O. roadmap](https://www.thesixthaxis.com/2025/11/07/semiwork-wants-your-input-for-the-next-r-e-p-o-update/) · [GosuGamers, Gamble With Your Friends](https://www.gosugamers.net/entertainment/news/78409-gamble-with-your-friends-sells-one-million-copies-in-a-week) · [Insider Gaming, best friendslop](https://insider-gaming.com/best-friendslop-games-you-need-to-play/)
 
-## Design Pillars
-1. **Everything Has Legs.** Every valuable thing fights to escape. Nothing sits still waiting to be collected.
-2. **Heavy Together.** The best loot needs coordinated carrying, so solo players earn less than a team.
-3. **The Bridge Is the Climax.** Every run funnels through one dramatic chokepoint, which is where the clips happen.
-4. **Failure Is Funny, Never Fatal.** Drops, river dunks and ragdolls cost money, not fun. Runs are short and restarts are instant.
+## Long-Term Structure
+
+### Layer 1: The Day (10–15 minutes, the core loop)
+1. **Morning:** read the market order and the day's twist (weather or a curse).
+2. **Round up:** chase fleeing livestock and crops (AdaptivePathfinding) with nets, lassos and lures.
+3. **Haul:** load the wagon or carry by hand across the bridge to market. Bruises reduce value.
+4. **Dusk return:** an optional bonus haul at night, which is when Night Creatures appear.
+
+### Layer 2: The Week (one session, 1–2 hours)
+- Five days, then **Landlord Sunday**: pay the weekly quota or lose. Quotas escalate the way they do in Lethal Company and R.E.P.O.
+- Between days, spend money on farm upgrades (a bigger wagon, an electric fence, a bridge reinforcement, a guard dog that can also cause chaos).
+- **Failing a week resets the save, but you keep account-level unlocks.** It works like a roguelite, so each "season" is one attempt at the debt.
+
+### Layer 3: The Debt Campaign (weeks to months of play)
+- Paying off the farm takes about 4–6 weeks of in-game Sundays per **Region**.
+- Each paid region unlocks the next **market town** and biome, each with new species, curses and Landlord twists. Biomes are built from the owned packs plus free Quixel content, reskinned and rearranged with PCG:
+  1. Grandpa's Farm (Harvest pack plus the Bridge pack)
+  2. Misty Riverlands (Bridge/Nature pack used as the main map, with rafts)
+  3. Haunted Orchard (night-heavy, owned assets with a fog and lighting pass)
+  4. and more after launch
+- **Meta unlocks:** cosmetics (hats, overalls, tractor paint), new tools, and an almanac to fill with every species, curse and bruise type.
+- **Endgame:** "Eviction Mode" ladders, where the quota scales without limit, a daily seed and a leaderboard.
+
+## Chaos Sources (systemic and stackable)
+- **Livestock personalities:** chickens scatter, pigs bulldoze, goats climb roofs, bulls charge whoever is wearing red, and sheep flock-follow the panicking player.
+- **Cursed crops:** turnips that burrow, screaming mandrakes (loud sounds attract night creatures), pumpkins that grow while you carry them, and a corn maze that rearranges.
+- **Night Creatures (light horror):** the Scarecrow moves only when nobody is looking, the Barn Thing drags players into hay, and Crows steal shiny tools.
+- **Weather:** mud slows you, wind tips carried cargo, a storm can wash out the bridge, and fog limits sight to proximity voice only.
+- **Rival Farmers (NPC):** they steal from your wagon, sabotage the bridge, and you can steal back.
+- **Landlord Events:** surprise inspections ("all cows must be wearing hats"), quota doubles, and the Landlord personally walking the farm.
+
+## Comedy Systems (built to produce streamable moments)
+1. **Shared Wallet and Blame Ledger:** the end-of-day screen itemizes who bruised what ("Dave: dropped pig into river ×3, −$240"), and the Most Valuable Disaster award goes to the worst player.
+2. **Proximity voice with livestock:** loud players spook animals and attract night creatures, so whispering and screaming both matter.
+3. **Physics carrying and tethers:** carrying with several hands, wagon hitches and lasso ropes connect players in a Chained Together style, so one person falls and everyone falls.
+4. **The Bridge:** planks break, the bridge sways, and the river spits you back out downstream. It is the clip stage every day.
+5. **Grandpa's Camcorder:** a built-in replay that auto-saves the last 30 seconds before every disaster, with one-click export for TikTok and Shorts. It is free marketing in the spirit of Content Warning.
+6. **Ragdolls everywhere:** kicked by a cow, launched by a bull, or carried away by crows. Death is temporary (respawn at the barn for a fee), so the comedy never becomes punishing.
+7. **Optional betrayal:** secretly pocket a golden egg, which shows up in the Blame Ledger at the end of the week.
+
+## Pillars (revised)
+1. **Everything Has Legs.** Every valuable thing fights to escape.
+2. **Heavy Together, Blamed Together.** Shared loads, a shared wallet and shared failure.
+3. **The Farm Gets Worse, You Get Better.** Escalating quotas and curses against your growing toolkit.
+4. **Failure Is the Content.** Every disaster is funny, recorded and cheap to recover from.
+
+## Phased Roadmap (small team)
+| Phase | Duration | Scope |
+|---|---|---|
+| **Vertical slice** | 2 weeks | See below: one day loop, the pig, the bridge, payout |
+| **Prototype to Alpha** | about 3 months | The full Week/Landlord loop, 5 species, 3 cursed crops, the Scarecrow, weather, upgrades, Blame Ledger, Camcorder, Steam lobbies |
+| **Early Access launch** (around $9.99) | about 6–8 months | Region 1 complete, 8 species, 2 night creatures, Rival Farmer, 30 upgrades, cosmetics, almanac, Eviction Mode |
+| **Update 1: Riverlands** | EA +2–3 months | Region 2, rafts, new species and curses |
+| **Update 2: Haunted Orchard** | EA +5–6 months | Region 3, night-focused, 3 new creatures |
+| **Ongoing** | | Seasonal events (Harvest Fest, Halloween), cosmetics, community-voted creatures, mod support |
+
+Content scales by **combining systems** (species × curse × weather × Landlord event × PCG layout), not by authoring levels.
 
 ## Owned Asset Coverage
 
