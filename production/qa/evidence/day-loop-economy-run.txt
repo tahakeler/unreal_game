@@ -1,0 +1,28 @@
+# HP.QAShots under -game -nullrhi (2026-10-10). Rendered screenshots blocked: Metal Toolchain missing (see dle_game.log excerpt at bottom)
+[2026.10.10-16.15.08:088][  0]LogTemp: [HP] Phase -> EHPDayPhase::Morning (30s) day 0 week 1
+[2026.10.10-16.15.08:137][  0]LogTemp: [HP] Phase -> EHPDayPhase::Workday (540s) day 0 week 1
+[2026.10.10-16.15.08:965][888]LogTemp: [HP] Payout: sales=484 items=8 orderBonus=60 costs=25 net=519 wallet=619 due=540
+[2026.10.10-16.15.08:965][888]LogTemp: [HP] Receipt: Tahas-MacBook-Pro.lo: dropped Prize Pumpkin  -131
+[2026.10.10-16.15.08:965][888]LogTemp: [HP] Receipt: Tahas-MacBook-Pro.lo: drowned (respawn fee)  -25
+[2026.10.10-16.15.08:965][889]LogTemp: [HP] Receipt: Tahas-MacBook-Pro.lo: dropped Chicken  -2
+[2026.10.10-16.15.08:965][889]LogTemp: [HP] Receipt: Nature: dropped Pig into river  -60
+[2026.10.10-16.15.08:965][889]LogTemp: [HP] Phase -> EHPDayPhase::Payout (0s) day 0 week 1
+[2026.10.10-16.15.09:962][888]LogMac: FPlatformMisc::RequestExit(0, HP.QAShots)
+[2026.10.10-16.15.09:962][889]LogCore: Engine exit requested (reason: Mac RequestExit)
+
+# Automation RunTests HarvestPanic.
+[2026.10.10-16.14.07:130][212]LogAutomationController: Display: Test Completed. Result={Success} Name={GroupsByPlayerThenVerbNatureLast} Path={HarvestPanic.Blame.Receipt.GroupsByPlayerThenVerbNatureLast}
+[2026.10.10-16.14.07:180][215]LogAutomationController: Display: Test Completed. Result={Success} Name={MatchesGddExample} Path={HarvestPanic.Blame.Severity.MatchesGddExample}
+[2026.10.10-16.14.07:214][217]LogAutomationController: Display: Test Completed. Result={Success} Name={RenormalizedTouchHistory} Path={HarvestPanic.Blame.Shares.RenormalizedTouchHistory}
+[2026.10.10-16.14.07:264][220]LogAutomationController: Display: Test Completed. Result={Success} Name={DeltaMatchesGddExamples} Path={HarvestPanic.Economy.Bruise.DeltaMatchesGddExamples}
+[2026.10.10-16.14.07:297][222]LogAutomationController: Display: Test Completed. Result={Success} Name={TierThresholdsAndMultipliers} Path={HarvestPanic.Economy.Bruise.TierThresholdsAndMultipliers}
+[2026.10.10-16.14.07:347][225]LogAutomationController: Display: Test Completed. Result={Success} Name={SaturationAfterSixUnits} Path={HarvestPanic.Economy.Demand.SaturationAfterSixUnits}
+[2026.10.10-16.14.07:397][228]LogAutomationController: Display: Test Completed. Result={Success} Name={GraceThenLinearToFloor} Path={HarvestPanic.Economy.Freshness.GraceThenLinearToFloor}
+[2026.10.10-16.14.07:447][231]LogAutomationController: Display: Test Completed. Result={Success} Name={MatchesWeekQuotaTable} Path={HarvestPanic.Economy.Quota.MatchesWeekQuotaTable}
+[2026.10.10-16.14.07:497][234]LogAutomationController: Display: Test Completed. Result={Success} Name={MatchesGddFormula} Path={HarvestPanic.Economy.SaleValue.MatchesGddFormula}
+[2026.10.10-16.14.07:547][237]LogAutomationController: Display: Test Completed. Result={Success} Name={FloorAtMinus200WithIOU} Path={HarvestPanic.Economy.Wallet.FloorAtMinus200WithIOU}
+[2026.10.10-16.14.07:597][240]LogAutomationController: Display: Test Completed. Result={Success} Name={RespawnFeeAndOrderBonus} Path={HarvestPanic.Economy.Wallet.RespawnFeeAndOrderBonus}
+[2026.10.10-16.14.07:614][241]LogAutomationCommandLine: Display: **** TEST COMPLETE. EXIT CODE: 0 ****
+
+# Windowed -game launch failure
+[2026.10.10-16.14.25:261][  0]Message dialog closed, result: Ok, title: Message, text: Xcode Metal Compiler error: error: error: cannot execute tool 'metal' due to missing Metal Toolchain; use: xcodebuild -downloadComponent MetalToolchain

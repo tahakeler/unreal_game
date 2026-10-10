@@ -19,6 +19,7 @@ public class HarvestPanic : ModuleRules
 			"GameplayStateTreeModule",
 			"UMG",
 			"Slate",
+			"SlateCore",
 			"GameplayTags",
 			"NetCore"
 		});
