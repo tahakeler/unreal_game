@@ -259,14 +259,14 @@ else
   fi
 
   # Jolt is Godot's default 3D physics engine; 2D is unchanged (Godot Physics
-  # 2D). See docs/engine-reference/godot/modules/physics.md. Declaring Jolt on a
+  # 2D). See docs/engine-reference/godot/modules/physics.md. (removed — this repo is Unreal-only) Declaring Jolt on a
   # 2D project sends the implementer to tune a backend the game does not use.
   if [ -z "$PHYSICS" ]; then
     skipped "physics — project.yaml has no engine.physics"
   elif printf '%s' "$PHYSICS" | grep -qiE 'jolt'; then
     if grep -qE '(Node2D|CharacterBody2D|RigidBody2D|Area2D|StaticBody2D)' \
          $(find src -name '*.gd' -o -name '*.tscn' 2>/dev/null) /dev/null 2>/dev/null; then
-      differs "engine.physics is 'Jolt', but 2D nodes were found under src/. Jolt is Godot's default 3D engine; 2D still uses Godot Physics 2D (docs/engine-reference/godot/modules/physics.md)."
+      differs "engine.physics is 'Jolt', but 2D nodes were found under src/. Jolt is Godot's default 3D engine; 2D still uses Godot Physics 2D (docs/engine-reference/godot/modules/physics.md (removed — this repo is Unreal-only))."
     else
       match "engine.physics ($PHYSICS) — no 2D nodes found under src/ to contradict it"
     fi

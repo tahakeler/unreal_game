@@ -3,7 +3,7 @@
 > **How to go from zero to a shipped game using the Agent Architecture.**
 >
 > This guide walks you through every phase of game development using the
-> 49-agent system, 74 slash commands, and 12 automated hooks. It assumes you
+> 39-agent system, 74 slash commands, and 12 automated hooks. It assumes you
 > have Claude Code installed and are working from the project root.
 >
 > The pipeline has 7 phases. At `rigor: standard` and `full`, each phase has
@@ -274,9 +274,9 @@ Or with a specific engine:
 - Creates version-pinned reference docs in `docs/engine-reference/`
 
 **Why this matters:** Once you set the engine, the system knows which
-engine-specialist agents to use. If you pick Godot, agents like
-`godot-specialist`, `godot-gdscript-specialist`, and `godot-shader-specialist`
-become your go-to experts.
+engine-specialist agents to use. This project is Unreal-only, so
+`unreal-specialist`, `ue-blueprint-specialist`, `ue-gas-specialist`,
+`ue-umg-specialist` and `ue-replication-specialist` are your go-to experts.
 
 ### Step 1.4: Decompose Your Concept Into Systems
 
@@ -1378,12 +1378,7 @@ Tier 3 (Specialists):  gameplay-programmer, engine-programmer,
                        qa-tester, performance-analyst, devops-engineer,
                        analytics-engineer, accessibility-specialist,
                        live-ops-designer, prototyper, security-engineer,
-                       community-manager, godot-specialist,
-                       godot-gdscript-specialist, godot-shader-specialist,
-                       godot-csharp-specialist, godot-gdextension-specialist,
-                       unity-specialist, unity-dots-specialist,
-                       unity-shader-specialist, unity-addressables-specialist,
-                       unity-ui-specialist, unreal-specialist,
+                       community-manager, unreal-specialist,
                        ue-blueprint-specialist, ue-gas-specialist,
                        ue-replication-specialist, ue-umg-specialist
 ```
@@ -1548,15 +1543,6 @@ Reads existing code and generates GDD-format design documentation from it.
 | Prototype quickly | `prototyper` | 3 |
 | Audit security | `security-engineer` | 3 |
 | Communicate with players | `community-manager` | 3 |
-| Godot-specific help | `godot-specialist` | 3 |
-| GDScript-specific help | `godot-gdscript-specialist` | 3 |
-| Godot shader help | `godot-shader-specialist` | 3 |
-| GDExtension modules | `godot-gdextension-specialist` | 3 |
-| Unity-specific help | `unity-specialist` | 3 |
-| Unity DOTS/ECS | `unity-dots-specialist` | 3 |
-| Unity shaders/VFX | `unity-shader-specialist` | 3 |
-| Unity Addressables | `unity-addressables-specialist` | 3 |
-| Unity UI Toolkit | `unity-ui-specialist` | 3 |
 | Unreal-specific help | `unreal-specialist` | 3 |
 | Unreal GAS | `ue-gas-specialist` | 3 |
 | Unreal Blueprints | `ue-blueprint-specialist` | 3 |

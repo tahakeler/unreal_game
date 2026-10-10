@@ -7,7 +7,7 @@ framework. It is self-contained and separate from any game project.
 
 | File | Purpose |
 |------|---------|
-| `catalog.yaml` | Master registry for all 74 skills and 49 agents. Contains category, spec path, and last-test tracking fields. Always read this first when running any test command. |
+| `catalog.yaml` | Master registry for all 74 skills and 39 agents. Contains category, spec path, and last-test tracking fields. Always read this first when running any test command. |
 | `quality-rubric.md` | Category-specific pass/fail metrics. Read the matching `###` section for the skill's category when running `/skill-test category`. |
 | `skills/[category]/[name].md` | Behavioral spec for a skill — 5 or more test cases + protocol compliance assertions. |
 | `agents/[tier]/[name].md` | Behavioral spec for an agent — 5 or more test cases + protocol compliance assertions. |
@@ -55,10 +55,6 @@ specialists    → gameplay-programmer, engine-programmer, network-programmer,
                  ai-programmer, tools-programmer, ui-programmer, ux-designer,
                  technical-artist, sound-designer, performance-analyst, prototyper,
                  writer, world-builder
-engine/godot   → godot-specialist, godot-gdscript-specialist, godot-csharp-specialist,
-                 godot-shader-specialist, godot-gdextension-specialist
-engine/unity   → unity-specialist, unity-ui-specialist, unity-shader-specialist,
-                 unity-dots-specialist, unity-addressables-specialist
 engine/unreal  → unreal-specialist, ue-gas-specialist, ue-replication-specialist,
                  ue-umg-specialist, ue-blueprint-specialist
 operations     → devops-engineer, release-manager, live-ops-designer,

@@ -1250,6 +1250,18 @@ resolve_code_root() {
     *)       root="" ;;
   esac
 
+  # Unreal project in a subfolder (e.g. HarvestPanic/HarvestPanic.uproject):
+  # UBT's Source/ sits next to the .uproject, not at the repo root. Use it when
+  # there is no root-level Source/ and exactly one <dir>/*.uproject exists.
+  if [ "$root" = "Source" ] && [ ! -d "$_YH_ROOT/Source" ]; then
+    local up upn=0 updir=""
+    for up in "$_YH_ROOT"/*/*.uproject; do
+      [ -f "$up" ] || continue
+      upn=$((upn + 1)); updir="${up%/*}"; updir="${updir##*/}"
+    done
+    [ "$upn" = 1 ] && root="$updir/Source"
+  fi
+
   # 3. No usable engine value — believe the tree, but only if it is unambiguous.
   #    Names are compared exactly, against the directory listing: `[ -d Assets ]`
   #    is also true for Godot's own `assets/` on a case-insensitive filesystem

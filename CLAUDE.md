@@ -1,18 +1,20 @@
 # Claude Code Game Studios -- Game Studio Agent Architecture
 
-Indie game development managed through 49 coordinated Claude Code subagents.
+Indie game development managed through 39 coordinated Claude Code subagents.
 Each agent owns a specific domain, enforcing separation of concerns and quality.
 
 ## Technology Stack
 
-- **Engine**: [CHOOSE: Godot 4 / Unity / Unreal Engine 5]
-- **Language**: [CHOOSE: GDScript / C# / C++ / Blueprint]
-- **Version Control**: Git with trunk-based development
-- **Build System**: [SPECIFY after choosing engine]
-- **Asset Pipeline**: [SPECIFY after choosing engine]
+- **Game**: HARVEST PANIC — Unreal project at `HarvestPanic/HarvestPanic.uproject`
+- **Engine**: Unreal Engine 5.8.3 (installed at `/Applications/UE_5.8`)
+- **Language**: C++ (primary), Blueprint (gameplay prototyping and tuning)
+- **Version Control**: Git + Git LFS, one branch per task (see `docs/engine/unreal-setup.md`)
+- **Build System**: Unreal Build Tool (UBT)
+- **Asset Pipeline**: Unreal Content Pipeline; Fab packs under `HarvestPanic/Content/<PackName>/`
+- **Platforms**: develop on macOS (Apple Silicon, Xcode); ship Windows + macOS on Steam
 
-> **Note**: Engine-specialist agents exist for Godot, Unity, and Unreal with
-> dedicated sub-specialists. Use the set matching your engine.
+> **Note**: This repo is Unreal-only. Use `unreal-specialist` and the `ue-*`
+> sub-specialists; Godot and Unity agent sets have been removed.
 
 ## Project Structure
 
@@ -20,13 +22,8 @@ Each agent owns a specific domain, enforcing separation of concerns and quality.
 
 ## Engine Version Reference
 
-<!-- ENGINE-REFERENCE-IMPORT: the line below is engine-specific. /setup-engine
-     rewrites it to @docs/engine-reference/<engine>/VERSION.md for the chosen
-     engine, so a Unity or Unreal project stops loading the Godot reference every
-     session. It defaults to Godot (the template's example engine); skills that
-     need the pinned version read docs/engine-reference/<engine>/VERSION.md on
-     demand regardless of this import. -->
-@docs/engine-reference/godot/VERSION.md
+<!-- ENGINE-REFERENCE-IMPORT: pinned to Unreal by /setup-engine. -->
+@docs/engine-reference/unreal/VERSION.md
 
 
 ## Technical Preferences

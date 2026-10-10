@@ -27,7 +27,7 @@ Before collecting anything:
    gets reported as clean:
    - **Godot:** `godot --headless --path . --import` once (it builds the class
      cache), then one run over every `.gd` the story added or changed:
-     `godot --headless --path . -s res://.claude/scripts/godot-parse-check.gd -- res://<file>.gd …`.
+     `godot --headless --path . -s res://.claude/scripts/godot-parse-check.gd -- res://<file>.gd …` (parse-check script removed — this repo is Unreal-only).
      For `godot`, use the executable `commands.test` names, else the editor
      `engine.path` records, else `godot` on `PATH`; if none resolves, write
      `parse NOT VERIFIED — Godot executable not found`.

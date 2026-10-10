@@ -2,11 +2,11 @@
 
 | Field | Value |
 |-------|-------|
-| **Engine Version** | Unreal Engine 5.7 |
-| **Installed at pin time** | NOT DETERMINED — `/setup-engine` §3 probes the installed editor and records the result here. |
-| **Release Date** | November 2025 |
-| **Project Pinned** | 2026-02-13 |
-| **Last Docs Verified** | 2026-02-13 |
+| **Engine Version** | Unreal Engine 5.8.3 |
+| **Installed at pin time** | 5.8.3 (CL 58210709) at `/Applications/UE_5.8` — read from `Engine/Build/Build.version` |
+| **Release Date** | 2026 (5.8 line; 5.8.3 hotfix) |
+| **Project Pinned** | 2026-10-10 |
+| **Last Docs Verified** | 2026-10-10 (5.8 section only; 5.7 notes below are older) |
 | **LLM Knowledge Cutoff** | May 2025 |
 
 ## Knowledge Gap Warning
@@ -32,6 +32,16 @@ version-qualified claim** — `NOT DETERMINED` means the gap is unknown, not abs
 | 5.5 | ~Sep 2025 | HIGH | Megalights (millions of lights), animation authoring, MegaCity demo |
 | 5.6 | ~Oct 2025 | MEDIUM | Performance optimizations, bug fixes |
 | 5.7 | Nov 2025 | HIGH | PCG production-ready, Substrate production-ready, AI assistant |
+| 5.8 | 2026 | HIGH | Stabilization/optimization; MegaLights production-ready, Lumen Lite, Mesh Terrain (experimental), Chaos Hair/Flesh/Cloth updates. Announced as the last planned major UE5 release |
+
+## UE 5.7 -> 5.8 (brief, from release coverage — verify against Epic's notes)
+
+- **MegaLights** is production-ready (was experimental in 5.5-5.7).
+- **Lumen Lite**: lighter dynamic-GI mode for scalability — relevant for Mac/low-end targets.
+- **Mesh Terrain** (experimental): mesh-based large landscapes; do not build on it yet.
+- **Chaos** Hair / Flesh / Cloth performance and simulation updates.
+- Deprecations/removed APIs for 5.8 were **not verified** — check the official
+  release notes before assuming any 5.7 API still exists.
 
 ## Major Changes from UE 5.3 to UE 5.7
 
@@ -56,6 +66,9 @@ version-qualified claim** — `NOT DETERMINED` means the gap is unknown, not abs
 
 ## Verified Sources
 
+- UE 5.8 release notes: https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-5-8-release-notes
+- UE 5.8 performance highlights: https://tomlooman.com/unreal-engine-5-8-performance-highlights/
+- UE 5.8 release coverage: https://gamefromscratch.com/unreal-engine-5-8-released/
 - Official docs: https://docs.unrealengine.com/5.7/
 - UE 5.7 release notes: https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-engine-5-7-release-notes
 - What's new in 5.7: https://dev.epicgames.com/documentation/en-us/unreal-engine/whats-new

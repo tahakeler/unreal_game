@@ -160,7 +160,7 @@ shipped anyway. Use the table for `engine.name` resolved in Phase 1.
 | 5, 6 | judgement and manifests, not greps — no engine set needed | | |
 
 The Unity and Unreal names above are **sourced from this repo's pinned
-references** (`docs/engine-reference/unity/modules/{networking,input}.md`,
+references** (`docs/engine-reference/unity/modules/{networking,input}.md` (removed — this repo is Unreal-only),
 `docs/engine-reference/unreal/modules/{networking,input}.md`), not from recall.
 Verify them against the pin before use and add what the reference documents that
 this table omits — it is a floor, not a complete set.
@@ -191,7 +191,7 @@ Grep patterns — **check the pinned engine reference before trusting this list*
 
 > **API names are version-specific and this list is a starting point, not a
 > complete set.** `File.open` is **Godot 3.x**; Godot 4 renamed the class to
-> `FileAccess` (`docs/engine-reference/godot/breaking-changes.md`). Before relying
+> `FileAccess` (`docs/engine-reference/godot/breaking-changes.md` (removed — this repo is Unreal-only)). Before relying
 > on these patterns, read `docs/engine-reference/<engine>/` for the version this
 > project pins and add the names it documents. A grep for a class that no longer
 > exists returns zero hits, and **zero hits in this category renders the report
@@ -215,7 +215,7 @@ Grep for: `recv`, `receive`, `PacketPeer`, `socket`, `MultiplayerPeer`,
 
 > Same version caveat as Category 1. `NetworkedMultiplayerPeer` is **Godot 3.x**;
 > Godot 4 uses `ENetMultiplayerPeer`
-> (`docs/engine-reference/godot/modules/networking.md`). The bare substring
+> (`docs/engine-reference/godot/modules/networking.md` (removed — this repo is Unreal-only)). The bare substring
 > `MultiplayerPeer` matches both and is the safer probe.
 
 ### Category 3: Input Validation
