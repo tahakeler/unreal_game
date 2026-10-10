@@ -5,7 +5,6 @@
 #include "Components/PrimitiveComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
-#include "Engine/OverlapResult.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/Controller.h"
 #include "Net/UnrealNetwork.h"
@@ -72,16 +71,38 @@ void UHPCarryComponent::GetView(FVector& OutStart, FVector& OutDir) const
 
 FVector UHPCarryComponent::GetHoldLocation() const
 {
-	const ACharacter* Character = Cast<ACharacter>(GetOwner());
-	const FVector Forward = GetOwner()->GetActorForwardVector();
-	FVector Anchor = GetOwner()->GetActorLocation();
-	if (Character && Character->GetMesh() && Character->GetMesh()->DoesSocketExist(HandSocketName))
+	const APawn* Pawn = Cast<APawn>(GetOwner());
+	const FVector Eye = Pawn ? Pawn->GetPawnViewLocation() : GetOwner()->GetActorLocation();
+	FRotator Aim = Pawn ? Pawn->GetBaseAimRotation() : GetOwner()->GetActorRotation();
+	Aim.Pitch = FMath::Clamp(FRotator::NormalizeAxis(Aim.Pitch), -HoldPitchLimit, HoldPitchLimit);
+	return Eye + Aim.Vector() * HoldForwardCm + FVector::UpVector * HoldUpCm;
+}
+
+AActor* UHPCarryComponent::TraceAimTarget(const FVector& ViewStart, const FVector& ViewDir) const
+{
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(HPGrab), false, GetOwner());
+	FCollisionObjectQueryParams Objects;
+	Objects.AddObjectTypesToQuery(ECC_PhysicsBody);
+	Objects.AddObjectTypesToQuery(ECC_WorldDynamic);
+	TArray<FHitResult> Hits;
+	GetWorld()->SweepMultiByObjectType(Hits, ViewStart, ViewStart + ViewDir.GetSafeNormal() * GrabRangeCm, FQuat::Identity,
+		Objects, FCollisionShape::MakeSphere(GrabSweepRadiusCm), Params);
+	Hits.Sort([](const FHitResult& A, const FHitResult& B) { return A.Distance < B.Distance; });
+	for (const FHitResult& Hit : Hits)
 	{
-		Anchor = Character->GetMesh()->GetSocketLocation(HandSocketName);
-		Anchor.X = GetOwner()->GetActorLocation().X; // keep it centred: only take socket height
-		Anchor.Y = GetOwner()->GetActorLocation().Y;
+		if (Cast<IHPCarryable>(Hit.GetActor()))
+		{
+			return Hit.GetActor();
+		}
 	}
-	return Anchor + Forward * HoldForwardCm + FVector::UpVector * HoldUpCm;
+	return nullptr;
+}
+
+AActor* UHPCarryComponent::TraceAimTargetFromView() const
+{
+	FVector Start, Dir;
+	GetView(Start, Dir);
+	return TraceAimTarget(Start, Dir);
 }
 
 float UHPCarryComponent::GetThrowCharge() const
@@ -156,38 +177,11 @@ void UHPCarryComponent::DoGrabOrDrop(const FVector& ViewStart, const FVector& Vi
 		ServerRelease(false);
 		return;
 	}
-	// The client's view is only a hint: sweep from the server-side pawn in that direction.
-	const FVector Origin = GetOwner()->GetActorLocation();
-	FVector Dir = ViewDir.GetSafeNormal();
-	if (Dir.IsNearlyZero())
-	{
-		Dir = GetOwner()->GetActorForwardVector();
-	}
-	Dir = FVector(Dir.X, Dir.Y, FMath::Min(Dir.Z, 0.f) - 0.35f).GetSafeNormal(); // bias to the ground in front
-
-	FCollisionQueryParams Params(SCENE_QUERY_STAT(HPGrab), false, GetOwner());
-	TArray<FHitResult> Hits;
-	GetWorld()->SweepMultiByChannel(Hits, Origin, Origin + Dir * GrabRangeCm, FQuat::Identity, ECC_PhysicsBody,
-		FCollisionShape::MakeSphere(GrabSweepRadiusCm), Params);
-	Hits.Sort([](const FHitResult& A, const FHitResult& B) { return A.Distance < B.Distance; });
-	for (const FHitResult& Hit : Hits)
-	{
-		if (ServerGrabActor(Hit.GetActor()))
-		{
-			return;
-		}
-	}
-	// Fallback: plain overlap around the hands (objects at the feet).
-	TArray<FOverlapResult> Overlaps;
-	GetWorld()->OverlapMultiByChannel(Overlaps, Origin + GetOwner()->GetActorForwardVector() * (GrabRangeCm * 0.5f),
-		FQuat::Identity, ECC_PhysicsBody, FCollisionShape::MakeSphere(GrabRangeCm * 0.5f), Params);
-	for (const FOverlapResult& Overlap : Overlaps)
-	{
-		if (ServerGrabActor(Overlap.GetActor()))
-		{
-			return;
-		}
-	}
+	// Validate the client's center-screen ray against the server pawn's eyes.
+	const APawn* Pawn = Cast<APawn>(GetOwner());
+	const FVector Eye = Pawn ? Pawn->GetPawnViewLocation() : GetOwner()->GetActorLocation();
+	const FVector Start = FVector::Dist(ViewStart, Eye) <= MaxViewStartErrorCm ? ViewStart : Eye;
+	ServerGrabActor(TraceAimTarget(Start, ViewDir));
 }
 
 bool UHPCarryComponent::ServerGrabActor(AActor* Target)

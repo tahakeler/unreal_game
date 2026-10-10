@@ -3,12 +3,12 @@
 #include "HPCharacter.h"
 #include "HPGameState.h"
 #include "HPPlayerState.h"
-#include "HarvestPanicPlayerController.h"
+#include "GameFramework/PlayerController.h"
 
 AHPGameMode::AHPGameMode()
 {
 	GameStateClass = AHPGameState::StaticClass();
 	PlayerStateClass = AHPPlayerState::StaticClass();
 	DefaultPawnClass = AHPCharacter::StaticClass();
-	PlayerControllerClass = AHarvestPanicPlayerController::StaticClass();
+	PlayerControllerClass = APlayerController::StaticClass(); // template PC is abstract
 }

@@ -5,7 +5,14 @@
 #include "Carry/HPCarryable.h"
 #include "Carry/HPCarryMath.h"
 #include "Animation/AnimInstance.h"
+#include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/PoseableMeshComponent.h"
+#include "Debug/DebugDrawService.h"
+#include "Engine/Canvas.h"
+#include "Engine/Engine.h"
+#include "TimerManager.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/OverlapResult.h"
@@ -70,6 +77,32 @@ AHPCharacter::AHPCharacter()
 		GetMesh()->SetAnimInstanceClass(AnimClass.Class);
 	}
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -96.f), FRotator(0.f, -90.f, 0.f));
+	// First person: others see the full body, the owner sees only the FP arms.
+	GetMesh()->SetOwnerNoSee(true);
+
+	// The template's third-person boom camera stays but is inactive.
+	GetCameraBoom()->SetAutoActivate(false);
+	GetFollowCamera()->SetAutoActivate(false);
+	bUseControllerRotationYaw = true;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	BaseEyeHeight = EyeHeightCm;
+
+	FirstPersonCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
+	FirstPersonCamera->SetupAttachment(GetCapsuleComponent());
+	FirstPersonCamera->SetRelativeLocation(FVector(0.f, 0.f, EyeHeightCm));
+	FirstPersonCamera->bUsePawnControlRotation = true;
+	FirstPersonCamera->SetFieldOfView(BaseFOV);
+
+	FirstPersonArms = CreateDefaultSubobject<UPoseableMeshComponent>(TEXT("FirstPersonArms"));
+	FirstPersonArms->SetupAttachment(FirstPersonCamera);
+	FirstPersonArms->SetOnlyOwnerSee(true);
+	FirstPersonArms->SetCastShadow(false);
+	FirstPersonArms->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	FirstPersonArms->SetRelativeLocationAndRotation(ArmsOffset, FRotator(0.f, -90.f, 0.f));
+	if (MeshAsset.Succeeded())
+	{
+		FirstPersonArms->SetSkinnedAssetAndUpdate(MeshAsset.Object);
+	}
 
 	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
 	MoveComp->MaxWalkSpeed = WalkSpeed;
@@ -93,12 +126,150 @@ void AHPCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	MeshRelativeTransform = GetMesh()->GetRelativeTransform();
+	FirstPersonArms->HideBoneByName(TEXT("neck_01"), EPhysBodyOp::PBO_None);
+	FirstPersonArms->HideBoneByName(TEXT("thigh_l"), EPhysBodyOp::PBO_None);
+	FirstPersonArms->HideBoneByName(TEXT("thigh_r"), EPhysBodyOp::PBO_None);
+	if (!DebugDrawHandle.IsValid())
+	{
+		DebugDrawHandle = UDebugDrawService::Register(TEXT("Game"), FDebugDrawDelegate::CreateUObject(this, &AHPCharacter::DrawCrosshair));
+	}
 	GetCharacterMovement()->MaxWalkSpeedCrouched = CrouchSpeed;
 	GetCharacterMovement()->JumpZVelocity = JumpZVelocity;
 	if (HasAuthority())
 	{
 		Stamina = StaminaMax;
 		FeedUsesLeft = FeedUsesPerBucket;
+	}
+}
+
+void AHPCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (DebugDrawHandle.IsValid())
+	{
+		UDebugDrawService::Unregister(DebugDrawHandle);
+		DebugDrawHandle.Reset();
+	}
+	Super::EndPlay(EndPlayReason);
+}
+
+// ---------------------------------------------------------------- First person
+
+void AHPCharacter::Client_ImpactShake_Implementation(float Trauma01)
+{
+	ShakeTrauma = FMath::Clamp(ShakeTrauma + Trauma01, 0.f, 1.f);
+}
+
+void AHPCharacter::PoseArm(FName UpperArm, FName LowerArm, const FVector& WorldTarget, float Side)
+{
+	// UE5 mannequin arm bones point along +X (left) / -X (right).
+	const FVector Shoulder = FirstPersonArms->GetBoneLocationByName(UpperArm, EBoneSpaces::WorldSpace);
+	FVector Dir = (WorldTarget - Shoulder).GetSafeNormal();
+	if (Dir.IsNearlyZero())
+	{
+		return;
+	}
+	const FRotator Rot = FRotationMatrix::MakeFromXZ(Dir * Side, FirstPersonCamera->GetUpVector()).Rotator();
+	FirstPersonArms->SetBoneRotationByName(UpperArm, Rot, EBoneSpaces::WorldSpace);
+	FirstPersonArms->SetBoneRotationByName(LowerArm, Rot, EBoneSpaces::WorldSpace);
+}
+
+void AHPCharacter::TickFirstPerson(float DeltaSeconds)
+{
+	if (!IsLocallyControlled() || !FirstPersonCamera)
+	{
+		return;
+	}
+	const bool bRagdoll = BodyState != EHPBodyState::Normal;
+	FirstPersonCamera->ClearAdditiveOffset();
+
+	// Sprint FOV kick.
+	const bool bSprintingNow = bWantsSprint && !bSprintExhausted && GetVelocity().SizeSquared2D() > FMath::Square(WalkSpeed * 1.05f);
+	const float TargetFOV = BaseFOV + (bSprintingNow ? SprintFOVKick : 0.f);
+	FirstPersonCamera->SetFieldOfView(FMath::FInterpTo(FirstPersonCamera->FieldOfView, TargetFOV, DeltaSeconds, FOVInterpSpeed));
+
+	// Head bob scaled by ground speed.
+	FVector BobOffset = FVector::ZeroVector;
+	if (!bRagdoll && GetCharacterMovement()->IsMovingOnGround())
+	{
+		const float SpeedRatio = GetVelocity().Size2D() / FMath::Max(WalkSpeed, 1.f);
+		BobPhase += DeltaSeconds * HeadBobFrequency * SpeedRatio * UE_TWO_PI;
+		BobOffset.Z = FMath::Sin(BobPhase * 2.f) * HeadBobAmplitude * FMath::Min(SpeedRatio, 1.6f);
+		BobOffset.Y = FMath::Cos(BobPhase) * HeadBobAmplitude * 0.5f * FMath::Min(SpeedRatio, 1.6f);
+	}
+
+	// Impact shake (trauma^2 random rotation).
+	FRotator Shake = FRotator::ZeroRotator;
+	if (ShakeTrauma > 0.f)
+	{
+		const float Amount = ShakeTrauma * ShakeTrauma * ShakeMaxDegrees;
+		Shake = FRotator(FMath::FRandRange(-Amount, Amount), FMath::FRandRange(-Amount, Amount), FMath::FRandRange(-Amount, Amount));
+		ShakeTrauma = FMath::Max(0.f, ShakeTrauma - ShakeDecayPerSec * DeltaSeconds);
+	}
+	FirstPersonCamera->AddAdditiveOffset(FTransform(Shake, BobOffset), 0.f);
+
+	// Arms reach toward the held object (or rest low in front).
+	FirstPersonArms->SetVisibility(!bRagdoll);
+	if (bRagdoll)
+	{
+		return;
+	}
+	const FTransform CamXf = FirstPersonCamera->GetComponentTransform();
+	FVector LTarget = CamXf.TransformPosition(FVector(IdleHandOffset.X, -IdleHandOffset.Y, IdleHandOffset.Z));
+	FVector RTarget = CamXf.TransformPosition(IdleHandOffset);
+	if (AActor* Held = CarryComponent->GetHeldActor())
+	{
+		const FVector Center = Held->GetActorLocation();
+		const FVector Right = CamXf.GetUnitAxis(EAxis::Y);
+		const float HalfWidth = Held->GetComponentsBoundingBox().GetExtent().Size2D() * 0.6f;
+		LTarget = Center - Right * HalfWidth;
+		RTarget = Center + Right * HalfWidth;
+	}
+	else if (CarryComponent->TraceAimTargetFromView())
+	{
+		LTarget += CamXf.GetUnitAxis(EAxis::X) * 15.f; // eager reach
+		RTarget += CamXf.GetUnitAxis(EAxis::X) * 15.f;
+	}
+	if (LeftHandTarget.IsZero())
+	{
+		LeftHandTarget = LTarget;
+		RightHandTarget = RTarget;
+	}
+	LeftHandTarget = FMath::VInterpTo(LeftHandTarget, LTarget, DeltaSeconds, ArmInterpSpeed);
+	RightHandTarget = FMath::VInterpTo(RightHandTarget, RTarget, DeltaSeconds, ArmInterpSpeed);
+	PoseArm(TEXT("upperarm_l"), TEXT("lowerarm_l"), LeftHandTarget, 1.f);
+	PoseArm(TEXT("upperarm_r"), TEXT("lowerarm_r"), RightHandTarget, -1.f);
+}
+
+void AHPCharacter::DrawCrosshair(UCanvas* Canvas, APlayerController* PC)
+{
+	// Interim slice HUD (hud-menus owns the real one): centre dot + grab prompt.
+	if (!Canvas || !IsLocallyControlled() || BodyState != EHPBodyState::Normal || GetController() != PC)
+	{
+		return;
+	}
+	const float CX = Canvas->ClipX * 0.5f;
+	const float CY = Canvas->ClipY * 0.5f;
+	Canvas->SetDrawColor(FColor::White);
+	Canvas->K2_DrawBox(FVector2D(CX - 2.f, CY - 2.f), FVector2D(4.f, 4.f), 2.f, FLinearColor::White);
+
+	FString Prompt;
+	if (const AActor* Held = CarryComponent->GetHeldActor())
+	{
+		const IHPCarryable* C = Cast<IHPCarryable>(Held);
+		Prompt = FString::Printf(TEXT("E: Drop   LMB: Throw   (%d/%d hands)"), C ? C->GetHandsAttached() : 0, C ? C->GetCarryHands() : 0);
+	}
+	else if (const IHPCarryable* C = Cast<IHPCarryable>(CarryComponent->TraceAimTargetFromView()))
+	{
+		Prompt = FString::Printf(TEXT("E: Grab (%d/%d hands)"), C->GetHandsAttached(), C->GetCarryHands());
+	}
+	if (!Prompt.IsEmpty() && GEngine)
+	{
+		float W, H;
+		Canvas->StrLen(GEngine->GetMediumFont(), Prompt, W, H);
+		Canvas->SetDrawColor(FColor::Black);
+		Canvas->DrawText(GEngine->GetMediumFont(), Prompt, CX - W * 0.5f + 1.f, CY + 25.f);
+		Canvas->SetDrawColor(FColor::White);
+		Canvas->DrawText(GEngine->GetMediumFont(), Prompt, CX - W * 0.5f, CY + 24.f);
 	}
 }
 
@@ -368,6 +539,45 @@ void AHPCharacter::Server_CancelRevive_Implementation()
 	ReviveTarget.Reset();
 }
 
+void AHPCharacter::HPRunLater(float Seconds, const FString& Command)
+{
+	FTimerHandle Handle;
+	TWeakObjectPtr<AHPCharacter> WeakThis(this);
+	GetWorldTimerManager().SetTimer(Handle, FTimerDelegate::CreateLambda([WeakThis, Command]()
+	{
+		if (APlayerController* PC = WeakThis.IsValid() ? Cast<APlayerController>(WeakThis->GetController()) : nullptr)
+		{
+			PC->ConsoleCommand(Command);
+		}
+	}), FMath::Max(Seconds, 0.01f), false);
+}
+
+void AHPCharacter::HPSetView(float Pitch, float Yaw)
+{
+	if (AController* C = GetController())
+	{
+		C->SetControlRotation(FRotator(Pitch, Yaw, 0.f));
+	}
+}
+
+void AHPCharacter::HPDumpArms()
+{
+	const FTransform Cam = FirstPersonCamera->GetComponentTransform();
+	UE_LOG(LogTemp, Log, TEXT("[HPArms] asset=%s visible=%d bones=%d cam=%s"), *GetNameSafe(FirstPersonArms->GetSkinnedAsset()),
+		FirstPersonArms->IsVisible(), FirstPersonArms->GetNumBones(), *Cam.GetLocation().ToString());
+	for (const TCHAR* Bone : {TEXT("spine_05"), TEXT("upperarm_r"), TEXT("hand_r"), TEXT("hand_l")})
+	{
+		UE_LOG(LogTemp, Log, TEXT("[HPArms] %s local-to-cam=%s"), Bone,
+			*Cam.InverseTransformPosition(FirstPersonArms->GetBoneLocationByName(Bone, EBoneSpaces::WorldSpace)).ToString());
+	}
+	UE_LOG(LogTemp, Log, TEXT("[HPArms] held=%s aim=%s"), *GetNameSafe(CarryComponent->GetHeldActor()), *GetNameSafe(CarryComponent->TraceAimTargetFromView()));
+}
+
+void AHPCharacter::HPGrab()
+{
+	OnGrabStarted();
+}
+
 void AHPCharacter::HPImpact(float ImpulseNs)
 {
 	Server_DebugImpact(ImpulseNs);
@@ -394,6 +604,7 @@ void AHPCharacter::ReceiveImpactImpulse(float ImpulseNs, int32 InstigatorPlayerI
 	{
 		return;
 	}
+	Client_ImpactShake(FMath::Clamp(ImpulseNs / FMath::Max(ShakeFullImpulseNs, 1.f), 0.f, 1.f));
 	const float Threshold = GetCurrentRagdollThreshold();
 	if (ImpulseNs < Threshold)
 	{
@@ -456,6 +667,13 @@ void AHPCharacter::ApplyBodyState()
 		MeshComp->SetAllBodiesSimulatePhysics(true);
 		MeshComp->SetSimulatePhysics(true);
 		MeshComp->WakeAllRigidBodies();
+		if (IsLocallyControlled())
+		{
+			MeshComp->SetOwnerNoSee(false);
+			FirstPersonCamera->bUsePawnControlRotation = false;
+			FirstPersonCamera->AttachToComponent(MeshComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, HeadSocket);
+			FirstPersonCamera->SetRelativeLocationAndRotation(FVector(0.f, 25.f, 0.f), FRotator(0.f, 90.f, -90.f));
+		}
 	}
 	else if (!bRagdoll && bAlreadyRagdoll)
 	{
@@ -467,6 +685,10 @@ void AHPCharacter::ApplyBodyState()
 		MeshComp->SetRelativeTransform(MeshRelativeTransform);
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		MoveComp->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
+		MeshComp->SetOwnerNoSee(true);
+		FirstPersonCamera->AttachToComponent(GetCapsuleComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+		FirstPersonCamera->SetRelativeLocationAndRotation(FVector(0.f, 0.f, EyeHeightCm), FRotator::ZeroRotator);
+		FirstPersonCamera->bUsePawnControlRotation = true;
 		if (HasAuthority())
 		{
 			FHitResult Floor;
@@ -568,4 +790,5 @@ void AHPCharacter::Tick(float DeltaSeconds)
 	TickStamina(DeltaSeconds);
 	TickBodyState(DeltaSeconds);
 	UpdateMovementSpeed();
+	TickFirstPerson(DeltaSeconds);
 }

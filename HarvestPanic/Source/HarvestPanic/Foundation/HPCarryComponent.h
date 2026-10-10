@@ -37,6 +37,12 @@ public:
 	UFUNCTION(BlueprintPure, Category="Carry") float GetSpeedMultiplier() const { return SpeedMultiplier; }
 	/** Replicated per-player load ratio 0..1 (stamina drain, ragdoll threshold). */
 	UFUNCTION(BlueprintPure, Category="Carry") float GetLoadRatio() const { return LoadRatio; }
+	/** Center-screen trace for a carryable (prompt + grab). Works on any machine. */
+	AActor* TraceAimTarget(const FVector& ViewStart, const FVector& ViewDir) const;
+	/** Uses the owner's own view point. */
+	AActor* TraceAimTargetFromView() const;
+	/** World hold point in front of the eyes (server drives the handle to it; FP arms reach to it). */
+	FVector GetHoldLocation() const;
 	/** Local: 0..1 while the throw button is held. */
 	UFUNCTION(BlueprintPure, Category="Carry") float GetThrowCharge() const;
 
@@ -59,11 +65,13 @@ protected:
 	/** kg one hand can carry before slowing (formula constant 25). */
 	UPROPERTY(EditDefaultsOnly, Category="Carry|Tuning") float KgPerHand = 25.f;
 	UPROPERTY(EditDefaultsOnly, Category="Carry|Tuning") float SpeedFloor = 0.35f;
-	/** Hand socket on the character mesh used as the hold anchor. */
-	UPROPERTY(EditDefaultsOnly, Category="Carry|Tuning") FName HandSocketName = TEXT("hand_r");
-	/** Hold point: forward / up offset from the hand socket, cm. */
-	UPROPERTY(EditDefaultsOnly, Category="Carry|Tuning") float HoldForwardCm = 70.f;
-	UPROPERTY(EditDefaultsOnly, Category="Carry|Tuning") float HoldUpCm = 10.f;
+	/** Hold point relative to the eyes along the aim, cm (first-person). */
+	UPROPERTY(EditDefaultsOnly, Category="Carry|Tuning") float HoldForwardCm = 110.f;
+	UPROPERTY(EditDefaultsOnly, Category="Carry|Tuning") float HoldUpCm = -25.f;
+	/** Max pitch (deg) used for the hold point, so looking straight down doesn't bury the item. */
+	UPROPERTY(EditDefaultsOnly, Category="Carry|Tuning") float HoldPitchLimit = 45.f;
+	/** Server rejects client view starts further than this from the pawn's eyes, cm. */
+	UPROPERTY(EditDefaultsOnly, Category="Carry|Tuning") float MaxViewStartErrorCm = 150.f;
 	/** Spring-damped hands (wobbly on purpose). */
 	UPROPERTY(EditDefaultsOnly, Category="Carry|Tuning") float HandStiffness = 1500.f;
 	UPROPERTY(EditDefaultsOnly, Category="Carry|Tuning") float HandDamping = 120.f;
@@ -95,7 +103,6 @@ private:
 	void DoGrabOrDrop(const FVector& ViewStart, const FVector& ViewDir);
 	void DoThrow(float Charge, const FVector& ViewDir);
 	void GetView(FVector& OutStart, FVector& OutDir) const;
-	FVector GetHoldLocation() const;
 	void UpdateServerHold();
 	IHPCarryable* GetHeldCarryable() const;
 

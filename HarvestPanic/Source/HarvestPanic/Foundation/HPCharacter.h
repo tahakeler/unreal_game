@@ -19,6 +19,10 @@
 class UHPCarryComponent;
 class UInputAction;
 class UInputMappingContext;
+class UCameraComponent;
+class UPoseableMeshComponent;
+class UCanvas;
+class APlayerController;
 
 UENUM(BlueprintType)
 enum class EHPBodyState : uint8 { Normal, Ragdoll, KnockedOut };
@@ -48,6 +52,14 @@ public:
 
 	/** Debug: console `HPImpact 1000` applies an impact to the local player (server-side). */
 	UFUNCTION(Exec) void HPImpact(float ImpulseNs);
+	/** Debug: console `HPGrab` = press grab (E). */
+	UFUNCTION(Exec) void HPGrab();
+	/** Debug: log FP arm state. */
+	UFUNCTION(Exec) void HPDumpArms();
+	/** Debug/QA: set view pitch/yaw (deterministic screenshots). */
+	UFUNCTION(Exec) void HPSetView(float Pitch, float Yaw);
+	/** Debug/QA: `HPRunLater 5 Shot showui` runs a console command after N seconds (screenshots). */
+	UFUNCTION(Exec) void HPRunLater(float Seconds, const FString& Command);
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Tick(float DeltaSeconds) override;
@@ -56,6 +68,32 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual void NotifyControllerChanged() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	// ---- First-person presentation (local player only; others see the full body) ----
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	TObjectPtr<UCameraComponent> FirstPersonCamera;
+	/** Mannequin copy posed procedurally so only the arms reach into view (OnlyOwnerSee). */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	TObjectPtr<UPoseableMeshComponent> FirstPersonArms;
+
+	UPROPERTY(EditDefaultsOnly, Category="Tuning|Camera") float EyeHeightCm = 64.f;
+	UPROPERTY(EditDefaultsOnly, Category="Tuning|Camera") float BaseFOV = 90.f;
+	UPROPERTY(EditDefaultsOnly, Category="Tuning|Camera") float SprintFOVKick = 8.f;
+	UPROPERTY(EditDefaultsOnly, Category="Tuning|Camera") float FOVInterpSpeed = 8.f;
+	/** Head bob amplitude (cm) at walk speed and cycle frequency (Hz). */
+	UPROPERTY(EditDefaultsOnly, Category="Tuning|Camera") float HeadBobAmplitude = 1.6f;
+	UPROPERTY(EditDefaultsOnly, Category="Tuning|Camera") float HeadBobFrequency = 1.8f;
+	/** Impact shake: degrees at trauma 1, decay per second; impulse (N*s) that gives trauma 1. */
+	UPROPERTY(EditDefaultsOnly, Category="Tuning|Camera") float ShakeMaxDegrees = 4.f;
+	UPROPERTY(EditDefaultsOnly, Category="Tuning|Camera") float ShakeDecayPerSec = 2.f;
+	UPROPERTY(EditDefaultsOnly, Category="Tuning|Camera") float ShakeFullImpulseNs = 900.f;
+	UPROPERTY(EditDefaultsOnly, Category="Tuning|Camera") FName HeadSocket = TEXT("head");
+	/** Arms mesh offset from the camera (chest behind the near plane). */
+	UPROPERTY(EditDefaultsOnly, Category="Tuning|Camera") FVector ArmsOffset = FVector(-8.f, 0.f, -146.f);
+	/** Idle hand point relative to the camera (x fwd, y right, z up), cm. */
+	UPROPERTY(EditDefaultsOnly, Category="Tuning|Camera") FVector IdleHandOffset = FVector(60.f, 20.f, -22.f);
+	UPROPERTY(EditDefaultsOnly, Category="Tuning|Camera") float ArmInterpSpeed = 12.f;
 
 	/** physics-carry: grab / hold / throw. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
@@ -97,7 +135,7 @@ protected:
 
 	// ---- Noise ----
 	UPROPERTY(EditDefaultsOnly, Category="Tuning|Noise") float HollerLoudness = 0.8f;
-	UPROPERTY(EditDefaultsOnly, Category="Tuning|Noise") float HollerCooldown = 0.25f;
+	UPROPERTY(EditDefaultsOnly, Category="Tuning|Noise") float HollerCooldown = 2.f;
 
 	// ---- Tools (farm-tools: net + feed bucket) ----
 	UPROPERTY(EditDefaultsOnly, Category="Tuning|Tools") float NetReachCm = 150.f;
@@ -127,6 +165,7 @@ protected:
 	UFUNCTION(Server, Reliable) void Server_BeginRevive(AHPCharacter* Target);
 	UFUNCTION(Server, Reliable) void Server_CancelRevive();
 	UFUNCTION(Server, Reliable) void Server_DebugImpact(float ImpulseNs);
+	UFUNCTION(Client, Unreliable) void Client_ImpactShake(float Trauma01);
 
 private:
 	void BuildInput();
@@ -150,6 +189,15 @@ private:
 	void OnSelectNet();
 	void OnSelectFeed();
 	void OnJumpStarted();
+
+	void TickFirstPerson(float DeltaSeconds);
+	void PoseArm(FName UpperArm, FName LowerArm, const FVector& WorldTarget, float Side);
+	void DrawCrosshair(UCanvas* Canvas, APlayerController* PC);
+	FDelegateHandle DebugDrawHandle;
+	float ShakeTrauma = 0.f;
+	float BobPhase = 0.f;
+	FVector LeftHandTarget = FVector::ZeroVector;
+	FVector RightHandTarget = FVector::ZeroVector;
 
 	UPROPERTY(Transient) TObjectPtr<UInputMappingContext> RuntimeIMC;
 	UPROPERTY(Transient) TObjectPtr<UInputAction> IA_Move;
