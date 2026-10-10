@@ -20,7 +20,8 @@ public class HarvestPanic : ModuleRules
 			"UMG",
 			"Slate",
 			"GameplayTags",
-			"NetCore"
+			"NetCore",
+			"PhysicsCore"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "OnlineSubsystem", "OnlineSubsystemUtils" });

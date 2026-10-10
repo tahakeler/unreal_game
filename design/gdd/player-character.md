@@ -18,6 +18,14 @@ The player is a clumsy farmer heir. They can walk, sprint, jump, crouch (quiet-w
 4. **Shout (emote, a.k.a. "Holler" button in `onboarding-accessibility`):** a non-voice alternative to voice for players without a mic. Emits a Noise Event of loudness 0.8 (see `proximity-voice`). 2 s cooldown.
 5. **Quiet-walk (a.k.a. "Shush"):** crouch movement. Player footsteps produce no Noise Events.
 
+### Camera and view (first person — direction change 2026-10-10)
+5a. **First-person camera** at eye height (`EyeHeight` 64 cm above capsule centre ≈ 1.6 m), like R.E.P.O. / Lethal Company / PEAK. The body yaws with the camera.
+5b. **Local view:** the owner sees procedurally posed first-person arms (owner-only) that rest low in front, reach forward when aiming at a carryable, and reach to the sides of a held object. The owner never sees their own full body while upright.
+5c. **Other players** always see the full third-person body (owner-no-see), so co-op slapstick reads.
+5d. **Feel:** subtle head bob scaled by ground speed; sprint FOV kick (+`SprintFOVKick`); camera shake on received impacts (trauma = impulse / `ShakeFullImpulse`, decays).
+5e. **Ragdoll / KO camera:** the camera attaches to the ragdoll's head and tumbles with it (the owner sees their own body), then snaps back to the eyes on get-up / revive.
+5f. **Targeting:** a centre-screen trace (reach `GrabRange` from the camera, `physics-carry`) with a small centre dot and a prompt "E: Grab (attached/required hands)"; while holding: "E: Drop  LMB: Throw".
+
 ### Ragdoll and knockout
 6. **Ragdoll triggers:** an impact impulse above `RagdollImpulse` (default 900 N·s, scaled by the formula below), sprinting with load ≥ 70% of max at a slope > 25°, standing on a plank when it breaks, or being charged by a bull (`livestock-roster`: `ChargeImpulse` 1800 N·s = 2× RagdollImpulse, so a direct bull hit is a KO).
 7. **Ragdoll recovery:** after the body velocity < 0.5 m/s for 0.5 s, the player can stand up with a button press (1.2 s get-up anim). Mashing has no effect (accessibility).
@@ -65,6 +73,9 @@ load_ratio 0–1 (from `physics-carry`). mud_mult 0.8 in mud (`bridge-hazards`),
 | RagdollImpulse | 900 N·s | 600–1500 |
 | KODuration / ReviveHold | 8 s / 1.5 s | 4–15 / 0.5–3 |
 | RespawnDelay | 5 s | 3–10 |
+| EyeHeight / BaseFOV / SprintFOVKick | 64 cm / 90° / +8° | — / 80–110 / 0–15 |
+| HeadBobAmplitude / Frequency | 1.6 cm / 1.8 Hz | 0–4 / — |
+| ShakeMaxDegrees / ShakeFullImpulse / Decay | 4° / 900 N·s / 2 per s | 0–8 / — / — |
 | RespawnFee | see `shared-wallet-economy` (per week) | — |
 
 ## 8. Acceptance Criteria
