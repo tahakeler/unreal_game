@@ -40,22 +40,29 @@ struct FBlameEvent
   bSecret        : bool         // hidden until Sunday (golden egg)
 ```
 
-**EBlameVerb** (v1, 16 verbs; add-only):
+**EBlameVerb** (v1.1, 23 verbs; add-only). Consistency pass 2026-10-10 added Drowned, Stranded, YeetedTeammate, Slipped, Crashed, SpilledCargo, LassoedIntoRiver so every emitter's verb is listed; emitters must use these exact PascalCase names.
 
 | Verb | Typical emitter | Receipt line template |
 |---|---|---|
 | Bruised | goods-value | "{P}: bruised {item} ×{n}" |
-| Dropped | physics-carry | "{P}: dropped {item}" |
-| DroppedInRiver | bridge-hazards | "{P}: dropped {item} into river ×{n}" |
-| Threw | physics-carry | "{P}: yeeted {item}" |
+| Dropped | physics-carry, goods-value | "{P}: dropped {item}" |
+| Slipped | physics-carry | "{P}: lost grip on {item}" |
+| DroppedInRiver | bridge-hazards, goods-value | "{P}: dropped {item} into river ×{n}" |
+| Threw | physics-carry, goods-value | "{P}: yeeted {item}" |
+| Crashed | goods-value (vehicle impact), wagon-vehicles | "{P}: crashed with {item} aboard" |
+| SpilledCargo | wagon-vehicles (bounce-out, blamed on driver) | "{P}: bounced {item} out of the wagon" |
 | LetEscape | critter-ai | "{P}: let {item} escape" |
 | BrokePlank | bridge-hazards | "{P}: broke a plank (again)" |
 | TippedWagon | wagon-vehicles | "{P}: tipped the wagon" |
-| KnockedOut | player-character | "{P}: got knocked out (respawn fee)" |
+| Drowned | player-character | "{P}: drowned (respawn fee)" |
+| KnockedOut | player-character, night-creatures | "{P}: got knocked out by the {creature} (respawn fee)" |
+| Stranded | day-loop | "{P}: lost in the dark (respawn fee)" |
+| YeetedTeammate | player-character | "{P}: threw {P2} into the river" |
 | LostTool | farm-tools | "{P}: lost the {tool}" |
-| SpookedHerd | proximity-voice | "{P}: screamed, {n} animals fled" |
+| LassoedIntoRiver | farm-tools | "{P}: lassoed {item} into the river" |
+| SpookedHerd | proximity-voice, farm-tools (whistle scare) | "{P}: screamed, {n} animals fled" |
 | SummonedCreature | night-creatures | "{P}: woke the {creature}" |
-| Stolen | rival-farmers | "{P}: left {item} unguarded" |
+| Stolen | rival-farmers, night-creatures (crow coin theft → "Nature") | "{P}: left {item} unguarded" |
 | Pocketed | goods-value (golden egg) | secret until Sunday |
 | LandlordFine | landlord-events | "{P}: failed hat inspection" |
 | Rescue | any | "{P}: saved {item}" (positive) |
@@ -64,8 +71,8 @@ struct FBlameEvent
 **Emission rules**
 1. Only the host emits. Clients never construct events (anti-cheat, single source of truth).
 2. Emit once per incident. Repeated damage on the same item by the same instigator within **1.5 s** merges into one event (DollarDelta summed, Severity recomputed).
-3. Events with |DollarDelta| < **$2** and no non-economic verb (KnockedOut, SummonedCreature) are discarded as noise.
-4. Attribution: the emitter supplies a "touch history" (last 3 players who touched the item in the last **4 s**). Shares: last toucher 0.6, previous 0.3, earlier 0.1, renormalized for fewer touchers. No toucher in 4 s → "Nature" (shown with CauseTag, e.g. "The Wind: −$40").
+3. Events with |DollarDelta| < **$2** and no non-economic verb (KnockedOut, Drowned, Stranded, SummonedCreature, YeetedTeammate) are discarded as noise.
+4. Attribution: the emitter supplies a "touch history" (last 3 players who touched the item in the last **3 s**; canonical TouchWindow, also used by physics-carry and goods-value). Shares: last toucher 0.6, previous 0.3, earlier 0.1, renormalized for fewer touchers. No toucher in 3 s → "Nature" (shown with CauseTag, e.g. "The Wind: −$40").
 5. Severity ≥ **60** (or Verb in {DroppedInRiver, TippedWagon, BrokePlank with item loss}) broadcasts `OnDisaster(BlameEvent)` for `camcorder-replay` and `audio-feedback`.
 
 ### Core Rules
@@ -79,7 +86,7 @@ struct FBlameEvent
    - **Pig Whisperer:** highest positive $ (Rescue + StealBack + clean deliveries reported by day-loop).
    - **Town Crier:** most SpookedHerd + SummonedCreature.
    Ties go to the player with the earlier first qualifying event.
-5. **Betrayal reveal:** Pocketed events are bSecret. On Sunday after awards, the Ledger plays "Grandpa's audit": each pocketed item is revealed with the thief's name and value. Pocketed value is added to the thief's personal cosmetic tally (`meta-progression`) and not to the wallet. Lobby option `BetrayalEnabled` (default ON, host toggle) disables pocketing entirely.
+5. **Betrayal reveal:** Pocketed events are bSecret. On Sunday after awards (and before quota payment, see `week-quota` Sunday sequence), the Ledger plays "Grandpa's audit": each pocketed item is revealed with the thief's name and value. The thief then chooses **Donate** (egg sold to the wallet at demand 1.0, $150) or **Keep** (value goes to the thief's personal cosmetic tally / Almanac in `meta-progression`, not the wallet). Lobby option `BetrayalEnabled` (default ON, host toggle) disables pocketing entirely.
 6. Ledger is read-only toward money. `shared-wallet-economy` remains the authority on balances; Ledger mirrors DollarDelta for display.
 
 ### States and Transitions
@@ -104,10 +111,10 @@ DayQuotaShare = WeeklyQuota / 5
 | Variable | Type | Range | Source | Description |
 |---|---|---|---|---|
 | DollarDelta | int | −5000..+2000 | emitter | value lost/gained |
-| WeeklyQuota | int | 300..∞ | week-quota | current week quota |
-| VerbBonus | int | 0..40 | data table | DroppedInRiver +25, TippedWagon +30, SummonedCreature +20, KnockedOut +10, others 0 |
+| WeeklyQuota | int | 540..∞ | week-quota | current week quota (W1 1p = $540) |
+| VerbBonus | int | 0..40 | data table | DroppedInRiver +25, TippedWagon +30, SummonedCreature +20, KnockedOut / Drowned / Stranded +10, YeetedTeammate +15, others 0 |
 
-Result clamped 0–100. Example: Week 1 quota $600 → share $120; dropping a $90 pig in the river = 75 + 25 = 100.
+Result clamped 0–100. Example: Week 1 4p quota $1,200 → share $240; losing a $150 cow in the river = 62.5 + 25 = 88.
 
 ### Blame Score (weekly, per player)
 ```
@@ -125,7 +132,7 @@ Disasters_p = events with Severity ≥ 60 where p is PrimaryInstigator. Score fl
 | Same item bruised by 4 players in 1 s | Single merged event, shares by touch order | Avoid receipt spam |
 | Positive and negative events in same merge window | Never merged; different verbs | Clarity |
 | Betrayal disabled mid-week | Existing secrets still revealed Sunday | No lost data |
-| Host leaves | Day ledger lost with unsaved day (save-persistence boundary) | No migration at EA |
+| Host leaves | Day ledger lost with the unsaved day; the run resumes from the last day-boundary checkpoint (any roster player may host the Resume, `session-networking`) | Migration-lite only |
 | > 500 events in a day | Oldest Severity < 20 events compacted into per-player "misc" totals | Memory cap |
 
 ## Dependencies
@@ -145,7 +152,7 @@ Disasters_p = events with Severity ≥ 60 where p is PrimaryInstigator. Score fl
 |---|---|---|---|
 | MergeWindow | 1.5 s | 0.5–3 | Receipt line density |
 | NoiseFloorDollars | $2 | 0–10 | Filters trivial events |
-| TouchWindow | 4 s | 2–8 | Attribution memory |
+| TouchWindow | 3 s | 2–5 | Attribution memory (canonical; physics-carry/goods-value mirror it) |
 | TouchShares | 0.6/0.3/0.1 | — | Blame spread |
 | DisasterSeverity | 60 | 40–80 | Camcorder trigger frequency (target 3–6 per day) |
 | ReceiptLinesPerPlayer | 5 | 3–8 | Readability |

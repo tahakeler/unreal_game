@@ -27,23 +27,33 @@ The Shop opens in the Shop phase of `day-loop` (after Payout). Upgrades are run-
 6. Consumables (single-use, marked ◆) are restocked each day and don't sell back.
 7. Upgrades that create chaos (Guard Dog, Pig Cannon) are intentionally double-edged.
 
-### Catalog (Region 1, EA target ≈ 30)
+### Catalog (Region 1, EA target ≈ 40)
 
 | Upgrade | Price | Effect | Phase |
 |---|---|---|---|
-| Bigger Wagon Lv1/2/3 | 400 / 700 / 1,100 | Wagon slots 4→6→8→10 | Alpha |
-| Bridge Reinforcement Lv1/2 | 300 / 600 | `Bridge.PlankBreakMult` ×0.7 / ×0.45 | Alpha |
-| Electric Fence | 250 | Pen escape −60%; zaps players too (stun 1 s) | Alpha |
+| Bigger Wagon Lv1/2/3 | 400 / 700 / 1,100 | Larger bed; cargo soft cap 400→550→700→850 kg (`wagon-vehicles`) | Alpha |
+| Bridge Reinforcement Lv1/2 | 300 / 600 | `Bridge.PlankBreakMult` ×0.7 / ×0.45; waives Region 1 Bridge Toll | Alpha |
+| Electric Fence | 250 | Pen escape −60% (`PenEscapeChance` ×0.4, `critter-ai`); zaps players too (stun 1 s) | Alpha |
 | Guard Dog | 350 | Herds livestock toward pens; 20% chance/min to chase a player | Alpha |
 | Scarecrow Decoy ◆ | 40 | Distracts crows/night creatures 60 s | Alpha |
 | Feed Silo | 450 | Lures: livestock spawn 25% closer to barn | Alpha |
 | Padded Crates | 300 | `Goods.BruiseMult` ×0.8 in wagon | Alpha |
 | Barn Cellar | 500 | Store 6 goods overnight (freshness paused) | Alpha |
 | Better Nets | 200 | Net catch radius +30% | Alpha |
-| Lasso Lv2 | 250 | Lasso range +40% | Alpha |
+| Lasso Lv2 ("Reinforced Lasso") | 250 | Lasso range +40% | Alpha |
 | Market Stall Sign | 350 | `Market.DemandMult` +0.05 | Alpha |
-| Radio Set | 300 | Long-range voice channel (`proximity-voice`) | Alpha |
+| Radio Set | 300 | Global push-to-talk channel at 60% with static (`proximity-voice`) | Alpha |
+| Wagon Tarp | 150 | Tie-down tarp for the wagon (`wagon-vehicles`; granted free in the VS build) | VS/Alpha |
+| Big Net | 200 | Net holds 3 critters (`farm-tools`) | Alpha |
+| Earmuff Hat | 100 | Wearer immune to mandrake stun (`cursed-crops`) | Alpha |
+| Burlap Sack ◆ | 20 | Mandrake loudness −70% while sacked (`cursed-crops`) | Alpha |
+| Handheld Lantern | 200 | Shine on the Scarecrow to freeze it 3 s (8 s cooldown) (`night-creatures`) | Alpha |
 | Lantern Posts | 250 | Night creature aggro −25% near lit path | EA |
+| Hammer | 120 | Fix sabotaged planks instantly; plank patch time 3 s → 1 s (`bridge-hazards`, `rival-farmers`) | EA |
+| Rope Rail Netting | 250 | Side nets on the bridge catch goods falling off the edge (not through broken planks) (`bridge-hazards`, `weather-twists`) | EA |
+| Iron Wheels | 300 | Wagon WheelHP 100 → 200 (`wagon-vehicles`) | EA |
+| Golden Bucket | 200 | Feed bucket 20 uses, lure radius 20 m (`farm-tools`) | EA |
+| Field Repair Kit ◆ | 35 | Re-attach one wagon wheel in the field (`wagon-vehicles`) | EA |
 | Hay Bale Ramps | 150 | Reposition ramps; cushions falls (BP −50% on landing) | EA |
 | Pig Cannon | 900 | Fires goods across river; adds 25 BP on landing | EA |
 | Zipline | 800 | Second crossing route; 1-hand goods only | EA |
@@ -54,7 +64,7 @@ The Shop opens in the Shop phase of `day-loop` (after Payout). Upgrades are run-
 | Stamina Tonic ◆ | 25 | +50% stamina for one day, one player | EA |
 | Second Pen | 300 | Holding capacity +8 | EA |
 | Rival Traps | 350 | Slow rival farmers (`rival-farmers`) | EA |
-| Crow Net | 300 | Crows can't steal coins | EA |
+| Crow Net | 300 | Crows can't steal coins from the wallet sign (`night-creatures`) | EA |
 | Morning Coffee | 200 | Morning phase lasts 15 s longer, +10 s workday | EA |
 | Wheelbarrows ×2 | 250 | 2-slot one-player carts | EA |
 | Lucky Horseshoe | 600 | Daily twist offers a reroll once per week | EA |

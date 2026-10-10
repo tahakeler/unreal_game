@@ -23,9 +23,9 @@ The week loop counts days (Mon–Fri), triggers Landlord Sunday, computes the qu
 1. Week = Day 1..5 (Mon–Fri) via `day-loop`, then Sunday (no work phase). Saturday doesn't exist ("The Landlord doesn't believe in Saturdays").
 2. Quota for week `w` is shown from Monday morning on the barn chalkboard and HUD.
 3. **Sunday sequence** (~90 s, skippable after first time per run):
-   a. Landlord walks to the barn. Wallet counter rolls down by the quota.
-   b. **Pocket reveal**: any pocketed Golden Eggs are revealed by `blame-ledger`; the pocketing player may "donate" now (adds its $150 at demand 1.0) or keep it for account Almanac credit (betrayal).
-   c. If `Balance ≥ Q(w) + IOU`: **Paid**. Remainder carries over. Week MVP/MVD awards.
+   a. Landlord walks to the barn.
+   b. **SundayAudit** (`blame-ledger`): weekly awards (MVD etc.), then the pocket reveal; the pocketing player may **Donate** (adds $150 at demand 1.0) or **Keep** (account Almanac/cosmetic credit; betrayal).
+   c. Wallet counter rolls down by the Due. If `Balance ≥ Q(w) + IOU`: **Paid**. Remainder carries over.
    d. If short: **Collateral** prompt, 60 s: the crew may sell back any upgrades at 50% (`farm-upgrades`). Any player may vote "Give up".
    e. Still short at timer end: **Evicted**. Run ends; `save-persistence` wipes the run save; account unlocks persist; eviction cutscene plays, Camcorder montage of the week.
 4. After a paid Sunday: week counter +1; new Landlord weekly rule drawn; chaos cap rises (`day-loop`); respawn fee rises (`shared-wallet-economy`); new order species may unlock (`region-campaign`).
@@ -38,7 +38,7 @@ The week loop counts days (Mon–Fri), triggers Landlord Sunday, computes the qu
 ```
 Q(w) = round_to_10( Q_base × G^(w−1) × S_p × R_mult )
 ```
-- `Q_base` = $1,200, `G` = 1.35, `R_mult` = region multiplier (Region 1 = 1.0; Region 2 = 1.6; Region 3 = 2.4, set by `region-campaign`).
+- `Q_base` = $1,200, `G` = 1.35, `R_mult` = `RegionDifficulty` owned by `region-campaign`: Region 1 = 1.00, 2 = 1.20, 3 = 1.45, 4 = 1.70, 5 = 2.00. *(Consistency pass: the former 1.0/1.6/2.4 values were superseded.)*
 - `S_p` player scale: 1p 0.45, 2p 0.65, 3p 0.85, 4p 1.00.
 
 | w | 4p | 3p | 2p | 1p |
@@ -59,7 +59,7 @@ Q(w) = round_to_10( Q_base × G^(w−1) × S_p × R_mult )
 
 ## 5. Edge Cases
 - **Player leaves mid-week** in 4p → 3p: from the next day, quota is re-scaled pro-rata for remaining days: `Q' = Q × (d_done + d_left × S_new/S_old) / 5`. Prevents a ragequit from dooming the others.
-- **Host leaves on Sunday mid-sequence**: Sunday re-runs on resume from the Friday Shop save.
+- **Host leaves on Sunday mid-sequence**: Sunday re-runs on resume from the Friday Shop save (any roster player may host the Resume via the replicated checkpoint, `session-networking`).
 - **Balance exactly equals Due**: Paid with $0 carryover ("the Landlord seems disappointed").
 - **Collateral sells everything and still short**: evicted; sold upgrades don't matter (run wipes).
 - **All players vote Give up on Collateral**: immediate eviction.

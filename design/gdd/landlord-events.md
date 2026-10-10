@@ -33,7 +33,7 @@ Landlord Events is an event deck plus one non-hostile NPC. It provides (a) **Wee
 | No Running on the Bridge | `Bridge.PlankBreakMult` ×1.3 |
 | Early Curfew | `Day.WorkdaySeconds` −45 |
 | Respawn Paperwork | `Economy.RespawnFeeMult` ×1.2 |
-| Quiet Hours | Noise Events from voice ×1.25 radius at dusk (via `proximity-voice` param) |
+| Quiet Hours | `Noise.VoiceRadiusMult` ×1.25 at dusk (Day param read by `proximity-voice`) |
 | One Pumpkin Per Family | Order lines never request the same GoodsId twice; `Order.LineCount` +1 |
 
 ### Visits (mid-week)
@@ -42,7 +42,7 @@ Landlord Events is an event deck plus one non-hostile NPC. It provides (a) **Wee
 | Visit | Duration | Rules | Typical $ impact |
 |---|---|---|---|
 | **Inspection** | 120 s window in Workday | Landlord picks 3 checks from list (muddy players, loose livestock in barn zone, broken fence, unbruised order item shown); each failed check = fine $25 × week cap $150 | −$50 to −$150 |
-| **Farm Walk** | 90 s | Landlord walks a spline across the farm & bridge; any goods/player/wagon that physically hits him = $50 fine ("dry-cleaning"); he "helpfully" opens one pen gate | −$0 to −$150 + escaped animals |
+| **Farm Walk** | 90 s | Landlord walks a spline across the farm & bridge; any goods/player/wagon that physically hits him = $50 fine ("dry-cleaning", Blame verb `LandlordFine`); he "helpfully" opens one pen gate (raises `World.PenGateOpened` with the pen id; `critter-ai` handles the escape response) | −$0 to −$150 + escaped animals |
 | **Double Down** | offer at Morning, 20 s vote | Accept: this week's Due ×2, but next week's quota is waived ("paid in advance"). Decline: nothing. Offered max once per run, never in the region's final week | ±a whole week |
 | **Helpful Visit** | Day | Landlord "fixes" the bridge: `Bridge.PlankBreakMult` ×0.5 and charges a $100 "service fee" on Payout. Can't decline | −$100, + safer hauling |
 

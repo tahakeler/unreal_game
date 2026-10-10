@@ -11,17 +11,17 @@ The wagon is a large physics cart that carries many goods at once. It has no eng
 "Load it all and go!" A full wagon feels like a jackpot rolling toward market, which makes it devastating when one wheel goes off the bridge edge.
 
 ## 3. Detailed Rules
-1. **Wagon:** Chaos physics body, 120 kg empty, 4 wheels, bed 2.0 × 1.2 m, side walls 0.4 m. Capacity is physical (whatever fits), soft cap 400 kg cargo.
-2. **Moving it:** the front handle has 2 grab points, the back has 2 push points. Force per player = 900 N. A hitched animal pulls at its `critter_pull` toward its own flee/lure target — it is not steered directly; a rider can lead it with the feed bucket.
+1. **Wagon:** Chaos physics body, 120 kg empty, 4 wheels, bed 2.0 × 1.2 m, side walls 0.4 m. Capacity is physical (whatever fits), soft cap 400 kg cargo (Bigger Wagon Lv1/2/3: 550 / 700 / 850 kg with a larger bed).
+2. **Moving it:** the front handle has 2 grab points, the back has 2 push points. Force per player = 900 N. A hitched animal pulls at its `CritterPullN` (Critter Personality) toward its own flee/lure target — it is not steered directly; a rider can lead it with the feed bucket.
 3. **Steering:** the front handle sets the axle angle (max 35°). With no one at the front, the axle centers slowly.
 4. **Brake:** a lever at the side, 1 hand. Locks the wheels (sliding friction 0.8).
-5. **Cargo security:** goods are free bodies in the bed. A **tarp** (1 hand, 1.5 s to tie) welds cargo positions until untied but adds −10% speed. Tarp is a VS upgrade item (`farm-upgrades`).
+5. **Cargo security:** goods are free bodies in the bed. A **tarp** (1 hand, 1.5 s to tie) welds cargo positions until untied but adds −10% speed. The Wagon Tarp is listed in `farm-upgrades` (granted free in the VS build; a shop upgrade from Alpha).
 6. **Tipping:** if roll > 50° the wagon tips; contents spill. Righting it takes 2 players for 2 s.
-7. **Damage:** wheels have 100 HP. Impacts > 1500 N·s deal `impulse/50` damage. 0 HP → wheel falls off, the corner drags. Repair at the barn ($20) or field-repair kit.
+7. **Damage:** wheels have 100 HP. Impacts > 1500 N·s deal `impulse/50` damage. 0 HP → wheel falls off, the corner drags. Repair at the barn ($50, canonical price from `shared-wallet-economy`) or with the Field Repair Kit consumable (`farm-upgrades`).
 8. **Wheelbarrow (Alpha):** 1 player, 1 wheel, 80 kg capacity, tips at 30° roll.
 9. **Raft (Post, Riverlands):** floats on the river current (1.5 m/s), poled by players, capacity 250 kg.
 10. **Network:** server-simulated; Predictive Interpolation for the wagon; cargo bodies inside the bed replicate at Near rate regardless of distance while the wagon moves.
-11. Every cargo body that leaves the bed by bouncing emits a Blame Event attributed to the player at the front handle (the driver), or the last pusher if none.
+11. Every cargo body that leaves the bed by bouncing emits a Blame Event (verb `SpilledCargo`; a tip is `TippedWagon`) attributed to the player at the front handle (the driver), or the last pusher if none.
 
 ## 4. Formulas
 **Wagon speed**
@@ -43,7 +43,7 @@ rolling_k = 1.5 (dirt) · 3.0 (mud) · 1.2 (plank)
 ## 6. Dependencies
 - **Upstream:** `physics-carry` (grab points, tethers/hitch), `player-character`, `session-networking`.
 - **Contracts:** Goods Item (`goods-value`) for cargo mass and bruising; Blame Event (`blame-ledger`).
-- **Downstream:** `bridge-hazards` (mass on planks), `rival-farmers` (steal wagon contents), `farm-upgrades` (bigger wagon, tarp, iron wheels), `day-loop` (market drop-off zone accepts a whole wagon), `goods-value`.
+- **Downstream:** `bridge-hazards` (mass on planks), `rival-farmers` (steal wagon contents), `farm-upgrades` (Bigger Wagon raises CargoSoftCap, Wagon Tarp, Iron Wheels), `day-loop` (market drop-off zone accepts a whole wagon), `goods-value`.
 
 ## 7. Tuning Knobs
 | Knob | Default | Range |
@@ -54,7 +54,7 @@ rolling_k = 1.5 (dirt) · 3.0 (mud) · 1.2 (plank)
 | RollingK dirt/mud/plank | 1.5 / 3.0 / 1.2 | — |
 | TipAngle | 50° | 35–65 |
 | WheelHP / DamageDivisor | 100 / 50 | — |
-| WagonRecoveryFee / WheelRepair | $40 / $20 | — |
+| WagonRecoveryFee / WheelRepair | $40 / $50 (owned by shared-wallet-economy) | — |
 | TarpSpeedPenalty | 10% | 0–25% |
 
 ## 8. Acceptance Criteria

@@ -24,6 +24,7 @@ The host machine stores up to 3 Run Save slots (one per crew/region attempt). Sa
 - **Contents**: version, seed, region id, week w, day d, player roster (Steam IDs + S_p sampled Monday), wallet balance + IOU, weekly txn summary (not full log), owned upgrades + levels, active Week/Run Day Modifiers (tags + remaining duration), Landlord rules drawn + Double Down state, Barn Cellar goods (GoodsId, BP, Freshness), Blame Ledger week totals, pocketed-egg flags, Camcorder clip index refs.
 - **Write points**: entering Shop phase; after Sunday Paid; on graceful host quit from Shop. Atomic write (temp file + rename), keep 1 backup (`.bak`).
 - **Wipe points**: Evicted (week-quota), Region Cleared (after rewards written to profiles), player-chosen Abandon.
+- **Guest copy**: on each write the host sends the Run Save to roster clients, who store it as a read-only resume checkpoint (same checksum rules).
 - **Load**: host selects slot in lobby; guests not in the original roster may join (quota re-scaled per `week-quota`).
 - Mid-day state is never saved: quitting mid-day resumes at that day's Morning (day replays; income from the partial day is lost).
 
@@ -42,7 +43,7 @@ The host machine stores up to 3 Run Save slots (one per crew/region attempt). Sa
 - **Host crashes mid-day**: on reload, resume from Shop save of the previous day (day replays).
 - **Host crashes during Sunday**: Sunday re-runs from Friday Shop save (result is deterministic: same balance).
 - **Crash during save write**: temp file discarded; previous save intact.
-- **Different host wants to continue**: not supported at EA (no host migration); host can "Export run code" later (Post).
+- **Different host wants to continue**: supported via host migration-lite: every roster client keeps a replicated read-only copy of the latest Run Save (`session-networking`), so any roster player can host the Resume. No live mid-day migration. "Export run code" for non-roster hosts is Post.
 - **Save scumming eviction** (kill app on Sunday): Sunday result is written *before* the cutscene plays; reopening gives the evicted state.
 - **Guest edits their profile file**: cosmetic-only impact; profiles are not trusted for gameplay; the shop pool uses the **host's** profile unlocks only, to prevent injection.
 - **Disk full**: warn, keep playing, retry at next boundary.

@@ -33,14 +33,14 @@ struct FNoiseEvent
     FVector      Location;     // world position (server)
     AActor*      Instigator;   // player pawn, critter, item or null; the "who made the noise"
     APlayerState* BlamedPlayer;// player responsible (or null), for blame-ledger
-    FGameplayTagContainer Tags;// e.g. Noise.Scream, Noise.Splash, Noise.Metal, Noise.Mandrake
+    FGameplayTagContainer Tags;// registered: Noise.Scream, Noise.Splash, Noise.Metal, Noise.Mandrake, Noise.Food, Noise.Whistle, Noise.WhistleLong, Noise.Squelch, Noise.Creak, Noise.PlankBreak, Noise.Squeal
     double       ServerTime;   // seconds, server clock
 };
 ```
 **Rules**
 1. Created **only on the server** via `UNoiseSubsystem::Emit(FNoiseEvent)`. Clients request (voice loudness, emote) and the server validates.
 2. Delivered to listeners in range via UE AI Perception (Hearing sense, `ReportNoiseEvent` with `Loudness` and `MaxRange = Radius`) **and** a multicast delegate `OnNoise(const FNoiseEvent&)` for non-AI systems. Not replicated to clients by default (debug view only).
-3. **Radius**: `Radius = 4 + 46 * Loudness^1.5` metres (0 → 4 m, 0.5 → 20 m, 1.0 → 50 m), times `env_mult` (fog 0.8, storm 0.6, night 1.25 — supplied by `weather-twists` / `day-loop` Day Modifiers).
+3. **Radius**: `Radius = 4 + 46 * Loudness^1.5` metres (0 → 4 m, 0.5 → 20 m, 1.0 → 50 m), times `env_mult` (Day param `Noise.EnvMult`: fog 0.8, storm 0.6, night 1.25 — supplied by `weather-twists` / `day-loop` Day Modifiers), and for Source=Voice also `Noise.VoiceRadiusMult` (Landlord "Quiet Hours").
 4. **Listener hearing**: a listener hears the event if `distance ≤ Radius * listener_hearing_mult`. Perceived strength = `Loudness * (1 - distance/Radius)`. Each consumer decides its reaction (flee, attract, wake) from perceived strength and Tags; this contract does not.
 5. **Rate limit**: max 1 event per Instigator per 0.25 s per Source; louder events within the window replace quieter ones. Global cap 60 events/s (oldest-quietest dropped).
 6. **Reference loudness table** (consumers tune against these):
@@ -52,8 +52,11 @@ struct FNoiseEvent
 | Sprint footstep | 0.25 |
 | Normal talk (voice) | 0.35–0.55 |
 | Shout emote / yelling voice | 0.8 |
-| Whistle tool | 0.7 |
-| Light impact (300–800 N·s) | 0.3 |
+| Whistle tool (`Noise.Whistle`, long blow adds `Noise.WhistleLong`) | 0.7 |
+| Feed bucket shake (`Noise.Food`) | 0.4 |
+| Plank crack (`Noise.Creak`) | 0.3 |
+| Cow moo / pig squeal / goose honk (Source=Critter) | 0.5 / 0.7 / 0.8 |
+| Light impact (400–800 N·s; 400 = goods-value `I_min`) | 0.3 |
 | Heavy impact / item break (> 800 N·s) | 0.6 |
 | Plank break / splash | 0.75 |
 | Screaming mandrake | 0.9 |

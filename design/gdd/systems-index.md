@@ -36,15 +36,15 @@ Layers: **Foundation** → **Core** → **Feature** → **Presentation** → **P
 | 11 | Bridge & Environmental Hazards (breakable planks, sway, river spit-out, mud) | `bridge-hazards` | Core | VS | Not Started | design/gdd/bridge-hazards.md | physics-carry, player-character |
 | 12 | Livestock Roster (pig, chicken, goat, cow, bull, sheep… species data) | `livestock-roster` | Feature | VS (pig, chicken) / Alpha (5) / EA (8) | Not Started | design/gdd/livestock-roster.md | critter-ai, goods-value |
 | 13 | Week Loop, Quota & Landlord Sunday (5 days + Sunday, escalation, fail state) | `week-quota` | Feature | Alpha | Not Started | design/gdd/week-quota.md | day-loop, shared-wallet-economy |
-| 14 | Farm Upgrades & Shop (between-day purchases, ~30 upgrades by EA) | `farm-upgrades` | Feature | Alpha | Not Started | design/gdd/farm-upgrades.md | shared-wallet-economy, week-quota |
-| 15 | Cursed Crops (burrowing turnips, mandrakes, growing pumpkins, maze corn) | `cursed-crops` | Feature | VS (prize pumpkin) / Alpha (3) | Not Started | design/gdd/cursed-crops.md | critter-ai, goods-value, proximity-voice |
-| 16 | Night Creatures (Scarecrow, Barn Thing, Crows; night director) | `night-creatures` | Feature | Alpha (Scarecrow) / EA (2) | Not Started | design/gdd/night-creatures.md | critter-ai, proximity-voice, day-loop |
+| 14 | Farm Upgrades & Shop (between-day purchases, ~40 upgrades by EA) | `farm-upgrades` | Feature | Alpha | Not Started | design/gdd/farm-upgrades.md | shared-wallet-economy, week-quota |
+| 15 | Cursed Crops (burrowing turnips, mandrakes, growing pumpkins, maze corn) | `cursed-crops` | Feature | VS (prize pumpkin) / Alpha (3) / EA (3) | Not Started | design/gdd/cursed-crops.md | critter-ai, goods-value, proximity-voice |
+| 16 | Night Creatures (Scarecrow, Barn Thing, Crows; night director) | `night-creatures` | Feature | Alpha (Scarecrow) / EA (Barn Thing, Crows) | Not Started | design/gdd/night-creatures.md | critter-ai, proximity-voice, day-loop |
 | 17 | Weather & Daily Twists (mud, wind, storm, fog; twist deck) | `weather-twists` | Feature | Alpha | Not Started | design/gdd/weather-twists.md | day-loop, bridge-hazards |
 | 18 | Rival Farmers (NPC thieves/saboteurs, steal-back) | `rival-farmers` | Feature | EA | Not Started | design/gdd/rival-farmers.md | critter-ai, wagon-vehicles, goods-value |
 | 19 | Landlord Events (inspections, quota doubles, Landlord walks the farm) | `landlord-events` | Feature | Alpha | Not Started | design/gdd/landlord-events.md | week-quota, day-loop |
 | 20 | Blame Ledger & Awards (per-player disaster attribution, MVD, betrayal reveal) | `blame-ledger` | Feature | VS (bruise report) / Alpha (full) | Not Started | design/gdd/blame-ledger.md | goods-value, shared-wallet-economy |
 | 21 | Grandpa's Camcorder (rolling 30s replay buffer, disaster trigger, export) | `camcorder-replay` | Feature | Alpha | Not Started | design/gdd/camcorder-replay.md | session-networking, blame-ledger |
-| 22 | Region Campaign & PCG Layouts (regions, market towns, biome rules, seeded layouts) | `region-campaign` | Feature | EA (Region 1 + PCG) / Post (2, 3) | Not Started | design/gdd/region-campaign.md | week-quota, livestock-roster, weather-twists |
+| 22 | Region Campaign & PCG Layouts (regions, market towns, biome rules, seeded layouts) | `region-campaign` | Feature | EA (Region 1 + PCG) / Post (2, 3) / Expansion idea (4, 5) | Not Started | design/gdd/region-campaign.md | week-quota, livestock-roster, weather-twists |
 | 23 | Save & Persistence (run save, account profile, roguelite reset rules) | `save-persistence` | Core | Alpha | Not Started | design/gdd/save-persistence.md | week-quota, session-networking |
 | 24 | Meta Progression, Cosmetics & Almanac (account unlocks, hats, almanac entries) | `meta-progression` | Feature | EA | Not Started | design/gdd/meta-progression.md | save-persistence, livestock-roster |
 | 25 | Eviction Mode (endless quota ladder, daily seed, leaderboard) | `eviction-mode` | Feature | EA | Not Started | design/gdd/eviction-mode.md | week-quota, region-campaign, save-persistence |
@@ -90,7 +90,7 @@ Layers: **Foundation** → **Core** → **Feature** → **Presentation** → **P
 |---|---|---|
 | **Noise Event** (source, loudness 0–1, radius, instigator) | proximity-voice | critter-ai, night-creatures, cursed-crops, rival-farmers |
 | **Goods Item** (id, base value, fragility, bruise state, carry hands) | goods-value | physics-carry, wagon, livestock, crops, ledger, economy |
-| **Blame Event** (player, verb, item, $ delta, timestamp) | blame-ledger | goods-value, physics-carry, bridge-hazards, camcorder |
+| **Blame Event** (player, verb, item, $ delta, timestamp) | blame-ledger | emitters: goods-value, physics-carry, bridge-hazards, wagon-vehicles, player-character, farm-tools, proximity-voice, critter-ai, night-creatures, rival-farmers, landlord-events, day-loop; consumers: camcorder-replay, audio-feedback, hud-menus |
 | **Day Modifier** (tag, stacking rules, duration) | day-loop | weather-twists, landlord-events, cursed-crops, region-campaign, eviction-mode |
 | **Critter Personality** (trait set + params) | critter-ai | livestock-roster, cursed-crops, night-creatures, rival-farmers |
 

@@ -49,9 +49,9 @@ EvictionQuota(r) = Q0 * G^r * CrewScale(players)
 | Q0 | $400 | rung 0 quota (3-day week) |
 | G | 1.28 | growth per rung |
 | r | 0.. | rung index |
-| CrewScale | 1p 0.45, 2p 0.7, 3p 0.85, 4p 1.0 | |
+| CrewScale | 1p 0.45, 2p 0.65, 3p 0.85, 4p 1.0 | same as week-quota `S_p` |
 
-Rung 5 ≈ $1,375; Rung 10 ≈ $4,730; Rung 15 ≈ $16,300. Target median: Rung 6; top 1%: Rung 13+.
+Rung 5 ≈ $1,375; Rung 10 ≈ $4,730; Rung 15 ≈ $16,160. Target median: Rung 6; top 1%: Rung 13+.
 
 Daily seed: `DailySeed = xxHash32("HP-EVICT", YYYYMMDD)`; region = `DailySeed % UnlockedRegionCountForLaunchPool`.
 

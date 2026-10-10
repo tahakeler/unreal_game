@@ -21,7 +21,7 @@ The screen is clean so the chaos reads. You learn the time by glancing at the su
 
 ### Core Rules: Day HUD (persistent)
 1. **Pocket watch** (bottom-left, 140 px @1080p): sundown countdown; ticks red under 60 s.
-2. **Wallet + day target** (top-center): "$412 / $600 today-share"; animates ±$ with color.
+2. **Wallet + day target** (top-center): "$412 · today's share $240" (share = Q(w)/5, W1 4p); animates ±$ with color.
 3. **Carry indicator** (center-bottom, contextual): hands on item (1–4 icons), item value with bruise tint, only while carrying.
 4. **Teammate markers:** name + status icon over heads, clamped to screen edges when off-screen ≤ 80 m; hidden in fog days except when within voice range (consistent with weather-twists fog rule).
 - Contextual prompts (grab, hitch, tool) appear world-anchored near the object, max 1 at a time.
@@ -36,7 +36,7 @@ The screen is clean so the chaos reads. You learn the time by glancing at the su
 | Lobby | Host/Join | Region pick, crew slots (4), ready, lobby options (Betrayal, Voice, Difficulty) | — |
 | Morning Order | Day start | Manifest (≤ 6 items), twist card(s), Region twist; auto-closes at 12 s or all-ready | 12 s |
 | Payout Receipt | Day end | Earnings, receipt per player (blame-ledger), headline tape, letters earned | ≤ 25 s |
-| Shop | After receipt | Upgrades grid, shared wallet, **purchase vote**: item needs majority (ties: host), 5 s veto window | ≤ 90 s soft |
+| Shop | After receipt | Upgrades grid, shared wallet, **purchase vote**: item needs majority (ties: host), 10 s vote window (`farm-upgrades`) | ≤ 90 s soft |
 | Sunday Awards | Sunday | 5 awards, betrayal audit, quota payment animation, pass/fail | ~45 s |
 | Camcorder Shelf/Viewer | From receipt | See camcorder-replay | — |
 | Settings | Anywhere | Controls, audio, video, accessibility (onboarding-accessibility) | — |

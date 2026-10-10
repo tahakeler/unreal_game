@@ -43,7 +43,7 @@ Day length: 9:30 without dusk, ~12:40 with dusk, ~14 min with payout/shop → fi
 - Sale value computed by `goods-value`; credited by `shared-wallet-economy` instantly; shown above the pen.
 
 ### Day end / stranded players
-- Players not inside the barn zone or market zone at end of Workday (if no dusk) or end of Dusk are "lost in the dark": knocked out and charged a respawn fee (`shared-wallet-economy`).
+- Players not inside the barn zone or market zone at end of Workday (if no dusk) or end of Dusk are "lost in the dark": sent to the barn and charged a respawn fee (`shared-wallet-economy`), Blame verb `Stranded`.
 - Unsold goods: livestock wander back to the wild pool; crops and products despawn (unless stored in Barn Cellar from `farm-upgrades`).
 
 ### Contract: Day Modifier
@@ -72,7 +72,7 @@ Owned here. Authored as `UDayModifierDefinition` data assets by `weather-twists`
 P = Override_highestPriority ?? clamp( (P_base + Σ Add) × Π Mul , P_min, P_max )
 ```
 
-**Registered parameters (initial)**: `Day.WorkdaySeconds`, `Day.DuskSeconds`, `Day.DuskBonus`, `Goods.ValueMult`, `Goods.BruiseMult`, `Goods.FreshnessDecayMult`, `Market.DemandMult`, `Market.AcceptSeconds`, `Economy.RespawnFeeMult`, `Economy.IncomeTaxRate`, `Order.LineCount`, `Critter.SpeedMult`, `Player.StaminaMult`, `Bridge.PlankBreakMult`. New params are added by registering an `FDayParamSpec {Name, Base, Min, Max}`; consumer systems read via `GetDayParam(Name)` only.
+**Registered parameters (initial)**: `Day.WorkdaySeconds`, `Day.DuskSeconds`, `Day.DuskBonus`, `Goods.ValueMult`, `Goods.BruiseMult`, `Goods.FreshnessDecayMult`, `Market.DemandMult`, `Market.AcceptSeconds`, `Economy.RespawnFeeMult`, `Economy.IncomeTaxRate`, `Order.LineCount`, `Critter.SpeedMult`, `Player.StaminaMult`, `Bridge.PlankBreakMult`, `Bridge.SafeLoadMult`, `Noise.VoiceRadiusMult` (Landlord "Quiet Hours"), `Noise.EnvMult` (weather/night env_mult for `proximity-voice`). New params are added by registering an `FDayParamSpec {Name, Base, Min, Max}`; consumer systems read via `GetDayParam(Name)` only.
 
 ## 4. Formulas
 
@@ -82,7 +82,7 @@ P = Override_highestPriority ?? clamp( (P_base + Σ Add) × Π Mul , P_min, P_ma
 
 **Order Complete Bonus**: `OCB = 60 × w` (w = week number 1..6; Eviction uses ladder step).
 
-**Order quantity per line**: `q = max(1, round(BaseQ_species × S_p × (1 + 0.15 (w−1))))` with `S_p` player scale {1p 0.5, 2p 0.7, 3p 0.85, 4p 1.0}.
+**Order quantity per line**: `q = max(1, round(BaseQ_species × S_p × (1 + 0.15 (w−1))))` with `S_p` player scale = the canonical `week-quota` table {1p 0.45, 2p 0.65, 3p 0.85, 4p 1.0}.
 
 **Day gross (reported)**: `G_day = Σ V_sold + OCB` (V from `goods-value`).
 
@@ -90,7 +90,7 @@ P = Override_highestPriority ?? clamp( (P_base + Σ Add) × Π Mul , P_min, P_ma
 
 ## 5. Edge Cases
 - **Host disconnects mid-day**: day is lost; run resumes from last day-boundary save (Shop autosave). Income from the lost day is not kept (documented in `save-persistence`).
-- **Join-in-progress**: joiners wait in the Shop/Morning; mid-day joiners spectate until Payout (`session-networking`).
+- **Join-in-progress**: allowed in any phase except the Sunday payout cutscene; mid-day joiners spawn at the barn with 2 s spawn protection (`session-networking` owns this rule).
 - **All players knocked out**: Workday continues ticking; respawns at barn per `player-character`; fees still apply.
 - **Item accepted at 0:00.01 after sundown**: grace window 2 s for items already inside the pen at bell; nothing new accepted after.
 - **Override conflict** (two modifiers override `Day.WorkdaySeconds`): highest Priority wins; tie → most recently applied.

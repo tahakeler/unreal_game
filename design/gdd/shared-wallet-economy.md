@@ -39,12 +39,13 @@ A single host-authoritative integer wallet (whole dollars) is shared by all play
 ### Sinks
 | Sink | Amount |
 |---|---|
-| Respawn fee | per knockout, see formula; charged to the wallet, attributed to the knocked-out player |
-| Repairs | Bridge plank $30, wagon wheel $50, fence section $20 (`bridge-hazards`, `wagon-vehicles`) |
-| Landlord fines | $25–$150 (`landlord-events`) |
-| Upgrades | $100–$1,500 (`farm-upgrades`) |
+| Respawn fee | per barn respawn, see formula; charged to the wallet, attributed to the respawning player |
+| Repairs | Bridge plank patch $30, wagon wheel $50, fence section $20, wagon recovery from river $40, lost-tool restock $15 (canonical; `bridge-hazards`, `wagon-vehicles`, `farm-tools` mirror these) |
+| Landlord fines / fees | $25–$150 per event (`landlord-events`) |
+| Region twist costs | e.g. Bridge Toll $5 per goods crossing (Region 1), Heating Bill (Region 5) (`region-campaign`) |
+| Upgrades | $25–$1,100 (`farm-upgrades`) |
 | Sunday quota | `week-quota` |
-| Theft | Crows steal **$10 per hit** from the wallet, max $50/day (`night-creatures`); rival farmers steal goods, not cash (`rival-farmers`) |
+| Theft | Crows steal **$10 per hit** from the wallet sign, max $50/day; theft never pushes the balance below $0 (`night-creatures`; blocked by Crow Net); rival farmers steal goods, not cash (`rival-farmers`) |
 
 ### Market demand
 - Each morning, every GoodsId rolls `D_day ∈ [0.8, 1.2]` (seeded, shown on the order board as arrows: "Pigs ▲").
@@ -63,7 +64,7 @@ D(g, n) = clamp( D_day(g) × 0.95^max(0, n − N_sat) × Market.DemandMult , 0.6
 ```
 Fee(w) = round_to_5( 25 × (1 + 0.25 (w − 1)) × Economy.RespawnFeeMult )
 ```
-→ W1 $25, W2 $30, W3 $40, W4 $45, W5 $50, W6 $55. Applies to every knockout that sends a player to the barn respawn (`player-character`), including stranded-at-dusk.
+→ W1 $25, W2 $30, W3 $40, W4 $45, W5 $50, W6 $55. **Canonical** respawn fee (the old per-death escalation in `player-character` was removed). Applies to every barn respawn: drowning/out-of-bounds, night-creature knockout, stranded at day end (`player-character` rule 9). Daytime in-place KOs are free.
 
 **Income tax modifier** (Landlord rule): `Credit = round(V × (1 − Economy.IncomeTaxRate))`.
 

@@ -12,13 +12,13 @@ Every player has two hands. Grabbing attaches a physics constraint between a han
 
 ## 3. Detailed Rules
 1. **Hands:** each player has a Left and Right grab slot. Grab range is 1.8 m from the camera ray. Holding the grab button keeps hold, releasing drops.
-2. **Carry hands:** each Goods Item has `carry_hands` (from the Goods Item contract, owned by `goods-value`): 1, 2, 4 or 6 hands. A body lifts only when `hands_attached ≥ carry_hands`. Below that it is dragged (friction ×1.0 vs ground) at drag speed.
+2. **Carry hands:** each Goods Item has `CarryHands` (from the Goods Item contract, owned by `goods-value`), counted in **hands** (1, 2, 4, 6 or 8; each player supplies 2, so carriers needed = ceil(CarryHands/2)). A body lifts only when `hands_attached ≥ carry_hands`. Below that it is dragged (friction ×1.0 vs ground) at drag speed.
 3. **Constraint:** physics handle per hand, linear stiffness 1500, damping 120, max force 2500 N per hand. If the constraint stretches beyond 1.2 m for 0.3 s, the grip breaks ("slip").
 4. **Multi-carrier:** the body's movement is the average of carriers' targets. Carriers moving in opposite directions create torque (spin) instead of cancelling.
 5. **Throw:** release while charging (hold Throw up to 1.0 s). Throw speed formula below. 2-hand items can only be thrown by one player if their mass ≤ 40 kg ("heave").
-6. **Critters fight back:** a held critter applies a struggle impulse every 0.5–1.5 s (critter-ai sets the strength). If it breaks the grip, it escapes.
+6. **Critters fight back:** a held critter applies `StruggleImpulse` (N·s) every `StruggleInterval` (0.5–1.5 s), both from its Critter Personality (`critter-ai`). Break-free chance uses `SecureCarriers` (critter-ai formula). If it breaks the grip, it escapes.
 7. **Tethers (rope):** created by the lasso (`farm-tools`) or a hitch point. A rope is a cable constraint with max length 6 m (lasso) or 3 m (hitch), breaking force 4000 N. Pulling a rope tight drags the attached body. A rope can be tied to a wagon, post or another player.
-8. **Bruise reporting:** any impact on a held or thrown goods body over 300 N·s is sent to `goods-value` as a bruise hit with the instigator = the last player to touch it within 3 s. A drop counts as the dropper's fault.
+8. **Bruise reporting:** any impact on a held or thrown goods body over `I_min` = **400 N·s** (owned by `goods-value`) is sent to `goods-value` as a bruise hit, with a **touch history** (last 3 players to touch it within **3 s**, newest first; see `blame-ledger` TouchWindow). The newest toucher is `LastHandlerId`. A drop counts as the dropper's fault.
 9. **Network:** grabs are requested by the client and confirmed by the server (≤ 1 RTT). Clients predict the hand pose. Held bodies use predictive interpolation (`session-networking`).
 
 ### States per body
@@ -52,7 +52,7 @@ carry_speed = clamp(1 - 0.5 * (mass_kg / (hands_attached * 25)), 0.35, 1.0)
 
 ## 6. Dependencies
 - **Upstream:** `player-character` (hands, stamina, ragdoll), `session-networking`.
-- **Contracts consumed:** **Goods Item** (`goods-value`: mass, carry_hands, fragility); **Blame Event** (`blame-ledger`: verbs `dropped`, `threw`, `slipped`).
+- **Contracts consumed:** **Goods Item** (`goods-value`: mass, carry_hands, fragility); **Blame Event** (`blame-ledger`: verbs `Dropped`, `Threw`, `Slipped`).
 - **Downstream:** `farm-tools`, `wagon-vehicles`, `bridge-hazards`, `critter-ai` (struggle), `goods-value` (bruise hits), `proximity-voice` (impact noise).
 
 ## 7. Tuning Knobs
@@ -64,14 +64,14 @@ carry_speed = clamp(1 - 0.5 * (mass_kg / (hands_attached * 25)), 0.35, 1.0)
 | KgPerHand | 25 | 15–40 |
 | ThrowSpeedMin/Max | 4 / 14 m/s | — |
 | LassoLength / HitchLength / RopeBreak | 6 / 3 m / 4000 N | — |
-| BruiseImpactMin | 300 N·s | 150–600 |
-| BlameWindow | 3 s | 1–5 |
+| BruiseImpactMin | 400 N·s (mirror of goods-value `I_min`) | 250–700 |
+| TouchWindow | 3 s (mirror of blame-ledger) | 2–5 |
 
 ## 8. Acceptance Criteria
 - A 6-hand item (cow) cannot be lifted by 2 players and can be lifted by 3.
 - One of four carriers releasing a cow drops it within 0.5 s.
 - Thrown 2 kg item at full charge travels ≥ 15 m on flat ground.
-- Every impact > 300 N·s on a goods body produces one bruise hit with the correct instigator (automated test, 50 drops).
+- Every impact > 400 N·s on a goods body produces one bruise hit with the correct instigator (automated test, 50 drops).
 - Grab confirm ≤ 1 RTT at 150 ms ping; no item ever held by two players' 1-hand grips at once.
 
 ## Comedy beats

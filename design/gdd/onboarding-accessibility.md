@@ -20,7 +20,7 @@ A first-launch tutorial day ("Grandpa's Tape #1") is a short scripted morning on
 ## Detailed Design
 
 ### Core Rules: Onboarding
-1. **Tape #1 (solo, offline, ~4 min):** steps: move/jump (20 s) → grab pig (pig flees slowly at 50% speed) → carry & throw into wagon → push wagon across bridge (one plank guaranteed to break, rescue prompt) → sell → mini receipt with "Grandpa: −$5 for the plank". Skippable at any time; auto-offered once, replayable from menu.
+1. **Tape #1 (solo, offline, ~4 min):** steps: move/jump (20 s) → grab pig (pig flees slowly at 50% speed) → carry & throw into wagon → push wagon across bridge (one plank guaranteed to break, rescue prompt) → sell → mini receipt with "Grandpa: −$30 for the plank" (canonical patch price). Skippable at any time; auto-offered once, replayable from menu.
 2. Joining a friend's lobby without Tape #1 done: offered "Quick Tape" (60 s video) while waiting in lobby; never blocks join.
 3. **Just-in-time tapes (14 at EA):** wagon hitch, lasso, feed bucket, noise/whisper, night, Landlord Sunday, shop vote, Blame Ledger, camcorder, upgrades, weather, each new species (first sight). Shown once per account; max 1 per 90 s; never during carry or within 10 s of a disaster.
 4. **New-player buddy:** in a lobby where one player has < 2 h played, their teammates see a small "rookie" sprout icon; the rookie's first 3 Blame events are captioned "(rookie)" on the receipt.
@@ -28,7 +28,7 @@ A first-launch tutorial day ("Grandpa's Tape #1") is a short scripted morning on
 ### Core Rules: Accessibility
 | Area | Options (defaults in bold) |
 |---|---|
-| Voice-free play | **Holler** button (Noise loudness 0.9, 6 s cooldown), **Shush** hold (quiet walk, voice loudness capped 0.2), **Ping wheel** (8 pings: "Here", "Help carry", "Pig!", "Danger", "Wagon", "Bridge", "Yes", "No"), quick-chat text with TTS option (off) |
+| Voice-free play | **Holler** button (= player-character shout emote: Noise loudness 0.8, 2 s cooldown), **Shush** hold (quiet walk, voice loudness capped 0.2), **Ping wheel** (8 pings: "Here", "Help carry", "Pig!", "Danger", "Wagon", "Bridge", "Yes", "No"), quick-chat text with TTS option (off) |
 | Mic sensitivity | Noise gain 0.5–1.5 (**1.0**); "Calm mode": voice never spooks animals (lobby-wide, host option, marks run unranked) |
 | Subtitles/captions | Subtitles **on**; speaker names; critter barks and stingers captioned with direction arrows; size S/**M**/L/XL; background opacity 0–100% (**60%**) |
 | Visual | Colorblind filters (Protan/Deutan/Tritan) + shape-coded bruise tiers; high-contrast outlines for goods; red-wearing warning (bull) shown as icon too |
@@ -72,7 +72,7 @@ TapeEligible = !Seen && time_since_last_tape ≥ 90 s && !Carrying && time_since
 |---|---|
 | Tape1 pig speed | 50% |
 | JIT tape spacing | 90 s |
-| Holler loudness / cooldown | 0.9 / 6 s |
+| Holler loudness / cooldown | 0.8 / 2 s (owned by player-character / proximity-voice) |
 | Shush cap | 0.2 |
 | Assist magnitudes | −20% / +20% / −50% |
 | Rookie threshold | 2 h |

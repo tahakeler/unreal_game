@@ -9,7 +9,7 @@
 ## Summary
 The campaign is a chain of Regions, each a debt of 5 paid weeks that unlocks the next market town, biome, species, curses and Landlord twist. Each region's farm layout is generated from a seed with PCG rules so every run plays differently while keeping the bridge as the fixed chokepoint.
 
-> **Quick reference** — Layer: `Feature` · Priority: `EA (Region 1 + PCG) / Post (2, 3) / Expansion (4, 5)` · Key deps: `week-quota`, `livestock-roster`, `weather-twists`, `save-persistence`
+> **Quick reference** — Layer: `Feature` · Priority: `EA (Region 1 + PCG) / Post (2, 3) / Expansion idea (4, 5)` · Key deps: `week-quota`, `livestock-roster`, `weather-twists`, `save-persistence`
 
 ## Overview
 A **Region Run** is a sequence of weeks (from `week-quota`) on one region's map. Pay the Sunday quota **5 times** and the region's debt is cleared: the crew earns the region deed, the next region unlocks at account level, and the run ends with a credits-style "Deed Day". Failing any Sunday ends the run (roguelite reset per save-persistence); account unlocks persist. Each region defines a **Region Profile**: biome PCG rules, species/curse/creature pools, weather deck weights, market town rules and one **Landlord Twist** rule that is always active there.
@@ -21,7 +21,7 @@ A **Region Run** is a sequence of weeks (from `week-quota`) on one region's map.
 
 ### Core Rules
 1. Regions unlock linearly at account level: clearing Region N unlocks N+1 for any lobby the clearing players host. Lobby region = host's choice among host's unlocked regions.
-2. Run length: **5 weeks** per region (EA tuning; knob 4–6). Week numbers within a run drive quota (week-quota); region index applies a **RegionDifficulty** multiplier.
+2. Run length: **5 weeks** per region for all 5 regions (EA tuning; knob 4–6). Week numbers within a run drive quota (week-quota); region index applies a **RegionDifficulty** multiplier (canonical owner; `week-quota` reads it as `R_mult`).
 3. Content pools: a region's day draws from **its own pool + 50% of previous regions' species** (so the roster widens). New species of the region appear from Week 1; returning species are weighted 0.5.
 4. **Seeded layouts:** at run start, `RunSeed` (uint32) is generated (or provided by eviction-mode). Each week reseeds the farm side (`WeekSeed = hash(RunSeed, week)`), so the farm reshapes each Monday ("the farm moved overnight"). The bridge and market sides are fixed per region.
 5. **PCG rules (all regions):** map = Farm zone (≈ 180×180 m) + Bridge chokepoint + Market Town zone. PCG places: 1 barn (respawn), 3–5 pens, 4–8 field plots, 2–4 hazard clusters, 12–30 fence segments with 2–4 gaps, cover props. Constraints: barn → bridge walking path ≤ 140 m and ≥ 70 m; no pen within 25 m of the bridge; every field reachable by wagon (navmesh width ≥ 3 m); at least one alternative route (ford, raft, zipline per region) unlocked by upgrades.
@@ -34,51 +34,51 @@ A **Region Run** is a sequence of weeks (from `week-quota`) on one region's map.
 #### Region 1: Grandpa's Farm → Muddlebury (EA)
 - **Theme:** sunny, muddy, sun-bleached Americana farm; the rickety plank bridge over a lazy river. Assets: Harvest pack + Bridge pack.
 - **Species:** pig, chicken, goat, cow, bull, sheep, duck, prize llama (full EA roster).
-- **Curses:** prize pumpkin, burrowing turnip, screaming mandrake, growing pumpkin, rearranging corn maze.
-- **Night creatures:** Scarecrow, Crows. **Rival:** the Pruitt brothers.
+- **Curses:** prize pumpkin, burrowing turnip, screaming mandrake, growing pumpkin, maze corn (EA), tumble melon (EA), moonberry bush (EA).
+- **Night creatures:** Scarecrow, Barn Thing, Crows. **Rivals:** Cousin Clem, the Pruitt Twins, Mabel (`rival-farmers`).
 - **Hazards:** breakable planks, mud pits, river spit-out, hay bale avalanches.
-- **Weather deck:** sun 40%, mud 25%, wind 20%, storm 10%, fog 5%.
+- **Weather deck** (card names per `weather-twists`; overrides default weights): Clear 40%, Mud Day 25%, Gusty 20%, Storm 10%, Fog 5% (Heatwave and Full Moon not in Region 1's deck).
 - **Market town Muddlebury:** stalls: Butcher (livestock), Greengrocer (crops), Oddities (cursed goods, high volatility ±40%). Quirk: the town bell rings at sundown −60 s and every critter in earshot panics toward it.
-- **Landlord twist "Bridge Toll":** each crossing *with goods* costs $5 unless the Bridge Reinforcement upgrade is owned. Teaches route economy.
+- **Landlord twist "Bridge Toll":** each crossing *with goods* costs $5 (wallet sink, `shared-wallet-economy`) unless Bridge Reinforcement (any level) is owned. Teaches route economy.
 - **RegionDifficulty:** 1.00.
 
 #### Region 2: Misty Riverlands → Ferrytown (Update 1)
 - **Theme:** wide braided river, reed islands, stilt houses, constant drizzle. Farm sits on 3 islands.
-- **New critters:** **Walking Catfish** (flops on land toward water, slippery 2-hand carry), **Goose** (honks = Noise Event 0.8, bites carriers), **Otter** (steals small goods and swims off).
+- **New critters** (defined in `livestock-roster` §3.4): **Walking Catfish** (flops on land toward water, slippery 2-hand carry), **Goose** (honks = Noise Event 0.8, bites carriers), **Otter** (steals small goods and swims off).
 - **New curses:** **Floating Gourds** (drift away unless weighted), **Rice that Wanders** (bundles migrate at dusk).
-- **Night creature:** **The Bog Lantern** (lures the loudest player into deep water).
+- **Night creature** (`night-creatures` §3.4): **The Bog Lantern** (lures the loudest player into deep water).
 - **Hazards:** currents that drag rafts, tide that floods low fields at 2/3 day, rope ferry with crank.
 - **Signature mechanic:** rafts (wagon-vehicles) are the main haul vehicle; the bridge is a long rope bridge with 2 mid islands.
-- **Weather deck:** drizzle 40%, fog 25%, flood 15%, wind 15%, sun 5%.
+- **Weather deck:** Drizzle 40%, Fog 25%, Flood 15%, Gusty 15%, Clear 5% (Drizzle/Flood are region cards stubbed in `weather-twists` §3.4).
 - **Market town Ferrytown:** stalls: Fishmonger, Floating Market barge (moves along dock every 3 min), Mill. Quirk: market is only reachable via the ferry, which departs every 90 s.
 - **Landlord twist "Waterfront Property":** goods that touch water lose freshness 2× faster, but the Landlord pays +20% for "dry-delivered" items (zero water contact).
 - **RegionDifficulty:** 1.20.
 
 #### Region 3: Haunted Orchard → Hollow Hill (Update 2)
 - **Theme:** autumn apple orchard, crooked trees, perpetual twilight, lantern-lit paths. Days are 40% night.
-- **New critters:** **Hiding Apples** (play dead among normal apples, sprint when looked away), **Black Cat** (curses whoever it crosses: −20% carry speed 30 s), **Bat Swarm** (chicken-like swarm, only at night).
+- **New critters** (`livestock-roster` §3.4; Hiding Apples are a cursed crop in `cursed-crops`): **Hiding Apples** (play dead among normal apples, sprint when looked away), **Black Cat** (curses whoever it crosses: −20% carry speed 30 s), **Bat Swarm** (chicken-like swarm, only at night).
 - **New curses:** **Jack-o'-Lanterns** that relight and run when dropped, **Whispering Hedges** (amplify voice ×2 nearby).
-- **Night creatures (3 new):** **The Headless Picker** (takes goods out of wagons), **Orchard Widow** (webs between trees immobilize carriers), **The Cider Ghost** (possesses one player's controls briefly, swaying).
+- **Night creatures (3 new, `night-creatures` §3.4):** **The Headless Picker** (takes goods out of wagons), **Orchard Widow** (webs between trees immobilize carriers), **The Cider Ghost** (possesses one player's controls briefly, swaying).
 - **Hazards:** falling apples (bruise carried goods), sinkhole graves, a creaking covered bridge that closes its doors at random.
-- **Weather deck:** fog 40%, wind 25%, blood moon 10%, storm 15%, clear 10%.
+- **Weather deck:** Fog 40%, Gusty 25%, Storm 15%, Blood Moon 10% (region variant of Full Moon), Clear 10%.
 - **Market town Hollow Hill:** stalls: Cider Press (buys bruised fruit at full price!), Apothecary (cursed goods), Pumpkin Patch auction (one lot per day, bid-price spike). Quirk: town gates shut at true dark; late arrivals sell at 50%.
 - **Landlord twist "Night Shift":** quota counts dusk-bonus sales at 1.5× but day sales at 0.9×; pushes players into the night.
 - **RegionDifficulty:** 1.45.
 
 #### Region 4*: Sunburnt Ranch → Dustwater (Expansion idea)
 - **Theme:** desert ranch, red mesas, a dry gulch crossed by a rail trestle.
-- **New critters:** **Longhorns** (stampede herd AI), **Roadrunner** (fastest critter, 1-hand, worth little but needed by order), **Armadillo** (rolls into balls, rolls downhill).
+- **New critters** (`livestock-roster` §3.4): **Longhorns** (stampede herd AI), **Roadrunner** (fastest critter, 1-hand, worth little but needed by order), **Armadillo** (rolls into balls, rolls downhill).
 - **Hazards/curses:** tumbleweeds (pick up small goods), heat that spoils goods (freshness decay ×1.5 in sun, shade props matter), dust devils, **Cactus Fruit** that throws spines.
-- **Night creature:** **The Skinwalking Coyote** (mimics teammates' footsteps; no voice mimicry).
+- **Night creature:** **The Copycat Coyote** (mimics teammates' footsteps; no voice mimicry). *(Renamed from "Skinwalking Coyote" to avoid appropriating a Navajo sacred concept; see consistency report open question.)*
 - **Market town Dustwater:** saloon stall (pays per haul speed), Rail Depot (train every 4 min: miss it, wait), General Store. Quirk: noon showdown, all critters freeze 10 s, then scatter.
 - **Landlord twist "Water Rights":** troughs cost $ to fill; thirsty livestock move 1.3× faster.
 - **RegionDifficulty:** 1.70.
 
 #### Region 5*: Frostbite Fjord → Icemouth (Expansion idea)
 - **Theme:** Nordic fjord, ice shelves, sauna huts, northern lights.
-- **New critters:** **Yaks** (4-hand, warm: carriers don't get "Cold"), **Penguins** (slide on bellies), **Reindeer** (antlers snag ropes).
+- **New critters** (`livestock-roster` §3.4): **Yaks** (8 hands / 4 carriers, warm: carriers don't get "Cold"), **Penguins** (slide on bellies), **Reindeer** (antlers snag ropes).
 - **Hazards/curses:** slippery ice physics (friction 0.15), frozen bridge that cracks over 3 crossings, "Cold" status (stamina regen −40% away from braziers), **Snow Turnips** that build snowmen decoys.
-- **Night creature:** **The Ice Troll** under the bridge, demands a toll good per crossing at night.
+- **Night creature** (`night-creatures` §3.4): **The Ice Troll** under the bridge, demands a toll good per crossing at night.
 - **Market town Icemouth:** Fish Auction, Fur Trader (cosmetic only, no animal harm shown), Sauna Bar. Quirk: market on a floating ice floe that drifts 10 m per minute.
 - **Landlord twist "Heating Bill":** a $ cost per day equal to 8% of quota, reduced by warm-weather upgrades.
 - **RegionDifficulty:** 2.00.
@@ -103,7 +103,7 @@ EffectiveQuota(week, region) = BaseQuotaFromWeekQuota(week) * RegionDifficulty[r
 SpeciesWeight = NewToRegion ? 1.0 : 0.5
 WeekSeed = xxHash32(RunSeed, WeekIndex)
 ```
-Expected region clear time: 5 weeks × 6 days × ~12 min ≈ 6 h for Region 1.
+Expected region clear time: 5 weeks × (5 working days × ~13 min + ~2 min Sunday) ≈ 5.6 h for Region 1 (≈ 6 h with shop time).
 
 ## Edge Cases
 | Scenario | Behavior |

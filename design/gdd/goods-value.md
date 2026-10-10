@@ -30,37 +30,42 @@ Owned here. All consumers (`physics-carry`, `wagon-vehicles`, `livestock-roster`
 | `Category` | enum {Livestock, Crop, Product, Special} | data asset | Product = eggs, milk, wool |
 | `BaseValue` | int32 ($) | data asset | before any multiplier |
 | `Fragility` | float 0.25–2.0 | data asset | scales bruise gain |
-| `CarryHands` | int32 1–4 | data asset | players required to lift (consumed by physics-carry) |
+| `CarryHands` | int32 1–8 | data asset | **hands** required to lift (each player = 2 hands; carriers = ceil(CarryHands/2)); consumed by physics-carry |
 | `MassKg` | float | data asset | physics mass |
 | `BruisePoints` | float 0–100 | goods-value (server) | replicated |
 | `BruiseState` | enum {Pristine, Scuffed, Bruised, Busted, Ruined} | goods-value (derived) | replicated |
 | `Freshness` | float 0.5–1.0 | goods-value (server) | 1.0 for Livestock |
 | `FreshnessClockStart` | float (server time) | goods-value | set on harvest/lay; −1 = not started |
 | `bIsAlive` | bool | livestock/crops | Living goods can flee |
-| `LastHandlerId` | PlayerId | physics-carry | last player to grab/throw/drop; 3 s attribution window |
+| `LastHandlerId` | PlayerId | physics-carry | last player to grab/throw/drop; physics-carry also supplies the touch history (last 3 touchers within the 3 s TouchWindow owned by `blame-ledger`) |
 | `Tags` | GameplayTagContainer | any (additive) | `Goods.Golden`, `Goods.Cursed`, `Goods.OrderItem`, `Goods.Pocketed`, `Goods.Stolen` |
 | `ValueModifierMult` | float | day-loop modifiers | product of active item-scoped Day Modifiers, default 1.0 |
 
-Events emitted: `OnBruised(Item, DeltaBP, DeltaDollars, InstigatorId)`, `OnStateChanged(Item, Old, New)`, `OnSold(Item, FinalValue)`. Every `OnBruised` with `DeltaDollars ≥ $1` raises a Blame Event (verb = `Dropped`/`Threw`/`Crashed`/`Drowned`/`Hit`).
+Events emitted: `OnBruised(Item, DeltaBP, DeltaDollars, InstigatorId)`, `OnStateChanged(Item, Old, New)`, `OnSold(Item, FinalValue)`. Every `OnBruised` with `DeltaDollars ≥ $1` raises a Blame Event (verb = `Bruised` (generic hit) / `Dropped` / `Threw` / `Crashed` (vehicle impact) / `DroppedInRiver`; the Ledger's $2 noise floor then applies).
 
 ### Starting value table (Region 1)
 
-| GoodsId | Category | Base $ | Fragility | Hands | Phase |
+Canonical for **all** docs (consistency pass 2026-10-10): `livestock-roster` and `cursed-crops` mirror these values. Hands = `CarryHands` in hands (carriers = ceil(hands/2)).
+
+| GoodsId | Category | Base $ | Fragility | Hands (carriers) | Phase |
 |---|---|---|---|---|---|
-| Chicken | Livestock | 15 | 0.6 | 1 | VS |
-| Egg | Product | 5 | 2.0 | 1 | VS |
-| Golden Egg | Special | 150 | 2.0 | 1 | Alpha |
-| Pig | Livestock | 60 | 0.8 | 1 (2 for no-penalty) | VS |
-| Prize Pumpkin | Crop | 300 | 1.5 | 4 | VS |
-| Goat | Livestock | 70 | 0.5 | 1 | Alpha |
-| Cow | Livestock | 150 | 0.7 | 3 | Alpha |
-| Bull | Livestock | 200 | 0.4 | 3 | Alpha |
-| Turnip | Crop | 10 | 1.0 | 1 | Alpha |
-| Mandrake | Crop | 45 | 1.2 | 1 | Alpha |
-| Growing Pumpkin | Crop | 40 + 25/stage | 1.3 | 1→4 | Alpha |
-| Sheep / Wool | Livestock / Product | 80 / 20 | 0.6 / 0.3 | 2 / 1 | EA |
-| Duck | Livestock | 35 | 0.6 | 1 | EA |
-| Prize Llama | Livestock | 400 | 0.9 | 2 | EA |
+| Chicken | Livestock | 15 | 0.6 | 1 (1) | VS |
+| Egg | Product | 5 | 2.0 | 1 (1) | VS |
+| Golden Egg | Special | 150 | 2.0 | 1 (1) | Alpha |
+| Pig | Livestock | 60 | 0.8 | 2 (1) | VS |
+| Prize Pumpkin | Crop | 300 | 1.5 | 8 (4) | VS |
+| Goat | Livestock | 70 | 0.5 | 2 (1) | Alpha |
+| Cow | Livestock | 150 | 0.7 | 6 (3) | Alpha |
+| Bull | Livestock | 200 | 0.4 | 6 (3) | Alpha |
+| Turnip | Crop | 10 | 1.0 | 1 (1) | Alpha |
+| Mandrake | Crop | 45 | 1.2 | 1 (1) | Alpha |
+| Growing Pumpkin | Crop | 40 × 1.05^(t_held/10), cap 2.5× (`cursed-crops`) | 1.3 | 2→8 (1→4) | Alpha |
+| Golden Cob (Maze Corn) | Crop | 40 | 1.0 | 1 (1) | EA |
+| Tumble Melon | Crop | 80 | 1.4 | 4 (2) | EA |
+| Moonberries (handful) | Crop | 15 | 1.8 | 1 (1) | EA |
+| Sheep / Wool | Livestock / Product | 80 / 20 | 0.6 / 0.3 | 2 (1) / 1 (1) | EA |
+| Duck | Livestock | 35 | 0.6 | 1 (1) | EA |
+| Prize Llama | Livestock | 400 | 0.9 | 4 (2) | EA |
 
 ### Bruise rules
 1. Server evaluates every physics hit on a goods actor (from `physics-carry` hit callbacks) and every damage source (river, creature, bull, fall).
@@ -68,7 +73,7 @@ Events emitted: `OnBruised(Item, DeltaBP, DeltaDollars, InstigatorId)`, `OnState
 3. Bruise state is derived from BP: Pristine <10, Scuffed 10–34, Bruised 35–64, Busted 65–99, Ruined 100.
 4. **Ruined** crops/products are worth $0 but still sellable as "compost" for $1 (so the Ledger can still say "sold the pumpkin for $1"). Ruined livestock instead become **Grumpy**: value floored at 25% and they gain +50% flee speed (handled by `critter-ai` via tag `Goods.Grumpy`).
 5. Water: an item fully submerged takes 15 BP/s (crops) or 5 BP/s (livestock, except Duck = 0).
-6. Attribution: BP delta is attributed to `LastHandlerId` if within 3 s of release, otherwise to the environmental source (`Bridge`, `Bull`, `Scarecrow`, `Nobody`).
+6. Attribution: BP delta is attributed via the touch history (`LastHandlerId` primary) if within the 3 s TouchWindow of release, otherwise to the environmental source (`Bridge`, `Bull`, `Scarecrow`, `Nobody`).
 
 ### Freshness rules
 1. Crops start the clock when harvested (pulled from ground); Products when laid/produced. Livestock never lose freshness.
@@ -110,7 +115,7 @@ V = round( BaseValue × B × F × D × O × ValueModifierMult )
 - **Item thrown into market zone while bruising mid-air**: final hit resolves first, then sale. Sale value locked at acceptance.
 - **Livestock heals back into Pristine** in a pen: allowed; the Ledger keeps the original loss entry ("damage done") but shows a "+$X recovered" footnote.
 - **Pocketed Golden Egg** (`Goods.Pocketed`): value is not added to wallet; tracked by `blame-ledger` for the Sunday reveal. If the pocketing player is knocked out, the egg drops and its tag is cleared.
-- **Growing pumpkin** reaching 4-hand stage while one player holds it: player is pinned, ΔBP from the drop is attributed to "Pumpkin" (nobody), because it's funnier when nobody is to blame.
+- **Growing pumpkin** reaching its 8-hand (4-carrier) stage while one player holds it: player is pinned, ΔBP from the drop is attributed to "Pumpkin" (nobody), because it's funnier when nobody is to blame.
 - **Item destroyed by out-of-bounds / despawn**: logged as full value loss to `LastHandlerId` if within 3 s, else `Nobody`.
 - **Impulse spikes from physics explosions (Chaos jitter)**: per-hit ΔBP capped at 60 BP; ignore hits with I > 20,000 as solver errors.
 - **Client prediction**: clients show predicted value float; server state wins, correction tweens over 0.3 s.
@@ -136,7 +141,7 @@ V = round( BaseValue × B × F × D × O × ValueModifierMult )
 1. Dropping a pig (Frag 0.8) with measured impulse 1200 N·s produces 16 ±0.1 BP and state Scuffed on server and all clients within 200 ms.
 2. A Pristine prize pumpkin filling an order line at demand 1.0, freshness 1.0 sells for exactly $450.
 3. Crop freshness: F(100 s) = 1.0, F(240 s) = 0.75, F(600 s) = 0.5, F(900 s) = 0.5 (floor); decay is paused during Dusk.
-4. Every value loss ≥ $1 creates exactly one Blame Event with the correct player within 3 s window; environment-caused losses list a non-player source.
+4. Every value loss ≥ $2 (Ledger noise floor) creates exactly one Blame Event with the correct player within 3 s window; environment-caused losses list a non-player source.
 5. No Goods Item consumer writes `BruisePoints`/`BruiseState`/`Freshness` directly (static check: only `UGoodsItemComponent` setters, server-only).
 6. 200 goods actors bruising simultaneously costs < 0.3 ms server game-thread per frame.
 

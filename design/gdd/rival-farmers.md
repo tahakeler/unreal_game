@@ -15,7 +15,7 @@ NPC rivals from neighboring farms visit some days to steal from your wagon, sabo
 |---|---|---|---|---|
 | **Cousin Clem** | Sneaky, cowardly | Waits until wagon unattended 10 s, grabs the highest-value small good (≤ 2 hands), runs to his cart | Leave a guard; tackle (he drops loot) | Faints if shouted at from < 3 m (loudness ≥ 0.8) |
 | **The Pruitt Twins** | Coordinated, smug | One distracts (honks, waves a feed bucket to lure your animals), the other poaches livestock | Split the team; catch the distracting twin first and the other gives up | Get confused if separated > 30 m |
-| **Mabel "The Saboteur"** | Aggressive, crafty | Loosens 2–3 bridge planks (bridge-hazards break threshold −50%) and greases the ramp | Inspect planks (hold interact 1.5 s to fix); hammer upgrade | Slow walker; easy to chase off |
+| **Mabel "The Saboteur"** | Aggressive, crafty | Loosens 2–3 bridge planks (`Bridge.SafeLoadMult` ×0.5 on those planks, bridge-hazards) and greases the ramp | Inspect planks (hold interact 1.5 s to fix; instant with the Hammer upgrade, `farm-upgrades`) | Slow walker; easy to chase off |
 | **Big Earl** (Post) | Bully | Pushes carried goods out of hands (900 N shove); steals the wagon itself | Lasso his boots; 3-player tackle | Distracted by pie |
 
 ### 3.2 Visit rules
@@ -37,7 +37,7 @@ NPC rivals from neighboring farms visit some days to steal from your wagon, sabo
 - No voice players: emote-shout counts at loudness 0.8.
 
 ## 6. Dependencies
-critter-ai, goods-value, wagon-vehicles (wagon as target), bridge-hazards (sabotage hook), physics-carry (tackle/drop), proximity-voice, day-loop (visit schedule), blame-ledger (`let_clem_steal` verb), landlord-events (Landlord may "invite" rivals).
+critter-ai, goods-value, wagon-vehicles (wagon as target), bridge-hazards (sabotage hook), physics-carry (tackle/drop), proximity-voice, day-loop (visit schedule), blame-ledger (`Stolen` verb to the nearest/last player responsible for the unguarded item; `StealBack` on recovery), landlord-events (Landlord may "invite" rivals).
 
 ## 7. Tuning Knobs
 Visit chance base/per-day (0.15/0.05), unattended time (10 s), cart linger (90 s), tackles to repel (2), plank weaken (−50%).

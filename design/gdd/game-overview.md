@@ -34,7 +34,7 @@ Morning order + twist card → **Round up** (nets, lassos, lures vs. fleeing goo
 Five days, then **Landlord Sunday**: meet the quota or the run ends. Between days, spend the shared wallet on upgrades. Weekly escalation: quota × ~1.35 per week (tuned in `week-quota`) plus one new Landlord rule.
 
 ### Campaign loop: The Debt (weeks–months) → `region-campaign`, `meta-progression`
-4–6 paid weeks clears a **Region**, unlocks a market town, biome, species and curses. A failed week resets the region run, but account unlocks (cosmetics, tools added to the starting pool, almanac) persist.
+5 paid weeks (tuning knob 4–6) clears a **Region**, unlocks a market town, biome, species and curses. A failed week resets the region run, but account unlocks (cosmetics, tools added to the starting pool, almanac) persist.
 
 ### Endgame → `eviction-mode`
 Endless quota ladder on a daily seed with global and friends leaderboards.
@@ -50,7 +50,7 @@ Endless quota ladder on a daily seed with global and friends leaderboards.
 
 ## Progression and Economy Overview
 - **One shared wallet** (`shared-wallet-economy`). Income comes from market sales × freshness × bruise multiplier × market demand. Sinks are upgrades, respawn fees (default $25, scaling per week), repairs, Landlord fines and the Sunday quota.
-- **Run progression:** farm upgrades (~30 at EA): bigger wagon, electric fence, bridge reinforcement, guard dog (which chases livestock *and* players), scarecrow decoys, a feed silo.
+- **Run progression:** farm upgrades (~40 at EA): bigger wagon, electric fence, bridge reinforcement, guard dog (which chases livestock *and* players), scarecrow decoys, a feed silo.
 - **Account progression:** "Grandpa's Letters" unlock from milestones (first region cleared, 50 pigs delivered, 10 bridge collapses). They give cosmetics, new starting tool options and almanac pages. No stat power is ever sold.
 - **Almanac:** collect every species, curse, bruise type and disaster. This is the completionist hook.
 
@@ -61,9 +61,9 @@ Endless quota ladder on a daily seed with global and friends leaderboards.
 | Pig | Flees, squeezes through gaps, rolls in mud (slippery) | VS |
 | Chicken | Scatters as a swarm, flaps over fences | VS |
 | Goat | Climbs roofs and the wagon, headbutts | Alpha |
-| Cow | Heavy (3 hands), stubborn, kicks when grabbed from behind | Alpha |
-| Bull | Charges anyone wearing red, launches players | Alpha |
-| Sheep | Flock-follows whichever player is panicking loudest | EA |
+| Cow | Heavy (3 carriers / 6 hands), stubborn, refuses to move | Alpha |
+| Bull | Charges anyone wearing red or sprinting, knocks players out | Alpha |
+| Sheep | Flock follows the bell-wether; catch the leader and the flock follows | EA |
 | Duck | Swims; the river is home turf | EA |
 | Prize Llama | Spits at loud players; very valuable | EA |
 
@@ -89,10 +89,10 @@ Livestock personalities × cursed crops × night creatures × weather (mud, wind
 7. **Optional betrayal:** pocket a golden egg; the ledger reveals it on Sunday.
 
 ## Multiplayer Model
-- 2–4 players, **listen server** (host authoritative), Steam lobbies with invite and join-in-progress between days. Solo is playable with scaled quotas (not a focus).
+- 2–4 players, **listen server** (host authoritative), Steam lobbies with invite and join-in-progress at any time except the Sunday payout cutscene (`session-networking`). Solo is playable with scaled quotas (not a focus).
 - **Proximity voice:** EOS Voice with 3D attenuation, plus a radio upgrade for long-range channels. Voice loudness feeds the Noise Event system. A non-mic fallback ("Holler" and "Shush" buttons) is required.
 - Physics replication favors a "host-simulated, client-predicted grab" model. Clips beat precision, so acceptable desync is tuned for comedy rather than competitive accuracy (details in `session-networking`, `physics-carry`).
-- Host leave: the run auto-saves at day boundaries. There is no full host migration at EA.
+- Host leave: the run auto-saves at day boundaries and the checkpoint is replicated to all roster players, so any of them can host the Resume ("migration-lite"). No live migration at EA.
 
 ## Monetization
 - **Premium ~$9.99** (launch discount and a 4-pack friend bundle).
@@ -104,7 +104,7 @@ Livestock personalities × cursed crops × night creatures × weather (mud, wind
 |---|---|---|---|
 | Vertical Slice | 2 weeks | Pig, chickens, prize pumpkin, wagon, bridge plank, day loop, payout | Foundation + Core |
 | Prototype→Alpha | ~3 months | Week/Landlord loop, 5 species, 3 curses, Scarecrow, weather, upgrades, Ledger, Camcorder, Steam lobbies, saves | Feature layer |
-| Early Access | ~6–8 months | Region 1 complete, 8 species, 2 night creatures, Rival Farmer, 30 upgrades, cosmetics, almanac, Eviction Mode | Region, meta, polish |
+| Early Access | ~6–8 months | Region 1 complete, 8 species, 3 night creatures (Scarecrow, Barn Thing, Crows), Rival Farmers, ~40 upgrades, cosmetics, almanac, Eviction Mode | Region, meta, polish |
 | Update 1: Riverlands | EA +2–3 mo | Region 2, rafts, new species and curses | |
 | Update 2: Haunted Orchard | EA +5–6 mo | Region 3, 3 new creatures | |
 | Ongoing | | Seasonal events, community-voted creatures, mod support | |
@@ -150,4 +150,4 @@ See design/gdd/systems-index.md for all 28 systems, dependencies, priorities and
 1. Can the Mac build run EOS voice on UE 5.8 arm64? This is a blocker for the proximity-voice pillar and should be spiked first.
 2. Livestock asset availability (highest-risk art gap).
 3. Solo mode: supported tier or "technically possible"?
-4. Should betrayal (golden egg) be opt-in per lobby?
+4. ~~Should betrayal (golden egg) be opt-in per lobby?~~ Resolved: lobby toggle `BetrayalEnabled`, default ON (`blame-ledger`).

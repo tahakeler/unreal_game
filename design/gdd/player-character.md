@@ -15,14 +15,14 @@ The player is a clumsy farmer heir. They can walk, sprint, jump, crouch (quiet-w
 1. Walk 4.0 m/s, sprint 6.5 m/s, crouch 2.0 m/s, jump apex 1.1 m. Carry speed multiplier comes from `physics-carry`.
 2. Stamina: 100. Sprint drains 15/s. Carrying drains `carry_load_drain` (see Formulas). Regenerates 25/s after a 1.0 s delay when not sprinting. At 0, sprint is disabled until 30 stamina.
 3. **Dive:** costs 20 stamina, 3 m lunge forward. Ends in a 0.8 s belly-flop (ragdoll-lite). Used to tackle critters (grab on contact).
-4. **Shout (emote):** a non-voice alternative to voice for players without a mic. Emits a Noise Event of loudness 0.8 (see `proximity-voice`). 2 s cooldown.
-5. **Quiet-walk:** crouch movement. Player footsteps produce no Noise Events.
+4. **Shout (emote, a.k.a. "Holler" button in `onboarding-accessibility`):** a non-voice alternative to voice for players without a mic. Emits a Noise Event of loudness 0.8 (see `proximity-voice`). 2 s cooldown.
+5. **Quiet-walk (a.k.a. "Shush"):** crouch movement. Player footsteps produce no Noise Events.
 
 ### Ragdoll and knockout
-6. **Ragdoll triggers:** an impact impulse above `RagdollImpulse` (default 900 N·s, scaled by the formula below), sprinting with load ≥ 70% of max at a slope > 25°, standing on a plank when it breaks, or being charged by a bull (`livestock-roster`).
+6. **Ragdoll triggers:** an impact impulse above `RagdollImpulse` (default 900 N·s, scaled by the formula below), sprinting with load ≥ 70% of max at a slope > 25°, standing on a plank when it breaks, or being charged by a bull (`livestock-roster`: `ChargeImpulse` 1800 N·s = 2× RagdollImpulse, so a direct bull hit is a KO).
 7. **Ragdoll recovery:** after the body velocity < 0.5 m/s for 0.5 s, the player can stand up with a button press (1.2 s get-up anim). Mashing has no effect (accessibility).
 8. **Knockout (KO):** an impulse ≥ 2× RagdollImpulse, or 3 ragdolls within 20 s. The player is KO for 8 s (stars over head). A teammate can hold Interact for 1.5 s to revive at once. Teammates can also carry a KO'd player as a 2-hand Goods-like body (weight 70 kg) — yes, you can throw your friend into the wagon.
-9. **Out of bounds / drowning:** falling into the river or below the kill-Z respawns at the barn after 5 s. Fee: `respawn_fee` from the shared wallet (`shared-wallet-economy` deducts it). A Blame Event `verb=drowned` is emitted.
+9. **Barn respawn (the only thing that costs a respawn fee):** a player is sent to the barn (5 s, `Respawning` state) when they (a) fall into the river or below the kill-Z → Blame verb `Drowned`; (b) are knocked out by a night creature (`night-creatures`) → verb `KnockedOut`; (c) are stranded outside the barn/market zone at day end (`day-loop`) → verb `Stranded`. Fee: `RespawnFee(w)` owned by `shared-wallet-economy` (W1 $25 … W6 $55), attributed to that player. A daytime KO (rule 8) recovers in place and costs nothing.
 10. The server is authoritative for ragdoll state. Clients predict the start of a ragdoll from local impacts, and the server corrects within 200 ms.
 
 ### States
@@ -43,12 +43,12 @@ load_ratio 0–1 (from `physics-carry`). mud_mult 0.8 in mud (`bridge-hazards`),
 
 **Carry stamina drain**: `carry_load_drain = 8 * load_ratio` per second (sprinting adds 15). Range 0–23/s.
 
-**Respawn fee**: `respawn_fee = 25 + 10 * respawns_today_by_player` dollars, capped at $75. The day's count resets each morning.
+**Respawn fee**: not defined here. Use `RespawnFee(w)` from `shared-wallet-economy` (per-week schedule $25/30/40/45/50/55, scaled by `Economy.RespawnFeeMult`). *(Consistency pass 2026-10-10: the former per-player escalating formula $25 + $10/death cap $75 was removed.)*
 
 ## 5. Edge Cases
 - **Ragdoll while holding an item:** the item is released with the hand's velocity (it flies — on purpose).
-- **KO'd player thrown into the river:** respawn rule applies. The thrower gets the Blame Event (`verb=yeeted_teammate`).
-- **Wallet below the respawn fee:** respawn still happens. The wallet goes negative, and the debt is added to the quota (`shared-wallet-economy` owns it).
+- **KO'd player thrown into the river:** respawn rule applies. The thrower gets the Blame Event (`verb=YeetedTeammate`); the drowned player still gets `Drowned` for the fee.
+- **Wallet below the respawn fee:** respawn still happens. The wallet may go negative down to the −$200 overdraft floor; any excess becomes a Landlord IOU added to this week's Due (`shared-wallet-economy` owns it).
 - **All players KO at once:** everyone gets up after 8 s. There is no wipe state during the day.
 - **Ragdoll on a moving wagon:** body inherits the wagon's velocity.
 - **Get-up inside geometry:** teleport to the nearest navmesh point within 2 m.
@@ -60,19 +60,19 @@ load_ratio 0–1 (from `physics-carry`). mud_mult 0.8 in mud (`bridge-hazards`),
 ## 7. Tuning Knobs
 | Knob | Default | Range |
 |---|---|---|
-| WalkSpeed / SprintSpeed / CrouchSpeed | 4.0 / 6.5 / 2.0 m/s | ±25% |
+| WalkSpeed / SprintSpeed / CrouchSpeed | 4.0 / 6.5 / 2.0 m/s (= 400 / 650 / 200 cm/s, canonical) | ±25% |
 | StaminaMax / SprintDrain / Regen / RegenDelay | 100 / 15 / 25 / 1.0 s | — |
 | RagdollImpulse | 900 N·s | 600–1500 |
 | KODuration / ReviveHold | 8 s / 1.5 s | 4–15 / 0.5–3 |
 | RespawnDelay | 5 s | 3–10 |
-| RespawnFeeBase / Step / Cap | $25 / $10 / $75 | — |
+| RespawnFee | see `shared-wallet-economy` (per week) | — |
 
 ## 8. Acceptance Criteria
 - A full-load sprint down a 30° slope ragdolls the player 100% of the time. An empty-handed sprint never does.
 - Get-up is available ≤ 1.5 s after the body comes to rest.
 - A KO'd player can be picked up, carried and thrown by one teammate.
-- A river fall → barn respawn in 5 s, wallet −$25 on the first fall, a Blame Event logged.
+- A river fall in Week 1 → barn respawn in 5 s, wallet −$25, a `Drowned` Blame Event logged.
 - Shout emote triggers a Noise Event (loudness 0.8) visible in the AI debugger.
 
 ## Comedy beats
-Tired + loaded + mud = guaranteed pratfalls on the bridge. Carrying and throwing a KO'd friend into the wagon is a top clip. Escalating respawn fees put a dollar figure on every death in the Blame Ledger ("Dave drowned 4 times: −$135").
+Tired + loaded + mud = guaranteed pratfalls on the bridge. Carrying and throwing a KO'd friend into the wagon is a top clip. Respawn fees put a dollar figure on every death in the Blame Ledger ("Dave drowned 4 times: −$100" in Week 1, −$160 by Week 3).

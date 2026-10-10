@@ -12,11 +12,11 @@ Farm tools are the herding verbs: the **net** (catch small runners), the **lasso
 
 ## 3. Detailed Rules
 1. **Slots:** 2 tool slots per player. Equip swaps take 0.4 s. An equipped tool uses the Right hand. Two-hand carries auto-holster the tool.
-2. **Net:** swing (0.5 s wind-up, 1.0 s cooldown), 1.5 m reach, 90° arc. Captures a critter with `size_class ≤ Small` (chickens, turnips) into a bag that becomes a 1-hand Goods body. Holds 1 critter (3 with the Big Net upgrade). Captured critters struggle; 20% chance per 5 s to escape unless the bag is in a wagon or pen.
+2. **Net:** swing (0.5 s wind-up, 1.0 s cooldown), 1.5 m reach, 90° arc. Captures a critter with `SizeClass ≤ Small` (Critter Personality; chickens, ducks, turnips) into a bag that becomes a 1-hand Goods body. Holds 1 critter (3 with the Big Net upgrade, `farm-upgrades`). Captured critters struggle; 20% chance per 5 s to escape unless the bag is in a wagon or pen.
 3. **Lasso:** hold to aim (arc preview), release to throw, range 12 m. On hit, it creates a 6 m tether (`physics-carry`). Works on Medium/Large critters. A Large critter (bull, cow) pulls the player — the player is dragged if critter pull > player anchor force (formula). Pulls cost 10 stamina/s.
-4. **Feed bucket:** hold Use to shake (Noise loudness 0.4, tag `Noise.Food`) — attracts hungry critters within 15 m via `critter-ai`'s lure response. Throwing feed places a lure point for 20 s. 10 uses per bucket, refill at the barn.
-5. **Whistle:** blow (Noise loudness 0.7, tag `Noise.Whistle`). Short blow = scare (critters flee away from the player), long blow (1 s) = rally (sheep and the guard dog follow). 3 s cooldown.
-6. **Tool loss:** tools are physics bodies (1-hand). If they fall in the river they wash up at the river exit after 30 s or are lost; the barn rack restocks lost tools each morning for $15 each.
+4. **Feed bucket:** hold Use to shake (Noise Event Source=Tool, loudness 0.4, tag `Noise.Food`) — attracts hungry critters within 15 m via the Critter Personality `NoiseTagResponse[Noise.Food]` (Lure). Throwing feed places a lure point for 20 s. 10 uses per bucket, refill at the barn.
+5. **Whistle:** blow (Noise Event Source=Tool, loudness 0.7, tag `Noise.Whistle`). Short blow = scare (critters flee away from the player; emits `SpookedHerd` if goods escape), long blow (1 s, extra tag `Noise.WhistleLong`) = rally (critters whose `NoiseTagResponse` is Rally, i.e. sheep and the guard dog, follow). 3 s cooldown.
+6. **Tool loss:** tools are physics bodies (1-hand). If they fall in the river they wash up at the river exit after 30 s or are lost; the barn rack restocks lost tools each morning for $15 each (`shared-wallet-economy` repair sink; Blame verb `LostTool`).
 7. **Server-authoritative hits:** client plays the swing; the server does the overlap/trace. Lasso uses a server-simulated projectile, replicated at 30 Hz.
 
 ### States (lasso)
@@ -34,9 +34,9 @@ Farm tools are the herding verbs: the **net** (catch small runners), the **lasso
 player_anchor = 600 N * (stamina > 0 ? 1 : 0.4) * (helpers_on_rope + 1) * ground_mult
 dragged = critter_pull > player_anchor
 ```
-critter_pull from Critter Personality (`critter-ai`): chicken 50, pig 500, goat 400, cow 900, bull 1600 N. ground_mult: grass 1.0, mud 0.6, plank 0.8. One player can hold a pig; it takes 3 to hold a bull on grass.
+`CritterPullN` from Critter Personality (`critter-ai`; per-species values in `livestock-roster`): chicken 50, pig 500, goat 400, cow 900, bull 1600 N. ground_mult: grass 1.0, mud 0.6, plank 0.8. One player can hold a pig; it takes 3 to hold a bull on grass.
 
-**Net catch chance**: `p = clamp(0.95 - 0.1 * critter_agility, 0.4, 0.95)` (agility 0–5 from Critter Personality).
+**Net catch chance**: `p = clamp(0.95 - 0.1 * Agility, 0.4, 0.95)` (`Agility` 0–5 from Critter Personality).
 
 ## 5. Edge Cases
 - **Lasso a teammate:** allowed only on KO'd players (same rule as grabbing). Otherwise the lasso bounces.
@@ -47,8 +47,8 @@ critter_pull from Critter Personality (`critter-ai`): chicken 50, pig 500, goat 
 - **Tool slot full and you pick up a tool:** swaps with the current tool, dropping it.
 
 ## 6. Dependencies
-- **Upstream:** `physics-carry` (hands, tethers), `critter-ai` (Critter Personality: size_class, agility, pull, lure/scare responses), `proximity-voice` (Noise Events).
-- **Downstream:** `farm-upgrades` (Big Net, Reinforced Lasso, Golden Bucket), `meta-progression` (new tool unlocks), `blame-ledger` (verbs `lassoed_into_river`, `whistled_away`), `hud-menus` (tool slot UI).
+- **Upstream:** `physics-carry` (hands, tethers), `critter-ai` (Critter Personality: SizeClass, Agility, CritterPullN, NoiseTagResponse for lure/scare/rally), `proximity-voice` (Noise Events).
+- **Downstream:** `farm-upgrades` (Big Net, Lasso Lv2 "Reinforced Lasso", Golden Bucket, Handheld Lantern), `meta-progression` (new tool unlocks), `blame-ledger` (verbs `LassoedIntoRiver`, `SpookedHerd`, `LostTool`), `hud-menus` (tool slot UI).
 
 ## 7. Tuning Knobs
 | Knob | Default | Range |

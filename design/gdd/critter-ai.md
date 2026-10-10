@@ -19,15 +19,15 @@ Critter AI is the shared brain for everything that runs away, hides, steals or h
 | Flee | Threat ≥ `FleeThreshold` | AdaptivePathfinding flee query: maximize distance from weighted threat centroid, prefer `EscapeTargets` (gaps, river, treeline). Uses shortcuts (under fences, through hay) players cannot | Threat < `CalmThreshold` for `CalmTime`, Cornered, or Grabbed |
 | Lured | Lure in range and `LureAffinity` beats threat | Paths to lure, eats for `EatTime`, ignores threats below 0.5 | Lure removed, eat done, threat spike > 0.8 |
 | Cornered | Flee path cost > `CorneredCost` and ≥ 2 players within 4 m | Personality-driven: `Freeze`, `Charge`, `Juke` (dash through the widest gap) or `PlayDead` | 2–5 s or grabbed |
-| Carried | Grabbed via physics-carry | Struggles: periodic wriggle impulse (`StruggleForce`, `StruggleInterval`); may break grip if carriers < `CarryHands` | Dropped/thrown → Stunned; delivered → despawn to market |
+| Carried | Grabbed via physics-carry | Struggles: periodic wriggle impulse (`StruggleImpulse`, `StruggleInterval`); may break grip if carriers < `SecureCarriers` | Dropped/thrown → Stunned; delivered → despawn to market |
 | Stunned | Thrown, ragdolled, hit hard | Dizzy, no movement for `StunTime` | Timer |
-| Escaped | Reaches off-map Escape volume | Despawns; Blame Event `escaped` to last toucher; value lost | — |
+| Escaped | Reaches off-map Escape volume | Despawns; Blame Event `LetEscape` to last toucher (TouchWindow 3 s, else Nature); value lost | — |
 
 ### 3.2 Threat model
 Each critter tracks a threat list (players, creatures, rivals). Threat sources: proximity, sprinting, line of sight, Noise Events, damage. Highest-threat source and threat centroid feed the flee query.
 
 ### 3.3 Noise Event handling
-Consumes Noise Event `{source, position, loudness 0–1, type}` (type: voice, impact, tool, crop_scream, creature). Each personality has a `NoiseSensitivity` and per-type multipliers. Quiet-walk / emote-shout fallbacks (non-voice) produce the same events, so no mic is required.
+Consumes the `FNoiseEvent` contract exactly as defined in `proximity-voice` (`Source`, `Loudness` 0–1, `Radius`, `Location`, `Instigator`, `BlamedPlayer`, `Tags`). Each personality has a `NoiseSensitivity`, per-`ENoiseSource` multipliers (`NoiseSourceMult`) and per-tag responses (`NoiseTagResponse`, e.g. `Noise.Food` → Lure, `Noise.Whistle` → Flee, `Noise.WhistleLong` → Rally). Quiet-walk / emote-shout fallbacks (non-voice) produce the same events, so no mic is required.
 
 ### 3.4 Group behavior
 Personality `HerdMode`: `None`, `Flock` (chickens: boids scatter then regroup), `Follow` (sheep follow leader, so catch the leader), `Guard` (bull defends cows). Max 1 flee-path query per critter per 0.25 s; flocks share one query per group leader.
@@ -39,20 +39,26 @@ Owned here. Every consumer (livestock-roster, cursed-crops, night-creatures, riv
 |---|---|---|---|
 | `Id` | FName | — | e.g. `Critter.Pig` |
 | `Traits` | GameplayTagContainer | — | `Trait.Skittish`, `Trait.Greedy`, `Trait.Aggressive`, `Trait.Sneaky`, `Trait.Herd`, `Trait.Burrower`, `Trait.Climber`, `Trait.Swimmer`, `Trait.Thief`, `Trait.Loud`, `Trait.Nocturnal`, `Trait.Stalker`, `Trait.Dramatic` |
-| `MoveSpeed` / `SprintSpeed` | cm/s | 300 / 550 | Player walk 350, sprint 600 |
+| `MoveSpeed` / `SprintSpeed` | cm/s | 300 / 550 | Player walk 400, sprint 650 cm/s (canonical, `player-character` 4.0 / 6.5 m/s) |
 | `Acceleration` | cm/s² | 1500 | |
 | `AlertRadius` | m | 10 | Threat detection |
 | `AlertThreshold` / `FleeThreshold` / `CalmThreshold` | 0–1 | 0.3 / 0.55 / 0.15 | |
 | `CalmTime` | s | 4 | |
 | `NoiseSensitivity` | 0–2 | 1.0 | Multiplier on Noise loudness |
-| `NoiseTypeMult` | map type→float | all 1.0 | |
+| `NoiseSourceMult` | map ENoiseSource→float | all 1.0 | Keyed by proximity-voice `Source` (Voice, Shout, Footstep, Impact, Tool, Hazard, Critter, Crop, Vehicle, Scripted) |
+| `NoiseTagResponse` | map tag→{Lure, Flee, Rally, Ignore} + strength 0–1 | `Noise.Food`→Lure 0.6, `Noise.Whistle`→Flee 0.8, `Noise.WhistleLong`→Rally 0 | How the critter reacts to tool/feed noises (`farm-tools`) |
 | `SightCone` | deg | 220 | |
 | `LureAffinity` | map lure tag→0–1 | {} | `Lure.FeedBucket`, `Lure.Whistle`, `Lure.Shiny`, `Lure.Light` |
 | `EatTime` | s | 3 | |
 | `CorneredResponse` | enum | Juke | Freeze / Charge / Juke / PlayDead / Burrow / Teleport |
-| `ChargeKnockback` | N | 0 | Impulse on players if Charge |
-| `CarryHands` | int 1–4 | 1 | Hands needed to hold without breaking free (mirrors Goods Item carry hands) |
-| `StruggleForce` / `StruggleInterval` | N / s | 400 / 1.5 | |
+| `ChargeImpulse` | N·s | 0 | Impulse applied to a player hit by a Charge; compared against player `RagdollImpulse` 900 N·s (≥ 1800 = KO). Bull 1800, goat 600 |
+| `SizeClass` | enum | Medium | Tiny / Small / Medium / Large / Huge. Net captures ≤ Small (`farm-tools`); lasso works on Medium+ |
+| `Agility` | 0–5 | 2 | Net dodge (`farm-tools` catch chance), juke quality |
+| `CritterPullN` | N | 300 | Pull force when tethered/lassoed or hitched (`farm-tools`, `wagon-vehicles`) |
+| `SecureCarriers` | int 1–4 | 1 | **Players** holding it needed so it cannot break free. Lift hands come from Goods Item `CarryHands` (hands) |
+| `StruggleImpulse` / `StruggleInterval` | N·s / s | 120 / 0.5–1.5 (random) | Wriggle applied to holders (`physics-carry` rule 6) |
+| `GrumpyMods` | struct | FleeSpeed ×1.5, Aggression +0.3 | Applied while the critter's Goods Item has tag `Goods.Grumpy` (ruined livestock, `goods-value`) |
+| `PenEscapeChance` | 0–1 | 0.6 | Chance per penned critter to leave when a gate is opened (`World.PenGateOpened`, e.g. Landlord Farm Walk); Electric Fence ×0.4 |
 | `HerdMode` | enum | None | None / Flock / Follow / Guard |
 | `ShortcutAccess` | tag set | {} | `Nav.UnderFence`, `Nav.Hay`, `Nav.Climb`, `Nav.Water`, `Nav.Underground` |
 | `ActivePhase` | enum | Day | Day / Night / Both |
@@ -71,7 +77,7 @@ Modifiers: Day Modifiers may scale any numeric field through `FCritterModifier {
 - `P = 1 − d/AlertRadius` (0 beyond radius); `w_prox = 0.5`
 - `S = 1` if sprinting within AlertRadius; `w_sprint = 0.2`
 - `V = 1` if in SightCone with LOS; `w_sight = 0.15`
-- `N = loudness · NoiseSensitivity · NoiseTypeMult[type] · (1 − d/(25 m·loudness))`, floored at 0; decays at 0.25/s
+- `N = Loudness · NoiseSensitivity · NoiseSourceMult[Source] · (1 − d/Radius)`, floored at 0 (Radius from the Noise Event, `proximity-voice`); decays at 0.25/s. Tags with a `NoiseTagResponse` of Lure/Rally do not add threat.
 - `D = 0.6` on damage, decays 0.3/s
 
 Example: pig, player 4 m away sprinting in view: P = 0.6 → 0.3 + 0.2 + 0.15 = 0.65 → Flee.
@@ -80,7 +86,7 @@ Example: pig, player 4 m away sprinting in view: P = 0.6 → 0.3 + 0.2 + 0.15 = 
 
 **Lure wins** if `LureAffinity · (1 − d_lure/15 m) > T · 0.8`.
 
-**Break free while carried**: each StruggleInterval, `P_break = clamp( (CarryHands − hands) · 0.35 + 0.05, 0, 0.9 )`. Pig (CarryHands 2) held by 1 player: 40% per 1.5 s.
+**Break free while carried**: each StruggleInterval, `P_break = clamp( (SecureCarriers − carriers) · 0.35 + 0.05, 0, 0.9 )`. Pig (SecureCarriers 2) held by 1 player: 40% per interval (mean 1.0 s).
 
 **Cornered**: `CorneredCost` = path cost > 3× straight distance to best escape node.
 
@@ -88,7 +94,9 @@ Example: pig, player 4 m away sprinting in view: P = 0.6 → 0.3 + 0.2 + 0.15 = 
 - Critter stuck (no path progress 3 s): AdaptivePathfinding re-query with relaxed constraints; after 8 s, teleport to nearest valid navmesh point out of camera view of all players.
 - Threats from both sides: flee perpendicular to centroid axis; if both equal, Cornered.
 - Lure held by a carried/ragdolled player: lure stays active at its world position.
-- Thrown into river: `Trait.Swimmer` swims; otherwise river spit-out per bridge-hazards rules (critter, not player, keeps value with Bruise "Soggy").
+- Thrown into river: `Trait.Swimmer` swims; otherwise river spit-out per bridge-hazards rules (critter keeps its value minus the `Soaked` water bruise from goods-value).
+- Item tagged `Goods.Grumpy`: apply `GrumpyMods` immediately; tag removal (pen healing out of Ruined) reverts them.
+- Pen gate opened by anyone (Landlord Farm Walk, rival, player): each penned critter rolls `PenEscapeChance` and enters Flee toward the gate.
 - Host migration: critter state is server-authoritative; on migration critters resume in Alert.
 - Too many critters (>40 active): far critters (>60 m from any player) drop to 2 Hz tick and pathing on idle.
 - Grabbed by two different teams (rival): tug-of-war; the side with more hands wins, ties every 1 s go to the original holder.
@@ -96,7 +104,7 @@ Example: pig, player 4 m away sprinting in view: P = 0.6 → 0.3 + 0.2 + 0.15 = 
 
 ## 6. Dependencies
 - **Upstream**: physics-carry (grab/carry hooks, CarryHands), proximity-voice (Noise Event), goods-value (Goods Item value/bruise on escape/throw), day-loop (Day Modifier, night phase), session-networking (replication), AdaptivePathfindingSystem plugin.
-- **Downstream**: livestock-roster, cursed-crops, night-creatures, rival-farmers, farm-tools (lure tags), audio-feedback (barks), blame-ledger (escaped/stunned events).
+- **Downstream**: livestock-roster, cursed-crops, night-creatures, rival-farmers, farm-tools (lure tags, SizeClass, Agility, CritterPullN), wagon-vehicles (hitch pull), landlord-events (gate opening), audio-feedback (barks), blame-ledger (`LetEscape`).
 
 ## 7. Tuning Knobs
 | Knob | Default | Safe range | Effect |
@@ -111,7 +119,7 @@ Example: pig, player 4 m away sprinting in view: P = 0.6 → 0.3 + 0.2 + 0.15 = 
 
 ## 8. Acceptance Criteria
 1. A pig flees a sprinting player within 0.4–0.6 s (tell + reaction) and reaches ≥ 8 m away in open field 90% of runs.
-2. A shout (loudness ≥ 0.8) within 10 m sends every Skittish critter into Flee; a quiet walk (loudness 0.1) does not.
+2. A shout (loudness ≥ 0.8) within 10 m sends every Skittish critter into Flee; a walk footstep (loudness 0.10) does not (quiet-walk emits nothing).
 3. A feed bucket placed 8 m from a calm pig lures it in ≤ 5 s.
 4. Two players flanking a pig against a fence trigger Cornered in ≥ 70% of attempts.
 5. A pig held by 1 player breaks free in a mean of 3–5 s; by 2 players, never.

@@ -14,15 +14,21 @@ Each morning a **twist deck** draws one weather card and, from Day 3, possibly o
 | Card | Effects | Critter effects | Counter | Weight |
 |---|---|---|---|---|
 | **Clear** | none | none | — | 30 |
-| **Mud Day** | Player speed ×0.8 on mud tiles, sprint stamina ×1.3 cost, slip chance on turn 10% | Pig speed ×1.15 in mud ("in its element"); clean-wool bonus impossible | Boards, wagon | 20 |
+| **Mud Day** | Mud volumes radius ×1.5 and extra patches (mud rules owned by bridge-hazards: speed ×0.6, ragdoll threshold ×0.8), sprint stamina ×1.3 cost, slip chance on turn 10% | Pig speed ×1.15 in mud ("in its element"); clean-wool bonus impossible | Boards, wagon | 20 |
 | **Gusty** | Wind vector 4–12 m/s, rotates every 60 s; carried goods get torque; chickens drift when flapping | Chickens fly 2× farther | Carry low, heavier hands | 15 |
-| **Storm** | Rain + lightning every 45–90 s (strikes tallest object; ragdoll + 50 $ bruise); river rises: bridge planks break threshold −30% after minute 6; possible bridge washout at minute 10 (one segment) | All critters NoiseSensitivity ×0.6 (thunder masks voices) | Finish early; rope rail upgrade | 10 |
+| **Storm** | Rain + lightning every 45–90 s (strikes tallest object; ragdoll + 50 $ bruise); river rises: `Bridge.SafeLoadMult` ×0.7 after minute 6; possible bridge washout at minute 10 (one segment) | All critters NoiseSensitivity ×0.6 (thunder masks voices) | Finish early; Rope Rail Netting upgrade | 10 |
 | **Fog** | Visibility 15 m; HUD markers off; proximity voice is the only nav aid | Critter AlertRadius ×0.6; Scarecrow sight rule shortened | Call-and-response, bells on animals | 10 |
 | **Heatwave** | Freshness decay ×1.5 for crops; stamina regen ×0.8 | Cows Freeze in shade 50% more | Wagon trips | 10 |
 | **Full Moon** (night-only) | Night budget ×1.5 | Nocturnal traits active from minute 8 | Leave before dusk | 5 |
 
+### 3.0 Weights
+The Weight column is the default deck. A Region Profile (`region-campaign`) overrides weights per region and may add region cards (§3.4).
+
 ### 3.2 Oddity cards (Day 3+, 40% chance)
 Greased Pig (pig grab break ×2), Chicken Jamboree (+8 chickens, half price), Goat Convention (3 goats), Mandrake Bloom, Upside-down Gravity Hour (Post, 20 s low gravity), Grandpa's Ghost Helps (one free lure).
+
+### 3.4 Region weather cards (Post stubs, from `region-campaign`)
+**Drizzle** (Region 2: light Mud Day + Noise env_mult 0.9), **Flood** (Region 2: low fields flood at 2/3 day), **Blood Moon** (Region 3: Full Moon variant, night budget ×2). Defined with their region update.
 
 ### 3.3 Deck rules
 Weighted draw; no weather repeats more than 2 days in a row; Storm/Fog not on Day 1; Landlord days may force a card (landlord-events). Eviction-mode uses daily-seeded draw.
