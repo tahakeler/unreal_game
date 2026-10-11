@@ -1,5 +1,6 @@
 #include "Frontend/HPLobbyGame.h"
 #include "Frontend/HPGameInstance.h"
+#include "Frontend/HPFrontendTestHooks.h"
 #include "Frontend/HPFrontendUISubsystem.h"
 #include "Frontend/UI/HPLobbyWidget.h"
 #include "Net/UnrealNetwork.h"
@@ -321,6 +322,7 @@ void AHPLobbyPlayerController::BeginPlay()
 		Hint->AddToViewport(5);
 	}
 	AutoTest();
+	HPFrontendTestHooks::Arm(this);
 }
 
 void AHPLobbyPlayerController::AutoTest()

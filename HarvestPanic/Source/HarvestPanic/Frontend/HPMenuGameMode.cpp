@@ -1,5 +1,6 @@
 #include "Frontend/HPMenuGameMode.h"
 #include "Frontend/HPGameInstance.h"
+#include "Frontend/HPFrontendTestHooks.h"
 #include "Frontend/HPFrontendUISubsystem.h"
 #include "Frontend/HPGameUserSettings.h"
 #include "Camera/CameraComponent.h"
@@ -61,6 +62,7 @@ void AHPMenuPlayerController::BeginPlay()
 		}
 	}
 	AutoTest();
+	HPFrontendTestHooks::Arm(this);
 }
 
 void AHPMenuPlayerController::SetupInputComponent()
