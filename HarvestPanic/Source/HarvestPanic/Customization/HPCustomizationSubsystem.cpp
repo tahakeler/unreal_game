@@ -248,7 +248,7 @@ void UHPCustomizationSubsystem::RunShowcase(UWorld* World, const FString& OutDir
 	SpawnLineup(0);
 
 	ACameraActor* Cam = World->SpawnActor<ACameraActor>(LineCenter - Fwd * 390.f + FVector(0, 0, 55), Facing + FRotator(-4, 0, 0));
-	Cam->GetCameraComponent()->SetFieldOfView(62.f);
+	Cam->GetCameraComponent()->SetFieldOfView(72.f);
 	Cam->GetCameraComponent()->bConstrainAspectRatio = false;
 	PC->SetViewTarget(Cam);
 

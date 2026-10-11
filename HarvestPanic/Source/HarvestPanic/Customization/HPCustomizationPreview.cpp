@@ -38,13 +38,13 @@ AHPCustomizationPreview::AHPCustomizationPreview()
 	Backdrop->SetupAttachment(Root);
 	Backdrop->SetStaticMesh(CubeMesh.Object);
 	Backdrop->SetRelativeLocation(FVector(-150, 0, 100));
-	Backdrop->SetRelativeScale3D(FVector(0.1f, 6.f, 4.f));
+	Backdrop->SetRelativeScale3D(FVector(0.1f, 8.f, 8.f));
 	Backdrop->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Floor = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Floor"));
 	Floor->SetupAttachment(Root);
 	Floor->SetStaticMesh(CylMesh.Object);
 	Floor->SetRelativeLocation(FVector(0, 0, -4));
-	Floor->SetRelativeScale3D(FVector(1.2f, 1.2f, 0.08f));
+	Floor->SetRelativeScale3D(FVector(4.f, 4.f, 0.08f));
 	Floor->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	KeyLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("KeyLight"));
@@ -65,9 +65,9 @@ AHPCustomizationPreview::AHPCustomizationPreview()
 
 	Capture = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("Capture"));
 	Capture->SetupAttachment(Root);
-	Capture->SetRelativeLocation(FVector(330, 0, 105));
+	Capture->SetRelativeLocation(FVector(310, 0, 118));
 	Capture->SetRelativeRotation(FRotator(-6, 180, 0));
-	Capture->FOVAngle = 38.f;
+	Capture->FOVAngle = 37.f;
 	Capture->bCaptureEveryFrame = true;
 	Capture->bCaptureOnMovement = false;
 	Capture->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_UseShowOnlyList;

@@ -13,6 +13,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Animation/AnimSequenceBase.h"
+#include "Animation/AnimSequence.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimSingleNodeInstance.h"
 #include "Net/UnrealNetwork.h"
@@ -40,6 +41,12 @@ void FHPEmotePlayback::Start(USkeletalMeshComponent* InBody, EHPEmote InEmote, b
 	if (bSkipAnim) { return; }
 	if (UAnimSequenceBase* Anim = Def->Anim.LoadSynchronous())
 	{
+		// Template death/attack anims carry root translation; lock it so the body stays in its capsule.
+		if (UAnimSequence* Seq = Cast<UAnimSequence>(Anim))
+		{
+			Seq->bEnableRootMotion = true;
+			Seq->RootMotionRootLock = ERootMotionRootLock::RefPose;
+		}
 		// Single-node playback works with any anim blueprint (no slot needed); the ABP is restored after.
 		InBody->PlayAnimation(Anim, Def->bLoopAnim && !Def->bHoldLastFrame);
 		InBody->SetPlayRate(Def->PlayRate);

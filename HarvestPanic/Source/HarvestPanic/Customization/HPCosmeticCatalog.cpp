@@ -147,27 +147,27 @@ void UHPCosmeticCatalog::BuildDefaults()
 	// Offsets are in mesh-component axes relative to the bone: +Z up, +Y face-forward.
 	// ---- Hats ----
 	Item(101, TEXT("StrawHat"), LOCTEXT("StrawHat", "Straw Hat"), H, true, {
-		Part(TEXT("/Game/Emberlight/Meshes/Props/SM_Strawhat.SM_Strawhat"), Head, FVector(0, 1, 19), FVector(1.0f), Own) }, 1.5f);
+		Part(TEXT("/Game/Emberlight/Meshes/Props/SM_Strawhat.SM_Strawhat"), Head, FVector(0, 1, 15), FVector(0.8f), Own) }, 1.5f);
 	Item(102, TEXT("TruckerCap"), LOCTEXT("TruckerCap", "Trucker Cap"), H, true, {
-		Part(Sphere, Head, FVector(0, 1, 19), FVector(0.25f, 0.25f, 0.17f), EHPPartColorSource::Secondary),
-		Part(Cube, Head, FVector(0, 13, 18), FVector(0.2f, 0.14f, 0.015f), EHPPartColorSource::Accent) });
+		Part(Sphere, Head, FVector(0, 1, 16), FVector(0.25f, 0.25f, 0.17f), EHPPartColorSource::Secondary),
+		Part(Cube, Head, FVector(0, 13, 15), FVector(0.2f, 0.14f, 0.015f), EHPPartColorSource::Accent) });
 	Item(103, TEXT("BucketHelmet"), LOCTEXT("BucketHelmet", "Bucket Helmet"), H, false, {
-		Part(Cylinder, Head, FVector(0, 1, 17), FVector(0.27f, 0.27f, 0.26f), Fixed, Metal),
-		Part(Cylinder, Head, FVector(0, 1, 5), FVector(0.29f, 0.29f, 0.02f), Fixed, Metal * 0.7f),
-		Part(Cube, Head, FVector(0, 1, 31), FVector(0.3f, 0.015f, 0.015f), Fixed, DarkBrown) });
+		Part(Cylinder, Head, FVector(0, 1, 14), FVector(0.27f, 0.27f, 0.26f), Fixed, Metal),
+		Part(Cylinder, Head, FVector(0, 1, 2), FVector(0.29f, 0.29f, 0.02f), Fixed, Metal * 0.7f),
+		Part(Cube, Head, FVector(0, 1, 28), FVector(0.3f, 0.015f, 0.015f), Fixed, DarkBrown) });
 	Item(104, TEXT("PumpkinHead"), LOCTEXT("PumpkinHead", "Pumpkin Head"), H, false, {
-		Part(Sphere, Head, FVector(0, 2, 11), FVector(0.38f, 0.36f, 0.32f), Fixed, Orange),
-		Part(Cylinder, Head, FVector(0, 2, 29), FVector(0.05f, 0.05f, 0.08f), Fixed, Green),
-		Part(Cone, Head, FVector(-5.5f, 19, 15), FVector(0.05f, 0.03f, 0.05f), Fixed, Black, FRotator(0, 0, -90)),
-		Part(Cone, Head, FVector(5.5f, 19, 15), FVector(0.05f, 0.03f, 0.05f), Fixed, Black, FRotator(0, 0, -90)),
-		Part(Cube, Head, FVector(0, 19, 6), FVector(0.12f, 0.03f, 0.025f), Fixed, Black) }, 1.5f);
+		Part(Sphere, Head, FVector(0, 2, 8), FVector(0.38f, 0.36f, 0.32f), Fixed, Orange),
+		Part(Cylinder, Head, FVector(0, 2, 26), FVector(0.05f, 0.05f, 0.08f), Fixed, Green),
+		Part(Cone, Head, FVector(-5.5f, 19, 12), FVector(0.05f, 0.03f, 0.05f), Fixed, Black, FRotator(0, 0, -90)),
+		Part(Cone, Head, FVector(5.5f, 19, 12), FVector(0.05f, 0.03f, 0.05f), Fixed, Black, FRotator(0, 0, -90)),
+		Part(Cube, Head, FVector(0, 19, 3), FVector(0.12f, 0.03f, 0.025f), Fixed, Black) }, 1.5f);
 	Item(105, TEXT("CowboyHat"), LOCTEXT("CowboyHat", "Cowboy Hat"), H, true, {
-		Part(Cylinder, Head, FVector(0, 1, 19), FVector(0.52f, 0.5f, 0.02f), Fixed, Brown),
-		Part(Cylinder, Head, FVector(0, 1, 26), FVector(0.24f, 0.26f, 0.14f), Fixed, Brown),
-		Part(Cylinder, Head, FVector(0, 1, 21.5f), FVector(0.245f, 0.265f, 0.03f), EHPPartColorSource::Accent) });
+		Part(Cylinder, Head, FVector(0, 1, 13), FVector(0.52f, 0.5f, 0.02f), Fixed, Brown),
+		Part(Cylinder, Head, FVector(0, 1, 20), FVector(0.24f, 0.26f, 0.14f), Fixed, Brown),
+		Part(Cylinder, Head, FVector(0, 1, 15.5f), FVector(0.245f, 0.265f, 0.03f), EHPPartColorSource::Accent) });
 	Item(106, TEXT("ChefToque"), LOCTEXT("ChefToque", "Chef Toque"), H, true, {
-		Part(Cylinder, Head, FVector(0, 0, 28), FVector(0.24f, 0.24f, 0.24f), Fixed, White),
-		Part(Sphere, Head, FVector(0, 0, 41), FVector(0.33f, 0.33f, 0.2f), Fixed, White) });
+		Part(Cylinder, Head, FVector(0, 0, 25), FVector(0.24f, 0.24f, 0.24f), Fixed, White),
+		Part(Sphere, Head, FVector(0, 0, 38), FVector(0.33f, 0.33f, 0.2f), Fixed, White) });
 	{
 		TArray<FHPCosmeticPart> Flowers;
 		const FLinearColor Petals[] = { FLinearColor(FColor(255, 120, 180)), FLinearColor(FColor(255, 220, 60)), White,
@@ -175,29 +175,29 @@ void UHPCosmeticCatalog::BuildDefaults()
 		for (int32 i = 0; i < 10; ++i)
 		{
 			const float A = i * 2.f * PI / 10.f;
-			Flowers.Add(Part(Sphere, Head, FVector(FMath::Cos(A) * 11.f, 1.f + FMath::Sin(A) * 11.f, 17.f), FVector(0.065f), Fixed, Petals[i % 5]));
+			Flowers.Add(Part(Sphere, Head, FVector(FMath::Cos(A) * 11.f, 1.f + FMath::Sin(A) * 11.f, 14), FVector(0.065f), Fixed, Petals[i % 5]));
 		}
-		Flowers.Add(Part(Cylinder, Head, FVector(0, 1, 16.5f), FVector(0.23f, 0.23f, 0.015f), Fixed, Green));
+		Flowers.Add(Part(Cylinder, Head, FVector(0, 1, 13.5f), FVector(0.23f, 0.23f, 0.015f), Fixed, Green));
 		Item(107, TEXT("FlowerCrown"), LOCTEXT("FlowerCrown", "Flower Crown"), H, true, MoveTemp(Flowers));
 	}
 	Item(108, TEXT("TrafficCone"), LOCTEXT("TrafficCone", "Traffic Cone"), H, false, {
-		Part(Cone, Head, FVector(0, 0, 40), FVector(0.3f, 0.3f, 0.55f), Fixed, Orange),
-		Part(Cylinder, Head, FVector(0, 0, 42), FVector(0.2f, 0.2f, 0.07f), Fixed, White),
-		Part(Cube, Head, FVector(0, 0, 13.5f), FVector(0.36f, 0.36f, 0.03f), Fixed, Orange) }, 1.5f);
+		Part(Cone, Head, FVector(0, 0, 37), FVector(0.3f, 0.3f, 0.55f), Fixed, Orange),
+		Part(Cylinder, Head, FVector(0, 0, 39), FVector(0.2f, 0.2f, 0.07f), Fixed, White),
+		Part(Cube, Head, FVector(0, 0, 10.5f), FVector(0.36f, 0.36f, 0.03f), Fixed, Orange) }, 1.5f);
 	Item(109, TEXT("VikingHorns"), LOCTEXT("VikingHorns", "Viking Horns"), H, true, {
-		Part(Sphere, Head, FVector(0, 1, 16), FVector(0.26f, 0.26f, 0.22f), Fixed, Metal),
-		Part(Cone, Head, FVector(15, 1, 25), FVector(0.07f, 0.07f, 0.22f), Fixed, Ivory, FRotator(-40, 0, 0)),
-		Part(Cone, Head, FVector(-15, 1, 25), FVector(0.07f, 0.07f, 0.22f), Fixed, Ivory, FRotator(40, 0, 0)) });
+		Part(Sphere, Head, FVector(0, 1, 13), FVector(0.26f, 0.26f, 0.22f), Fixed, Metal),
+		Part(Cone, Head, FVector(15, 1, 22), FVector(0.07f, 0.07f, 0.22f), Fixed, Ivory, FRotator(-40, 0, 0)),
+		Part(Cone, Head, FVector(-15, 1, 22), FVector(0.07f, 0.07f, 0.22f), Fixed, Ivory, FRotator(40, 0, 0)) });
 	Item(110, TEXT("GrandpasFedora"), LOCTEXT("GrandpasFedora", "Grandpa's Fedora"), H, false, {
-		Part(Cylinder, Head, FVector(0, 1, 20), FVector(0.38f, 0.38f, 0.015f), Fixed, FLinearColor(FColor(70, 60, 50))),
-		Part(Cylinder, Head, FVector(0, 1, 26), FVector(0.23f, 0.25f, 0.13f), Fixed, FLinearColor(FColor(70, 60, 50))),
-		Part(Cylinder, Head, FVector(0, 1, 22), FVector(0.235f, 0.255f, 0.03f), Fixed, Black) });
+		Part(Cylinder, Head, FVector(0, 1, 14), FVector(0.38f, 0.38f, 0.015f), Fixed, FLinearColor(FColor(70, 60, 50))),
+		Part(Cylinder, Head, FVector(0, 1, 20), FVector(0.23f, 0.25f, 0.13f), Fixed, FLinearColor(FColor(70, 60, 50))),
+		Part(Cylinder, Head, FVector(0, 1, 16), FVector(0.235f, 0.255f, 0.03f), Fixed, Black) });
 	Item(111, TEXT("CarrotAntenna"), LOCTEXT("CarrotAntenna", "Carrot Antenna"), H, true, {
-		Part(TEXT("/Game/Emberlight/Meshes/Fruits/SM_Carrot.SM_Carrot"), Head, FVector(0, 0, 18), FVector(1.0f), Own) }, 0.7f);
+		Part(TEXT("/Game/Emberlight/Meshes/Fruits/SM_Carrot.SM_Carrot"), Head, FVector(0, 0, 15), FVector(1.0f), Own) }, 0.7f);
 
 	// ---- Face ----
 	Item(201, TEXT("Moustache"), LOCTEXT("Moustache", "Moustache"), F, true, {
-		Part(Cube, Head, FVector(0, 12.5f, 3.5f), FVector(0.11f, 0.03f, 0.03f), Fixed, DarkBrown),
+		Part(Cube, Head, FVector(0, 13, 4), FVector(0.13f, 0.04f, 0.035f), Fixed, DarkBrown),
 		Part(Sphere, Head, FVector(6, 12, 2.5f), FVector(0.045f), Fixed, DarkBrown),
 		Part(Sphere, Head, FVector(-6, 12, 2.5f), FVector(0.045f), Fixed, DarkBrown) });
 	Item(202, TEXT("Goggles"), LOCTEXT("Goggles", "Goggles"), F, true, {
