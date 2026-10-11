@@ -67,6 +67,10 @@
 		{
 			"Name": "VoiceChat",
 			"Enabled": true
+		},
+		{
+			"Name": "AdaptivePathfindingSystem",
+			"Enabled": true
 		}
 	]
 }
