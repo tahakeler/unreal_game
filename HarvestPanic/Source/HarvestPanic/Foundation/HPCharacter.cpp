@@ -3,6 +3,7 @@
 #include "HPCarryComponent.h"
 #include "HPNoiseSubsystem.h"
 #include "HPGameState.h"
+#include "Customization/HPCosmeticsComponent.h"
 #include "Frontend/HPGameUserSettings.h"
 #include "World/HPBarnRespawn.h"
 #include "World/HPBridgePlank.h"
@@ -153,6 +154,29 @@ void AHPCharacter::BeginPlay()
 	{
 		ApplyUserSettings(Settings);
 	});
+	// QA (-HPLoadoutTest): the local player picks a distinctive loadout, every machine logs what it sees.
+	if (FParse::Param(FCommandLine::Get(), TEXT("HPLoadoutTest")))
+	{
+		FTimerHandle H1, H2;
+		GetWorldTimerManager().SetTimer(H1, FTimerDelegate::CreateWeakLambda(this, [this]()
+		{
+			UHPCosmeticsComponent* C = UHPCosmeticsComponent::FindForPawn(this);
+			if (IsLocallyControlled() && C)
+			{
+				FHPCosmeticLoadout L = C->GetLoadout();
+				L.PrimaryColor = static_cast<uint8>(5 + (GetPlayerState() ? GetPlayerState()->GetPlayerId() % 10 : 0));
+				L.Hat = 1;
+				C->RequestSetLoadout(L);
+			}
+		}), 4.f, false);
+		GetWorldTimerManager().SetTimer(H2, FTimerDelegate::CreateWeakLambda(this, [this]()
+		{
+			const UHPCosmeticsComponent* C = UHPCosmeticsComponent::FindForPawn(this);
+			UE_LOG(LogTemp, Display, TEXT("[LoadoutQA] net=%d local=%d pawn=%s player=%s primary=%d hat=%d"),
+				(int32)GetNetMode(), IsLocallyControlled(), *GetName(), GetPlayerState() ? *GetPlayerState()->GetPlayerName() : TEXT("?"),
+				C ? C->GetLoadout().PrimaryColor : -1, C ? C->GetLoadout().Hat : -1);
+		}), 10.f, false);
+	}
 	bPawnReady = true;
 	OnPawnReady.Broadcast(this);
 }
