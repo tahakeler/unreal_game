@@ -199,7 +199,7 @@ def build_lobby():
         place(EL + "/Trees/SM_Tree01", (x, y, 0), yaw=i * 80)
     # Porch ready zone in front of the barn doors, dinner bell beside it.
     porch_cls = unreal.load_class(None, "/Script/HarvestPanic.HPPorchReadyZone")
-    porch = eas.spawn_actor_from_class(porch_cls, unreal.Vector(1050, 0, 150), unreal.Rotator(0, 0, 0))
+    porch = eas.spawn_actor_from_class(porch_cls, unreal.Vector(1050, 0, 150), unreal.Rotator(0, 0, 180))
     porch.set_actor_label("PorchReadyZone")
     place(EL + "/Props/SM_EmptySack", (1050, -250, 0), yaw=0, collide=False)
     bell_cls = unreal.load_class(None, "/Script/HarvestPanic.HPDinnerBell")
