@@ -12,7 +12,7 @@
 enum class EHPMarkerKind : uint8
 {
 	Unknown, PlayerStart, MarketPen, CritterSpawnerPig, CritterSpawnerChicken, GoodsPrizePumpkin, GoodsCrate,
-	BridgePlank, River, RiverPile, BarnRespawn
+	BridgePlank, River, RiverPile, BarnRespawn, Wardrobe
 };
 
 UCLASS()

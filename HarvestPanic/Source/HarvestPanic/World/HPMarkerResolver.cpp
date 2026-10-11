@@ -4,6 +4,7 @@
 #include "World/HPBridgePlank.h"
 #include "World/HPGoodsSpawner.h"
 #include "World/HPRiverVolume.h"
+#include "Customization/HPWardrobe.h"
 #include "AI/HPCritter.h"
 #include "AI/HPCritterSpawner.h"
 #include "Economy/HPMarketPen.h"
@@ -59,6 +60,7 @@ EHPMarkerKind UHPMarkerResolver::ParseTag(FName Tag, int32& OutCount, int32 Defa
 		{ TEXT("HP_River"), EHPMarkerKind::River },
 		{ TEXT("HP_RiverPile"), EHPMarkerKind::RiverPile },
 		{ TEXT("HP_BarnRespawn"), EHPMarkerKind::BarnRespawn },
+		{ TEXT("HP_Wardrobe"), EHPMarkerKind::Wardrobe },
 	};
 	const EHPMarkerKind* Found = Table.Find(Name);
 	return Found ? *Found : EHPMarkerKind::Unknown;
@@ -221,6 +223,12 @@ void UHPMarkerResolver::SpawnForMarker(AActor* Marker, EHPMarkerKind Kind, int32
 		if (AHPBarnRespawn* Barn = World->SpawnActor<AHPBarnRespawn>(AHPBarnRespawn::StaticClass(), T))
 		{
 			Spawned.Add(Barn);
+		}
+		break;
+	case EHPMarkerKind::Wardrobe:
+		if (AHPWardrobe* Wardrobe = World->SpawnActor<AHPWardrobe>(AHPWardrobe::StaticClass(), T))
+		{
+			Spawned.Add(Wardrobe);
 		}
 		break;
 	default:

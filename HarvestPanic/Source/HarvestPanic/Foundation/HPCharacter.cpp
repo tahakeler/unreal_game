@@ -633,7 +633,7 @@ USkeletalMeshComponent* AHPCharacter::GetBodyMesh3P() const
 	return GetMesh();
 }
 
-USkinnedMeshComponent* AHPCharacter::GetArmsMesh1P() const
+UMeshComponent* AHPCharacter::GetArmsMesh1P() const
 {
 	return FirstPersonArms;
 }
@@ -672,6 +672,23 @@ void AHPCharacter::ServerRespawnAtBarn(EHPBlameVerb Verb, bool bChargeFee)
 	GetCharacterMovement()->StopMovementImmediately();
 	GetCharacterMovement()->SetMovementMode(MOVE_Falling);
 	Stamina = StaminaMax;
+}
+
+void AHPCharacter::HPEmoteFaint(float Seconds)
+{
+	if (!HasAuthority() || BodyState != EHPBodyState::Normal)
+	{
+		return;
+	}
+	SetBodyState(EHPBodyState::Ragdoll); // releases any held item with its velocity
+	FTimerHandle Handle;
+	GetWorldTimerManager().SetTimer(Handle, FTimerDelegate::CreateWeakLambda(this, [this]()
+	{
+		if (BodyState == EHPBodyState::Ragdoll)
+		{
+			SetBodyState(EHPBodyState::Normal);
+		}
+	}), FMath::Max(0.5f, Seconds), false);
 }
 
 void AHPCharacter::HPPatch()

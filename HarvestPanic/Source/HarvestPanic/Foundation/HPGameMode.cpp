@@ -7,6 +7,8 @@
 #include "Economy/HPGoodsComponent.h"
 #include "UI/HPHUD.h"
 #include "World/HPMarkerResolver.h"
+#include "Customization/HPCosmeticsComponent.h"
+#include "HPNoiseSubsystem.h"
 #include "HAL/IConsoleManager.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
@@ -59,9 +61,31 @@ AActor* AHPGameMode::ChoosePlayerStart_Implementation(AController* Player)
 	return Markers[FMath::Max(0, Slot) % Markers.Num()];
 }
 
+void AHPGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	UHPCosmeticsComponent::OnAnyEmotePlayed.Remove(EmoteHandle);
+	Super::EndPlay(EndPlayReason);
+}
+
 void AHPGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+	// A wave is the no-mic shout: Noise Event Shout, loudness 0.6, blamed on the waver.
+	EmoteHandle = UHPCosmeticsComponent::OnAnyEmotePlayed.AddWeakLambda(this, [this](APawn* Pawn, EHPEmote Emote)
+	{
+		UHPNoiseSubsystem* Noise = GetWorld() ? GetWorld()->GetSubsystem<UHPNoiseSubsystem>() : nullptr;
+		if (Emote != EHPEmote::Wave || !Pawn || !Noise)
+		{
+			return;
+		}
+		FNoiseEvent E;
+		E.Source = ENoiseSource::Shout;
+		E.Loudness = 0.6f;
+		E.Location = Pawn->GetActorLocation();
+		E.Instigator = Pawn;
+		E.BlamedPlayer = Pawn->GetPlayerState();
+		Noise->Emit(E);
+	});
 	if (bAutoStartRun)
 	{
 		// Defer one tick so the listen-server host's PlayerState exists for the Monday player-count sample.

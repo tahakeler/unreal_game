@@ -17,7 +17,13 @@ Unknown `HP_*` tags are ignored. Each marker actor is processed once. Marker act
 | `HP_BridgePlank` | **one StaticMeshActor per plank** | `AHPBridgePlank` wraps that mesh: SafeLoad 250 kg, 0.2 dmg/kg/s over, cracks at integrity 50, breaks at 0 (mesh falls, $30 Blame, noise 0.75), free repair each Morning, $30 patch via `HPPatch` console exec. Mesh must be on a plank-sized actor (load sensor = actor bounds + 40 cm slab on top). |
 | `HP_River` | box-ish actor (scale or UBoxComponent) | `AHPRiverVolume`; flow direction = actor **+X**. Players drown after 1 s (barn respawn + fee + Blame `Drowned`); goods/carryables are pushed downstream and delivered to the nearest pile after 15-25 s marked Soaked; critters swim to the nearest bank. Make the box tall enough to cover the player's capsule in the water. |
 | `HP_RiverPile` | any | Spit-out location; assigned to the nearest river. Without one the river's downstream end is used. |
+| `HP_Wardrobe` | any | `AHPWardrobe` (Customization module) at the marker. |
 | `HP_BarnRespawn` | any | `AHPBarnRespawn`; up to 4 slots on a 120 cm ring (+100 cm Z), facing the marker's rotation. |
 
 Reference level generator: `docs/engine/tools/make_smoke_map.py` (builds `/Game/ThirdPerson/Maps/Lvl_SliceSmoke`).
 Headless smoke: `UnrealEditor-Cmd HarvestPanic.uproject /Game/ThirdPerson/Maps/Lvl_SliceSmoke -game -nullrhi -NOSTEAM -ExecCmds="hp.RunSmoke"`.
+
+## Bridge dimensions (canonical)
+The level's bridge is **40 m long, 20 planks of 2 m each** (this supersedes the GDD's 24 m / 1.2 m planks; design doc to follow).
+Plank behaviour is per mesh actor, so plank length does not matter to the code: SafeLoad, damage rate and the $30 patch apply per plank
+regardless of size. Place one `HP_BridgePlank` StaticMeshActor per 2 m plank.

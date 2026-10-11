@@ -22,7 +22,7 @@ class UInputMappingContext;
 class UCameraComponent;
 class UPoseableMeshComponent;
 class UCanvas;
-class USkinnedMeshComponent;
+class UMeshComponent;
 class USkeletalMeshComponent;
 enum class EHPBlameVerb : uint8;
 class APlayerController;
@@ -49,10 +49,10 @@ public:
 	 */
 	UFUNCTION(BlueprintPure, Category="Cosmetics") USkeletalMeshComponent* GetBodyMesh3P() const;
 	/**
-	 * Owner-only first-person arms. Returned as USkinnedMeshComponent because the arms are a procedurally
+	 * Owner-only first-person arms. Returned as UMeshComponent (base of both) because the arms are a procedurally
 	 * posed UPoseableMeshComponent (not a USkeletalMeshComponent); SetSkinnedAssetAndUpdate / SetMaterial work on it.
 	 */
-	UFUNCTION(BlueprintPure, Category="Cosmetics") USkinnedMeshComponent* GetArmsMesh1P() const;
+	UFUNCTION(BlueprintPure, Category="Cosmetics") UMeshComponent* GetArmsMesh1P() const;
 	/** True once BeginPlay finished and OnPawnReady fired (late binders should check this first). */
 	UFUNCTION(BlueprintPure, Category="Cosmetics") bool IsPawnReady() const { return bPawnReady; }
 	/** Fired on every machine at the end of BeginPlay, when body and arms meshes exist. */
@@ -63,6 +63,12 @@ public:
 	 * Used by drowning and the end of a knockout.
 	 */
 	void ServerRespawnAtBarn(EHPBlameVerb Verb, bool bChargeFee);
+
+	/**
+	 * Emote hook (customization, found via reflection): server-side real ragdoll for Seconds, dropping
+	 * anything held, then recover through the normal get-up path. Ignored on clients / when already down.
+	 */
+	UFUNCTION() void HPEmoteFaint(float Seconds);
 
 	/** Debug / input hook: patch the nearest broken bridge plank for $30. */
 	UFUNCTION(Exec) void HPPatch();

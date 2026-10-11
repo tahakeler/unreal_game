@@ -25,6 +25,7 @@ bool FHPMarkerParseTest::RunTest(const FString&)
 	TestTrue(TEXT("unknown HP"), UHPMarkerResolver::ParseTag(TEXT("HP_Nope"), N) == EHPMarkerKind::Unknown);
 	TestTrue(TEXT("river"), UHPMarkerResolver::ParseTag(TEXT("HP_River"), N) == EHPMarkerKind::River);
 	TestTrue(TEXT("pile"), UHPMarkerResolver::ParseTag(TEXT("HP_RiverPile"), N) == EHPMarkerKind::RiverPile);
+	TestTrue(TEXT("wardrobe"), UHPMarkerResolver::ParseTag(TEXT("HP_Wardrobe"), N) == EHPMarkerKind::Wardrobe);
 	return true;
 }
 

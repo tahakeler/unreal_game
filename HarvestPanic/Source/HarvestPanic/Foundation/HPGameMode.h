@@ -57,6 +57,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaSeconds) override;
 
 private:
@@ -66,6 +67,7 @@ private:
 	void RunSunday();
 	int32 CurrentPlayerCount() const;
 
+	FDelegateHandle EmoteHandle;
 	int32 RunDayIndex = 0;
 	int32 DayOfWeek = 0;
 	int32 Week = 1;
