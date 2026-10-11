@@ -116,6 +116,8 @@ protected:
 	void ShoveCarriers(const FVector& Direction, float ImpulseNs);
 	/** Goods preset id for this species ("Pig", "Chicken"). */
 	virtual FName GetGoodsId() const { return NAME_None; }
+	/** Carry mass in kg (drives carry speed / throw). */
+	virtual float GetBodyMassKg() const { return 20.f; }
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Critter")
 	TObjectPtr<UHPCritterMoverComponent> Mover;
@@ -163,6 +165,7 @@ public:
 	AHPCritter_Pig();
 protected:
 	virtual FName GetGoodsId() const override { return TEXT("Pig"); }
+	virtual float GetBodyMassKg() const override { return 60.f; }
 };
 
 UCLASS()
@@ -173,4 +176,5 @@ public:
 	AHPCritter_Chicken();
 protected:
 	virtual FName GetGoodsId() const override { return TEXT("Chicken"); }
+	virtual float GetBodyMassKg() const override { return 3.f; }
 };

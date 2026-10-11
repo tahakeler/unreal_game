@@ -76,6 +76,7 @@ void AHPCritter::BeginPlay()
 	{
 		Goods->ApplyPreset(GetGoodsId());
 		Goods->bIsAlive = true;
+		Goods->MassKg = GetBodyMassKg();
 	}
 	if (const UHPCritterPersonality* P = GetPersonality())
 	{
