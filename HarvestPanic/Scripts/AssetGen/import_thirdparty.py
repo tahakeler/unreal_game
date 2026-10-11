@@ -29,7 +29,7 @@ def log(m):
     unreal.log_warning("[FreeImport] " + m)  # warning level so it shows in commandlet output
 
 
-def make_pipeline(name, scale, offset, static):
+def make_pipeline(name, scale, offset, static, combine=True):
     path = "%s/P_%s" % (TMP, name)
     if EAL.does_asset_exist(path):
         EAL.delete_asset(path)
@@ -37,8 +37,12 @@ def make_pipeline(name, scale, offset, static):
     p.set_editor_property("import_offset_uniform_scale", scale)
     p.set_editor_property("import_offset_translation", offset)
     mp = p.get_editor_property("mesh_pipeline")
-    if static:
-        mp.set_editor_property("combine_static_meshes_behavior", unreal.InterchangeMeshCombineBehavior.ALL_COMBINED if hasattr(unreal, "InterchangeMeshCombineBehavior") else mp.get_editor_property("combine_static_meshes_behavior"))
+    if static and combine:
+        enum = unreal.InterchangeCombineStaticMeshesBehavior
+        for n in ("COMBINE_ALL", "ALL", "COMBINE_ALL_MESHES", "COMBINE"):
+            if hasattr(enum, n):
+                mp.set_editor_property("combine_static_meshes_behavior", getattr(enum, n))
+                break
     mp.set_editor_property("build_nanite", False)
     EAL.save_loaded_asset(p)
     return p
@@ -149,7 +153,7 @@ def main():
         dest = "%s/%s/%s" % (ROOT, it["pack"], it["id"])
         static = it["kind"] == "static"
         cls = "StaticMesh" if static else "SkeletalMesh"
-        got = do_import(glb, dest, make_pipeline(it["id"] + "_m", 1.0, unreal.Vector(0, 0, 0), static))
+        got = do_import(glb, dest, make_pipeline(it["id"] + "_m", 1.0, unreal.Vector(0, 0, 0), static, it.get("combine", True)))
         if cls not in got:
             report.append({"id": it["id"], "result": "IMPORT-FAIL", "classes": list(got)})
             continue
@@ -157,7 +161,7 @@ def main():
         d = dims(mn, mx)
         f = 1.0 if it["fit"] == "none" else it["target_cm"] / max(fit_size(d, it["fit"]), 1e-3)
         off = unreal.Vector(-(mn.x + mx.x) / 2 * f, -(mn.y + mx.y) / 2 * f, -mn.z * f) if static else unreal.Vector(0, 0, 0)
-        got = do_import(glb, dest, make_pipeline(it["id"], f, off, static))
+        got = do_import(glb, dest, make_pipeline(it["id"], f, off, static, it.get("combine", True)))
         mesh = got[cls][0]
         if it["fit"] != "none" and abs(f - 1.0) > 1e-3:
             # Interchange applies the uniform scale more than linearly to some skinned
@@ -169,7 +173,7 @@ def main():
                 f = (it["target_cm"] / s0) ** (1.0 / pexp)
                 off = unreal.Vector(-(mn.x + mx.x) / 2 * f ** pexp, -(mn.y + mx.y) / 2 * f ** pexp, -mn.z * f ** pexp) if static else off
                 log("%s scale exponent %.2f -> re-import with %.4f" % (it["id"], pexp, f))
-                got = do_import(glb, dest, make_pipeline(it["id"], f, off, static))
+                got = do_import(glb, dest, make_pipeline(it["id"], f, off, static, it.get("combine", True)))
                 mesh = got[cls][0]
         if static and len(got[cls]) > 1:
             log("WARN %s produced %d static meshes" % (it["id"], len(got[cls])))

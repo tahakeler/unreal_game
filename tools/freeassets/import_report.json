@@ -7,14 +7,14 @@
   ],
   "id": "SK_Pig",
   "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pig/SK_Pig",
-  "scale": 0.0816,
+  "scale": 0.0734,
   "src": "https://poly.pizza/m/u35l6uP5vj",
   "sockets": [],
   "loaded": true,
   "bounds_cm": [
-   55.9,
-   106.8,
-   135.4
+   45.2,
+   86.5,
+   109.6
   ],
   "skeleton": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pig/pig_Skeleton.pig_Skeleton",
   "bones": 18,
@@ -75,5 +75,218 @@
    }
   ],
   "materials": 1
+ },
+ {
+  "want_sockets": [
+   "head",
+   "grab_body"
+  ],
+  "id": "SK_Chicken",
+  "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Chicken/SK_Chicken",
+  "scale": 0.0605,
+  "src": "https://poly.pizza/m/Z3RCoCYss4",
+  "sockets": [],
+  "loaded": true,
+  "bounds_cm": [
+   22.4,
+   45.3,
+   30.1
+  ],
+  "skeleton": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Chicken/chicken_b_Skeleton.chicken_b_Skeleton",
+  "bones": 11,
+  "bone_names": [
+   "AnimalArmature_ProxyTrueRootJoint",
+   "Root",
+   "Leg_R",
+   "Leg_R_end",
+   "Leg_R_end_end",
+   "Leg_L",
+   "Leg_L_end",
+   "Leg_L_end_end",
+   "Body",
+   "Body_end",
+   "Body_end_end"
+  ],
+  "socket_list": [],
+  "verts": 1760,
+  "anims": [
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Chicken/chicken_bAnimalArmature_AnimalArmature_AnimalArmature_Attack",
+    "len_s": 0.33
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Chicken/chicken_bAnimalArmature_AnimalArmature_AnimalArmature_Death",
+    "len_s": 0.29
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Chicken/chicken_bAnimalArmature_AnimalArmature_AnimalArmature_Idle",
+    "len_s": 2.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Chicken/chicken_bAnimalArmature_AnimalArmature_AnimalArmature_Idle_Peck",
+    "len_s": 2.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Chicken/chicken_bAnimalArmature_AnimalArmature_AnimalArmature_Run",
+    "len_s": 0.38
+   }
+  ],
+  "materials": 1
+ },
+ {
+  "want_sockets": [
+   "carry_N",
+   "carry_E",
+   "carry_S",
+   "carry_W",
+   "ribbon"
+  ],
+  "id": "SM_PrizePumpkin",
+  "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SM_PrizePumpkin/SM_PrizePumpkin",
+  "scale": 1.0582,
+  "src": "https://poly.pizza/m/bvLvqnU1jX",
+  "collision": "convex",
+  "loaded": true,
+  "bounds_cm": [
+   158.4,
+   160.0,
+   98.5
+  ],
+  "tris": 644,
+  "sockets": [
+   "carry_N@(79,-0,49)",
+   "carry_E@(0,80,49)",
+   "carry_S@(-79,-0,49)",
+   "carry_W@(0,-80,49)",
+   "ribbon@(0,-0,99)"
+  ],
+  "materials": 2
+ },
+ {
+  "want_sockets": [
+   "hand_grip",
+   "egg_01",
+   "egg_02",
+   "egg_03",
+   "egg_04",
+   "egg_05",
+   "egg_06"
+  ],
+  "id": "SM_Crate",
+  "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SM_Crate/SM_Crate",
+  "scale": 0.4,
+  "src": "https://poly.pizza/m/oTD0P0yGLG",
+  "collision": "box",
+  "loaded": true,
+  "bounds_cm": [
+   40.0,
+   40.0,
+   40.0
+  ],
+  "tris": 732,
+  "sockets": [
+   "hand_grip@(0,0,40)",
+   "egg_01@(0,0,40)",
+   "egg_02@(0,0,40)",
+   "egg_03@(0,0,40)",
+   "egg_04@(0,0,40)",
+   "egg_05@(0,0,40)",
+   "egg_06@(0,0,40)"
+  ],
+  "materials": 2
+ },
+ {
+  "want_sockets": [
+   "grip",
+   "grain_fx"
+  ],
+  "id": "SM_FeedBucket",
+  "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SM_FeedBucket/SM_FeedBucket",
+  "scale": 0.6049,
+  "src": "https://poly.pizza/m/83obI9bNun",
+  "collision": "convex",
+  "loaded": true,
+  "bounds_cm": [
+   22.9,
+   24.4,
+   32.0
+  ],
+  "tris": 360,
+  "sockets": [
+   "grip@(0,0,32)",
+   "grain_fx@(0,0,32)"
+  ],
+  "materials": 3
+ },
+ {
+  "want_sockets": [
+   "sign",
+   "sell_zone",
+   "awning_tint"
+  ],
+  "id": "SM_MarketStall",
+  "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SM_MarketStall/SM_MarketStall",
+  "scale": 2.5997,
+  "src": "https://poly.pizza/m/hts7l0NZxW",
+  "collision": "ucx_custom",
+  "loaded": true,
+  "bounds_cm": [
+   134.4,
+   300.1,
+   270.9
+  ],
+  "tris": 1132,
+  "sockets": [
+   "sign@(0,0,271)",
+   "sell_zone@(67,0,0)",
+   "awning_tint@(0,0,271)"
+  ],
+  "materials": 3
+ },
+ {
+  "want_sockets": [
+   "latch"
+  ],
+  "id": "SM_PenGate",
+  "path": "/Game/HarvestPanic/ThirdParty/KayLousberg/SM_PenGate/SM_PenGate",
+  "scale": 0.5,
+  "src": "https://poly.pizza/m/h5P9Kuk0V5",
+  "collision": "box",
+  "loaded": true,
+  "bounds_cm": [
+   200.0,
+   25.0,
+   110.0
+  ],
+  "tris": 188,
+  "sockets": [
+   "latch@(100,0,55)"
+  ],
+  "materials": 1
+ },
+ {
+  "want_sockets": [
+   "grip",
+   "hoop_center",
+   "bag_attach"
+  ],
+  "id": "SM_Net",
+  "path": "/Game/HarvestPanic/ThirdParty/InHouse/SM_Net/SM_Net",
+  "scale": 0.9211,
+  "src": "tools/freeassets/scripts/make_net.py",
+  "collision": "none",
+  "loaded": true,
+  "bounds_cm": [
+   140.0,
+   49.7,
+   43.3
+  ],
+  "tris": 368,
+  "sockets": [
+   "grip@(-40,0,22)",
+   "hoop_center@(48,0,22)",
+   "bag_attach@(0,0,43)"
+  ],
+  "materials": 2
  }
 ]

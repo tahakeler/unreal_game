@@ -14,7 +14,7 @@
     {"id": "SM_FeedBucket", "spec": "SM_FeedBucket", "pack": "Quaternius", "glb": "polypizza_bucket/bucket.glb", "kind": "static", "fit": "height", "target_cm": 32, "src": "https://poly.pizza/m/83obI9bNun"},
     {"id": "SM_MarketStall", "spec": "SM_MarketStall", "pack": "Quaternius", "glb": "polypizza_market_stand/market_stand.glb", "kind": "static", "fit": "max", "target_cm": 300, "src": "https://poly.pizza/m/hts7l0NZxW"},
     {"id": "SM_MarketStalls_Set", "spec": null, "pack": "Quaternius", "glb": "polypizza_market_stalls/market_stalls.glb", "kind": "static", "fit": "none", "collision": "convex", "sockets": [], "src": "https://poly.pizza/m/PUZZ5F91OE"},
-    {"id": "SM_PenGate", "spec": "SM_MarketPenGate", "pack": "KayLousberg", "glb": "polypizza_fence_gate/fence_gate.glb", "kind": "static", "fit": "max", "target_cm": 200, "src": "https://poly.pizza/m/h5P9Kuk0V5"},
+    {"id": "SM_PenGate", "spec": "SM_MarketPenGate", "pack": "KayLousberg", "glb": "polypizza_fence_gate/fence_gate.glb", "kind": "static", "combine": false, "fit": "max", "target_cm": 200, "src": "https://poly.pizza/m/h5P9Kuk0V5"},
     {"id": "SM_Turnip", "spec": "SK_Turnip", "pack": "Quaternius", "glb": "polypizza_turnip/turnip.glb", "kind": "static", "fit": "height", "target_cm": 25, "src": "https://poly.pizza/m/taMEmsQCye"},
     {"id": "SM_Carrot", "spec": null, "pack": "Quaternius", "glb": "polypizza_carrot/carrot.glb", "kind": "static", "fit": "height", "target_cm": 25, "collision": "capsule", "mass_kg": 0.3, "sockets": [], "src": "https://poly.pizza/m/l4YmYv8hFK"},
     {"id": "SM_Net", "spec": "SM_Net", "pack": "InHouse", "glb": "inhouse_net/net.glb", "kind": "static", "fit": "length", "target_cm": 140, "src": "tools/freeassets/scripts/make_net.py"}
