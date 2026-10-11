@@ -67,6 +67,26 @@
 		{
 			"Name": "VoiceChat",
 			"Enabled": true
+		},
+		{
+			"Name": "AdaptivePathfindingSystem",
+			"Enabled": true
+		},
+		{
+			"Name": "PythonScriptPlugin",
+			"Enabled": true
+		},
+		{
+			"Name": "EditorScriptingUtilities",
+			"Enabled": true
+		},
+		{
+			"Name": "ModularGameplay",
+			"Enabled": true
+		},
+		{
+			"Name": "CommonUI",
+			"Enabled": true
 		}
 	]
 }
