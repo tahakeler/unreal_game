@@ -530,6 +530,8 @@ def build_farm(M):
         ps.tags = [unreal.Name("HP_PlayerStart"), unreal.Name("HP_PlayerStart_%d" % (k + 1))]
         STATS["Markers"] = STATS.get("Markers", 0) + 1
     marker(["HP_BarnRespawn"], (bx + 1250, by, 20), "HP_BarnRespawn")
+    # customization wardrobe: inside the barn, just behind the open doors, near the player starts
+    marker(["HP_Wardrobe"], (bx + 600, by + 300, 20), "HP_Wardrobe", rot=(0, 180, 0))
     for k in range(4):
         marker(["HP_Goods_Crate"], (bx + 1900, by + 650 + k * 140, 20), "HP_Goods_Crate_%d" % (k + 1))
 
