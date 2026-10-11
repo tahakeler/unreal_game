@@ -7,15 +7,10 @@
   ],
   "id": "SK_Pig",
   "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pig/SK_Pig",
-  "scale": 0.0734,
+  "scale": 0.5415,
   "src": "https://poly.pizza/m/u35l6uP5vj",
   "sockets": [],
   "loaded": true,
-  "bounds_cm": [
-   45.2,
-   86.5,
-   109.6
-  ],
   "skeleton": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pig/pig_Skeleton.pig_Skeleton",
   "bones": 18,
   "bone_names": [
@@ -37,6 +32,21 @@
    "BackLeg_R",
    "BackLeg_R_end",
    "BackLeg_R_end_end"
+  ],
+  "head_bone_pos_cm": [
+   -0.0,
+   22.0,
+   64.6
+  ],
+  "bone_extent_cm": [
+   27.2,
+   126.9,
+   85.5
+  ],
+  "bounds_cm_raw": [
+   2456.4,
+   4698.8,
+   5956.0
   ],
   "socket_list": [],
   "verts": 2934,
@@ -83,15 +93,10 @@
   ],
   "id": "SK_Chicken",
   "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Chicken/SK_Chicken",
-  "scale": 0.0605,
+  "scale": 0.3227,
   "src": "https://poly.pizza/m/Z3RCoCYss4",
   "sockets": [],
   "loaded": true,
-  "bounds_cm": [
-   22.4,
-   45.3,
-   30.1
-  ],
   "skeleton": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Chicken/chicken_b_Skeleton.chicken_b_Skeleton",
   "bones": 11,
   "bone_names": [
@@ -106,6 +111,21 @@
    "Body",
    "Body_end",
    "Body_end_end"
+  ],
+  "head_bone_pos_cm": [
+   0.0,
+   -0.0,
+   24.7
+  ],
+  "bone_extent_cm": [
+   6.8,
+   1.0,
+   33.2
+  ],
+  "bounds_cm_raw": [
+   638.0,
+   1290.9,
+   856.8
   ],
   "socket_list": [],
   "verts": 1760,
@@ -132,6 +152,772 @@
    }
   ],
   "materials": 1
+ },
+ {
+  "want_sockets": [
+   "head",
+   "bell",
+   "push_rear",
+   "push_left",
+   "push_right"
+  ],
+  "id": "SK_Cow",
+  "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/SK_Cow",
+  "scale": 0.2727,
+  "src": "https://poly.pizza/m/26zM1outCr",
+  "sockets": [],
+  "loaded": true,
+  "skeleton": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cow_Skeleton.cow_Skeleton",
+  "bones": 57,
+  "bone_names": [
+   "AnimalArmature_ProxyTrueRootJoint",
+   "Body",
+   "Back",
+   "Torso",
+   "Torso2",
+   "Torso3",
+   "Neck1",
+   "Neck2",
+   "Neck3",
+   "Head",
+   "Head_end",
+   "FrontShoulder_L",
+   "FrontUpperLeg_L",
+   "FrontLowerLeg_L",
+   "FrontLowerLeg_L_end",
+   "FrontShoulder_R",
+   "FrontUpperLeg_R",
+   "FrontLowerLeg_R",
+   "FrontLowerLeg_R_end",
+   "BackShoulder_L",
+   "BackLeg_L",
+   "BackUpperLeg_L",
+   "BackLowerLeg_L",
+   "BackLowerLeg_L_end",
+   "BackShoulder_R",
+   "BackLeg_R",
+   "BackUpperLeg_R",
+   "BackLowerLeg_R",
+   "BackLowerLeg_R_end",
+   "Tail1",
+   "Tail2",
+   "Tail3",
+   "Tail4",
+   "Tail5",
+   "Tail6",
+   "Tail7",
+   "Tail7_end",
+   "PoleTargetBack_L",
+   "PoleTargetBack_L_end",
+   "PoleTarget_L",
+   "PoleTarget_L_end",
+   "PoleTargetBack_R",
+   "PoleTargetBack_R_end",
+   "PoleTarget_R",
+   "PoleTarget_R_end",
+   "IKBackLeg_L",
+   "FFB_L",
+   "FFB_L_end",
+   "IKFrontLeg_L",
+   "FF_L",
+   "FF_L_end",
+   "IKBackLeg_R",
+   "FFB_R",
+   "FFB_R_end",
+   "IKFrontLeg_R",
+   "FF_R",
+   "FF_R_end"
+  ],
+  "head_bone_pos_cm": [
+   -0.0,
+   108.6,
+   105.0
+  ],
+  "bone_extent_cm": [
+   33.4,
+   221.7,
+   112.5
+  ],
+  "bounds_cm_raw": [
+   1719.7,
+   3411.3,
+   5999.8
+  ],
+  "socket_list": [],
+  "verts": 4966,
+  "anims": [
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowAnimalArmature_Attack_Headbutt",
+    "len_s": 1.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowAnimalArmature_Attack_Kick",
+    "len_s": 1.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowAnimalArmature_Death",
+    "len_s": 1.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowAnimalArmature_Eating",
+    "len_s": 6.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowAnimalArmature_Gallop",
+    "len_s": 0.58
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowAnimalArmature_Gallop_Jump",
+    "len_s": 1.46
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowAnimalArmature_Idle",
+    "len_s": 3.33
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowAnimalArmature_Idle_2",
+    "len_s": 3.33
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowAnimalArmature_Idle_Headlow",
+    "len_s": 3.33
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowAnimalArmature_Idle_HitReact_Left",
+    "len_s": 0.67
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowAnimalArmature_Jump_toIdle",
+    "len_s": 1.71
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowAnimalArmature_Walk",
+    "len_s": 1.17
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowAttack_Headbutt",
+    "len_s": 1.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowAttack_Kick",
+    "len_s": 1.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowDeath",
+    "len_s": 1.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowEating",
+    "len_s": 6.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowGallop",
+    "len_s": 0.58
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowGallop_Jump",
+    "len_s": 2.04
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowIdle",
+    "len_s": 3.33
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowIdle_2",
+    "len_s": 3.33
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowIdle_Headlow",
+    "len_s": 3.33
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowIdle_HitReact_Left",
+    "len_s": 0.67
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowIdle_HitReact_Right",
+    "len_s": 0.67
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowJump_toIdle",
+    "len_s": 1.71
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Cow/cowWalk",
+    "len_s": 1.17
+   }
+  ],
+  "materials": 7
+ },
+ {
+  "want_sockets": [
+   "head",
+   "bell",
+   "push_rear",
+   "push_left",
+   "push_right"
+  ],
+  "id": "SK_Bull",
+  "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/SK_Bull",
+  "scale": 0.2851,
+  "src": "https://poly.pizza/m/a8PIIYwF7r",
+  "sockets": [],
+  "loaded": true,
+  "skeleton": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bull_Skeleton.bull_Skeleton",
+  "bones": 57,
+  "bone_names": [
+   "AnimalArmature_ProxyTrueRootJoint",
+   "Body",
+   "Back",
+   "Torso",
+   "Torso2",
+   "Torso3",
+   "Neck1",
+   "Neck2",
+   "Neck3",
+   "Head",
+   "Head_end",
+   "FrontShoulder_L",
+   "FrontUpperLeg_L",
+   "FrontLowerLeg_L",
+   "FrontLowerLeg_L_end",
+   "FrontShoulder_R",
+   "FrontUpperLeg_R",
+   "FrontLowerLeg_R",
+   "FrontLowerLeg_R_end",
+   "BackShoulder_L",
+   "BackLeg_L",
+   "BackUpperLeg_L",
+   "BackLowerLeg_L",
+   "BackLowerLeg_L_end",
+   "BackShoulder_R",
+   "BackLeg_R",
+   "BackUpperLeg_R",
+   "BackLowerLeg_R",
+   "BackLowerLeg_R_end",
+   "Tail1",
+   "Tail2",
+   "Tail3",
+   "Tail4",
+   "Tail5",
+   "Tail6",
+   "Tail7",
+   "Tail7_end",
+   "PoleTargetBack_L",
+   "PoleTargetBack_L_end",
+   "PoleTarget_L",
+   "PoleTarget_L_end",
+   "PoleTargetBack_R",
+   "PoleTargetBack_R_end",
+   "PoleTarget_R",
+   "PoleTarget_R_end",
+   "IKBackLeg_L",
+   "FFB_L",
+   "FFB_L_end",
+   "IKFrontLeg_L",
+   "FF_L",
+   "FF_L_end",
+   "IKBackLeg_R",
+   "FFB_R",
+   "FFB_R_end",
+   "IKFrontLeg_R",
+   "FF_R",
+   "FF_R_end"
+  ],
+  "head_bone_pos_cm": [
+   -0.0,
+   113.6,
+   109.8
+  ],
+  "bone_extent_cm": [
+   34.9,
+   231.7,
+   117.6
+  ],
+  "bounds_cm_raw": [
+   2043.2,
+   3728.5,
+   6557.6
+  ],
+  "socket_list": [],
+  "verts": 4904,
+  "anims": [
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullAnimalArmature_Attack_Headbutt",
+    "len_s": 1.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullAnimalArmature_Attack_Kick",
+    "len_s": 1.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullAnimalArmature_Death",
+    "len_s": 1.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullAnimalArmature_Eating",
+    "len_s": 6.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullAnimalArmature_Gallop",
+    "len_s": 0.58
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullAnimalArmature_Gallop_Jump",
+    "len_s": 1.46
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullAnimalArmature_Idle",
+    "len_s": 3.33
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullAnimalArmature_Idle_2",
+    "len_s": 3.33
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullAnimalArmature_Idle_Headlow",
+    "len_s": 3.33
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullAnimalArmature_Idle_HitReact_Left",
+    "len_s": 0.67
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullAnimalArmature_Jump_toIdle",
+    "len_s": 1.71
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullAnimalArmature_Walk",
+    "len_s": 1.17
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullAttack_Headbutt",
+    "len_s": 1.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullAttack_Kick",
+    "len_s": 1.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullDeath",
+    "len_s": 1.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullEating",
+    "len_s": 6.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullGallop",
+    "len_s": 0.58
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullGallop_Jump",
+    "len_s": 2.04
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullIdle",
+    "len_s": 3.33
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullIdle_2",
+    "len_s": 3.33
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullIdle_Headlow",
+    "len_s": 3.33
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullIdle_HitReact_Left",
+    "len_s": 0.67
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullIdle_HitReact_Right",
+    "len_s": 0.67
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullJump_toIdle",
+    "len_s": 1.71
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Bull/bullWalk",
+    "len_s": 1.17
+   }
+  ],
+  "materials": 7
+ },
+ {
+  "want_sockets": [
+   "head",
+   "bell"
+  ],
+  "id": "SK_Sheep",
+  "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Sheep/SK_Sheep",
+  "scale": 0.3881,
+  "src": "https://poly.pizza/m/rgJXF570ZK",
+  "sockets": [],
+  "loaded": true,
+  "skeleton": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Sheep/sheep_Skeleton.sheep_Skeleton",
+  "bones": 24,
+  "bone_names": [
+   "AnimalArmature_ProxyTrueRootJoint",
+   "All",
+   "FrontLeg_L",
+   "FrontLeg_L_end",
+   "FrontLeg_L_end_end",
+   "BackLeg_L",
+   "BackLeg_L_end",
+   "BackLeg_L_end_end",
+   "Body",
+   "Head",
+   "Head_end",
+   "Head_end_end",
+   "Tail",
+   "Tail_end",
+   "Tail_end_end",
+   "FrontLeg_R",
+   "FrontLeg_R_end",
+   "FrontLeg_R_end_end",
+   "BackLeg_R",
+   "BackLeg_R_end",
+   "BackLeg_R_end_end",
+   "Root",
+   "Root_end",
+   "Root_end_end"
+  ],
+  "head_bone_pos_cm": [
+   -0.0,
+   22.0,
+   36.8
+  ],
+  "bone_extent_cm": [
+   18.6,
+   168.8,
+   67.9
+  ],
+  "bounds_cm_raw": [
+   1479.0,
+   2374.1,
+   3880.5
+  ],
+  "socket_list": [],
+  "verts": 2088,
+  "anims": [
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Sheep/sheepAnimalArmature_AnimalArmature_AnimalArmature_Death",
+    "len_s": 0.88
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Sheep/sheepAnimalArmature_AnimalArmature_AnimalArmature_Headbutt",
+    "len_s": 0.62
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Sheep/sheepAnimalArmature_AnimalArmature_AnimalArmature_Idle",
+    "len_s": 6.67
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Sheep/sheepAnimalArmature_AnimalArmature_AnimalArmature_Idle_Eating",
+    "len_s": 3.33
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Sheep/sheepAnimalArmature_AnimalArmature_AnimalArmature_Jump_Loop",
+    "len_s": 1.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Sheep/sheepAnimalArmature_AnimalArmature_AnimalArmature_Jump_Start",
+    "len_s": 0.25
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Sheep/sheepAnimalArmature_AnimalArmature_AnimalArmature_Run",
+    "len_s": 0.67
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Sheep/sheepAnimalArmature_AnimalArmature_AnimalArmature_Walk",
+    "len_s": 1.0
+   }
+  ],
+  "materials": 1
+ },
+ {
+  "want_sockets": [
+   "head",
+   "horns",
+   "grab_back"
+  ],
+  "id": "SK_Alpaca",
+  "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/SK_Alpaca",
+  "scale": 0.2038,
+  "src": "https://poly.pizza/m/bCVFD48i2l",
+  "sockets": [],
+  "loaded": true,
+  "skeleton": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpaca_Skeleton.alpaca_Skeleton",
+  "bones": 62,
+  "bone_names": [
+   "AnimalArmature_ProxyTrueRootJoint",
+   "Body",
+   "Back",
+   "Torso",
+   "Torso2",
+   "Torso3",
+   "Neck1",
+   "Neck2",
+   "Neck3",
+   "Head",
+   "Ear1_L",
+   "Ear2_L",
+   "Ear3_L",
+   "Ear4_L",
+   "Ear4_L_end",
+   "Ear1_R",
+   "Ear2_R",
+   "Ear3_R",
+   "Ear4_R",
+   "Ear4_R_end",
+   "FrontShoulder_L",
+   "FrontUpperLeg_L",
+   "FrontLowerLeg_L",
+   "FrontLowerLeg_L_end",
+   "FrontShoulder_R",
+   "FrontUpperLeg_R",
+   "FrontLowerLeg_R",
+   "FrontLowerLeg_R_end",
+   "BackShoulder_L",
+   "BackLeg_L",
+   "BackUpperLeg_L",
+   "BackLowerLeg_L",
+   "BackLowerLeg_L_end",
+   "BackShoulder_R",
+   "BackLeg_R",
+   "BackUpperLeg_R",
+   "BackLowerLeg_R",
+   "BackLowerLeg_R_end",
+   "Tail1",
+   "Tail2",
+   "Tail3",
+   "Tail3_end",
+   "PoleTargetBack_L",
+   "PoleTargetBack_L_end",
+   "PoleTarget_L",
+   "PoleTarget_L_end",
+   "PoleTargetBack_R",
+   "PoleTargetBack_R_end",
+   "PoleTarget_R",
+   "PoleTarget_R_end",
+   "IKBackLeg_L",
+   "FFB_L",
+   "FFB_L_end",
+   "IKFrontLeg_L",
+   "FF_L",
+   "FF_L_end",
+   "IKBackLeg_R",
+   "FFB_R",
+   "FFB_R_end",
+   "IKFrontLeg_R",
+   "FF_R",
+   "FF_R_end"
+  ],
+  "head_bone_pos_cm": [
+   0.0,
+   32.9,
+   92.3
+  ],
+  "bone_extent_cm": [
+   16.0,
+   109.9,
+   109.4
+  ],
+  "bounds_cm_raw": [
+   525.6,
+   2241.7,
+   1785.6
+  ],
+  "socket_list": [],
+  "verts": 4140,
+  "anims": [
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaAnimalArmature_Attack_Headbutt",
+    "len_s": 1.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaAnimalArmature_Attack_Kick",
+    "len_s": 1.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaAnimalArmature_Death",
+    "len_s": 1.04
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaAnimalArmature_Eating",
+    "len_s": 7.5
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaAnimalArmature_Gallop",
+    "len_s": 0.67
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaAnimalArmature_Gallop_Jump",
+    "len_s": 1.75
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaAnimalArmature_Idle",
+    "len_s": 4.17
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaAnimalArmature_Idle_2",
+    "len_s": 4.17
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaAnimalArmature_Idle_Headlow",
+    "len_s": 4.17
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaAnimalArmature_Idle_HitReact_Left",
+    "len_s": 0.58
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaAnimalArmature_Idle_HitReact_Right",
+    "len_s": 0.67
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaAnimalArmature_Jump_toIdle",
+    "len_s": 1.92
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaAnimalArmature_Walk",
+    "len_s": 1.46
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaAttack_Headbutt",
+    "len_s": 1.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaAttack_Kick",
+    "len_s": 1.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaDeath",
+    "len_s": 1.04
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaEating",
+    "len_s": 7.5
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaGallop",
+    "len_s": 0.67
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaGallop_Jump",
+    "len_s": 1.75
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaIdle",
+    "len_s": 4.17
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaIdle_2",
+    "len_s": 4.17
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaIdle_Headlow",
+    "len_s": 4.17
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaIdle_HitReact_Left",
+    "len_s": 0.58
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaIdle_HitReact_Right",
+    "len_s": 0.67
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaJump_toIdle",
+    "len_s": 1.92
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Alpaca/alpacaWalk",
+    "len_s": 1.46
+   }
+  ],
+  "materials": 7
+ },
+ {
+  "want_sockets": [
+   "beak",
+   "head"
+  ],
+  "id": "SK_Pigeon",
+  "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pigeon/SK_Pigeon",
+  "scale": 0.1703,
+  "src": "https://poly.pizza/m/9NGlBTpDEr",
+  "sockets": [],
+  "loaded": true,
+  "skeleton": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pigeon/pigeon_Skeleton.pigeon_Skeleton",
+  "bones": 7,
+  "bone_names": [
+   "CharacterArmature_ProxyTrueRootJoint",
+   "Body",
+   "Body_end",
+   "Head",
+   "Head2",
+   "Head3",
+   "Head3_end"
+  ],
+  "head_bone_pos_cm": [
+   0.0,
+   -0.0,
+   8.1
+  ],
+  "bone_extent_cm": [
+   0.0,
+   0.0,
+   29.6
+  ],
+  "bounds_cm_raw": [
+   681.1,
+   522.6,
+   583.3
+  ],
+  "socket_list": [],
+  "verts": 1211,
+  "anims": [
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pigeon/pigeonCharacterArmature_Bite_Front",
+    "len_s": 0.38
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pigeon/pigeonCharacterArmature_Dance",
+    "len_s": 0.67
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pigeon/pigeonCharacterArmature_Death",
+    "len_s": 0.33
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pigeon/pigeonCharacterArmature_HitRecieve",
+    "len_s": 0.29
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pigeon/pigeonCharacterArmature_Idle",
+    "len_s": 2.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pigeon/pigeonCharacterArmature_Jump",
+    "len_s": 0.42
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pigeon/pigeonCharacterArmature_No",
+    "len_s": 1.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pigeon/pigeonCharacterArmature_Walk",
+    "len_s": 0.42
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pigeon/pigeonCharacterArmature_Yes",
+    "len_s": 0.96
+   }
+  ],
+  "materials": 4
  },
  {
   "want_sockets": [
@@ -196,6 +982,23 @@
   "materials": 2
  },
  {
+  "want_sockets": [],
+  "id": "SM_Egg",
+  "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SM_Egg/SM_Egg",
+  "scale": 0.1502,
+  "src": "https://poly.pizza/m/ngjyRi84lk",
+  "collision": "sphere",
+  "loaded": true,
+  "bounds_cm": [
+   5.5,
+   5.5,
+   7.0
+  ],
+  "tris": 288,
+  "sockets": [],
+  "materials": 1
+ },
+ {
   "want_sockets": [
    "grip",
    "grain_fx"
@@ -244,6 +1047,23 @@
   "materials": 3
  },
  {
+  "want_sockets": [],
+  "id": "SM_MarketStalls_Set",
+  "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SM_MarketStalls_Set/SM_MarketStalls_Set",
+  "scale": 1.0,
+  "src": "https://poly.pizza/m/PUZZ5F91OE",
+  "collision": "convex",
+  "loaded": true,
+  "bounds_cm": [
+   190.0,
+   186.7,
+   55.3
+  ],
+  "tris": 6064,
+  "sockets": [],
+  "materials": 7
+ },
+ {
   "want_sockets": [
    "latch"
   ],
@@ -263,6 +1083,44 @@
    "latch@(100,0,55)"
   ],
   "materials": 1
+ },
+ {
+  "want_sockets": [
+   "head"
+  ],
+  "id": "SM_Turnip",
+  "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SM_Turnip/SM_Turnip",
+  "scale": 0.1046,
+  "src": "https://poly.pizza/m/taMEmsQCye",
+  "collision": "sphere",
+  "loaded": true,
+  "bounds_cm": [
+   13.1,
+   12.9,
+   25.0
+  ],
+  "tris": 976,
+  "sockets": [
+   "head@(0,-0,25)"
+  ],
+  "materials": 3
+ },
+ {
+  "want_sockets": [],
+  "id": "SM_Carrot",
+  "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SM_Carrot/SM_Carrot",
+  "scale": 0.09,
+  "src": "https://poly.pizza/m/l4YmYv8hFK",
+  "collision": "capsule",
+  "loaded": true,
+  "bounds_cm": [
+   8.5,
+   8.4,
+   25.0
+  ],
+  "tris": 864,
+  "sockets": [],
+  "materials": 2
  },
  {
   "want_sockets": [

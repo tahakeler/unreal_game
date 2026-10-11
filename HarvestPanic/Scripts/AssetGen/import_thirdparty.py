@@ -22,6 +22,7 @@ SPEC = os.path.join(REPO, "tools", "tripo", "batch01.json")
 DL = os.path.join(REPO, "tools", "freeassets", "downloads")
 ROOT = "/Game/HarvestPanic/ThirdParty"
 TMP = "/Game/_HPImportTmp"
+ROLL = float(os.environ.get("HP_FREE_ROLL", "0"))
 EAL = unreal.EditorAssetLibrary
 
 
@@ -36,6 +37,9 @@ def make_pipeline(name, scale, offset, static, combine=True):
     p = EAL.duplicate_loaded_asset(unreal.load_asset("/Interchange/Pipelines/DefaultAssetsPipeline"), path)
     p.set_editor_property("import_offset_uniform_scale", scale)
     p.set_editor_property("import_offset_translation", offset)
+    if not static:
+        # Optional fix-up roll (default 0: Quaternius rigs import upright, Z up, facing +Y).
+        p.set_editor_property("import_offset_rotation", unreal.Rotator(roll=ROLL, pitch=0.0, yaw=0.0))
     mp = p.get_editor_property("mesh_pipeline")
     if static and combine:
         enum = unreal.InterchangeCombineStaticMeshesBehavior
@@ -159,22 +163,17 @@ def main():
             continue
         mn, mx = bbox(got[cls][0])
         d = dims(mn, mx)
-        f = 1.0 if it["fit"] == "none" else it["target_cm"] / max(fit_size(d, it["fit"]), 1e-3)
+        size1 = fit_size(d, it["fit"])
+        if not static:
+            # Skinned Quaternius GLBs: SkeletalMesh bounds read 100x the rendered (bone-space)
+            # size and scale with f^2 (raw vertices sit under the armature's x100 node scale).
+            # Rendered size scales linearly with f, so solve against bounds/100 and verify
+            # afterwards with the reference-pose bone extents.
+            size1 = max(d) / 100.0
+        f = 1.0 if it["fit"] == "none" else it["target_cm"] / max(size1, 1e-3)
         off = unreal.Vector(-(mn.x + mx.x) / 2 * f, -(mn.y + mx.y) / 2 * f, -mn.z * f) if static else unreal.Vector(0, 0, 0)
         got = do_import(glb, dest, make_pipeline(it["id"], f, off, static, it.get("combine", True)))
         mesh = got[cls][0]
-        if it["fit"] != "none" and abs(f - 1.0) > 1e-3:
-            # Interchange applies the uniform scale more than linearly to some skinned
-            # GLBs (observed: size ~ f^2 for Quaternius rigs). Measure the exponent and solve.
-            mn2, mx2 = bbox(mesh)
-            s0, s1 = fit_size(d, it["fit"]), fit_size(dims(mn2, mx2), it["fit"])
-            pexp = math.log(s1 / s0) / math.log(f)
-            if abs(pexp - 1.0) > 0.05:
-                f = (it["target_cm"] / s0) ** (1.0 / pexp)
-                off = unreal.Vector(-(mn.x + mx.x) / 2 * f ** pexp, -(mn.y + mx.y) / 2 * f ** pexp, -mn.z * f ** pexp) if static else off
-                log("%s scale exponent %.2f -> re-import with %.4f" % (it["id"], pexp, f))
-                got = do_import(glb, dest, make_pipeline(it["id"], f, off, static, it.get("combine", True)))
-                mesh = got[cls][0]
         if static and len(got[cls]) > 1:
             log("WARN %s produced %d static meshes" % (it["id"], len(got[cls])))
         EAL.rename_asset(mesh.get_path_name(), "%s/%s" % (dest, it["id"]))
@@ -219,6 +218,13 @@ def verify(report):
                 names = [str(b) for b in skel.get_reference_pose().get_bone_names()]
                 r["bones"] = len(names)
                 r["bone_names"] = names
+                rp = skel.get_reference_pose()
+                hb = [n for n in names if n.lower() == "head"] or [names[-1]]
+                hp = rp.get_ref_bone_pose(hb[0], unreal.AnimPoseSpaces.WORLD).translation
+                r["head_bone_pos_cm"] = [round(hp.x, 1), round(hp.y, 1), round(hp.z, 1)]
+                ps = [rp.get_ref_bone_pose(n, unreal.AnimPoseSpaces.WORLD).translation for n in names]
+                r["bone_extent_cm"] = [round(max(getattr(v, a) for v in ps) - min(getattr(v, a) for v in ps), 1) for a in "xyz"]
+                r["bounds_cm_raw"] = r.pop("bounds_cm")
             except Exception:
                 r["bones"] = "n/a"
             try:
