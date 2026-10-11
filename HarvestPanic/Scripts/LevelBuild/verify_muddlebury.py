@@ -5,7 +5,7 @@ import unreal
 
 EXPECT = {"HP_PlayerStart": 4, "HP_MarketPen": 1, "HP_CritterSpawner_Pig:3": 1, "HP_CritterSpawner_Chicken:8": 1,
           "HP_Goods_PrizePumpkin": 1, "HP_Goods_Crate": 4, "HP_BridgePlank": 20, "HP_River": 1, "HP_RiverPile": 1,
-          "HP_BarnRespawn": 1}
+          "HP_BarnRespawn": 1, "HP_Wardrobe": 1}
 
 
 def out(m):
