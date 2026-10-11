@@ -1,0 +1,544 @@
+{
+  "source": "design/art/asset-specs/tripo-batch-01.md",
+  "model": "v3.1-20260211",
+  "style_prefix": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal",
+  "shared_negative": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic",
+  "items": [
+    {
+      "id": "SK_Pig_Hamlet",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, cartoon farm pig named Hamlet, chubby barrel body, oversized round head (chibi, head ~40% of body length), big floppy ears, flat pink snout disc, tiny stubby legs, curly tail, smug half-lidded eyes, soft pink with warmer rose belly gradient, small mud splotch on one hip, quadruped standing on four legs",
+      "priority": "P0",
+      "rig": "quadruped",
+      "anims": [
+        "idle",
+        "walk",
+        "run"
+      ],
+      "face_limit": 5000,
+      "scale_cm": {
+        "raw": "110 cm long, 65 cm shoulder",
+        "max_dim_cm": 110.0
+      },
+      "pivot": "ground centre between feet, +X forward",
+      "mass_kg": 50.0,
+      "collision": "capsule",
+      "sockets": [
+        "head",
+        "grab_back",
+        "mouth"
+      ],
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic, realistic pig, wrinkles, bristles, tusks, lean body",
+      "category": "Critters"
+    },
+    {
+      "id": "SK_Chicken",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, cartoon farm hen, round egg-shaped body, tiny head with big red comb and wattle, orange beak, stubby wings, thin orange legs thickened for readability, cream-white feathers painted as large soft shapes, startled big eyes",
+      "priority": "P0",
+      "rig": "biped",
+      "anims": [
+        "idle",
+        "walk",
+        "run; flap and scatter authored in UE"
+      ],
+      "face_limit": 2000,
+      "scale_cm": {
+        "raw": "40 cm tall",
+        "max_dim_cm": 40.0
+      },
+      "pivot": "ground between feet",
+      "mass_kg": 2.5,
+      "collision": "capsule",
+      "sockets": [
+        "head",
+        "grab_body"
+      ],
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic, individual feathers, realistic bird, rooster tail plumes",
+      "category": "Critters"
+    },
+    {
+      "id": "SM_PrizePumpkin",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, giant prize-winning pumpkin, slightly squashed sphere with deep chunky ribs, thick curly green stem with one leaf and a tendril, warm saturated orange with lighter ridge tops, faint blue ribbon rosette tied to stem",
+      "priority": "P0",
+      "rig": null,
+      "anims": [],
+      "face_limit": 4000,
+      "scale_cm": {
+        "raw": "160 cm wide, 120 cm tall (gap list: ≥ 1.5 m)",
+        "max_dim_cm": 160.0
+      },
+      "pivot": "base centre",
+      "mass_kg": 180.0,
+      "collision": "convex",
+      "sockets": [
+        "carry_N",
+        "carry_E",
+        "carry_S",
+        "carry_W",
+        "ribbon"
+      ],
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic, carved face, jack-o-lantern, small pumpkin",
+      "category": "Props"
+    },
+    {
+      "id": "SM_EggBasket_Crate",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, small wicker egg basket with a single arched handle and a folded cream cloth, holding six chunky oversized eggs, honey-brown wicker painted as big woven bands",
+      "priority": "P0",
+      "rig": null,
+      "anims": [],
+      "face_limit": 1500,
+      "scale_cm": {
+        "raw": "40×30×35 cm (with handle)",
+        "max_dim_cm": 40.0
+      },
+      "pivot": "base centre",
+      "mass_kg": 4.0,
+      "collision": "box",
+      "sockets": [
+        "hand_grip",
+        "egg_01",
+        "egg_02",
+        "egg_03",
+        "egg_04",
+        "egg_05",
+        "egg_06"
+      ],
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic, fine wicker strands, cracked eggs",
+      "category": "Props"
+    },
+    {
+      "id": "SM_FeedBucket",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, chunky wooden feed bucket with two dark iron bands and a curved wire handle, heaped with golden grain and a few corn kernels on top, slightly tapered",
+      "priority": "P0",
+      "rig": null,
+      "anims": [],
+      "face_limit": 1500,
+      "scale_cm": {
+        "raw": "30 cm Ø, 32 cm tall (FP view scale ×1.2 applied in the first-person mesh, not the asset)",
+        "max_dim_cm": 32.0
+      },
+      "pivot": "handle apex (for hand socket)",
+      "mass_kg": 3.0,
+      "collision": "convex",
+      "sockets": [
+        "grip",
+        "grain_fx"
+      ],
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic, metal pail, rust, thin wire",
+      "category": "Props"
+    },
+    {
+      "id": "SM_Net",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, farm butterfly-style catching net, thick wooden handle with leather grip wraps, large round wooden hoop, chunky rope mesh rendered as big diamond panels, cream rope, net bag hanging softly",
+      "priority": "P0",
+      "rig": null,
+      "anims": [],
+      "face_limit": 3000,
+      "scale_cm": {
+        "raw": "140 cm total, hoop 50 cm Ø",
+        "max_dim_cm": 140.0
+      },
+      "pivot": "net: grip point 30 cm from butt; bag: knot",
+      "mass_kg": null,
+      "collision": "none",
+      "sockets": [
+        "grip",
+        "hoop_center",
+        "bag_attach"
+      ],
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic, fishing rod, metal hoop, thin strings, see-through mesh holes",
+      "category": "Props"
+    },
+    {
+      "id": "SM_Net_Bag",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, closed cream rope net sack tied at the top with a knot, bulging round shape, empty",
+      "priority": "P0",
+      "rig": null,
+      "anims": [],
+      "face_limit": 800,
+      "scale_cm": {
+        "raw": "bag (unspecified; ~50 cm hoop)",
+        "max_dim_cm": 50.0
+      },
+      "pivot": "knot",
+      "mass_kg": 1.0,
+      "collision": "sphere",
+      "sockets": [
+        "bag_attach"
+      ],
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic, fishing rod, metal hoop, thin strings, see-through mesh holes",
+      "category": "Props"
+    },
+    {
+      "id": "SM_MarketStall",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, wooden village market stall, sturdy plank counter, four chunky posts, striped canvas awning in cream and barn red with scalloped edge, small hanging blank wooden sign, a couple of empty crates under the counter",
+      "priority": "P0",
+      "rig": null,
+      "anims": [],
+      "face_limit": 6000,
+      "scale_cm": {
+        "raw": "300 W × 180 D × 280 H cm",
+        "max_dim_cm": 300.0
+      },
+      "pivot": "front-centre at ground",
+      "mass_kg": null,
+      "collision": "ucx_custom",
+      "sockets": [
+        "sign",
+        "sell_zone",
+        "awning_tint"
+      ],
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic, text on sign, produce, people, modern tent",
+      "category": "Market"
+    },
+    {
+      "id": "SM_MarketPenGate",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, short sturdy livestock pen gate, five horizontal chunky planks with a diagonal brace, two thick square posts, big iron hinges and a simple drop latch, weathered warm wood",
+      "priority": "P0",
+      "rig": null,
+      "anims": [],
+      "face_limit": 2000,
+      "scale_cm": {
+        "raw": "200 W × 110 H cm",
+        "max_dim_cm": 200.0
+      },
+      "pivot": "gate leaf: hinge axis bottom; export leaf + posts as separate meshes (`SM_MarketPenGate_Leaf`, `SM_MarketPenGate_Post`)",
+      "mass_kg": 25.0,
+      "collision": "box",
+      "sockets": [
+        "latch"
+      ],
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic, metal gate, chain-link, ornate",
+      "category": "Market"
+    },
+    {
+      "id": "SK_Goat_Gary",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, cartoon farm goat named Gary, lanky body, big rectangular-pupil goggle eyes with a mischievous look, short curved horns, little chin beard, oversized ears sticking sideways, cream-white with a warm brown saddle patch, quadruped",
+      "priority": "P1",
+      "rig": "quadruped",
+      "anims": [
+        "idle",
+        "walk",
+        "run"
+      ],
+      "face_limit": 5000,
+      "scale_cm": {
+        "raw": "100 cm long, 75 cm shoulder",
+        "max_dim_cm": 100.0
+      },
+      "pivot": "ground centre",
+      "mass_kg": 40.0,
+      "collision": "capsule",
+      "sockets": [
+        "head",
+        "horns",
+        "grab_back"
+      ],
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic, realistic goat, long sharp horns, shaggy fur",
+      "category": "Critters"
+    },
+    {
+      "id": "SK_Cow_BigMartha",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, huge cartoon dairy cow named Big Martha, wide blocky body, lazy sleepy half-closed eyes, big pink muzzle, small stubby horns, cowbell on a leather collar, cream with large chocolate-brown patches, quadruped",
+      "priority": "P1",
+      "rig": "quadruped",
+      "anims": [
+        "idle",
+        "walk"
+      ],
+      "face_limit": 6000,
+      "scale_cm": {
+        "raw": "220 cm long, 140 cm shoulder",
+        "max_dim_cm": 220.0
+      },
+      "pivot": "ground centre",
+      "mass_kg": 450.0,
+      "collision": "capsule",
+      "sockets": [
+        "head",
+        "bell",
+        "push_rear",
+        "push_left",
+        "push_right"
+      ],
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic, black and white photo-real Holstein, udder detail, bull, muscles",
+      "category": "Critters"
+    },
+    {
+      "id": "SK_Sheep",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, round fluffy cartoon sheep, cloud-shaped cream wool body made of big soft lumps, small dark charcoal face and legs, sleepy anxious eyes, quadruped",
+      "priority": "P1",
+      "rig": "quadruped",
+      "anims": [
+        "idle",
+        "walk",
+        "run"
+      ],
+      "face_limit": 5000,
+      "scale_cm": {
+        "raw": "100 cm long, 70 cm shoulder",
+        "max_dim_cm": 100.0
+      },
+      "pivot": "ground centre",
+      "mass_kg": 45.0,
+      "collision": "capsule",
+      "sockets": [
+        "head",
+        "bell"
+      ],
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic, wool strands, realistic fleece",
+      "category": "Critters"
+    },
+    {
+      "id": "SK_Mandrake",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, cursed mandrake root creature, pale tan carrot-like root body shaped like a chubby little person, stubby root arms and legs, tuft of big green leaves on head, wide open screaming mouth, tiny squeezed shut eyes",
+      "priority": "P1",
+      "rig": "biped",
+      "anims": [
+        "idle",
+        "walk",
+        "run"
+      ],
+      "face_limit": 2500,
+      "scale_cm": {
+        "raw": "35 cm tall (incl. leaves)",
+        "max_dim_cm": 35.0
+      },
+      "pivot": "base of root (planted height: bury 60%)",
+      "mass_kg": 1.5,
+      "collision": "capsule",
+      "sockets": [
+        "mouth",
+        "leaves"
+      ],
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic, realistic root hairs, scary horror face, teeth",
+      "category": "Critters"
+    },
+    {
+      "id": "SK_Turnip",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, cursed turnip, round white bulb with purple-magenta top half, three big leaves, tiny dot eyes and a nervous little mouth, short root tail",
+      "priority": "P1",
+      "rig": null,
+      "anims": [],
+      "face_limit": 1200,
+      "scale_cm": {
+        "raw": "25 cm tall",
+        "max_dim_cm": 25.0
+      },
+      "pivot": "bulb bottom",
+      "mass_kg": 1.0,
+      "collision": "sphere",
+      "sockets": [
+        "head"
+      ],
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic, realistic veggie, dirt texture",
+      "category": "Critters"
+    },
+    {
+      "id": "SK_Scarecrow_MrStitches",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, creepy-cute scarecrow, burlap sack head with stitched crooked smile and two button eyes, floppy patched straw hat, patched plaid shirt in faded sage and barn red, straw poking out of cuffs and collar, arms outstretched on wooden cross post, tall and thin",
+      "priority": "P1",
+      "rig": "biped",
+      "anims": [
+        "idle only"
+      ],
+      "face_limit": 6000,
+      "scale_cm": {
+        "raw": "230 cm tall incl. post",
+        "max_dim_cm": 230.0
+      },
+      "pivot": "post base",
+      "mass_kg": null,
+      "collision": "capsule",
+      "sockets": [
+        "eye_L",
+        "eye_R",
+        "#B6FF3B",
+        "head"
+      ],
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic, gore, blood, realistic horror, pumpkin head",
+      "category": "Characters"
+    },
+    {
+      "id": "SK_Crow",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, cartoon crow, round chunky body, big head, thick pale-yellow beak, beady curious eyes, deep blue-black feathers painted as broad plum-tinted shapes, short tail fan, wings folded",
+      "priority": "P1",
+      "rig": "biped",
+      "anims": [
+        "idle",
+        "walk"
+      ],
+      "face_limit": 1500,
+      "scale_cm": {
+        "raw": "40 cm long, 80 cm wingspan",
+        "max_dim_cm": 80.0
+      },
+      "pivot": "feet",
+      "mass_kg": 0.5,
+      "collision": "sphere",
+      "sockets": [
+        "beak",
+        "head"
+      ],
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic, realistic raven, individual feathers, pure black",
+      "category": "Critters"
+    },
+    {
+      "id": "SK_Landlord",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, cartoon villainous landlord, very tall and thin man, absurdly tall black-plum top hat about 40% of total height, long plum tailcoat, narrow shoulders, pointy nose, thin curled moustache, monocle, holding a ledger book, smug expression, T-pose",
+      "priority": "P1",
+      "rig": "biped",
+      "anims": [
+        "idle",
+        "walk"
+      ],
+      "face_limit": 12000,
+      "scale_cm": {
+        "raw": "230 cm tall incl. hat (body 140 cm)",
+        "max_dim_cm": 230.0
+      },
+      "pivot": "feet",
+      "mass_kg": null,
+      "collision": "capsule",
+      "sockets": [
+        "hat",
+        "hand_r",
+        "head"
+      ],
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic, realistic human, muscular, gun, cane spikes",
+      "category": "Characters"
+    },
+    {
+      "id": "SM_Hat_Viking",
+      "priority": "P2",
+      "rig": null,
+      "anims": [],
+      "face_limit": 1500,
+      "scale_cm": {
+        "raw": "head ~25 cm reference",
+        "max_dim_cm": null
+      },
+      "pivot": "socket attach point",
+      "mass_kg": null,
+      "collision": "none",
+      "sockets": [],
+      "attach_socket": "head",
+      "category": "Cosmetics",
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, cartoon viking helmet, rounded iron cap with warm brown leather band, two huge curved cream horns"
+    },
+    {
+      "id": "SM_Hat_DuckCrown",
+      "priority": "P2",
+      "rig": null,
+      "anims": [],
+      "face_limit": 1500,
+      "scale_cm": {
+        "raw": "head ~25 cm reference",
+        "max_dim_cm": null
+      },
+      "pivot": "socket attach point",
+      "mass_kg": null,
+      "collision": "none",
+      "sockets": [],
+      "attach_socket": "head",
+      "category": "Cosmetics",
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, small gold paper-style crown with a big yellow rubber duck sitting on top"
+    },
+    {
+      "id": "SM_Hat_BeekeeperVeil",
+      "priority": "P2",
+      "rig": null,
+      "anims": [],
+      "face_limit": 1500,
+      "scale_cm": {
+        "raw": "head ~25 cm reference",
+        "max_dim_cm": null
+      },
+      "pivot": "socket attach point",
+      "mass_kg": null,
+      "collision": "none",
+      "sockets": [],
+      "attach_socket": "head",
+      "category": "Cosmetics",
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, wide-brim cream beekeeper hat with soft mesh veil hanging to shoulders"
+    },
+    {
+      "id": "SM_Neck_ConeOfShame",
+      "priority": "P2",
+      "rig": null,
+      "anims": [],
+      "face_limit": 1500,
+      "scale_cm": {
+        "raw": "head ~25 cm reference",
+        "max_dim_cm": null
+      },
+      "pivot": "socket attach point",
+      "mass_kg": null,
+      "collision": "none",
+      "sockets": [],
+      "attach_socket": "neck",
+      "category": "Cosmetics",
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, pet vet cone collar, soft translucent-looking cream plastic, chunky rim"
+    },
+    {
+      "id": "SM_Face_SunflowerGlasses",
+      "priority": "P2",
+      "rig": null,
+      "anims": [],
+      "face_limit": 1500,
+      "scale_cm": {
+        "raw": "head ~25 cm reference",
+        "max_dim_cm": null
+      },
+      "pivot": "socket attach point",
+      "mass_kg": null,
+      "collision": "none",
+      "sockets": [],
+      "attach_socket": "face",
+      "category": "Cosmetics",
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, novelty sunglasses with sunflower petal frames, dark lenses"
+    },
+    {
+      "id": "SM_Tool_GrandpaCamcorder",
+      "priority": "P2",
+      "rig": null,
+      "anims": [],
+      "face_limit": 1500,
+      "scale_cm": {
+        "raw": "head ~25 cm reference",
+        "max_dim_cm": null
+      },
+      "pivot": "socket attach point",
+      "mass_kg": null,
+      "collision": "none",
+      "sockets": [],
+      "attach_socket": "hand_r",
+      "category": "Cosmetics",
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, chunky 1990s camcorder with red record light and a strap, rounded toy shapes"
+    },
+    {
+      "id": "SM_Back_DuckFloatie",
+      "priority": "P2",
+      "rig": null,
+      "anims": [],
+      "face_limit": 1500,
+      "scale_cm": {
+        "raw": "head ~25 cm reference",
+        "max_dim_cm": null
+      },
+      "pivot": "socket attach point",
+      "mass_kg": null,
+      "collision": "none",
+      "sockets": [],
+      "attach_socket": "spine_03",
+      "category": "Cosmetics",
+      "negative_prompt": "photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high-frequency detail, scratches, grime, text, logo, watermark, ground plane, base, pedestal, platform, shadow plane, multiple objects, cropped, floating parts, thin spikes, horror gore, dark desaturated palette, metallic chrome, glossy plastic",
+      "prompt": "stylized hand-painted game asset, Emberlight farm style, chunky soft bevels, rounded toy-like proportions, big simple readable silhouette, soft warm palette (honey yellow, barn red, sage green, cream, warm brown), painted gradient albedo with baked soft ambient occlusion, no micro detail, low-poly-ish clean quad-friendly topology, single object, centered, neutral T-pose or rest pose, isolated on plain background, no base, no ground plane, no pedestal, inflatable yellow duck swim ring, glossy-painted but soft"
+    }
+  ]
+}

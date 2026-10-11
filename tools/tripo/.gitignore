@@ -1,0 +1,4 @@
+out/
+state.json
+state.json.tmp
+!out/*/preview_*.png
