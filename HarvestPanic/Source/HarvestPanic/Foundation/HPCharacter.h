@@ -98,6 +98,10 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Tick(float DeltaSeconds) override;
+	/** Look input scaled by the player's sensitivity / invert-Y setting. */
+	virtual void DoLook(float Yaw, float Pitch) override;
+	/** Pull sensitivity, invert Y and FOV from UHPGameUserSettings (frontend). */
+	void ApplyUserSettings(const class UHPGameUserSettings& Settings);
 
 protected:
 	virtual void BeginPlay() override;
@@ -249,6 +253,9 @@ private:
 	UPROPERTY(Transient) TObjectPtr<UInputAction> IA_ToolFeed;
 
 	bool bPawnReady = false;
+	float LookSensitivity = 1.f;
+	bool bInvertLookY = false;
+	FDelegateHandle SettingsHandle;
 
 	// Server-side bookkeeping
 	TArray<double> RecentRagdollTimes;

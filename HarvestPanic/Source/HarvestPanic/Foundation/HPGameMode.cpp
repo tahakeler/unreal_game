@@ -3,6 +3,7 @@
 #include "HPCharacter.h"
 #include "HPGameState.h"
 #include "HPPlayerState.h"
+#include "HPPlayerController.h"
 #include "Economy/HPEconomyMath.h"
 #include "Economy/HPGoodsComponent.h"
 #include "UI/HPHUD.h"
@@ -28,7 +29,7 @@ AHPGameMode::AHPGameMode()
 	GameStateClass = AHPGameState::StaticClass();
 	PlayerStateClass = AHPPlayerState::StaticClass();
 	DefaultPawnClass = AHPCharacter::StaticClass();
-	PlayerControllerClass = APlayerController::StaticClass(); // template PC is abstract
+	PlayerControllerClass = AHPPlayerController::StaticClass();
 	HUDClass = AHPHUD::StaticClass();
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.TickInterval = 0.1f;

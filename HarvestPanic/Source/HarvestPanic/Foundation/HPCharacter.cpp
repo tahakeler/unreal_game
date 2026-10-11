@@ -3,6 +3,7 @@
 #include "HPCarryComponent.h"
 #include "HPNoiseSubsystem.h"
 #include "HPGameState.h"
+#include "Frontend/HPGameUserSettings.h"
 #include "World/HPBarnRespawn.h"
 #include "World/HPBridgePlank.h"
 #include "EngineUtils.h"
@@ -144,12 +145,33 @@ void AHPCharacter::BeginPlay()
 		Stamina = StaminaMax;
 		FeedUsesLeft = FeedUsesPerBucket;
 	}
+	if (UHPGameUserSettings* Settings = UHPGameUserSettings::Get())
+	{
+		ApplyUserSettings(*Settings);
+	}
+	SettingsHandle = UHPGameUserSettings::OnHPSettingsApplied.AddWeakLambda(this, [this](const UHPGameUserSettings& Settings)
+	{
+		ApplyUserSettings(Settings);
+	});
 	bPawnReady = true;
 	OnPawnReady.Broadcast(this);
 }
 
+void AHPCharacter::ApplyUserSettings(const UHPGameUserSettings& Settings)
+{
+	LookSensitivity = Settings.GetMouseSensitivity();
+	bInvertLookY = Settings.GetInvertY();
+	BaseFOV = Settings.GetFieldOfView();
+}
+
+void AHPCharacter::DoLook(float Yaw, float Pitch)
+{
+	Super::DoLook(Yaw * LookSensitivity, (bInvertLookY ? -Pitch : Pitch) * LookSensitivity);
+}
+
 void AHPCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	UHPGameUserSettings::OnHPSettingsApplied.Remove(SettingsHandle);
 	if (DebugDrawHandle.IsValid())
 	{
 		UDebugDrawService::Unregister(DebugDrawHandle);

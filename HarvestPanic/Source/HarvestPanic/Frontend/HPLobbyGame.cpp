@@ -1,4 +1,5 @@
 #include "Frontend/HPLobbyGame.h"
+#include "Foundation/HPCharacter.h"
 #include "Frontend/HPGameInstance.h"
 #include "Frontend/HPFrontendTestHooks.h"
 #include "Frontend/HPFrontendUISubsystem.h"
@@ -132,12 +133,8 @@ AHPLobbyGameMode::AHPLobbyGameMode()
 	PlayerStateClass = AHPLobbyPlayerState::StaticClass();
 	PlayerControllerClass = AHPLobbyPlayerController::StaticClass();
 	bUseSeamlessTravel = false;
-	// Walk around as the template farmer until the HP character branch provides its own BP.
-	static ConstructorHelpers::FClassFinder<APawn> PawnBP(TEXT("/Game/ThirdPerson/Blueprints/BP_ThirdPersonCharacter"));
-	if (PawnBP.Succeeded())
-	{
-		DefaultPawnClass = PawnBP.Class;
-	}
+	// Integration: the lobby yard uses the real first-person farmer (cosmetics included).
+	DefaultPawnClass = AHPCharacter::StaticClass();
 }
 
 AHPLobbyGameState* AHPLobbyGameMode::LobbyGS() const { return GetGameState<AHPLobbyGameState>(); }
