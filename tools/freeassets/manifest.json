@@ -1,0 +1,22 @@
+{
+  "note": "Chosen free assets. glb paths are relative to tools/freeassets/downloads/. Spec data (scale/mass/collision/sockets) from tools/tripo/batch01.json ids.",
+  "items": [
+    {"id": "SK_Pig", "spec": "SK_Pig_Hamlet", "pack": "Quaternius", "glb": "polypizza_pig/pig.glb", "kind": "skeletal", "fit": "max", "target_cm": 110, "head_bone": "Head", "src": "https://poly.pizza/m/u35l6uP5vj"},
+    {"id": "SK_Chicken", "spec": "SK_Chicken", "pack": "Quaternius", "glb": "polypizza_chicken_b/chicken_b.glb", "kind": "skeletal", "fit": "max", "target_cm": 40, "head_bone": "Body", "src": "https://poly.pizza/m/Z3RCoCYss4"},
+    {"id": "SK_Cow", "spec": "SK_Cow_BigMartha", "pack": "Quaternius", "glb": "polypizza_cow/cow.glb", "kind": "skeletal", "fit": "max", "target_cm": 220, "head_bone": "Head", "src": "https://poly.pizza/m/26zM1outCr"},
+    {"id": "SK_Bull", "spec": "SK_Cow_BigMartha", "pack": "Quaternius", "glb": "polypizza_bull/bull.glb", "kind": "skeletal", "fit": "max", "target_cm": 230, "head_bone": "Head", "src": "https://poly.pizza/m/a8PIIYwF7r"},
+    {"id": "SK_Sheep", "spec": "SK_Sheep", "pack": "Quaternius", "glb": "polypizza_sheep/sheep.glb", "kind": "skeletal", "fit": "max", "target_cm": 100, "head_bone": "Head", "src": "https://poly.pizza/m/rgJXF570ZK"},
+    {"id": "SK_Alpaca", "spec": "SK_Goat_Gary", "pack": "Quaternius", "glb": "polypizza_alpaca/alpaca.glb", "kind": "skeletal", "fit": "max", "target_cm": 110, "head_bone": "Head", "src": "https://poly.pizza/m/bCVFD48i2l"},
+    {"id": "SK_Pigeon", "spec": "SK_Crow", "pack": "Quaternius", "glb": "polypizza_pigeon/pigeon.glb", "kind": "skeletal", "fit": "max", "target_cm": 40, "head_bone": "Head", "src": "https://poly.pizza/m/9NGlBTpDEr"},
+    {"id": "SM_PrizePumpkin", "spec": "SM_PrizePumpkin", "pack": "Quaternius", "glb": "polypizza_pumpkin/pumpkin.glb", "kind": "static", "fit": "max", "target_cm": 160, "src": "https://poly.pizza/m/bvLvqnU1jX"},
+    {"id": "SM_Crate", "spec": "SM_EggBasket_Crate", "pack": "Quaternius", "glb": "polypizza_crate_c/crate_c.glb", "kind": "static", "fit": "max", "target_cm": 40, "src": "https://poly.pizza/m/oTD0P0yGLG"},
+    {"id": "SM_Egg", "spec": null, "pack": "Quaternius", "glb": "polypizza_egg/egg.glb", "kind": "static", "fit": "max", "target_cm": 7, "collision": "sphere", "mass_kg": 0.06, "sockets": [], "src": "https://poly.pizza/m/ngjyRi84lk"},
+    {"id": "SM_FeedBucket", "spec": "SM_FeedBucket", "pack": "Quaternius", "glb": "polypizza_bucket/bucket.glb", "kind": "static", "fit": "height", "target_cm": 32, "src": "https://poly.pizza/m/83obI9bNun"},
+    {"id": "SM_MarketStall", "spec": "SM_MarketStall", "pack": "Quaternius", "glb": "polypizza_market_stand/market_stand.glb", "kind": "static", "fit": "max", "target_cm": 300, "src": "https://poly.pizza/m/hts7l0NZxW"},
+    {"id": "SM_MarketStalls_Set", "spec": null, "pack": "Quaternius", "glb": "polypizza_market_stalls/market_stalls.glb", "kind": "static", "fit": "none", "collision": "convex", "sockets": [], "src": "https://poly.pizza/m/PUZZ5F91OE"},
+    {"id": "SM_PenGate", "spec": "SM_MarketPenGate", "pack": "KayLousberg", "glb": "polypizza_fence_gate/fence_gate.glb", "kind": "static", "fit": "max", "target_cm": 200, "src": "https://poly.pizza/m/h5P9Kuk0V5"},
+    {"id": "SM_Turnip", "spec": "SK_Turnip", "pack": "Quaternius", "glb": "polypizza_turnip/turnip.glb", "kind": "static", "fit": "height", "target_cm": 25, "src": "https://poly.pizza/m/taMEmsQCye"},
+    {"id": "SM_Carrot", "spec": null, "pack": "Quaternius", "glb": "polypizza_carrot/carrot.glb", "kind": "static", "fit": "height", "target_cm": 25, "collision": "capsule", "mass_kg": 0.3, "sockets": [], "src": "https://poly.pizza/m/l4YmYv8hFK"},
+    {"id": "SM_Net", "spec": "SM_Net", "pack": "InHouse", "glb": "inhouse_net/net.glb", "kind": "static", "fit": "length", "target_cm": 140, "src": "tools/freeassets/scripts/make_net.py"}
+  ]
+}

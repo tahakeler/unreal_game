@@ -1,0 +1,79 @@
+[
+ {
+  "want_sockets": [
+   "head",
+   "grab_back",
+   "mouth"
+  ],
+  "id": "SK_Pig",
+  "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pig/SK_Pig",
+  "scale": 0.0816,
+  "src": "https://poly.pizza/m/u35l6uP5vj",
+  "sockets": [],
+  "loaded": true,
+  "bounds_cm": [
+   55.9,
+   106.8,
+   135.4
+  ],
+  "skeleton": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pig/pig_Skeleton.pig_Skeleton",
+  "bones": 18,
+  "bone_names": [
+   "All",
+   "FrontLeg_L",
+   "FrontLeg_L_end",
+   "FrontLeg_L_end_end",
+   "BackLeg_L",
+   "BackLeg_L_end",
+   "BackLeg_L_end_end",
+   "Body",
+   "Neck",
+   "Head",
+   "Head_end",
+   "Head_end_end",
+   "FrontLeg_R",
+   "FrontLeg_R_end",
+   "FrontLeg_R_end_end",
+   "BackLeg_R",
+   "BackLeg_R_end",
+   "BackLeg_R_end_end"
+  ],
+  "socket_list": [],
+  "verts": 2934,
+  "anims": [
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pig/pigAnimalArmature_AnimalArmature_AnimalArmature_Death",
+    "len_s": 0.88
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pig/pigAnimalArmature_AnimalArmature_AnimalArmature_Headbutt",
+    "len_s": 0.62
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pig/pigAnimalArmature_AnimalArmature_AnimalArmature_Idle",
+    "len_s": 6.67
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pig/pigAnimalArmature_AnimalArmature_AnimalArmature_Idle_Eating",
+    "len_s": 3.33
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pig/pigAnimalArmature_AnimalArmature_AnimalArmature_Jump_Loop",
+    "len_s": 1.0
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pig/pigAnimalArmature_AnimalArmature_AnimalArmature_Jump_Start",
+    "len_s": 0.25
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pig/pigAnimalArmature_AnimalArmature_AnimalArmature_Run",
+    "len_s": 0.67
+   },
+   {
+    "path": "/Game/HarvestPanic/ThirdParty/Quaternius/SK_Pig/pigAnimalArmature_AnimalArmature_AnimalArmature_Walk",
+    "len_s": 1.0
+   }
+  ],
+  "materials": 1
+ }
+]
