@@ -22,6 +22,9 @@ class UInputMappingContext;
 class UCameraComponent;
 class UPoseableMeshComponent;
 class UCanvas;
+class USkinnedMeshComponent;
+class USkeletalMeshComponent;
+enum class EHPBlameVerb : uint8;
 class APlayerController;
 
 UENUM(BlueprintType)
@@ -30,6 +33,8 @@ enum class EHPBodyState : uint8 { Normal, Ragdoll, KnockedOut };
 UENUM(BlueprintType)
 enum class EHPTool : uint8 { None, Net, FeedBucket };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FHPOnPawnReady, AHPCharacter*, Pawn);
+
 UCLASS()
 class HARVESTPANIC_API AHPCharacter : public AHarvestPanicCharacter
 {
@@ -37,6 +42,30 @@ class HARVESTPANIC_API AHPCharacter : public AHarvestPanicCharacter
 
 public:
 	AHPCharacter();
+
+	/**
+	 * Cosmetics hook (customization finds these via reflection). Full-body third-person mannequin
+	 * (what other players see). Never null after construction.
+	 */
+	UFUNCTION(BlueprintPure, Category="Cosmetics") USkeletalMeshComponent* GetBodyMesh3P() const;
+	/**
+	 * Owner-only first-person arms. Returned as USkinnedMeshComponent because the arms are a procedurally
+	 * posed UPoseableMeshComponent (not a USkeletalMeshComponent); SetSkinnedAssetAndUpdate / SetMaterial work on it.
+	 */
+	UFUNCTION(BlueprintPure, Category="Cosmetics") USkinnedMeshComponent* GetArmsMesh1P() const;
+	/** True once BeginPlay finished and OnPawnReady fired (late binders should check this first). */
+	UFUNCTION(BlueprintPure, Category="Cosmetics") bool IsPawnReady() const { return bPawnReady; }
+	/** Fired on every machine at the end of BeginPlay, when body and arms meshes exist. */
+	UPROPERTY(BlueprintAssignable, Category="Cosmetics") FHPOnPawnReady OnPawnReady;
+
+	/**
+	 * Server: charge the barn respawn fee (optional), drop what is held, get up and move to the barn.
+	 * Used by drowning and the end of a knockout.
+	 */
+	void ServerRespawnAtBarn(EHPBlameVerb Verb, bool bChargeFee);
+
+	/** Debug / input hook: patch the nearest broken bridge plank for $30. */
+	UFUNCTION(Exec) void HPPatch();
 
 	UHPCarryComponent* GetCarryComponent() const { return CarryComponent; }
 
@@ -157,6 +186,7 @@ protected:
 
 	UFUNCTION() void OnRep_BodyState();
 
+	UFUNCTION(Server, Reliable) void Server_PatchPlank();
 	UFUNCTION(Server, Reliable) void Server_SetSprint(bool bSprint);
 	UFUNCTION(Server, Reliable) void Server_Holler();
 	UFUNCTION(Server, Reliable) void Server_UseTool();
@@ -211,6 +241,8 @@ private:
 	UPROPERTY(Transient) TObjectPtr<UInputAction> IA_Tool;
 	UPROPERTY(Transient) TObjectPtr<UInputAction> IA_ToolNet;
 	UPROPERTY(Transient) TObjectPtr<UInputAction> IA_ToolFeed;
+
+	bool bPawnReady = false;
 
 	// Server-side bookkeeping
 	TArray<double> RecentRagdollTimes;

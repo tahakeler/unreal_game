@@ -4,6 +4,7 @@
 #include "HPCritterMoverComponent.h"
 #include "HPCritterAIController.h"
 #include "HPNoiseSubsystem.h"
+#include "Economy/HPGoodsComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -42,6 +43,8 @@ AHPCritter::AHPCritter()
 	Move->AvoidanceConsiderationRadius = 200.f;
 
 	Mover = CreateDefaultSubobject<UHPCritterMoverComponent>(TEXT("Mover"));
+	Goods = CreateDefaultSubobject<UHPGoodsComponent>(TEXT("Goods"));
+	Goods->bIsAlive = true;
 
 	Body = MakePart(this, TEXT("Body"), GetCapsuleComponent());
 	Head = MakePart(this, TEXT("Head"), Body);
@@ -69,6 +72,11 @@ void AHPCritter::BeginPlay()
 	ApplyBodyColor(Body, BodyColor);
 	ApplyBodyColor(Head, BodyColor);
 	ApplyBodyColor(Accent, AccentColor);
+	if (HasAuthority() && Goods && !GetGoodsId().IsNone())
+	{
+		Goods->ApplyPreset(GetGoodsId());
+		Goods->bIsAlive = true;
+	}
 	if (const UHPCritterPersonality* P = GetPersonality())
 	{
 		GetCharacterMovement()->MaxWalkSpeed = P->MoveSpeed;
@@ -126,6 +134,7 @@ void AHPCritter::OnGrabbed(AActor* By)
 	Carriers.Add(By);
 	if (bFirst)
 	{
+		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore); // do not shove the holder
 		Mover->Stop();
 		GetCharacterMovement()->StopMovementImmediately();
 		GetCharacterMovement()->DisableMovement();
@@ -151,6 +160,10 @@ void AHPCritter::OnReleased(AActor* By)
 		Carriers.Reset();
 	}
 	Carriers.RemoveAll([](const TWeakObjectPtr<AActor>& A) { return !A.IsValid(); });
+	if (Carriers.Num() == 0)
+	{
+		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	}
 	if (Carriers.Num() == 0 && State == ECritterState::Carried)
 	{
 		GetCharacterMovement()->SetMovementMode(MOVE_Falling);
@@ -209,6 +222,7 @@ void AHPCritter::TickStruggle(float DeltaSeconds)
 	StruggleTimer = FMath::FRandRange(P->StruggleIntervalMin, P->StruggleIntervalMax);
 	const FVector Dir = FVector(FMath::FRandRange(-1.f, 1.f), FMath::FRandRange(-1.f, 1.f), 0.4f).GetSafeNormal();
 	OnStruggle.Broadcast(this, Dir, P->StruggleImpulse);
+	ShoveCarriers(Dir, P->StruggleImpulse);
 
 	const float Chance = FHPCritterLogic::BreakFreeChance(P->SecureCarriers, Carriers.Num());
 	if (Chance > 0.f && FMath::FRand() < Chance)
@@ -218,6 +232,74 @@ void AHPCritter::TickStruggle(float DeltaSeconds)
 		OnReleased(nullptr);
 		LaunchCharacter(Dir * 300.f + FVector(0, 0, 250.f), true, true);
 	}
+}
+
+void AHPCritter::ShoveCarriers(const FVector& Direction, float ImpulseNs)
+{
+	for (const TWeakObjectPtr<AActor>& Weak : Carriers)
+	{
+		if (ACharacter* Holder = Cast<ACharacter>(Weak.Get()))
+		{
+			// N*s -> kg*cm/s; the holder is ~100 kg so this is roughly ImpulseNs cm/s of wobble.
+			Holder->GetCharacterMovement()->AddImpulse(Direction.GetSafeNormal2D() * ImpulseNs * 100.f);
+		}
+	}
+}
+
+// ---- IHPCarryable --------------------------------------------------------------
+
+float AHPCritter::GetCarryMassKg() const
+{
+	return Goods ? Goods->MassKg : 10.f;
+}
+
+UPrimitiveComponent* AHPCritter::GetCarryPrimitive() const
+{
+	return GetCapsuleComponent();
+}
+
+void AHPCritter::AddCarrierHands(AActor* Carrier, int32 Hands)
+{
+	if (!HasAuthority() || !IsCarryable())
+	{
+		return;
+	}
+	CarrierHands.FindOrAdd(Carrier) = Hands;
+	OnGrabbed(Carrier);
+}
+
+void AHPCritter::RemoveCarrier(AActor* Carrier)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+	CarrierHands.Remove(Carrier);
+	OnReleased(Carrier);
+}
+
+int32 AHPCritter::GetHandsAttached() const
+{
+	int32 Total = 0;
+	for (const TPair<TWeakObjectPtr<AActor>, int32>& Pair : CarrierHands)
+	{
+		Total += (Pair.Key.IsValid() && Carriers.Contains(Pair.Key)) ? Pair.Value : 0;
+	}
+	return Total;
+}
+
+void AHPCritter::NotifyTouched(AActor* Toucher, bool bThrown)
+{
+	if (HasAuthority() && Goods)
+	{
+		Goods->RecordTouch(Toucher);
+	}
+}
+
+void AHPCritter::ApplyThrowVelocity(const FVector& VelocityCmS)
+{
+	GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+	LaunchCharacter(VelocityCmS, true, true);
 }
 
 void AHPCritter::UpdateWobble(float DeltaSeconds)

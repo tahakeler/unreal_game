@@ -7,7 +7,7 @@ void FHPTouchHistory::AddTouch(int32 PlayerId, double Now, int32 MaxKept)
 	{
 		return;
 	}
-	Records.RemoveAll([PlayerId](const FHPTouchRecord& R) { return R.PlayerId == PlayerId; });
+	Records.RemoveAll([PlayerId](const FHPCarryTouchRecord& R) { return R.PlayerId == PlayerId; });
 	Records.Add({PlayerId, Now});
 	while (Records.Num() > FMath::Max(1, MaxKept))
 	{
@@ -20,7 +20,7 @@ TArray<int32> FHPTouchHistory::GetRecentToucherIds(double Now, double Window, in
 	TArray<int32> Out;
 	for (int32 i = Records.Num() - 1; i >= 0 && Out.Num() < MaxCount; --i)
 	{
-		const FHPTouchRecord& R = Records[i];
+		const FHPCarryTouchRecord& R = Records[i];
 		if (Now - R.Time <= Window)
 		{
 			Out.Add(R.PlayerId);

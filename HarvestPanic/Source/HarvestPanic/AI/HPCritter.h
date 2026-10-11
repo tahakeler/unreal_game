@@ -12,12 +12,14 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "HPCritterTypes.h"
+#include "Carry/HPCarryable.h"
 #include "HPCritter.generated.h"
 
 class UHPCritterPersonality;
 class UHPCritterMoverComponent;
 class UStaticMeshComponent;
 class UMaterialInterface;
+class UHPGoodsComponent;
 class UStaticMesh;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnCritterStruggle, AHPCritter*, Critter, FVector, ImpulseDirection, float, ImpulseNs);
@@ -25,7 +27,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCritterBreakFree, AHPCritter*, Cr
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnCritterStateChanged, AHPCritter*, Critter, ECritterState, OldState, ECritterState, NewState);
 
 UCLASS(Abstract)
-class HARVESTPANIC_API AHPCritter : public ACharacter
+class HARVESTPANIC_API AHPCritter : public ACharacter, public IHPCarryable
 {
 	GENERATED_BODY()
 
@@ -66,7 +68,7 @@ public:
 	void OnReleased(AActor* By = nullptr);
 
 	UFUNCTION(BlueprintPure, Category="Critter|Carry")
-	int32 GetCarryHands() const;
+	virtual int32 GetCarryHands() const override;
 
 	UFUNCTION(BlueprintPure, Category="Critter|Carry")
 	int32 GetSecureCarriers() const;
@@ -89,6 +91,17 @@ public:
 	FOnCritterBreakFree OnBreakFree;
 
 	UHPCritterMoverComponent* GetMover() const { return Mover; }
+	UHPGoodsComponent* GetGoods() const { return Goods; }
+
+	// ---- IHPCarryable (integration: critters are carried kinematically by UHPCarryComponent) ----
+	virtual float GetCarryMassKg() const override;
+	virtual UPrimitiveComponent* GetCarryPrimitive() const override;
+	virtual void AddCarrierHands(AActor* Carrier, int32 Hands) override;
+	virtual void RemoveCarrier(AActor* Carrier) override;
+	virtual int32 GetHandsAttached() const override;
+	virtual void NotifyTouched(AActor* Toucher, bool bThrown) override;
+	virtual bool IsKinematicCarry() const override { return true; }
+	virtual void ApplyThrowVelocity(const FVector& VelocityCmS) override;
 
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -99,6 +112,10 @@ protected:
 	void UpdateWobble(float DeltaSeconds);
 	void TickStruggle(float DeltaSeconds);
 	void EmitGrabNoise(AActor* By);
+	/** Server: shove every holder along ImpulseDirection (N*s) -- the wriggle the carrier feels. */
+	void ShoveCarriers(const FVector& Direction, float ImpulseNs);
+	/** Goods preset id for this species ("Pig", "Chicken"). */
+	virtual FName GetGoodsId() const { return NAME_None; }
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Critter")
 	TObjectPtr<UHPCritterMoverComponent> Mover;
@@ -114,6 +131,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Critter|Visual")
 	TObjectPtr<UStaticMeshComponent> Head;
 
+	/** Sellable goods data (goods-value). Preset chosen by GetGoodsId(). */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Critter|Economy")
+	TObjectPtr<UHPGoodsComponent> Goods;
+
 	UPROPERTY(EditAnywhere, Category="Critter|Visual") FLinearColor BodyColor = FLinearColor::White;
 	UPROPERTY(EditAnywhere, Category="Critter|Visual") FLinearColor AccentColor = FLinearColor::White;
 	UPROPERTY(EditAnywhere, Category="Critter|Visual") float WobbleFrequency = 14.f;
@@ -126,6 +147,8 @@ protected:
 	ECritterState State = ECritterState::Idle;
 
 	TArray<TWeakObjectPtr<AActor>> Carriers;
+	/** Hands each carrier supplies (server). */
+	TMap<TWeakObjectPtr<AActor>, int32> CarrierHands;
 	float StruggleTimer = 1.f;
 	float WobblePhase = 0.f;
 	FVector BodyBaseLoc = FVector::ZeroVector;
@@ -138,6 +161,8 @@ class HARVESTPANIC_API AHPCritter_Pig : public AHPCritter
 	GENERATED_BODY()
 public:
 	AHPCritter_Pig();
+protected:
+	virtual FName GetGoodsId() const override { return TEXT("Pig"); }
 };
 
 UCLASS()
@@ -146,4 +171,6 @@ class HARVESTPANIC_API AHPCritter_Chicken : public AHPCritter
 	GENERATED_BODY()
 public:
 	AHPCritter_Chicken();
+protected:
+	virtual FName GetGoodsId() const override { return TEXT("Chicken"); }
 };

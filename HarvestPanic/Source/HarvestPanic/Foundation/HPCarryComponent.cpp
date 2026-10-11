@@ -84,6 +84,7 @@ AActor* UHPCarryComponent::TraceAimTarget(const FVector& ViewStart, const FVecto
 	FCollisionObjectQueryParams Objects;
 	Objects.AddObjectTypesToQuery(ECC_PhysicsBody);
 	Objects.AddObjectTypesToQuery(ECC_WorldDynamic);
+	Objects.AddObjectTypesToQuery(ECC_Pawn); // critters are pawns
 	TArray<FHitResult> Hits;
 	GetWorld()->SweepMultiByObjectType(Hits, ViewStart, ViewStart + ViewDir.GetSafeNormal() * GrabRangeCm, FQuat::Identity,
 		Objects, FCollisionShape::MakeSphere(GrabSweepRadiusCm), Params);
@@ -193,12 +194,16 @@ bool UHPCarryComponent::ServerGrabActor(AActor* Target)
 		return false;
 	}
 	UPrimitiveComponent* Prim = Carryable->GetCarryPrimitive();
-	if (!Prim || !Prim->IsSimulatingPhysics())
+	const bool bKinematic = Carryable->IsKinematicCarry();
+	if (!Prim || (!bKinematic && !Prim->IsSimulatingPhysics()))
 	{
 		return false;
 	}
 	const int32 Hands = FMath::Min(HandsPerPlayer, Carryable->GetCarryHands());
-	Handle->GrabComponentAtLocationWithRotation(Prim, NAME_None, Prim->GetComponentLocation(), Prim->GetComponentRotation());
+	if (!bKinematic)
+	{
+		Handle->GrabComponentAtLocationWithRotation(Prim, NAME_None, Prim->GetComponentLocation(), Prim->GetComponentRotation());
+	}
 	HeldActor = Target;
 	Carryable->AddCarrierHands(GetOwner(), Hands);
 	Carryable->NotifyTouched(GetOwner(), false);
@@ -210,7 +215,7 @@ bool UHPCarryComponent::ServerGrabActor(AActor* Target)
 void UHPCarryComponent::ServerRelease(bool bThrown)
 {
 	check(GetOwner()->HasAuthority());
-	if (Handle)
+	if (Handle && Handle->GetGrabbedComponent())
 	{
 		Handle->ReleaseComponent();
 	}
@@ -243,12 +248,13 @@ void UHPCarryComponent::DoThrow(float Charge, const FVector& ViewDir)
 		return;
 	}
 	UPrimitiveComponent* Prim = Carryable->GetCarryPrimitive();
+	AActor* Thrown = HeldActor;
 	ServerRelease(true);
-	if (Prim)
+	if (Prim && IsValid(Thrown))
 	{
 		const float SpeedMs = HPCarryMath::ThrowSpeed(Charge, Mass, ThrowSpeedMin, ThrowSpeedMax, ThrowRefMassKg, ThrowMassFactorMin);
 		const FVector Dir = (FVector(ViewDir.X, ViewDir.Y, FMath::Max(ViewDir.Z, 0.f)).GetSafeNormal() + FVector(0, 0, ThrowLoftZ)).GetSafeNormal();
-		Prim->SetPhysicsLinearVelocity(Dir * SpeedMs * 100.f);
+		Carryable->ApplyThrowVelocity(Dir * SpeedMs * 100.f);
 	}
 }
 
@@ -274,7 +280,17 @@ void UHPCarryComponent::UpdateServerHold()
 		ServerRelease(false); // slip
 		return;
 	}
-	Handle->SetTargetLocationAndRotation(Target, GetOwner()->GetActorRotation());
+	if (Carryable->IsKinematicCarry())
+	{
+		AActor* Body = HeldActor;
+		const float Dt = GetWorld()->GetDeltaSeconds();
+		Body->SetActorLocationAndRotation(FMath::VInterpTo(Body->GetActorLocation(), Target, Dt, HandInterpSpeed),
+			FMath::RInterpTo(Body->GetActorRotation(), GetOwner()->GetActorRotation(), Dt, HandInterpSpeed), false, nullptr, ETeleportType::TeleportPhysics);
+	}
+	else
+	{
+		Handle->SetTargetLocationAndRotation(Target, GetOwner()->GetActorRotation());
+	}
 
 	SpeedMultiplier = HPCarryMath::CarrySpeedMultiplier(Mass, Total, Required, KgPerHand, SpeedFloor);
 	LoadRatio = HPCarryMath::LoadRatio(Mass, Total, KgPerHand);
@@ -286,6 +302,12 @@ void UHPCarryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	if (GetOwner()->HasAuthority() && HeldActor)
 	{
 		if (!IsValid(HeldActor))
+		{
+			ServerRelease(false);
+			return;
+		}
+		// The carryable let go of us (a critter breaking free removes all its carriers).
+		if (GetHeldCarryable() && GetHeldCarryable()->GetHandsAttached() <= 0)
 		{
 			ServerRelease(false);
 			return;

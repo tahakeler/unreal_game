@@ -2,6 +2,10 @@
 #include "HPCharacter.h"
 #include "HPCarryComponent.h"
 #include "HPNoiseSubsystem.h"
+#include "HPGameState.h"
+#include "World/HPBarnRespawn.h"
+#include "World/HPBridgePlank.h"
+#include "EngineUtils.h"
 #include "Carry/HPCarryable.h"
 #include "Carry/HPCarryMath.h"
 #include "Animation/AnimInstance.h"
@@ -140,6 +144,8 @@ void AHPCharacter::BeginPlay()
 		Stamina = StaminaMax;
 		FeedUsesLeft = FeedUsesPerBucket;
 	}
+	bPawnReady = true;
+	OnPawnReady.Broadcast(this);
 }
 
 void AHPCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -465,7 +471,10 @@ void AHPCharacter::Server_UseTool_Implementation()
 		// the player's hands (no bag body / critter escape yet -- critter-ai owns that).
 		TArray<FOverlapResult> Overlaps;
 		FCollisionQueryParams Params(SCENE_QUERY_STAT(HPNet), false, this);
-		World->OverlapMultiByChannel(Overlaps, GetActorLocation(), FQuat::Identity, ECC_PhysicsBody,
+		FCollisionObjectQueryParams NetObjects;
+		NetObjects.AddObjectTypesToQuery(ECC_PhysicsBody);
+		NetObjects.AddObjectTypesToQuery(ECC_Pawn); // critters
+		World->OverlapMultiByObjectType(Overlaps, GetActorLocation(), FQuat::Identity, NetObjects,
 			FCollisionShape::MakeSphere(NetReachCm), Params);
 		const float CosHalfArc = FMath::Cos(FMath::DegreesToRadians(NetArcDegrees * 0.5f));
 		AActor* Best = nullptr;
@@ -619,6 +628,76 @@ void AHPCharacter::ReceiveImpactImpulse(float ImpulseNs, int32 InstigatorPlayerI
 	SetBodyState(bKO ? EHPBodyState::KnockedOut : EHPBodyState::Ragdoll);
 }
 
+USkeletalMeshComponent* AHPCharacter::GetBodyMesh3P() const
+{
+	return GetMesh();
+}
+
+USkinnedMeshComponent* AHPCharacter::GetArmsMesh1P() const
+{
+	return FirstPersonArms;
+}
+
+void AHPCharacter::ServerRespawnAtBarn(EHPBlameVerb Verb, bool bChargeFee)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+	if (bChargeFee)
+	{
+		if (AHPGameState* GS = GetWorld()->GetGameState<AHPGameState>())
+		{
+			GS->ChargeRespawnFee(GetPlayerState(), Verb); // logs the Blame Event at the pre-teleport location
+		}
+	}
+	if (CarryComponent->IsHolding())
+	{
+		CarryComponent->ServerRelease(false);
+	}
+	if (BodyState != EHPBodyState::Normal)
+	{
+		SetBodyState(EHPBodyState::Normal);
+	}
+	if (const AHPBarnRespawn* Barn = AHPBarnRespawn::Find(GetWorld()))
+	{
+		const APlayerState* PS = GetPlayerState();
+		const FTransform Slot = Barn->GetRespawnTransform(PS ? PS->GetPlayerId() : 0);
+		TeleportTo(Slot.GetLocation(), Slot.Rotator());
+		if (AController* C = GetController())
+		{
+			C->SetControlRotation(Slot.Rotator());
+		}
+	}
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCharacterMovement()->SetMovementMode(MOVE_Falling);
+	Stamina = StaminaMax;
+}
+
+void AHPCharacter::HPPatch()
+{
+	Server_PatchPlank();
+}
+
+void AHPCharacter::Server_PatchPlank_Implementation()
+{
+	AHPBridgePlank* Best = nullptr;
+	float BestDist = 450.f;
+	for (TActorIterator<AHPBridgePlank> It(GetWorld()); It; ++It)
+	{
+		const float D = FVector::Dist(It->GetActorLocation(), GetActorLocation());
+		if (It->GetPlankState() == EHPPlankState::Broken && D < BestDist)
+		{
+			Best = *It;
+			BestDist = D;
+		}
+	}
+	if (Best)
+	{
+		Best->ServerPatch(this);
+	}
+}
+
 void AHPCharacter::ServerRecover()
 {
 	if (HasAuthority() && BodyState != EHPBodyState::Normal)
@@ -721,7 +800,7 @@ void AHPCharacter::TickBodyState(float DeltaSeconds)
 		SettledSeconds = Speed < GetUpMaxSpeed ? SettledSeconds + DeltaSeconds : 0.f;
 		if (BodyState == EHPBodyState::KnockedOut && Now - BodyStateStartTime >= KODuration)
 		{
-			SetBodyState(EHPBodyState::Normal);
+			ServerRespawnAtBarn(EHPBlameVerb::KnockedOut, true); // unrevived: carted back to the barn for a fee
 		}
 	}
 

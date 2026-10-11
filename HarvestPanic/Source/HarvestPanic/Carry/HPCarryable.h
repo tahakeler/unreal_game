@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "Components/PrimitiveComponent.h"
 #include "HPCarryable.generated.h"
 
 class UPrimitiveComponent;
@@ -35,4 +36,19 @@ public:
 
 	/** Server: touch history hook (grab, drop, throw). */
 	virtual void NotifyTouched(AActor* Toucher, bool bThrown) = 0;
+
+	/**
+	 * True for bodies that are not physics-simulated (characters such as critters). The carry
+	 * component then moves the actor to the hold point itself instead of using a physics handle.
+	 */
+	virtual bool IsKinematicCarry() const { return false; }
+
+	/** Server: launch the body after a throw. Default sets the simulating primitive's velocity (cm/s). */
+	virtual void ApplyThrowVelocity(const FVector& VelocityCmS)
+	{
+		if (UPrimitiveComponent* Prim = GetCarryPrimitive())
+		{
+			Prim->SetPhysicsLinearVelocity(VelocityCmS);
+		}
+	}
 };

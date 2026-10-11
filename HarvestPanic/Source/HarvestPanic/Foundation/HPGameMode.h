@@ -52,6 +52,9 @@ public:
 
 	static float GetDayLengthScale();
 
+	/** World markers tagged HP_PlayerStart win over APlayerStart actors (docs/engine/marker-contract.md). */
+	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;

@@ -6,6 +6,7 @@
 #include "Economy/HPEconomyMath.h"
 #include "Economy/HPGoodsComponent.h"
 #include "UI/HPHUD.h"
+#include "World/HPMarkerResolver.h"
 #include "HAL/IConsoleManager.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h"
@@ -44,6 +45,18 @@ AHPGameState* AHPGameMode::GetHPGameState() const
 int32 AHPGameMode::CurrentPlayerCount() const
 {
 	return FMath::Clamp(GameState ? GameState->PlayerArray.Num() : 1, 1, MaxPlayers);
+}
+
+AActor* AHPGameMode::ChoosePlayerStart_Implementation(AController* Player)
+{
+	TArray<AActor*> Markers;
+	UHPMarkerResolver::CollectPlayerStartMarkers(GetWorld(), Markers);
+	if (Markers.Num() == 0)
+	{
+		return Super::ChoosePlayerStart_Implementation(Player);
+	}
+	const int32 Slot = (GameState && Player && Player->PlayerState) ? GameState->PlayerArray.IndexOfByKey(Player->PlayerState) : 0;
+	return Markers[FMath::Max(0, Slot) % Markers.Num()];
 }
 
 void AHPGameMode::BeginPlay()

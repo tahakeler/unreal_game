@@ -8,7 +8,7 @@
 #include "CoreMinimal.h"
 
 /** One entry in an item's touch history (server only). */
-struct HARVESTPANIC_API FHPTouchRecord
+struct HARVESTPANIC_API FHPCarryTouchRecord
 {
 	/** APlayerState::GetPlayerId(); INDEX_NONE = nobody. */
 	int32 PlayerId = INDEX_NONE;
@@ -19,7 +19,7 @@ struct HARVESTPANIC_API FHPTouchRecord
 /** Rolling touch history; newest entry last internally, queried newest-first. */
 struct HARVESTPANIC_API FHPTouchHistory
 {
-	TArray<FHPTouchRecord> Records;
+	TArray<FHPCarryTouchRecord> Records;
 
 	/** Records a touch. A player touching again moves to the front (newest). Keeps at most MaxKept. */
 	void AddTouch(int32 PlayerId, double Now, int32 MaxKept = 8);
