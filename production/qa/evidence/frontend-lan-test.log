@@ -1,0 +1,58 @@
+LogHPSession: HPSession: online subsystem = NULL (LAN fallback)
+LogLoad: LoadMap: /Game/HarvestPanic/Frontend/Lvl_MainMenu?Name=Player
+LogLoad: Game class is 'HPMenuGameMode'
+LogHPMenu: HPMenu: auto-host
+LogHPSession: HPSession: creating session (LAN=1)
+LogHPSession: HPSession: session created, opening lobby as listen server
+LogLoad: LoadMap: /Game/HarvestPanic/Frontend/Lvl_Lobby?listen
+LogLoad: Game class is 'HPLobbyGameMode'
+LogHPLobby: HPLobby[server]: roster now 1
+LogHPLobby: HPLobby[server]: name replicated -> 'Tahas-MacBook-Pro.lo'
+LogHPLobby: HPLobby[server]: PostLogin 'Tahas-MacBook-Pro.lo' host=1 players=1
+LogHPLobby: HPLobby[server]: name replicated -> 'HostFarmer'
+LogHPLobby: HPLobby[server]: display name set 'HostFarmer'
+LogHPLobby: HPLobby[server]: player state 'HostFarmer' present (ready=0 host=1)
+LogHPLobby: HPLobby[server]: 'HostFarmer' ready=1
+LogHPLobby: HPLobby[server]: chat 'HostFarmer: howdy from the test farm'
+LogHPLobby: HPLobby[server]: roster now 2
+LogHPLobby: HPLobby[server]: player state '' present (ready=0 host=0)
+LogHPLobby: HPLobby[server]: name replicated -> 'Tahas-MacBook-Pro.lo'
+LogHPLobby: HPLobby[server]: PostLogin 'Tahas-MacBook-Pro.lo' host=0 players=2
+LogHPLobby: HPLobby[server]: name replicated -> 'GuestFarmer'
+LogHPLobby: HPLobby[server]: display name set 'GuestFarmer'
+LogHPLobby: HPLobby[server]: 'GuestFarmer' ready=1
+LogHPLobby: HPLobby[server]: chat 'DING DING DING! Dinner's in 3...'
+LogHPLobby: HPLobby[server]: starting the day -> ServerTravel /Game/ThirdPerson/Lvl_ThirdPerson?listen
+LogNet: UChannel::CleanUp: ChIndex == 0. Closing connection. [UChannel] ChIndex: 0, Closing: 0 [UNetConnection] RemoteAddr: 192.168.1.107:54318, Name: IpConnection_0, Driver: Name:GameNetDriver Def:GameNetDriver IpNetDriver_0, IsServer: YES, PC: HPLobbyPlayerController_1, Owner: HPLobbyPlayerController_1, UniqueId: NULL:Tahas-MacBook-Pro.local-EF38473BAC47726AECEACC93A18F309F
+LogNet: UNetConnection::Close: [UNetConnection] RemoteAddr: 192.168.1.107:54318, Name: IpConnection_0, Driver: Name:GameNetDriver Def:GameNetDriver IpNetDriver_0, IsServer: YES, PC: HPLobbyPlayerController_1, Owner: HPLobbyPlayerController_1, UniqueId: NULL:Tahas-MacBook-Pro.local-EF38473BAC47726AECEACC93A18F309F, Channels: 11, Time: 2026.10.11-07.46.29
+LogNet: UChannel::Close: Sending CloseBunch. ChIndex == 0. Name: [UChannel] ChIndex: 0, Closing: 0 [UNetConnection] RemoteAddr: 192.168.1.107:54318, Name: IpConnection_0, Driver: Name:GameNetDriver Def:GameNetDriver IpNetDriver_0, IsServer: YES, PC: HPLobbyPlayerController_1, Owner: HPLobbyPlayerController_1, UniqueId: NULL:Tahas-MacBook-Pro.local-EF38473BAC47726AECEACC93A18F309F
+LogNet: UNetDriver::RemoveClientConnection - Removed address 192.168.1.107:54318 from MappedClientConnections for: [UNetConnection] RemoteAddr: 192.168.1.107:54318, Name: IpConnection_0, Driver: Name:GameNetDriver Def:GameNetDriver IpNetDriver_0, IsServer: YES, PC: HPLobbyPlayerController_1, Owner: HPLobbyPlayerController_1, UniqueId: NULL:Tahas-MacBook-Pro.local-EF38473BAC47726AECEACC93A18F309F
+LogHPLobby: HPLobby[server]: chat 'GuestFarmer left the yard.'
+LogLoad: LoadMap: /Game/ThirdPerson/Lvl_ThirdPerson?listen
+LogHPLobby: HPLobby[server]: chat 'HostFarmer left the yard.'
+LogNet: Login request: ?game=/Script/HarvestPanic.HPLobbyGameMode?Name=Tahas-MacBook-Pro.local-EF38473BAC47726AECEACC93A18F309F userId: NULL:Tahas-MacBook-Pro.local-EF38473BAC47726AECEACC93A18F309F platform: NULL
+LogNet: Join request: /Game/ThirdPerson/Lvl_ThirdPerson?game=/Script/HarvestPanic.HPLobbyGameMode?Name=Tahas-MacBook-Pro.local-EF38473BAC47726AECEACC93A18F309F?SplitscreenCount=1
+LogHPSession: HPSession: online subsystem = NULL (LAN fallback)
+LogLoad: LoadMap: /Game/HarvestPanic/Frontend/Lvl_MainMenu?Name=Player
+LogLoad: Game class is 'HPMenuGameMode'
+LogHPSession: HPSession: searching (LAN=1)
+LogHPSession: HPSession: search finished ok=1 results=1
+LogHPMenu: HPMenu: auto-find found 1, joining 'HostFarmer'
+LogHPSession: HPSession: joined session, travelling to 192.168.1.107:7777
+LogNet: Welcomed by server (Level: /Game/HarvestPanic/Frontend/Lvl_Lobby, Game: /Script/HarvestPanic.HPLobbyGameMode)
+LogLoad: LoadMap: 192.168.1.107/Game/HarvestPanic/Frontend/Lvl_Lobby?game=/Script/HarvestPanic.HPLobbyGameMode
+LogHPLobby: HPLobby[client]: roster now 1
+LogHPLobby: HPLobby[client]: name replicated -> 'HostFarmer'
+LogHPLobby: HPLobby[client]: 'HostFarmer' ready=1
+LogHPLobby: HPLobby[client]: player state 'HostFarmer' present (ready=1 host=1)
+LogHPLobby: HPLobby[client]: roster now 2
+LogHPLobby: HPLobby[client]: name replicated -> 'Tahas-MacBook-Pro.lo'
+LogHPLobby: HPLobby[client]: player state 'Tahas-MacBook-Pro.lo' present (ready=0 host=0)
+LogHPLobby: HPLobby[client]: name replicated -> 'GuestFarmer'
+LogHPLobby: HPLobby[client]: 'GuestFarmer' ready=1
+LogGlobalStatus: Browse Started Browse: "192.168.1.107/Game/ThirdPerson/Lvl_ThirdPerson?game=/Script/HarvestPanic.HPLobbyGameMode"
+LogNet: Browse: 192.168.1.107/Game/ThirdPerson/Lvl_ThirdPerson?game=/Script/HarvestPanic.HPLobbyGameMode
+LogNet: UNetConnection::Close: [UNetConnection] RemoteAddr: 192.168.1.107:7777, Name: IpConnection_0, Driver: Name:GameNetDriver Def:GameNetDriver IpNetDriver_0, IsServer: NO, PC: HPLobbyPlayerController_0, Owner: HPLobbyPlayerController_0, UniqueId: NULL:Tahas-MacBook-Pro.local-EF38473BAC47726AECEACC93A18F309F, Channels: 11, Time: 2026.10.11-07.46.29
+LogNet: UChannel::Close: Sending CloseBunch. ChIndex == 0. Name: [UChannel] ChIndex: 0, Closing: 0 [UNetConnection] RemoteAddr: 192.168.1.107:7777, Name: IpConnection_0, Driver: Name:GameNetDriver Def:GameNetDriver IpNetDriver_0, IsServer: NO, PC: HPLobbyPlayerController_0, Owner: HPLobbyPlayerController_0, UniqueId: NULL:Tahas-MacBook-Pro.local-EF38473BAC47726AECEACC93A18F309F
+LogNet: Welcomed by server (Level: /Game/ThirdPerson/Lvl_ThirdPerson, Game: /Game/ThirdPerson/Blueprints/BP_ThirdPersonGameMode.BP_ThirdPersonGameMode_C)
+LogLoad: LoadMap: 192.168.1.107/Game/ThirdPerson/Lvl_ThirdPerson?game=/Game/ThirdPerson/Blueprints/BP_ThirdPersonGameMode.BP_ThirdPersonGameMode_C
