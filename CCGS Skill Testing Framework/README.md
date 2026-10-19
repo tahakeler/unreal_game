@@ -50,7 +50,7 @@ CCGS Skill Testing Framework/
 │   ├── leads/             ← lead-programmer, narrative-director, audio-director, game-designer, systems-designer, level-designer, qa-lead
 │   ├── specialists/       ← gameplay/engine/network/AI/tools/UI programmers, technical-artist, sound-designer, ux-designer, performance-analyst, prototyper, writer, world-builder
 │   ├── engine/            ← engine-specific specialists, split per engine:
-│   │   └── unreal/        ← Unreal-specific specialists
+│   │   └── unity/         ← Unity-specific specialists
 │   ├── operations/        ← devops, release, live-ops, community, analytics, economy, localization
 │   └── qa/                ← qa-tester, security-engineer, accessibility-specialist
 │
@@ -127,7 +127,7 @@ All testing is driven by two skills already in the framework:
 | `directors` | creative-director, technical-director, producer, art-director |
 | `leads` | lead-programmer, narrative-director, audio-director, game-designer, systems-designer, level-designer, qa-lead |
 | `specialists` | gameplay-programmer, engine-programmer, network-programmer, ai-programmer, tools-programmer, ui-programmer, ux-designer, technical-artist, sound-designer, performance-analyst, prototyper, writer, world-builder |
-| `engine/unreal` | unreal-specialist, ue-gas-specialist, ue-replication-specialist, ue-umg-specialist, ue-blueprint-specialist |
+| `engine/unity` | unity-specialist, unity-ui-specialist, unity-shader-specialist, unity-dots-specialist, unity-addressables-specialist |
 | `operations` | devops-engineer, release-manager, live-ops-designer, community-manager, analytics-engineer, economy-designer, localization-lead |
 | `qa` | qa-tester, security-engineer, accessibility-specialist |
 

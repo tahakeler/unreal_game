@@ -1007,41 +1007,37 @@ agents:
     last_category_result: ""
     category: specialist
 
-  # Engine Specialists — Unreal
-  - name: unreal-specialist
-    spec: CCGS Skill Testing Framework/agents/engine/unreal/unreal-specialist.md
+  # Engine Specialists — Unity
+  - name: unity-specialist
+    spec: CCGS Skill Testing Framework/agents/engine/unity/unity-specialist.md
     last_spec: ""
     last_spec_result: ""
     last_category: ""
     last_category_result: ""
     category: engine
-
-  - name: ue-blueprint-specialist
-    spec: CCGS Skill Testing Framework/agents/engine/unreal/ue-blueprint-specialist.md
+  - name: unity-ui-specialist
+    spec: CCGS Skill Testing Framework/agents/engine/unity/unity-ui-specialist.md
     last_spec: ""
     last_spec_result: ""
     last_category: ""
     last_category_result: ""
     category: engine
-
-  - name: ue-gas-specialist
-    spec: CCGS Skill Testing Framework/agents/engine/unreal/ue-gas-specialist.md
+  - name: unity-shader-specialist
+    spec: CCGS Skill Testing Framework/agents/engine/unity/unity-shader-specialist.md
     last_spec: ""
     last_spec_result: ""
     last_category: ""
     last_category_result: ""
     category: engine
-
-  - name: ue-umg-specialist
-    spec: CCGS Skill Testing Framework/agents/engine/unreal/ue-umg-specialist.md
+  - name: unity-dots-specialist
+    spec: CCGS Skill Testing Framework/agents/engine/unity/unity-dots-specialist.md
     last_spec: ""
     last_spec_result: ""
     last_category: ""
     last_category_result: ""
     category: engine
-
-  - name: ue-replication-specialist
-    spec: CCGS Skill Testing Framework/agents/engine/unreal/ue-replication-specialist.md
+  - name: unity-addressables-specialist
+    spec: CCGS Skill Testing Framework/agents/engine/unity/unity-addressables-specialist.md
     last_spec: ""
     last_spec_result: ""
     last_category: ""

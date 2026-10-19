@@ -218,14 +218,14 @@ writer, world-builder
 
 ### `engine`
 
-**Agents**: unreal-specialist, ue-blueprint-specialist, ue-gas-specialist, ue-umg-specialist,
-ue-replication-specialist
+**Agents**: unity-specialist, unity-ui-specialist, unity-shader-specialist,
+unity-dots-specialist, unity-addressables-specialist
 
 | Metric | PASS criteria |
 |---|---|
 | **E1 — Version-aware** | References engine version from `docs/engine-reference/` before suggesting API calls; flags post-cutoff risk |
-| **E2 — File routing** | Routes file types to the correct sub-specialist (e.g., Widget Blueprints → ue-umg-specialist, not unreal-specialist) |
-| **E3 — Engine-specific patterns** | Enforces engine-specific idioms (e.g., UPROPERTY/UFUNCTION specifiers, Blueprint function libraries) |
+| **E2 — File routing** | Routes file types to the correct sub-specialist (e.g., `.shadergraph` → unity-shader-specialist, not unity-specialist) |
+| **E3 — Engine-specific patterns** | Enforces engine-specific idioms (e.g., `[SerializeField]` over public fields, ScriptableObject config, NonAlloc physics queries) |
 
 ### `qa`
 

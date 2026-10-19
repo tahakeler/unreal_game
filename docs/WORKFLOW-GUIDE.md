@@ -1378,9 +1378,9 @@ Tier 3 (Specialists):  gameplay-programmer, engine-programmer,
                        qa-tester, performance-analyst, devops-engineer,
                        analytics-engineer, accessibility-specialist,
                        live-ops-designer, prototyper, security-engineer,
-                       community-manager, unreal-specialist,
-                       ue-blueprint-specialist, ue-gas-specialist,
-                       ue-replication-specialist, ue-umg-specialist
+                       community-manager, unity-specialist,
+                       unity-dots-specialist, unity-shader-specialist,
+                       unity-addressables-specialist, unity-ui-specialist
 ```
 
 **Coordination rules:**
@@ -1543,11 +1543,11 @@ Reads existing code and generates GDD-format design documentation from it.
 | Prototype quickly | `prototyper` | 3 |
 | Audit security | `security-engineer` | 3 |
 | Communicate with players | `community-manager` | 3 |
-| Unreal-specific help | `unreal-specialist` | 3 |
-| Unreal GAS | `ue-gas-specialist` | 3 |
-| Unreal Blueprints | `ue-blueprint-specialist` | 3 |
-| Unreal replication | `ue-replication-specialist` | 3 |
-| Unreal UMG/CommonUI | `ue-umg-specialist` | 3 |
+| Unity-specific help | `unity-specialist` | 3 |
+| Unity DOTS/ECS | `unity-dots-specialist` | 3 |
+| Unity shaders/VFX | `unity-shader-specialist` | 3 |
+| Unity Addressables | `unity-addressables-specialist` | 3 |
+| Unity UI Toolkit | `unity-ui-specialist` | 3 |
 
 ### Agent Hierarchy
 

@@ -55,8 +55,8 @@ specialists    → gameplay-programmer, engine-programmer, network-programmer,
                  ai-programmer, tools-programmer, ui-programmer, ux-designer,
                  technical-artist, sound-designer, performance-analyst, prototyper,
                  writer, world-builder
-engine/unreal  → unreal-specialist, ue-gas-specialist, ue-replication-specialist,
-                 ue-umg-specialist, ue-blueprint-specialist
+engine/unity   → unity-specialist, unity-ui-specialist, unity-shader-specialist,
+                 unity-dots-specialist, unity-addressables-specialist
 operations     → devops-engineer, release-manager, live-ops-designer,
                  community-manager, analytics-engineer, economy-designer,
                  localization-lead
