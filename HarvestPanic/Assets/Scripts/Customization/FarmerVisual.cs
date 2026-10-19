@@ -32,7 +32,7 @@ namespace HarvestPanic.Customization
     /// Implements <see cref="IPlayerHooks"/> for its *visual* members (BodyRenderer, BodyAnimator, HeadAttachPoint,
     /// PlayEmote, Faint pose). Identity members (ClientId, IsLocal, FirstPersonArms) forward to the Player prefab's own
     /// IPlayerHooks found in a parent, so the Player team can forward its visual members here without referencing
-    /// this assembly: <c>bodyHooks = farmerBodyChild.GetComponent&lt;IPlayerHooks&gt;()</c>. See docs/architecture/customization-integration.md.
+    /// this assembly: <c>bodyHooks = farmerBodyChild.GetComponent&lt;IPlayerHooks&gt;()</c>. See Assets/Scripts/Customization/INTEGRATION.md.
     /// Implements design/gdd/character-customization.md.
     /// </summary>
     [DisallowMultipleComponent]
@@ -70,6 +70,7 @@ namespace HarvestPanic.Customization
         bool _firstPersonHidden;
         Coroutine _faintRoutine;
         float _headScale = 1f;
+        Vector3 _headBaseScale = Vector3.one;
 
         /// <summary>Raised after a loadout is applied.</summary>
         public event Action<FarmerLoadout> Applied;
@@ -253,6 +254,8 @@ namespace HarvestPanic.Customization
 
         // ---- Unity --------------------------------------------------------------------------------------------------
 
+        void Awake() { if (headBone != null) _headBaseScale = headBone.localScale; }
+
         void OnEnable() => _lastPos = transform.position;
 
         void Update()
@@ -279,7 +282,7 @@ namespace HarvestPanic.Customization
         void LateUpdate()
         {
             // Clips carry bone scale keys, so the chunky-head scale is re-applied after animation every frame.
-            if (headBone != null && !Mathf.Approximately(_headScale, 1f)) headBone.localScale = Vector3.one * _headScale;
+            if (headBone != null && !Mathf.Approximately(_headScale, 1f)) headBone.localScale = _headBaseScale * _headScale;
         }
 
         void OnDestroy() => ClearAccessories();

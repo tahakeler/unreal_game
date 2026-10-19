@@ -42,17 +42,21 @@ namespace HarvestPanic.Customization
             p._farmer.IsPreview = true;
             p._farmer.OfflineIsLocal = false;
 
-            p.Texture = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32) { name = "WardrobePreviewRT", antiAliasing = 4 };
-            p.Texture.Create();
+            if (SystemInfo.graphicsDeviceType != GraphicsDeviceType.Null) // headless servers/tests have no GPU
+            {
+                p.Texture = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32) { name = "WardrobePreviewRT", antiAliasing = 1 };
+                p.Texture.Create();
+            }
             var camGo = new GameObject("PreviewCamera");
             camGo.transform.SetParent(holder.transform, false);
             p._cam = camGo.AddComponent<Camera>();
             p._cam.targetTexture = p.Texture;
+            p._cam.enabled = p.Texture != null;
             p._cam.clearFlags = CameraClearFlags.SolidColor;
             p._cam.backgroundColor = new Color(0.42f, 0.3f, 0.22f, 1f);
             p._cam.nearClipPlane = 0.05f;
             p._cam.farClipPlane = 12f;
-            p._cam.fieldOfView = 32f;
+            p._cam.fieldOfView = 50f;
 
             AddLight(holder.transform, new Vector3(1.2f, 2.4f, 2.0f), new Color(1f, 0.93f, 0.8f), 6f, 6f);
             AddLight(holder.transform, new Vector3(-1.6f, 1.6f, -1.2f), new Color(0.75f, 0.85f, 1f), 3f, 6f);
@@ -91,6 +95,7 @@ namespace HarvestPanic.Customization
         /// <summary>Renders immediately (used by offscreen captures).</summary>
         public void RenderNow()
         {
+            if (Texture == null) return;
             var req = new RenderPipeline.StandardRequest { destination = Texture };
             if (RenderPipeline.SupportsRenderRequest(_cam, req)) RenderPipeline.SubmitRenderRequest(_cam, req);
             else _cam.Render();
@@ -99,7 +104,7 @@ namespace HarvestPanic.Customization
         void UpdateCamera()
         {
             if (_cam == null) return;
-            Vector3 target = Origin + Vector3.up * 1.0f;
+            Vector3 target = Origin + Vector3.up * 1.2f;
             Quaternion rot = Quaternion.Euler(_pitch, _yaw, 0f);
             _cam.transform.position = target - rot * Vector3.forward * _distance;
             _cam.transform.rotation = rot;

@@ -165,6 +165,7 @@ namespace HarvestPanic.Tests.PlayMode.Customization
         [UnityTest, Explicit("QA screenshot; needs a GPU (no -nographics)")]
         public IEnumerator Capture_Lineup()
         {
+            if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null) Assert.Ignore("No GPU (-nographics): capture skipped");
             var lineup = Lineup();
             lineup.ApplySet(WardrobeTestLineup.SetA, WardrobeTestLineup.Names);
             yield return new WaitForSeconds(0.5f);
@@ -180,6 +181,7 @@ namespace HarvestPanic.Tests.PlayMode.Customization
         [UnityTest, Explicit("QA screenshot; needs a GPU (no -nographics)")]
         public IEnumerator Capture_WardrobeUI()
         {
+            if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null) Assert.Ignore("No GPU (-nographics): capture skipped");
             var f = Lineup().Farmers[0];
             f.OfflineIsLocal = true;
             var sync = f.GetComponent<FarmerLoadoutSync>();

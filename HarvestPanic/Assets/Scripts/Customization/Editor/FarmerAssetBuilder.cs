@@ -379,11 +379,14 @@ namespace HarvestPanic.Customization.Editor
                 anim.applyRootMotion = false;
                 anim.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
 
+                // Blender's glTF importer adds a bone-display icosphere that rides along in the FBX: hide anything not Farmer_*.
+                foreach (var r in inst.GetComponentsInChildren<Renderer>(true))
+                    if (!r.name.StartsWith("Farmer_")) { Debug.Log("[FarmerAssetBuilder] hiding stray renderer " + r.name); r.enabled = false; r.gameObject.SetActive(false); }
                 var all = inst.GetComponentsInChildren<Transform>(true);
                 Transform Find(string n) => all.First(t => t.name == n);
                 var head = Find("Head");
                 var chest = Find("Chest");
-                var smrs = inst.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+                var smrs = inst.GetComponentsInChildren<SkinnedMeshRenderer>(true).Where(r => r.name.StartsWith("Farmer_")).ToArray();
                 var headSmr = smrs.First(s => s.name.Contains("Head"));
                 var bodySmr = smrs.First(s => s.name.Contains("Body"));
 
@@ -407,7 +410,8 @@ namespace HarvestPanic.Customization.Editor
                     var t = new GameObject(n).transform;
                     t.SetParent(parent, true);
                     t.SetPositionAndRotation(worldPos, Quaternion.identity);
-                    t.localScale = Vector3.one;
+                    var ls = parent.lossyScale; // bones carry the FBX 100x scale; keep the attach point at world scale 1
+                    t.localScale = new Vector3(1f / ls.x, 1f / ls.y, 1f / ls.z);
                     return t;
                 }
                 var hatAttach = Attach("HatAttach", head, new Vector3(headX, crown - 0.015f, headZ));
@@ -426,7 +430,7 @@ namespace HarvestPanic.Customization.Editor
                     smr.updateWhenOffscreen = false;
                 }
 
-                var tag = BuildNameTag(root.transform, crown + 0.55f, catalog);
+                var tag = BuildNameTag(root.transform, crown + 0.85f, catalog);
                 visual.EditorSetup(catalog, anim, inst.transform, head, hatAttach, faceAttach, backAttach, bodySmr, zones, tag);
 
                 var prefab = PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
@@ -466,7 +470,6 @@ namespace HarvestPanic.Customization.Editor
                 var go = new GameObject(n);
                 go.transform.SetParent(root.transform, false);
                 go.transform.localPosition = pos;
-                go.transform.localRotation = Quaternion.Euler(0, 180, 0);
                 var tm = go.AddComponent<TextMesh>();
                 tm.font = font; tm.fontSize = 72; tm.characterSize = 0.012f; tm.anchor = TextAnchor.MiddleCenter;
                 tm.alignment = TextAlignment.Center; tm.fontStyle = FontStyle.Bold; tm.color = c; tm.text = "Farmer";

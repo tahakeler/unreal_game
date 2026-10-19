@@ -332,7 +332,7 @@ namespace HarvestPanic.Customization
             return g;
         }
 
-        VisualElement Card(VisualElement parent, string label, bool selected, bool enabled, Action onClick, float width = 180)
+        VisualElement Card(VisualElement parent, string label, bool selected, bool enabled, Action onClick, float width = 205)
         {
             var b = MakeButton(parent, label, enabled ? onClick : null, 20, selected ? Gold : Cream);
             b.style.width = width; b.style.height = 56;
