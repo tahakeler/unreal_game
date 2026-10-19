@@ -250,8 +250,16 @@ namespace HarvestPanic.World.Editor
             float big = 1500f, ex0 = TX0, ex1 = TX0 + TSX, ez0 = TZ0, ez1 = TZ0 + TSZ;
             Block("Distant Ground W", new Vector3(ex0 - big / 2f + 1f, 4f, (ez0 + ez1) / 2f), new Vector3(big, 1f, big * 2f), far, _root, collider: false);
             Block("Distant Ground E", new Vector3(ex1 + big / 2f - 1f, 4f, (ez0 + ez1) / 2f), new Vector3(big, 1f, big * 2f), far, _root, collider: false);
-            Block("Distant Ground N", new Vector3((ex0 + ex1) / 2f, 4f, ez1 + big / 2f - 1f), new Vector3(TSX, 1f, big), far, _root, collider: false);
-            Block("Distant Ground S", new Vector3((ex0 + ex1) / 2f, 4f, ez0 - big / 2f + 1f), new Vector3(TSX, 1f, big), far, _root, collider: false);
+            // North/south slabs leave a gap for the river so it flows on past the horizon instead of hitting a wall.
+            float rw0 = RiverWest - 3f, rw1 = RiverEast + 3f;
+            foreach (var (zc, label) in new[] { (ez1 + big / 2f - 1f, "N"), (ez0 - big / 2f + 1f, "S") })
+            {
+                Block("Distant Ground " + label + "W", new Vector3((ex0 + rw0) / 2f, 4f, zc), new Vector3(rw0 - ex0, 1f, big), far, _root, collider: false);
+                Block("Distant Ground " + label + "E", new Vector3((rw1 + ex1) / 2f, 4f, zc), new Vector3(ex1 - rw1, 1f, big), far, _root, collider: false);
+                Block("Distant Riverbed " + label, new Vector3(RiverCentre, RiverBedY, zc), new Vector3(rw1 - rw0, 1f, big), WorldAssets.Mat("Riverbed", WorldAssets.Hex("8C7A5A")), _root, collider: false);
+                foreach (float bx in new[] { rw0 - 2f, rw1 + 2f })
+                    Block("Distant Bank " + label, new Vector3(bx, -1f, zc), new Vector3(4f, 10f, big), far, _root, collider: false);
+            }
             return t;
         }
 
@@ -459,7 +467,7 @@ namespace HarvestPanic.World.Editor
         static void River()
         {
             var g = Group("River");
-            var water = WorldAssets.SaveMesh(WorldAssets.RiverMesh(RiverEast - RiverWest + 6f, TSZ + 20f, 24, 160), "SM_World_River");
+            var water = WorldAssets.SaveMesh(WorldAssets.RiverMesh(RiverEast - RiverWest + 6f, TSZ + 1200f, 24, 400), "SM_World_River");
             string wm = WorldAssets.MatDir + "/M_World_Water.mat";
             var mat = AssetDatabase.LoadAssetAtPath<Material>(wm);
             if (mat == null) { mat = new Material(Shader.Find("HarvestPanic/StylizedWater")); AssetDatabase.CreateAsset(mat, wm); }

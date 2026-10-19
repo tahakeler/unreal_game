@@ -95,7 +95,7 @@ namespace HarvestPanic.World
             else if (_state == PlankState.Intact && PlankMath.IsCracked(_integrity)) { SetState(PlankState.Cracked, true); Announce(0.3f, NoiseTag.Creak, false); }
         }
 
-        /// <summary>Players standing on a breaking plank get a downward shove (design units) so they fall, not float.</summary>
+        /// <summary>Wakes bodies on a breaking plank; players get a downward shove (design units) so they fall, not float.</summary>
         void KnockRiders()
         {
             if (_box == null) return;
@@ -104,8 +104,13 @@ namespace HarvestPanic.World
             int n = Physics.OverlapBoxNonAlloc(t.TransformPoint(_box.center) + t.up * (half.y + sampleHeight * 0.5f), new Vector3(half.x, sampleHeight * 0.5f, half.z), _hits, t.rotation, ~0, QueryTriggerInteraction.Ignore);
             var done = new HashSet<IKnockable>();
             for (int i = 0; i < n; i++)
+            {
+                // Sleeping bodies would hover over the gap once the collider goes away.
+                var rb = _hits[i].attachedRigidbody;
+                if (rb != null && !rb.isKinematic) rb.WakeUp();
                 if (Knockables.TryGetFor(_hits[i].gameObject, out var k) && done.Add(k))
                     k.ApplyImpulse(Vector3.down * 300f, _heaviestPlayer, BlameVerb.BrokePlank);
+            }
         }
 
         /// <summary>Server: full repair (each morning).</summary>
