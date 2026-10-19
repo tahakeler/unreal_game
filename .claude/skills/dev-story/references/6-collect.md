@@ -27,7 +27,7 @@ Before collecting anything:
    gets reported as clean:
    - **Godot:** `godot --headless --path . --import` once (it builds the class
      cache), then one run over every `.gd` the story added or changed:
-     `godot --headless --path . -s res://.claude/scripts/godot-parse-check.gd -- res://<file>.gd …` (parse-check script removed — this repo is Unreal-only).
+     `godot --headless --path . -s res://.claude/scripts/godot-parse-check.gd -- res://<file>.gd …` (parse-check script removed — this repo is Unity-only).
      For `godot`, use the executable `commands.test` names, else the editor
      `engine.path` records, else `godot` on `PATH`; if none resolves, write
      `parse NOT VERIFIED — Godot executable not found`.
@@ -41,7 +41,7 @@ Before collecting anything:
      `"<UE root>/Engine/Binaries/DotNET/UnrealBuildTool/UnrealBuildTool.exe" <Project>Editor Win64 Development -Project="<absolute path>/<Project>.uproject"`
      on Windows; on Linux `"<UE root>/Engine/Build/BatchFiles/Linux/Build.sh" <Project>Editor Linux Development -Project=…`,
      on macOS `…/Mac/Build.sh <Project>Editor Mac Development -Project=…` (from Epic's
-     documentation — `docs/engine-reference/unreal/current-best-practices.md`, "Command Line").
+     documentation — `docs/engine-reference/unity/current-best-practices.md`, "Command Line").
      A compile error fails the build (`Result: Failed`, non-zero exit).
    Report what you ran, its exit code, and any error lines.
 3. If the engine binary is unavailable, write **`parse NOT VERIFIED — engine

@@ -26,34 +26,40 @@ framework:
 # edits this file. See `.claude/docs/config-resolution.md` for the full
 # precedence order.
 
-# Written by /setup-engine (Unreal Engine 5.8.3, HARVEST PANIC). The Unreal
-# project lives in a subfolder: HarvestPanic/HarvestPanic.uproject.
+# Written by /setup-engine (Unity 6.3 LTS 6000.3.26f1, HARVEST PANIC). The Unity
+# project lives in a subfolder: HarvestPanic/ (Assets/, Packages/, ProjectSettings/).
+# Networking: Netcode for GameObjects + Facepunch.Steamworks transport (UTP/LAN for dev).
 engine:
-  name: "Unreal"
-  version: "5.8.3"
-  language: "C++"
-  rendering: "Lumen + Nanite (deferred)"
-  physics: "Chaos"
-  path: "/Applications/UE_5.8"
+  name: "Unity"
+  version: "6000.3.26f1"
+  language: "C#"
+  rendering: "URP"
+  physics: "PhysX"
+  path: "/Applications/Unity/Hub/Editor/6000.3.26f1"
 
 specialists:
-  code: "unreal-specialist"
-  shader: "unreal-specialist"
-  ui: "ue-umg-specialist"
-  additional: ["ue-gas-specialist", "ue-blueprint-specialist", "ue-replication-specialist"]
+  code: "unity-specialist"
+  shader: "unity-shader-specialist"
+  ui: "unity-ui-specialist"
+  additional: ["unity-addressables-specialist", "unity-dots-specialist"]
 
 naming:
   classes: PascalCase
-  variables: PascalCase
+  variables: camelCase
   constants: SCREAMING_SNAKE   # UNVERIFIED — not sourceable from
-                               # docs/engine-reference/unreal/; confirm before relying on it
+                               # docs/engine-reference/unity/; confirm before relying on it
   signals: On<Event>
   files: PascalCase
   scenes: PascalCase
 
 commands:
-  # TODO: confirm these once HarvestPanic/HarvestPanic.uproject exists — adjust via /settings
-  build: '"/Applications/UE_5.8/Engine/Build/BatchFiles/RunUAT.sh" BuildCookRun -project="$(pwd)/HarvestPanic/HarvestPanic.uproject" -platform=Mac -build -cook'
-  test: '"/Applications/UE_5.8/Engine/Binaries/Mac/UnrealEditor-Cmd" "$(pwd)/HarvestPanic/HarvestPanic.uproject" -ExecCmds="Automation RunTests HarvestPanic.; Quit" -unattended -nullrhi -stdout -FullStdOutLogOutput'
-  run: '"/Applications/UE_5.8/Engine/Binaries/Mac/UnrealEditor.app/Contents/MacOS/UnrealEditor" "$(pwd)/HarvestPanic/HarvestPanic.uproject" -game -windowed -ResX=1280 -ResY=720'
-  smoke: '"/Applications/UE_5.8/Engine/Binaries/Mac/UnrealEditor-Cmd" "$(pwd)/HarvestPanic/HarvestPanic.uproject" -game -nullrhi -unattended -stdout -ExecCmds="Quit"'
+  # Unity batchmode CLI. Run from the repo root; results/logs go to gitignored Logs/.
+  # build: needs a static editor method HarvestPanic.Editor.BuildScript.BuildMac
+  # (Assets/Scripts/Editor/BuildScript.cs) — create it before relying on this.
+  # Windows target: -executeMethod HarvestPanic.Editor.BuildScript.BuildWindows64
+  # PlayMode suite: same as `test` with -testPlatform PlayMode and
+  #   -testResults "$(pwd)/Logs/playmode-results.xml" -logFile Logs/playmode.log
+  build: '"/Applications/Unity/Hub/Editor/6000.3.26f1/Unity.app/Contents/MacOS/Unity" -batchmode -nographics -quit -projectPath HarvestPanic -executeMethod HarvestPanic.Editor.BuildScript.BuildMac -logFile Logs/build.log'
+  test: '"/Applications/Unity/Hub/Editor/6000.3.26f1/Unity.app/Contents/MacOS/Unity" -batchmode -nographics -projectPath HarvestPanic -runTests -testPlatform EditMode -testResults "$(pwd)/Logs/editmode-results.xml" -logFile Logs/editmode.log'
+  run: 'open "HarvestPanic/Builds/Mac/HarvestPanic.app"'
+  smoke: '"/Applications/Unity/Hub/Editor/6000.3.26f1/Unity.app/Contents/MacOS/Unity" -batchmode -nographics -quit -projectPath HarvestPanic -logFile Logs/smoke.log'

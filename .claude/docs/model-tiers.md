@@ -69,12 +69,12 @@ model. 19 are pinned:
   Opus session an `opus` pin runs on the session's exact model, `[1m]` included,
   so it never gets a smaller window than its parent.
 - **sonnet (8):** `lead-programmer`, `prototyper`, `devops-engineer`,
-  `community-manager` and the 4 Unreal sub-specialists:
-  `ue-blueprint-specialist`, `ue-gas-specialist`, `ue-replication-specialist`,
-  `ue-umg-specialist`.
+  `community-manager` and the 4 Unity sub-specialists:
+  `unity-addressables-specialist`, `unity-dots-specialist`,
+  `unity-shader-specialist`, `unity-ui-specialist`.
   `/dev-story` and `/code-review` spawn the sub-specialists named in
   `project.yaml`'s `specialists` block (which `/setup-engine` writes); `/team-ui` spawns
-  `ue-umg-specialist`; `/team-release` spawns
+  `unity-ui-specialist`; `/team-release` spawns
   `devops-engineer` and `community-manager`, and `/team-live-ops` spawns
   `community-manager`.
 - **haiku (0):** no agent. The Haiku row above is for read-only lookups and

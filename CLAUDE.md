@@ -5,16 +5,19 @@ Each agent owns a specific domain, enforcing separation of concerns and quality.
 
 ## Technology Stack
 
-- **Game**: HARVEST PANIC — Unreal project at `HarvestPanic/HarvestPanic.uproject`
-- **Engine**: Unreal Engine 5.8.3 (installed at `/Applications/UE_5.8`)
-- **Language**: C++ (primary), Blueprint (gameplay prototyping and tuning)
-- **Version Control**: Git + Git LFS, one branch per task (see `docs/engine/unreal-setup.md`)
-- **Build System**: Unreal Build Tool (UBT)
-- **Asset Pipeline**: Unreal Content Pipeline; Fab packs under `HarvestPanic/Content/<PackName>/`
-- **Platforms**: develop on macOS (Apple Silicon, Xcode); ship Windows + macOS on Steam
+- **Game**: HARVEST PANIC — first-person 2–4 player co-op; Unity project folder `HarvestPanic/` (`Assets/`, `Packages/`, `ProjectSettings/`)
+- **Engine**: Unity 6.3 LTS `6000.3.26f1` (Apple Silicon editor at `/Applications/Unity/Hub/Editor/6000.3.26f1`)
+- **Render Pipeline**: Universal Render Pipeline (URP)
+- **Language**: C# (gameplay code under `HarvestPanic/Assets/Scripts/`)
+- **Networking**: Netcode for GameObjects; Steam transport via Facepunch.Steamworks (ship), Unity Transport/LAN (dev)
+- **Version Control**: Git + Git LFS (binary assets only; Unity YAML stays text), one branch per task (see `docs/engine/unity-setup.md`)
+- **Build System**: Unity batchmode CLI (`-runTests` for EditMode/PlayMode, `-executeMethod` for player builds) — see `project.yaml` `commands`
+- **Asset Pipeline**: Unity Asset Database (Force Text, Visible Meta Files); third-party/CC0 packs under `HarvestPanic/Assets/ThirdParty/<Pack>/`, licences in `THIRD_PARTY_LICENSES.md`
+- **Platforms**: develop on macOS (Apple Silicon); ship Windows + macOS on Steam
 
-> **Note**: This repo is Unreal-only. Use `unreal-specialist` and the `ue-*`
-> sub-specialists; Godot and Unity agent sets have been removed.
+> **Note**: This repo is Unity-only. Use `unity-specialist` and the `unity-*`
+> sub-specialists; Godot and Unreal agent sets have been removed. The previous
+> Unreal build of the game is archived on branch `archive/unreal-final`.
 
 ## Project Structure
 
@@ -22,8 +25,8 @@ Each agent owns a specific domain, enforcing separation of concerns and quality.
 
 ## Engine Version Reference
 
-<!-- ENGINE-REFERENCE-IMPORT: pinned to Unreal by /setup-engine. -->
-@docs/engine-reference/unreal/VERSION.md
+<!-- ENGINE-REFERENCE-IMPORT: pinned to Unity by /setup-engine. -->
+@docs/engine-reference/unity/VERSION.md
 
 
 ## Technical Preferences

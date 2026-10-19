@@ -231,7 +231,7 @@ The project path must be absolute: UE does not find a relative one (exit 1,
 the tests with `Engine/Binaries/Linux/UnrealEditor` and the same arguments; on
 macOS build with `Engine/Build/BatchFiles/Mac/Build.sh <Project>Editor Mac Development -Project="$(pwd -W 2>/dev/null || pwd)/<Project>.uproject"`
 — Epic documents no command-line editor inside `UnrealEditor.app` for the test
-run (see `docs/engine-reference/unreal/current-best-practices.md`, "Command Line").
+run (see `docs/engine-reference/unreal/current-best-practices.md` (removed — this repo is Unity-only), "Command Line").
 
 Read the output, not the exit code: a failing test and a run that matched nothing both exit 255.
 `Result={Fail}` is a failure; `No automation tests matched` means no test was

@@ -9,10 +9,10 @@ model: sonnet
 
 # Engine Setup
 
-> **This repo is Unreal-only (HARVEST PANIC, UE 5.8.3).** Godot and Unity
-> specialist agents, reference docs and the Godot language config were removed.
-> The Godot/Unity branches below are kept for upstream parity but are
-> unsupported here — only follow the Unreal paths.
+> **This repo is Unity-only (HARVEST PANIC, Unity 6.3 LTS 6000.3.26f1, URP, C#).**
+> Godot and Unreal specialist agents, reference docs and the Godot language
+> config were removed. The Godot/Unreal branches below are kept for upstream
+> parity but are unsupported here — only follow the Unity paths.
 
 When this skill is invoked:
 
@@ -127,7 +127,7 @@ If invoked as `/setup-engine refresh`:
 - If reference docs already exist for a different engine, ask before replacing
 - Always show the user what you're about to change before making CLAUDE.md edits
 - If WebSearch returns ambiguous results, show the user and let them decide
-- When the user chose **GDScript**: copy the GDScript CLAUDE.md template from **A1** in `references/godot-language-config.md` (removed — this repo is Unreal-only) exactly. NEVER add "C++ via GDExtension" to the Language field. GDScript projects may use GDExtension, but it is not a primary project language. The `godot-gdextension-specialist` in the routing table is available for when native extensions are needed — it does not make C++ a project language.
+- When the user chose **GDScript**: copy the GDScript CLAUDE.md template from **A1** in `references/godot-language-config.md` (removed — this repo is Unity-only) exactly. NEVER add "C++ via GDExtension" to the Language field. GDScript projects may use GDExtension, but it is not a primary project language. The `godot-gdextension-specialist` in the routing table is available for when native extensions are needed — it does not make C++ a project language.
 
 ---
 
@@ -136,7 +136,7 @@ If invoked as `/setup-engine refresh`:
 Moved out of this file so it costs nothing on non-Godot runs.
 
 **When the chosen engine is Godot, read**
-`references/godot-language-config.md` (removed — this repo is Unreal-only)
+`references/godot-language-config.md` (removed — this repo is Unity-only)
 and use the subsection for the chosen language:
 
 - **A1** — CLAUDE.md Technology Stack templates (GDScript / C# / Both)

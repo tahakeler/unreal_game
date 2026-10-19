@@ -22,7 +22,7 @@ engine-appropriate defaults. Read the existing template first, then fill in:
 
 ### Naming Conventions (engine defaults)
 
-**For Godot** — see `references/godot-language-config.md` (removed — this repo is Unreal-only) (**A2**) for GDScript, C#, and Both variants.
+**For Godot** — see `references/godot-language-config.md` (removed — this repo is Unity-only) (**A2**) for GDScript, C#, and Both variants.
 
 **For Unity (C#):**
 - Classes: PascalCase (e.g., `PlayerController`)
@@ -109,7 +109,7 @@ Example filled section:
 
 Also populate the `## Engine Specialists` section in `technical-preferences.md` with the correct routing for the chosen engine:
 
-**For Godot** — see `references/godot-language-config.md` (removed — this repo is Unreal-only) (**A3**) for the routing table matching the language chosen.
+**For Godot** — see `references/godot-language-config.md` (removed — this repo is Unity-only) (**A3**) for the routing table matching the language chosen.
 
 **For Unity:**
 ```markdown

@@ -10,10 +10,11 @@
 
 ## Engine & Language
 
-- **Engine**: Unreal Engine 5.8.3
-- **Language**: C++ (primary), Blueprint (gameplay prototyping and tuning)
-- **Rendering**: Lumen + Nanite (deferred) — engine default, revisit for Mac perf
-- **Physics**: Chaos
+- **Engine**: Unity 6.3 LTS (6000.3.26f1)
+- **Language**: C#
+- **Rendering**: Universal Render Pipeline (URP)
+- **Physics**: PhysX (built-in 3D physics)
+- **Networking**: Netcode for GameObjects; Steam transport via Facepunch.Steamworks (ship), Unity Transport (UTP) on LAN (dev)
 
 ## Input & Platform
 
@@ -22,19 +23,19 @@
 
 - **Target Platforms**: PC — Windows + macOS (Steam); development on macOS Apple Silicon
 - **Input Methods**: Keyboard/Mouse, Gamepad
-- **Primary Input**: [TO BE CONFIGURED — the dominant input for this game]
+- **Primary Input**: Keyboard/Mouse (first-person, 2–4 player co-op)
 - **Gamepad Support**: Partial (recommended for PC / Steam Deck-friendly)
 - **Touch Support**: None
 - **Platform Notes**: [TO BE CONFIGURED — any platform-specific UX constraints]
 
 ## Naming Conventions
 
-- **Classes**: Prefixed PascalCase (`A` Actor, `U` UObject, `F` struct, `E` enum, `I` interface, `T` template)
-- **Variables**: PascalCase (e.g. `MoveSpeed`); booleans use `b` prefix (`bIsAlive`)
-- **Signals/Events**: Delegates/events PascalCase `On<Event>` (e.g. `OnCropHarvested`)
-- **Files**: Match class without prefix (e.g. `HarvestPanicGameMode.h`)
-- **Scenes/Prefabs**: Levels/maps `L_<Name>`, Blueprints `BP_<Name>` (Epic asset-prefix convention)
-- **Constants**: SCREAMING_SNAKE_CASE (unsourced default; revisit)
+- **Classes**: PascalCase (e.g. `PlayerController`); namespaces `HarvestPanic.<Area>`
+- **Variables**: public fields/properties PascalCase (`MoveSpeed`); private fields `_camelCase` (`_moveSpeed`); locals/parameters camelCase
+- **Signals/Events**: C# events / UnityEvents PascalCase `On<Event>` (e.g. `OnCropHarvested`)
+- **Files**: PascalCase matching the class (e.g. `PlayerController.cs`); one public type per file
+- **Scenes/Prefabs**: PascalCase (e.g. `Farm.unity`, `PlayerCharacter.prefab`)
+- **Constants**: SCREAMING_SNAKE_CASE (unsourced default; revisit — Unity docs also use PascalCase)
 
 ## Performance Budgets
 
@@ -45,7 +46,7 @@
 
 ## Testing
 
-- **Framework**: Unreal Automation Spec (not yet scaffolded — run /test-setup)
+- **Framework**: Unity Test Framework (NUnit) — EditMode + PlayMode under `HarvestPanic/Assets/Tests/` (not yet scaffolded — run /test-setup)
 - **Minimum Coverage**: [TO BE CONFIGURED]
 - **Required Tests**: Balance formulas, gameplay systems, networking (if applicable)
 
@@ -70,24 +71,22 @@
 <!-- Read by /code-review, /architecture-decision, /architecture-review, and team skills -->
 <!-- to know which specialist to spawn for engine-specific validation. -->
 
-- **Primary**: unreal-specialist
-- **Language/Code Specialist**: ue-blueprint-specialist (Blueprint graphs) or unreal-specialist (C++)
-- **Shader Specialist**: unreal-specialist (no dedicated shader specialist — primary covers materials)
-- **UI Specialist**: ue-umg-specialist (UMG widgets, CommonUI, input routing, widget styling)
-- **Additional Specialists**: ue-gas-specialist (Gameplay Ability System), ue-replication-specialist (replication, RPCs, netcode)
-- **Routing Notes**: Primary for C++ architecture and broad engine decisions; Blueprint specialist for BP graphs and the BP/C++ boundary; GAS specialist for abilities/attributes; replication specialist for any networked code; UMG specialist for all UI.
+- **Primary**: unity-specialist
+- **Language/Code Specialist**: unity-specialist (C# review — primary covers it)
+- **Shader Specialist**: unity-shader-specialist (Shader Graph, HLSL, URP materials)
+- **UI Specialist**: unity-ui-specialist (UI Toolkit UXML/USS, UGUI Canvas, runtime UI)
+- **Additional Specialists**: unity-addressables-specialist (asset loading, memory, content catalogs), unity-dots-specialist (ECS, Jobs, Burst — only if adopted)
+- **Routing Notes**: Primary for architecture and general C# review, including Netcode for GameObjects code (pair with network-programmer for netcode architecture). Shader specialist for rendering/VFX. UI specialist for all interface work. Addressables specialist for asset-loading systems. DOTS specialist only for ECS/Jobs/Burst code.
 
 ### File Extension Routing
 
 <!-- Skills use this table to select the right specialist per file type. -->
-<!-- If a row says [TO BE CONFIGURED], fall back to Primary for that file type. -->
 
 | File Extension / Type | Specialist to Spawn |
 |-----------------------|---------------------|
-| Game code (.cpp, .h files) | unreal-specialist |
-| Shader / material files (.usf, .ush, Material assets) | unreal-specialist |
-| UI / screen files (UMG Widget Blueprints) | ue-umg-specialist |
-| Scene / prefab / level files (.umap, .uasset) | unreal-specialist |
-| Blueprint graphs (.uasset BP classes) | ue-blueprint-specialist |
-| Native extension / plugin files (.uplugin, modules) | unreal-specialist |
+| Game code (.cs files) | unity-specialist |
+| Shader / material files (.shader, .shadergraph, .hlsl, .mat) | unity-shader-specialist |
+| UI / screen files (.uxml, .uss, Canvas prefabs) | unity-ui-specialist |
+| Scene / prefab / level files (.unity, .prefab) | unity-specialist |
+| Native extension / plugin files (.dll, native plugins, .asmdef) | unity-specialist |
 | General architecture review | Primary |

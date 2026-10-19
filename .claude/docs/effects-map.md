@@ -1311,7 +1311,7 @@ closing, or produces a warning and lets work continue — per test type
 |-------|-----------|-------|
 | `individual` | Core 8: `producer`, `game-designer`, `gameplay-programmer`, engine-specialist (engine-driven), `technical-artist`, `sound-designer`, `qa-tester`, `writer`. **Default.** | Directors and lead-* run only on explicit invocation (e.g. via `/architecture-decision`). Specialists outside the core 8 routed through their nearest core agent. Each `team-*` skill names its own set per value, which can sit outside the core 8 (`team-release` runs `release-manager`); each skill's own `team.size` list is authoritative, and the Affected skills table below mirrors it. |
 | `small` | Core 15: directors (CD, TD, PR) + leads (LP, AD, QL, ND) + game-designer + systems-designer + engine-specialist + technical-artist + sound-designer + qa-tester + ux-designer + writer | `team-*` skills add their `small` set (below); most reach their full pipeline only at `studio`. |
-| `studio` | All 39 agents available. Engine sub-specialists (e.g. `ue-gas-specialist` separate from `unreal-specialist`) routed when relevant. The adversarial review pass in `team-combat`, `team-ui` and `team-polish`. | Commercial titles, learning the full org chart, large teams with parallel work. |
+| `studio` | All 39 agents available. Engine sub-specialists (e.g. `unity-dots-specialist` separate from `unity-specialist`) routed when relevant. The adversarial review pass in `team-combat`, `team-ui` and `team-polish`. | Commercial titles, learning the full org chart, large teams with parallel work. |
 
 ---
 
@@ -1730,7 +1730,7 @@ implementation, review, and architecture validation
 
 | Engine | Language/code specialist | Shader specialist | UI specialist | Additional specialists |
 |--------|--------------------------|-------------------|---------------|----------------------|
-| **Unreal** | `unreal-specialist` | `unreal-specialist` | `ue-umg-specialist` | `ue-gas-specialist`, `ue-blueprint-specialist`, `ue-replication-specialist` |
+| **Unity** | `unity-specialist` | `unity-shader-specialist` | `unity-ui-specialist` | `unity-addressables-specialist`, `unity-dots-specialist` |
 | **[UNSET]** | No specialist spawned — warning emitted | No specialist spawned | No specialist spawned | None |
 
 ---
@@ -1839,7 +1839,7 @@ engine reference in this repo can source it. See `/setup-engine` §"The Godot
 The Unreal row is Windows'. `/setup-engine` writes the Linux block (`Engine/Build/BatchFiles/RunUAT.sh`,
 `Engine/Binaries/Linux/UnrealEditor`) on Linux, and on macOS only `build`, leaving `test`, `run` and
 `smoke` unset, with a comment in `project.yaml` asking you to set them via `/settings` — see
-`docs/engine-reference/unreal/current-best-practices.md`, "Command Line".
+`docs/engine-reference/unreal/current-best-practices.md` (removed — this repo is Unity-only), "Command Line".
 
 > **`<PRESET>` and `<TARGET>` are placeholders, not values to copy.** A Godot
 > export preset is whatever string the operator typed into `export_presets.cfg`;
@@ -1862,7 +1862,7 @@ Users override per-project as needed via `/settings commands.<field>=<value>` or
 | **smoke-check** | Runs `commands.test`, or the engine's default when it is unset; on Unreal it builds the editor target first. Critical path for QA hand-off. |
 | **launch-checklist** | Emits a checklist **item** asking whether the build produces a valid artifact. It does **not** run `commands.build`; the verification is a human step. |
 | **validate-push.sh** | Does **not** read `commands.*`. It warns on pushes to protected branches (`main`/`master`/`release/*`) and runs no build or smoke command — the block path in it is commented out, so it never fails a push. |
-| **dev-story** | Phase 6 step 2 is the parse check: `.claude/scripts/godot-parse-check.gd` (removed — this repo is Unreal-only) on Godot, `commands.smoke` on Unity, the editor-target build on Unreal. Phase 6 step 4 runs `commands.run` — the windowed game launch — to observe the feature and retain a screenshot (`.claude/docs/run-and-observe.md`). |
+| **dev-story** | Phase 6 step 2 is the parse check: `.claude/scripts/godot-parse-check.gd` (removed — this repo is Unity-only) on Godot, `commands.smoke` on Unity, the editor-target build on Unreal. Phase 6 step 4 runs `commands.run` — the windowed game launch — to observe the feature and retain a screenshot (`.claude/docs/run-and-observe.md`). |
 | **regression-suite** | Maps coverage by **globbing test filenames**. It does **not** invoke `commands.test`, so coverage here means "a test file exists", never "a test passed". |
 
 ---
@@ -2374,21 +2374,21 @@ platform:
   cert_tier: none            # none | itch | steam | console
 
 engine:
-  name: "Unreal"             # Godot | Unity | Unreal — set by /setup-engine
-  version: "5.8.3"
-  language: "C++"            # GDScript | C# | C++ | Blueprint
-  rendering: "Lumen + Nanite (deferred)"
-  physics: "Chaos"
+  name: "Unity"              # Godot | Unity | Unreal — set by /setup-engine
+  version: "6000.3.26f1"
+  language: "C#"             # GDScript | C# | C++ | Blueprint
+  rendering: "URP"
+  physics: "PhysX"
 
 specialists:                 # auto-populated by /setup-engine
-  code: "unreal-specialist"
-  shader: "unreal-specialist"
-  ui: "ue-umg-specialist"
-  additional: ["ue-gas-specialist", "ue-blueprint-specialist", "ue-replication-specialist"]
+  code: "unity-specialist"
+  shader: "unity-shader-specialist"
+  ui: "unity-ui-specialist"
+  additional: ["unity-addressables-specialist", "unity-dots-specialist"]
 
 naming:
   classes: PascalCase        # PascalCase | snake_case | camelCase
-  variables: PascalCase
+  variables: camelCase
   constants: SCREAMING_SNAKE
   signals: On<Event>         # past_tense | on_event_name (engine-interpreted)
   files: PascalCase

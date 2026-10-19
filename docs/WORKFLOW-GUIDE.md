@@ -274,9 +274,9 @@ Or with a specific engine:
 - Creates version-pinned reference docs in `docs/engine-reference/`
 
 **Why this matters:** Once you set the engine, the system knows which
-engine-specialist agents to use. This project is Unreal-only, so
-`unreal-specialist`, `ue-blueprint-specialist`, `ue-gas-specialist`,
-`ue-umg-specialist` and `ue-replication-specialist` are your go-to experts.
+engine-specialist agents to use. This project is Unity-only, so
+`unity-specialist`, `unity-ui-specialist`, `unity-shader-specialist`,
+`unity-addressables-specialist` and `unity-dots-specialist` are your go-to experts.
 
 ### Step 1.4: Decompose Your Concept Into Systems
 

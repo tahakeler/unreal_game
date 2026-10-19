@@ -38,13 +38,13 @@ specialist implements here" — resolved from the engine *and the language*, whi
 `engine.name` alone cannot tell you. Resolve in this order:
 
 1. **`specialists.code`** — the language/code specialist, and the right secondary
-   for an implementation story. In this Unreal-only repo it is `unreal-specialist`
-   (C++); Blueprint-graph work goes to `ue-blueprint-specialist`.
+   for an implementation story. In this Unity-only repo it is `unity-specialist`
+   (C#); UI work goes to `unity-ui-specialist`.
 2. **`specialists.shader`** when the story touches shaders or materials, and
    **`specialists.ui`** when the story's Type is `UI` — in addition to, not
    instead of, `specialists.code`.
 3. **The generic `<engine>-specialist`** — derived from `engine.name`
-   (Unreal→`unreal-specialist`) — for architecture-level and broad engine
+   (Unity→`unity-specialist`) — for architecture-level and broad engine
    concerns, and as the fallback when the `specialists` block is absent.
 4. If `engine.name` is also absent or empty, read the Primary line of the
    `## Engine Specialists` section of `.claude/docs/technical-preferences.md`.
@@ -62,7 +62,7 @@ The full roster, for reference when no `specialists` block exists:
 
 | Engine | Specialist agents available |
 |--------|----------------------------|
-| Unreal Engine | `unreal-specialist`, `ue-gas-specialist`, `ue-blueprint-specialist`, `ue-umg-specialist`, `ue-replication-specialist` |
+| Unity | `unity-specialist`, `unity-ui-specialist`, `unity-shader-specialist`, `unity-addressables-specialist`, `unity-dots-specialist` |
 
 > **Do not pick from this table when `specialists` is set.** The table lists what
 > *exists* for an engine; the block records what this project *chose*. Reading the

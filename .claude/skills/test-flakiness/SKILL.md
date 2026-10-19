@@ -65,7 +65,7 @@ by default.
 For Unreal projects: automation logs go to `Saved/Logs/`. Grep for
 `Result={Success}` and `Result={Fail}` — each test prints
 `Test Completed. Result={<status>}`
-(`docs/engine-reference/unreal/current-best-practices.md`, "Command Line").
+(`docs/engine-reference/unreal/current-best-practices.md` (removed — this repo is Unity-only), "Command Line").
 
 ### Option B — Local log files
 
@@ -98,7 +98,7 @@ For each CI log or result file found, parse:
 reads):
 - Each test is a `<test-case` element; its `fullname` attribute is the identifier
 - Its `result` attribute is `Passed`, `Failed`, `Inconclusive` or `Skipped`
-  (`docs/engine-reference/unity/current-best-practices.md` (removed — this repo is Unreal-only), "Command Line");
+  (`docs/engine-reference/unity/current-best-practices.md`, "Command Line");
   only `Passed` and `Failed` enter the history
 
 **Plain text logs**:
@@ -162,11 +162,11 @@ Skip mechanisms, by engine — name only the one for the project's engine:
   `addons/gdUnit4/src/core/GdUnitTestSuiteScanner.gd`, as of gdUnit4 6.1.3;
   confirm them there for the installed version.
 - **Godot (gdUnit4), C#**: **NOT SOURCEABLE** — gdUnit4's C# test attributes are
-  not in the `addons/gdUnit4/` source, and `docs/engine-reference/godot/` (removed — this repo is Unreal-only) does not
+  not in the `addons/gdUnit4/` source, and `docs/engine-reference/godot/` (removed — this repo is Unity-only) does not
   cover them. Log it in the quarantine section and ask the user how their C#
   tests are skipped; do not invent an attribute.
 - **Unity (NUnit)**: `[Ignore("flaky: [cause]")]` — NUnit 3 requires the reason
-- **Unreal**: **NOT SOURCEABLE** — `docs/engine-reference/unreal/` documents no way
+- **Unreal**: **NOT SOURCEABLE** — `docs/engine-reference/unreal/` (removed — this repo is Unity-only) documents no way
   to skip an automation test. Log it in the quarantine section and ask the user
   how their CI excludes a test; do not invent a flag.
 

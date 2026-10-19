@@ -58,7 +58,7 @@ any context where an ability must show availability state.
 `Control` nodes for cooldown radial and charge pips. The cooldown radial uses a
 custom shader on a `ColorRect` rotating a mask — or implement with a
 `ProgressBar` styled as circular if engine supports it. Verify against
-engine-reference/unreal/ for UE 5.8 shader support for this pattern.]
+engine-reference/unity/ for Unity 6.3 shader support for this pattern.]
 
 ---
 

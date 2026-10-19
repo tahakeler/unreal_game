@@ -35,7 +35,7 @@ Wait for confirmation before making any edits.
 
 Update the Technology Stack section, replacing the `[CHOOSE]` placeholders with the actual values:
 
-**For Godot** — use the template matching the language chosen above. See `references/godot-language-config.md` (removed — this repo is Unreal-only) (**A1**) for all three variants (GDScript, C#, Both).
+**For Godot** — use the template matching the language chosen above. See `references/godot-language-config.md` (removed — this repo is Unity-only) (**A1**) for all three variants (GDScript, C#, Both).
 
 **For Unity:**
 ```markdown
@@ -61,9 +61,9 @@ In the same CLAUDE.md write, set the **Engine Version Reference** import to the
 chosen engine. Find the line marked `ENGINE-REFERENCE-IMPORT` (an
 `@docs/engine-reference/<engine>/VERSION.md` line under its comment) and Edit it
 to point at the configured engine:
-- Godot → `@docs/engine-reference/godot/VERSION.md (removed — this repo is Unreal-only)`
-- Unity → `@docs/engine-reference/unity/VERSION.md (removed — this repo is Unreal-only)`
-- Unreal → `@docs/engine-reference/unreal/VERSION.md`
+- Godot → `@docs/engine-reference/godot/VERSION.md (removed — this repo is Unity-only)`
+- Unity → `@docs/engine-reference/unity/VERSION.md`
+- Unreal → `@docs/engine-reference/unreal/VERSION.md` (removed — this repo is Unity-only)
 
 This is why a fresh Unity or Unreal project no longer loads the Godot reference in
 every session. It is idempotent — re-running `/setup-engine` for a different

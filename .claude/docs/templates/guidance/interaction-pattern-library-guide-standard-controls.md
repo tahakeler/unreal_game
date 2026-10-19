@@ -508,7 +508,7 @@ which is high friction.
 but always include a visible `Label` node as the field's accessible name. Bind
 `text_changed` signal for real-time validation. Bind `text_submitted` for form
 submission on Enter. On console, `LineEdit.call("_popup_keyboard")` or use the OS
-virtual keyboard API — verify against engine-reference/unreal/ for UE 5.8
+virtual keyboard API — verify against engine-reference/unity/ for Unity 6.3
 console keyboard API specifics.]
 
 ---
@@ -577,7 +577,7 @@ state and an end state).
 
 **Accessibility**:
 - Keyboard/Gamepad: The scroll container itself should not require explicit scrollbar interaction — navigating list items inside it should auto-scroll to keep focused items in view.
-- Screen reader: The scroll container announces "scrollable" and the scroll position ("showing items 5 through 15 of 30"). This requires engine accessibility support — verify in engine-reference/unreal/.
+- Screen reader: The scroll container announces "scrollable" and the scroll position ("showing items 5 through 15 of 30"). This requires engine accessibility support — verify in engine-reference/unity/.
 - Fade edges (content fading at scroll boundaries to indicate more content exists) are a helpful visual affordance but must not be the only indicator that content exists beyond the visible area. Include a scrollbar.
 
 **Implementation Notes**: [Godot `ScrollContainer`: call `ensure_control_visible()`

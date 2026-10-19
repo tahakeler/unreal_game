@@ -107,7 +107,7 @@ None. `/soak-test` is a QA planning utility. No director gates apply.
 **Expected behavior:**
 1. Checkpoints for `4h`: T+0, T+30, T+60, T+90, T+120, T+180, T+240
 2. Unreal memory items: a memory readout at each checkpoint — `stat memory`,
-   marked NOT SOURCEABLE since `docs/engine-reference/unreal/` does not cover
+   marked NOT SOURCEABLE since `docs/engine-reference/unreal/` (removed — this repo is Unity-only) does not cover
    it; record Physical Memory Used and Available (units as displayed)
 3. Alert threshold: Physical Memory Used growth > 20% over the full soak,
    against this run's T+0 — no absolute MB threshold
