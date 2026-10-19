@@ -7,6 +7,8 @@
 ## Summary
 A 2–4 player online co-op physics comedy. Your crew inherits Grandpa's cursed, debt-ridden farm. Every day you chase down runaway livestock and living crops, haul them across a terrible bridge to market, and pay the Landlord every Sunday. The goods fight back, the weather fights back, the night fights back, and your friends drop the pig in the river.
 
+**Camera:** **first-person** (user decision, 2026-10-11). Other players see your full body. See `character-customization`, `frontend-lobby`, `social-comedy-features`.
+
 **Genre:** co-op "friendslop" physics comedy with roguelite debt loops · **Price:** ~$9.99 premium · **Platform:** PC/Mac (Steam) · **Session:** 10–15 min days, 1–2 h weeks.
 
 ## Player Fantasy

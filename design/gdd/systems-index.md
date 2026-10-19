@@ -52,7 +52,13 @@ Layers: **Foundation** → **Core** → **Feature** → **Presentation** → **P
 | 27 | Audio & Comedy Feedback (MetaSounds bruise/impact, critter VO, music states) | `audio-feedback` | Presentation | Alpha | Not Started | design/gdd/audio-feedback.md | goods-value, critter-ai, day-loop |
 | 28 | Onboarding & Accessibility (Grandpa's tape tutorial, subtitles, voice-free play) (inferred) | `onboarding-accessibility` | Polish | EA | Not Started | design/gdd/onboarding-accessibility.md | hud-menus, proximity-voice |
 
-28 systems. Rows 23 and 28 are **inferred** (the concept does not list them explicitly).
+| 29 | Character Customization & Emotes (loadout slots, wardrobe, unlocks, emotes 5–8) | `character-customization` | Presentation | VS (slots, 10 hats, 4 emotes) / Alpha / EA | Designed | design/gdd/character-customization.md | player-character, meta-progression, save-persistence |
+| 30 | Frontend & Lobby (title, host/join, browser, walkable Lobby Yard, ready-up, pause, rejoin) | `frontend-lobby` | Presentation | VS / Alpha (browser) | Designed | design/gdd/frontend-lobby.md | session-networking, character-customization, hud-menus |
+| 31 | Social Comedy Features (friend throwing, slap, nicknames, ghost chicken, Crew Photo, helium, megaphone, chalkboard, pranks, highlight reel) | `social-comedy-features` | Polish | VS / Alpha / EA (per feature) | Designed | design/gdd/social-comedy-features.md | physics-carry, proximity-voice, blame-ledger, camcorder-replay |
+
+31 systems. Rows 23 and 28 are **inferred** (the concept does not list them explicitly). Rows 29–31 were added on 2026-10-11.
+
+> **Camera decision (2026-10-11, user):** HARVEST PANIC is **first-person**. Other players see your full body. Self-view comes from mirrors, the wardrobe preview, the Crew Photo and replays.
 
 ---
 
