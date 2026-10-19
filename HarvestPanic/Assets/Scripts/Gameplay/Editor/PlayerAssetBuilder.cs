@@ -81,7 +81,7 @@ namespace HarvestPanic.Gameplay.Editor
             root.layer = LayerMask.NameToLayer(GameLayers.Player);
             var cc = root.AddComponent<CharacterController>();
             cc.height = pt.StandHeight; cc.radius = pt.Radius; cc.center = new Vector3(0f, pt.StandHeight * 0.5f, 0f);
-            cc.stepOffset = 0.35f; cc.slopeLimit = 50f; cc.skinWidth = 0.04f;
+            cc.stepOffset = 0.35f; cc.slopeLimit = 50f; cc.skinWidth = 0.04f; cc.minMoveDistance = 0f; // high frame rates move < 1 mm per frame
             var rag = root.AddComponent<CapsuleCollider>();
             rag.height = pt.StandHeight; rag.radius = pt.Radius; rag.center = cc.center; rag.enabled = false;
             var rb = root.AddComponent<Rigidbody>();
@@ -285,7 +285,7 @@ namespace HarvestPanic.Gameplay.Editor
             Prim(PrimitiveType.Plane, "Ground", env, Vector3.zero, new Vector3(8f, 1f, 8f), Mat("Grass", new Color(0.36f, 0.6f, 0.26f)), true);
             var ramp = Prim(PrimitiveType.Cube, "Ramp30", env, new Vector3(8f, 1.0f, 6f), new Vector3(4f, 0.3f, 8f), Mat("Dirt", new Color(0.5f, 0.38f, 0.25f)), true);
             ramp.transform.rotation = Quaternion.Euler(-30f, 0f, 0f);
-            Prim(PrimitiveType.Cube, "Fence", env, new Vector3(0f, 0.5f, 6f), new Vector3(6f, 1f, 0.15f), Mat("FenceWood", new Color(0.6f, 0.45f, 0.3f)), true);
+            Prim(PrimitiveType.Cube, "Fence", env, new Vector3(-4f, 0.5f, 10f), new Vector3(6f, 1f, 0.15f), Mat("FenceWood", new Color(0.6f, 0.45f, 0.3f)), true);
             Prim(PrimitiveType.Cube, "Barn", env, new Vector3(-10f, 2f, -8f), new Vector3(6f, 4f, 5f), Mat("BarnRed", new Color(0.7f, 0.15f, 0.12f)), true);
 
             var river = Prim(PrimitiveType.Cube, "River", env, new Vector3(0f, -0.4f, 24f), new Vector3(40f, 1f, 6f), Mat("Water", new Color(0.2f, 0.45f, 0.75f)), true);

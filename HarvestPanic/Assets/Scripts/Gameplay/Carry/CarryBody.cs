@@ -33,6 +33,8 @@ namespace HarvestPanic.Gameplay
         float _savedAngularDamping;
         bool _savedKinematic, _stored, _selfSimulated;
         Vector2 _wobbleSeed;
+        float _struggle;
+        ICarryableEvents _events;
 
         /// <summary>The carried object.</summary>
         public ICarryable Carryable { get; private set; }
@@ -70,6 +72,29 @@ namespace HarvestPanic.Gameplay
             _t = any != null ? any : ScriptableObject.CreateInstance<CarryTuning>();
             _log = new TouchLog(_t.TouchWindow, _t.TouchCapacity, _t.ImpactReportWindow);
             _wobbleSeed = new Vector2(Random.value * 100f, Random.value * 100f);
+            _events = carryable as ICarryableEvents;
+            if (_events != null) { _events.OnForcedRelease += HandleForcedRelease; _events.OnStruggle += HandleStruggle; }
+        }
+
+        /// <summary>The carryable broke free from these holders (critter escape).</summary>
+        void HandleForcedRelease(ulong[] holders)
+        {
+            if (holders == null) return;
+            for (int i = _grips.Count - 1; i >= 0; i--)
+            {
+                var c = _grips[i].Carrier;
+                if (c != null && System.Array.IndexOf(holders, c.OwnerClientId) >= 0) { c.ServerOnGripLost(); RemoveGrip(c, HandlingMode.Slipped); }
+            }
+        }
+
+        /// <summary>Critter wriggle (design units): shoves each holder and raises the wobble.</summary>
+        void HandleStruggle(Vector3 designImpulse)
+        {
+            float mag = designImpulse.magnitude;
+            _struggle = Mathf.Max(_struggle, Mathf.Clamp(mag / 120f, 0f, 3f));
+            foreach (var g in _grips)
+                if (g.Carrier != null) g.Carrier.Character.ApplyImpulse(designImpulse, PlayerIds.Nature, BlameVerb.LetEscape);
+            if (_rb != null && !_rb.isKinematic) _rb.AddForce(ImpactUnits.ToUnity(mag) * Random.onUnitSphere, ForceMode.Impulse);
         }
 
         /// <summary>Adds a grip; rejects a second player on a 1-hand item and joins beyond what is needed.</summary>
@@ -156,6 +181,7 @@ namespace HarvestPanic.Gameplay
             if (NetObject == null || !NetObject.IsSpawned) { DropAll(); return; }
 
             float now = Time.time, dt = Time.fixedDeltaTime;
+            _struggle = Mathf.MoveTowards(_struggle, 0f, dt);
             foreach (var g in _grips)
                 if (now >= g.NextTouch) { g.NextTouch = now + _t.HoldTouchRefresh; _log.Touch(g.Carrier.OwnerClientId, now); _goods?.RecordTouch(g.Carrier.OwnerClientId); }
 
@@ -177,7 +203,7 @@ namespace HarvestPanic.Gameplay
                 var carrier = g.Carrier.Character;
                 Vector3 p = transform.TransformPoint(g.LocalPoint);
                 float speedRatio = carrier.Velocity.magnitude / Mathf.Max(0.1f, carrier.Tuning.SprintSpeed);
-                float amp = CarryMath.WobbleAmplitude(_t.WobbleAmplitude, speedRatio, 0f);
+                float amp = CarryMath.WobbleAmplitude(_t.WobbleAmplitude, speedRatio, _struggle);
                 float tn = now * _t.WobbleFrequency;
                 Vector3 wobble = new Vector3(Mathf.PerlinNoise(tn, _wobbleSeed.x) - 0.5f, Mathf.PerlinNoise(_wobbleSeed.y, tn) - 0.5f, Mathf.PerlinNoise(tn, tn + _wobbleSeed.x) - 0.5f) * (2f * amp);
                 Vector3 target = g.Carrier.HoldPoint(false) + wobble;
@@ -205,7 +231,11 @@ namespace HarvestPanic.Gameplay
             }
         }
 
-        void OnDestroy() => DropAll();
+        void OnDestroy()
+        {
+            if (_events != null) { _events.OnForcedRelease -= HandleForcedRelease; _events.OnStruggle -= HandleStruggle; }
+            DropAll();
+        }
 
         void OnCollisionEnter(Collision c)
         {
