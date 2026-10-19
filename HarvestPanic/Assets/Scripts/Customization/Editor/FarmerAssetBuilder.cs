@@ -445,8 +445,9 @@ namespace HarvestPanic.Customization.Editor
         static List<Vector3> BakedWorldVerts(SkinnedMeshRenderer smr, out List<List<Vector3>> perSubmesh)
         {
             var mesh = new Mesh();
-            smr.BakeMesh(mesh, true); // vertices in renderer space with scale already applied
-            var world = mesh.vertices.Select(v => smr.transform.position + smr.transform.rotation * v).ToList();
+            smr.BakeMesh(mesh, false); // renderer-local vertices; TransformPoint applies the full (imported 0.01/100) scale chain
+            var world = mesh.vertices.Select(v => smr.transform.position + smr.transform.rotation * v).ToList(); // BakeMesh(false) already yields metre-scale skinned positions
+            Debug.Log($"[FarmerAssetBuilder] {smr.name} lossyScale={smr.transform.lossyScale} maxY={world.Max(v => v.y):F3}");
             perSubmesh = new List<List<Vector3>>();
             for (int s = 0; s < mesh.subMeshCount; s++)
                 perSubmesh.Add(mesh.GetIndices(s).Distinct().Select(i => world[i]).ToList());
@@ -537,14 +538,14 @@ namespace HarvestPanic.Customization.Editor
                 f.name = "Farmer_" + (i + 1);
                 f.transform.SetParent(lineup.transform, false);
                 f.transform.localPosition = new Vector3(-2.4f + i * 1.6f, 0f, 0f);
-                f.transform.localRotation = Quaternion.Euler(0f, 180f + (i - 1.5f) * -8f, 0f);
+                f.transform.localRotation = Quaternion.Euler(0f, (i - 1.5f) * -8f, 0f);
                 farmers.Add(f.GetComponent<FarmerVisual>());
             }
             lineup.EditorSetup(farmers);
 
             var marker = new GameObject("WardrobeMarker");
-            marker.transform.position = new Vector3(4.6f, 0f, -1.8f);
-            marker.transform.rotation = Quaternion.Euler(0f, 200f, 0f);
+            marker.transform.position = new Vector3(3.7f, 0f, -2.4f);
+            marker.transform.rotation = Quaternion.Euler(0f, -20f, 0f);
             marker.AddComponent<LevelMarker>().Configure(MarkerRole.Wardrobe);
             marker.tag = MarkerTag.Wardrobe;
 
