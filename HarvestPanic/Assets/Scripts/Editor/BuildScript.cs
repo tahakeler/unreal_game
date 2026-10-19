@@ -16,18 +16,25 @@ namespace HarvestPanic.Editor
         [MenuItem("Harvest Panic/Build/macOS")]
         public static void BuildMac() => Build(BuildTarget.StandaloneOSX, "Builds/macOS/HarvestPanic.app");
 
+        /// <summary>Development macOS player (includes the NetTest scenes) used by the multiplayer tests.</summary>
+        [MenuItem("Harvest Panic/Build/macOS (Development)")]
+        public static void BuildMacDev() => Build(BuildTarget.StandaloneOSX, "Builds/macOS-dev/HarvestPanic.app", true);
+
         [MenuItem("Harvest Panic/Build/Windows")]
         public static void BuildWindows() => Build(BuildTarget.StandaloneWindows64, "Builds/Windows/HarvestPanic.exe");
 
-        static void Build(BuildTarget target, string defaultPath)
+        static void Build(BuildTarget target, string defaultPath, bool forceDevelopment = false)
         {
+            NetworkingSetup.SyncBuildScenes();
+            bool dev = forceDevelopment || Environment.GetCommandLineArgs().Contains("-development");
             var options = new BuildPlayerOptions
             {
-                scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray(),
+                // NGO identifies scenes by path hash, so peers only need the same paths, not the same indices.
+                scenes = EditorBuildSettings.scenes.Where(s => s.enabled && (dev || !s.path.StartsWith(NetworkingSetup.TestSceneDir))).Select(s => s.path).ToArray(),
                 locationPathName = Arg("-buildOutput") ?? defaultPath,
                 target = target,
                 targetGroup = BuildTargetGroup.Standalone,
-                options = Environment.GetCommandLineArgs().Contains("-development") ? BuildOptions.Development : BuildOptions.None,
+                options = dev ? BuildOptions.Development : BuildOptions.None,
             };
             var report = BuildPipeline.BuildPlayer(options);
             var s = report.summary;
