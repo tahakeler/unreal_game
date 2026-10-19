@@ -41,8 +41,7 @@ namespace HarvestPanic.Gameplay
         [Tooltip("A thrown body stays 'Thrown' until contact or this long (s)")] public float ThrownWindow = 2f;
 
         [Header("Bruise / impact")]
-        [Tooltip("Unity collision impulse (kg*m/s) is multiplied by this to get design N*s (GDD values are Unreal-scale). See docs/architecture/unity-player.md")]
-        public float ImpulseScale = 10f;
+        // Impulses are compared in design units: HarvestPanic.Core.ImpactUnits.ToDesign(unity impulse).
         [Tooltip("BruiseImpactMin (design N*s), mirror of goods-value I_min")] public float BruiseImpactMin = 400f;
         [Tooltip("Above this (design N*s) an impact is 'heavy'")] public float HeavyImpact = 800f;
         public float LightImpactLoudness = 0.3f;

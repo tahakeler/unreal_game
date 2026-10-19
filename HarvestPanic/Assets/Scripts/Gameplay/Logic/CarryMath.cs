@@ -99,9 +99,6 @@ namespace HarvestPanic.Gameplay
         public static float WobbleAmplitude(float baseAmp, float speedRatio, float struggle) =>
             baseAmp * (1f + 2f * Mathf.Clamp01(speedRatio)) * (1f + Mathf.Max(0f, struggle));
 
-        /// <summary>Converts a Unity collision impulse (kg*m/s) to design N*s.</summary>
-        public static float ToDesignImpulse(float unityImpulse, float scale) => unityImpulse * scale;
-
         /// <summary>Net catch chance <c>clamp(0.95 - 0.1 * agility, 0.4, 0.95)</c> (farm-tools section 4).</summary>
         public static float NetCatchChance(float agility) => Mathf.Clamp(0.95f - 0.1f * agility, 0.4f, 0.95f);
 

@@ -18,7 +18,7 @@ namespace HarvestPanic.Gameplay
     /// (state, carry, impulses, noise, fees) is decided on the server.
     /// </summary>
     [DefaultExecutionOrder(-60)]
-    public sealed class PlayerCharacter : NetworkBehaviour, IPlayerHooks, ICarryable, IGrabGate, ISelfSimulatedCarryable
+    public sealed class PlayerCharacter : NetworkBehaviour, IPlayerHooks, IKnockable, ICarryable, IGrabGate, ISelfSimulatedCarryable
     {
         [Header("Config")]
         [SerializeField] PlayerTuning tuning;
@@ -66,8 +66,6 @@ namespace HarvestPanic.Gameplay
         float _hollerReadyAt;         // server
         float _ownerHollerReadyAt;    // owner (cosmetic gate)
         float _controlLockUntil;      // owner: get-up animation
-        float _getUpStartedAt = -10f;
-        Quaternion _getUpFrom;
         bool _physicsMode;
         ulong _lastThrower = PlayerIds.None;
         float _lastThrownAt = -100f;
@@ -99,7 +97,9 @@ namespace HarvestPanic.Gameplay
         public PlayerState State => _state.Value;
         /// <summary>True when the player has input control.</summary>
         public bool HasControl => PlayerStateMachine.HasControl(State) && Time.time >= _controlLockUntil;
-        /// <summary>Ragdolled, knocked out or respawning (matches the planned Core IKnockable.IsDown).</summary>
+        /// <summary>Server-side control check (no client get-up lock).</summary>
+        public bool HasControlServer => State == PlayerState.Normal;
+        /// <inheritdoc />
         public bool IsDown => State != PlayerState.Normal;
         /// <summary>Who is carrying this (KO) body, or <see cref="PlayerIds.None"/>.</summary>
         public ulong CarriedBy => _carriedBy.Value;
@@ -341,13 +341,13 @@ namespace HarvestPanic.Gameplay
             _lastPos = position;
         }
 
-        // ---- Server API (mirrors the planned Core IKnockable) ------------------------------------------------
+        // ---- Server API: IKnockable -------------------------------------------------------------------------
 
         /// <summary>
-        /// Server: applies an impulse in design N*s (Unity impulse x <see cref="CarryTuning.ImpulseScale"/>).
+        /// Server: applies an impulse in design units (<see cref="ImpactUnits"/>).
         /// Above the ragdoll threshold the player ragdolls; at 2x RagdollImpulse, or the 3rd ragdoll in 20 s, KO.
         /// </summary>
-        public void ApplyImpulse(Vector3 designImpulse, ulong instigator)
+        public void ApplyImpulse(Vector3 designImpulse, ulong instigator, BlameVerb verb)
         {
             if (!IsServer || State == PlayerState.Respawning) return;
             float mag = designImpulse.magnitude;
@@ -360,11 +360,11 @@ namespace HarvestPanic.Gameplay
             float launch = Mathf.Min(tuning.RagdollLaunchMax, mag * tuning.RagdollLaunchPerImpulse);
             Vector3 dir = (designImpulse.normalized + Vector3.up * 0.35f).normalized;
             ServerEnterRagdoll(dir * launch, instigator, CarryMath.IsKnockoutImpulse(mag, tuning.RagdollImpulse));
-            NoiseService.TryEmit(NoiseSource.Impact, mag > 2f * tuning.RagdollImpulse * 0.5f ? 0.6f : 0.3f, transform.position, NetworkObjectId, instigator);
+            NoiseService.TryEmit(NoiseSource.Impact, mag > carryTuning.HeavyImpact ? carryTuning.HeavyImpactLoudness : carryTuning.LightImpactLoudness, transform.position, NetworkObjectId, instigator);
         }
 
-        /// <summary>Server: sends the player to the barn (5 s, fee charged). Verb Drowned / KnockedOut / Stranded.</summary>
-        public void SendToBarn(BlameVerb cause)
+        /// <summary>Server: sends the player to the barn (RespawnDelay s). Verb Drowned / KnockedOut / Stranded.</summary>
+        public void SendToBarn(BlameVerb cause, bool chargeFee)
         {
             if (!IsServer || State == PlayerState.Respawning) return;
             Carry?.ServerRelease(HandlingMode.Dropped);
@@ -372,7 +372,7 @@ namespace HarvestPanic.Gameplay
 
             if (Services.TryGet(out IEconomyService economy))
             {
-                economy.ChargeRespawnFee(OwnerClientId, cause);
+                if (chargeFee) economy.ChargeRespawnFee(OwnerClientId, cause);
                 if (cause == BlameVerb.Drowned && PlayerIds.IsPlayer(_lastThrower) && Time.time - _lastThrownAt <= tuning.YeetBlameWindow)
                 {
                     economy.EmitBlame(new BlameEvent
@@ -444,8 +444,6 @@ namespace HarvestPanic.Gameplay
             {
                 // Get-up: 1.2 s during which control is locked while the body rights itself.
                 _controlLockUntil = Time.time + tuning.GetUpDuration;
-                _getUpStartedAt = Time.time;
-                _getUpFrom = transform.rotation;
             }
             ApplyPhysicsMode(physics);
             if (next == PlayerState.KnockedOut) _stateUntil = Time.time + tuning.KoDuration;
@@ -526,7 +524,7 @@ namespace HarvestPanic.Gameplay
                     if (now >= _stateUntil) ServerFinishRespawn();
                     break;
             }
-            if (State != PlayerState.Respawning && transform.position.y < tuning.KillZ) SendToBarn(BlameVerb.Drowned);
+            if (State != PlayerState.Respawning && transform.position.y < tuning.KillZ) SendToBarn(BlameVerb.Drowned, true);
 
             // Footsteps (proximity-voice table): walk 0.10, sprint 0.25, crouch none.
             Vector3 p = transform.position;
@@ -566,9 +564,6 @@ namespace HarvestPanic.Gameplay
 
             if (!IsSpawned || !IsOwner) return;
 
-            // Get-up: rotate the camera/body upright smoothly during the lock.
-            if (!_physicsMode && Time.time - _getUpStartedAt < 0.0001f) { }
-
             // A carried KO body pulls itself toward the carrier's hold point (owner-simulated).
             if (_physicsMode && !_rb.isKinematic && _carriedBy.Value != PlayerIds.None)
             {
@@ -590,7 +585,7 @@ namespace HarvestPanic.Gameplay
         {
             if (!IsSpawned || !IsServer || State == PlayerState.Respawning) return;
             if (other.gameObject.layer == LayerMask.NameToLayer(GameLayers.Water) || other.CompareTag(MarkerTag.River))
-                SendToBarn(BlameVerb.Drowned);
+                SendToBarn(BlameVerb.Drowned, true);
         }
 
         void OnCollisionEnter(Collision c)
@@ -598,8 +593,8 @@ namespace HarvestPanic.Gameplay
             // Server: a dynamic body (thrown goods, charging critter with a rigidbody) hit this player.
             if (!IsSpawned || !IsServer || c.rigidbody == null || c.rigidbody.isKinematic) return;
             if (c.rigidbody.GetComponent<CarryBody>() != null) return; // reported by the carry system with attribution
-            float design = CarryMath.ToDesignImpulse(c.impulse.magnitude, carryTuning.ImpulseScale);
-            ApplyImpulse(-c.impulse.normalized * design, PlayerIds.Nature);
+            float design = ImpactUnits.ToDesign(c.impulse.magnitude);
+            ApplyImpulse(-c.impulse.normalized * design, PlayerIds.Nature, BlameVerb.Crashed);
         }
     }
 }
