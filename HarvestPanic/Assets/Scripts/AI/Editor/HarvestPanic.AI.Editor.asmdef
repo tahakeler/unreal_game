@@ -1,0 +1,25 @@
+{
+    "name": "HarvestPanic.AI.Editor",
+    "rootNamespace": "HarvestPanic.AI.Editor",
+    "references": [
+        "HarvestPanic.Core",
+        "HarvestPanic.AI",
+        "HarvestPanic.Editor",
+        "Unity.Netcode.Runtime",
+        "Unity.AI.Navigation",
+        "Unity.AI.Navigation.Editor",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
