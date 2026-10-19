@@ -8,7 +8,7 @@ namespace HarvestPanic.World
 {
     /// <summary>
     /// River trigger (Water layer, marker River). Server only:
-    /// players: respawn fee via <see cref="IEconomyService.ChargeRespawnFee"/>, then the "OnHarvestPanicDrowned(Vector3 barnRespawn)"
+    /// players: <see cref="IKnockable.SendToBarn"/> (Drowned, fee). Fallback for a player without IKnockable: respawn fee via <see cref="IEconomyService.ChargeRespawnFee"/>, then the "OnHarvestPanicDrowned(Vector3 barnRespawn)"
     /// message is sent so the Player team can respawn properly; if nothing moved the player out after 3 s the river teleports it.
     /// goods and critters: carried downstream at the surface (bobbing, kinematic) and dropped at the RiverPile marker after 15-25 s;
     /// goods take a Soaked hit (IGoods.ApplyBruise with DroppedInRiver).
@@ -37,6 +37,7 @@ namespace HarvestPanic.World
         {
             if (!WorldAuthority.IsServerOrOffline) return;
             if (other.gameObject.layer == LayerMask.NameToLayer(GameLayers.Bridge)) return;
+            if (Knockables.TryGetFor(other.gameObject, out var knock)) { HandleKnockable(knock, other); return; }
             var hooks = other.GetComponentInParent<IPlayerHooks>();
             if (hooks != null) { HandlePlayer(hooks, other); return; }
 
@@ -48,6 +49,23 @@ namespace HarvestPanic.World
             Splash(root.position, goods?.LastHandlerId ?? PlayerIds.None);
             if (goods != null) goods.ApplyBruise(soakImpulse, goods.LastHandlerId, BlameVerb.DroppedInRiver);
             StartCoroutine(Sweep(root));
+        }
+
+        void HandleKnockable(IKnockable knock, Collider col)
+        {
+            var root = knock is Component c ? c.transform : col.transform.root;
+            if (!_busy.Add(root.GetInstanceID())) return;
+            var hooks = col.GetComponentInParent<IPlayerHooks>();
+            Splash(root.position, hooks != null ? hooks.ClientId : PlayerIds.None);
+            knock.SendToBarn(BlameVerb.Drowned, true); // Player team teleports and charges the fee
+            StartCoroutine(Release(root, 1.5f));
+        }
+
+        IEnumerator Release(Transform root, float delay)
+        {
+            int id = root.GetInstanceID();
+            yield return new WaitForSeconds(delay);
+            _busy.Remove(id);
         }
 
         void HandlePlayer(IPlayerHooks hooks, Collider col)

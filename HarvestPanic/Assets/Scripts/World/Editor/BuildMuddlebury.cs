@@ -111,11 +111,11 @@ namespace HarvestPanic.World.Editor
 
             var sky = AssetDatabase.LoadAssetAtPath<Material>(WorldAssets.MatDir + "/M_World_Sky.mat");
             if (sky == null) { sky = new Material(Shader.Find("Skybox/Procedural")); AssetDatabase.CreateAsset(sky, WorldAssets.MatDir + "/M_World_Sky.mat"); }
-            sky.SetColor("_SkyTint", WorldAssets.Hex("9FC6E8"));
-            sky.SetColor("_GroundColor", WorldAssets.Hex("B8A58A"));
-            sky.SetFloat("_AtmosphereThickness", 0.75f);
-            sky.SetFloat("_Exposure", 1.25f);
-            sky.SetFloat("_SunSize", 0.05f);
+            sky.SetColor("_SkyTint", WorldAssets.Hex("B9CFE0"));
+            sky.SetColor("_GroundColor", WorldAssets.Hex("A9B88E"));
+            sky.SetFloat("_AtmosphereThickness", 0.9f);
+            sky.SetFloat("_Exposure", 1.15f);
+            sky.SetFloat("_SunSize", 0.025f);
             EditorUtility.SetDirty(sky);
             RenderSettings.skybox = sky;
 
@@ -126,8 +126,8 @@ namespace HarvestPanic.World.Editor
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.Linear;
             RenderSettings.fogColor = WorldAssets.Hex("E9D9BC");
-            RenderSettings.fogStartDistance = 70f;
-            RenderSettings.fogEndDistance = 340f;
+            RenderSettings.fogStartDistance = 140f;
+            RenderSettings.fogEndDistance = 700f;
             RenderSettings.defaultReflectionMode = DefaultReflectionMode.Skybox;
 
             var profilePath = SettingsDir + "/VP_Muddlebury.asset";
@@ -140,9 +140,9 @@ namespace HarvestPanic.World.Editor
             }
             Get<Tonemapping>().mode.Override(TonemappingMode.Neutral);
             var ca = Get<ColorAdjustments>();
-            ca.saturation.Override(14f); ca.contrast.Override(10f); ca.postExposure.Override(0.25f);
+            ca.saturation.Override(4f); ca.contrast.Override(12f); ca.postExposure.Override(0.1f);
             ca.colorFilter.Override(WorldAssets.Hex("FFF6E8"));
-            var wb = Get<WhiteBalance>(); wb.temperature.Override(10f); wb.tint.Override(2f);
+            var wb = Get<WhiteBalance>(); wb.temperature.Override(6f); wb.tint.Override(4f);
             var bloom = Get<Bloom>(); bloom.intensity.Override(0.35f); bloom.threshold.Override(1.1f); bloom.scatter.Override(0.6f);
             var smh = Get<ShadowsMidtonesHighlights>();
             smh.shadows.Override(new Vector4(0.96f, 0.94f, 1.06f, 0f)); // violet-tinted lifted shadows
@@ -175,7 +175,7 @@ namespace HarvestPanic.World.Editor
             // gentle rolling noise on the farm (kept low where things stand), hills ringing the play area
             float n = (Mathf.PerlinNoise(x * 0.025f + 3f, z * 0.025f + 7f) - 0.5f) * 0.6f;
             float outside = Mathf.Max(Mathf.Max(-120f - x, x - 175f), Mathf.Max(z - 102f, -146f - z));
-            float hill = Smooth(0f, 22f, outside) * (6f + Mathf.PerlinNoise(x * 0.05f, z * 0.05f) * 6f);
+            float hill = Smooth(0f, 24f, outside) * (7f + Mathf.PerlinNoise(x * 0.04f, z * 0.04f) * 9f);
             float flat = 1f - Smooth(0f, 6f, Mathf.Min(Mathf.Min(DistRect(x, z, -42, -12, -6, 12), DistRect(x, z, 40, -8, 120, 8)), DistRect(x, z, 100, -40, 175, 40)));
             float y = n * (1f - flat) + hill;
             return d < 20.5f ? Mathf.Min(river, river + y * Smooth(18f, 20.5f, d)) : y;
@@ -194,6 +194,8 @@ namespace HarvestPanic.World.Editor
             AssetDatabase.DeleteAsset(tdPath);
             var td = new TerrainData { heightmapResolution = res };
             td.size = new Vector3(TSX, TH, TSZ);
+            td.alphamapResolution = 512;
+            AssetDatabase.CreateAsset(td, tdPath); // create first so the splat textures are saved as sub-assets
             var h = new float[res, res];
             for (int j = 0; j < res; j++)
             for (int i = 0; i < res; i++)
@@ -206,13 +208,13 @@ namespace HarvestPanic.World.Editor
             // Layers: 0 grass, 1 road dirt, 2 tilled soil, 3 mud, 4 cobble, 5 bank sand, 6 meadow (lighter grass)
             var layers = new[]
             {
-                Layer("Grass", WorldAssets.NoiseTexture("Grass", WorldAssets.Hex("8CB052"), WorldAssets.Hex("7AA048"), WorldAssets.Hex("A9C46A"), 0.03f, seed: 2), 6f),
+                Layer("Grass", WorldAssets.NoiseTexture("Grass", WorldAssets.Hex("86A84E"), WorldAssets.Hex("769A46"), WorldAssets.Hex("A9C46A"), 0.03f, seed: 2), 6f),
                 Layer("Road", WorldAssets.NoiseTexture("Road", WorldAssets.Hex("C4A272"), WorldAssets.Hex("B08E60"), WorldAssets.Hex("8A6E4A"), 0.04f, seed: 3), 5f),
                 Layer("Soil", WorldAssets.NoiseTexture("Soil", WorldAssets.Hex("8E6640"), WorldAssets.Hex("76522F"), WorldAssets.Hex("A87C52"), 0.02f, seed: 4, stripes: true), 4f),
                 Layer("Mud", WorldAssets.NoiseTexture("Mud", WorldAssets.Hex("6B4A2E"), WorldAssets.Hex("5A3C24"), WorldAssets.Hex("8A6644"), 0.02f, seed: 5), 3f),
                 Layer("Cobble", WorldAssets.CobbleTexture("Cobble", WorldAssets.Hex("C9BBA2"), WorldAssets.Hex("8F8270")), 3f),
                 Layer("Bank", WorldAssets.NoiseTexture("Bank", WorldAssets.Hex("B49A72"), WorldAssets.Hex("9C8462"), WorldAssets.Hex("D2BE98"), 0.05f, seed: 6), 4f),
-                Layer("Meadow", WorldAssets.NoiseTexture("Meadow", WorldAssets.Hex("9DBA5C"), WorldAssets.Hex("8DB052"), WorldAssets.Hex("E6D88A"), 0.04f, seed: 8), 7f),
+                Layer("Meadow", WorldAssets.NoiseTexture("Meadow", WorldAssets.Hex("94AE58"), WorldAssets.Hex("8DB052"), WorldAssets.Hex("E6D88A"), 0.04f, seed: 8), 7f),
             };
             td.terrainLayers = layers;
             int ar = 512;
@@ -228,7 +230,9 @@ namespace HarvestPanic.World.Editor
                 for (int k = 0; k < w.Length; k++) a[j, i, k] = w[k] / sum;
             }
             td.SetAlphamaps(0, 0, a);
-            AssetDatabase.CreateAsset(td, tdPath);
+            foreach (var at in td.alphamapTextures) if (!AssetDatabase.Contains(at)) AssetDatabase.AddObjectToAsset(at, td);
+            EditorUtility.SetDirty(td);
+            AssetDatabase.SaveAssets();
 
             var go = Terrain.CreateTerrainGameObject(td);
             go.name = "Ground (Terrain)";
@@ -241,6 +245,13 @@ namespace HarvestPanic.World.Editor
             t.heightmapPixelError = 4f;
             t.basemapDistance = 400f;
             t.drawTreesAndFoliage = false;
+            // Distant ground skirt outside the terrain so the horizon reads as land (4 slabs around the terrain rectangle).
+            var far = WorldAssets.Mat("DistantGround", WorldAssets.Hex("7E9A55"));
+            float big = 1500f, ex0 = TX0, ex1 = TX0 + TSX, ez0 = TZ0, ez1 = TZ0 + TSZ;
+            Block("Distant Ground W", new Vector3(ex0 - big / 2f + 1f, 4f, (ez0 + ez1) / 2f), new Vector3(big, 1f, big * 2f), far, _root, collider: false);
+            Block("Distant Ground E", new Vector3(ex1 + big / 2f - 1f, 4f, (ez0 + ez1) / 2f), new Vector3(big, 1f, big * 2f), far, _root, collider: false);
+            Block("Distant Ground N", new Vector3((ex0 + ex1) / 2f, 4f, ez1 + big / 2f - 1f), new Vector3(TSX, 1f, big), far, _root, collider: false);
+            Block("Distant Ground S", new Vector3((ex0 + ex1) / 2f, 4f, ez0 - big / 2f + 1f), new Vector3(TSX, 1f, big), far, _root, collider: false);
             return t;
         }
 
@@ -500,10 +511,10 @@ namespace HarvestPanic.World.Editor
             bridge.AddComponent<BridgeController>();
             bridge.AddComponent<BridgeNetSync>();
 
-            var wood = new[] { WorldAssets.Mat("Plank_A", WorldAssets.Hex("B5875A")), WorldAssets.Mat("Plank_B", WorldAssets.Hex("A67A4E")), WorldAssets.Mat("Plank_C", WorldAssets.Hex("BF9466")) };
+            var wood = new[] { WorldAssets.Mat("Plank_A", WorldAssets.Hex("9C7652")), WorldAssets.Mat("Plank_B", WorldAssets.Hex("8C6846")), WorldAssets.Mat("Plank_C", WorldAssets.Hex("A8825C")) };
             var cracked = WorldAssets.Mat("Plank_Cracked", WorldAssets.Hex("6E4A30"));
             var post = WorldAssets.Mat("Post", WorldAssets.Hex("7A5236"));
-            var rope = WorldAssets.Mat("Rope", WorldAssets.Hex("D8C08A"));
+            var rope = WorldAssets.Mat("Rope", WorldAssets.Hex("C8A870"));
             int bridgeLayer = LayerMask.NameToLayer(GameLayers.Bridge);
 
             float x0 = RiverWest;
@@ -548,7 +559,7 @@ namespace HarvestPanic.World.Editor
                     float ta = s / (float)segs, tb = (s + 1) / (float)segs;
                     var pa = new Vector3(Mathf.Lerp(RiverWest - 1.2f, RiverEast + 1.2f, ta), PlankMath.Sag(ta, BridgeSag * 0.85f) + 1.05f, z);
                     var pb = new Vector3(Mathf.Lerp(RiverWest - 1.2f, RiverEast + 1.2f, tb), PlankMath.Sag(tb, BridgeSag * 0.85f) + 1.05f, z);
-                    Rope(pa, pb, 0.05f, rope, g);
+                    Rope(pa, pb, 0.07f, rope, g);
                 }
                 for (int i = 0; i <= PlankCount; i += 2)
                 {
@@ -664,8 +675,12 @@ namespace HarvestPanic.World.Editor
             var hay = WorldAssets.Mat("Hay", WorldAssets.Hex("E3C46E"));
             Block("HayBale (hole cover)", PigPen + new Vector3(-4f, 0.45f, 7.6f), new Vector3(1.9f, 0.9f, 1.2f), hay, pig);
             Block("Trough", PigPen + new Vector3(6f, 0.3f, 3.5f), new Vector3(2.6f, 0.6f, 0.8f), WorldAssets.Mat("Post", WorldAssets.Hex("7A5236")), pig);
-            Mud("Mud Wallow", PigPen + new Vector3(-3f, 0f, 1f), new Vector3(11f, 2f, 7.2f), pig);
-            Place(FT, "overhang", PigPen + new Vector3(6f, 0, -3f), 180f, 2.6f, pig);
+            Mud("Mud Wallow", PigPen + new Vector3(-3f, 0f, 1f), new Vector3(11f, 2f, 7.2f), pig, true);
+            var shedWood = WorldAssets.Mat("Post", WorldAssets.Hex("7A5236"));
+            foreach (var o in new[] { new Vector3(4.5f, 0, -5f), new Vector3(8f, 0, -5f), new Vector3(4.5f, 0, -1.5f), new Vector3(8f, 0, -1.5f) })
+                Block("ShelterPost", PigPen + o + new Vector3(0, 1.1f, 0), new Vector3(0.25f, 2.2f, 0.25f), shedWood, pig);
+            var shedRoof = Block("ShelterRoof", PigPen + new Vector3(6.25f, 2.3f, -3.25f), new Vector3(4.4f, 0.18f, 4.4f), WorldAssets.Mat("RoofTeal", WorldAssets.Hex("5E9A8A")), pig, collider: false);
+            shedRoof.transform.rotation = Quaternion.Euler(8f, 0f, 0f);
             var coop = Group("Coop Yard");
             FenceRect(Coop, 15f, 15f, coop, (2, 4f, 2.2f), (1, 10f, 2.2f), (0, 7.5f, 3f));
             var coopWall = WorldAssets.Mat("CoopWall", WorldAssets.Hex("E9D8B4"));
@@ -677,7 +692,7 @@ namespace HarvestPanic.World.Editor
             Place(FD, "bag", Coop + new Vector3(4.5f, 0, 5f), 20f, 0.8f, coop);
         }
 
-        static void Mud(string name, Vector3 centre, Vector3 size, Transform parent)
+        static void Mud(string name, Vector3 centre, Vector3 size, Transform parent, bool wetSurface = false)
         {
             var go = new GameObject(name);
             go.transform.SetParent(parent, false);
@@ -685,13 +700,14 @@ namespace HarvestPanic.World.Editor
             var bc = go.AddComponent<BoxCollider>(); bc.size = size; bc.isTrigger = true;
             go.layer = LayerMask.NameToLayer(GameLayers.Interactable);
             go.AddComponent<MudZone>();
+            if (!wetSurface) return; // splat-painted mud only
             // glossy wet mud decal (flat disc) so the wallow reads from far away
             var disc = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             Object.DestroyImmediate(disc.GetComponent<Collider>());
             disc.name = "Mud Surface";
             disc.transform.SetParent(go.transform, false);
             disc.transform.localPosition = new Vector3(0f, -size.y / 2f + 0.2f + 0.02f, 0f);
-            disc.transform.localScale = new Vector3(size.x * 0.8f, 0.01f, size.z * 0.8f);
+            disc.transform.localScale = new Vector3(size.x * 0.7f, 0.005f, size.z * 0.7f);
             disc.GetComponent<Renderer>().sharedMaterial = WorldAssets.Mat("MudWet", WorldAssets.Hex("5E4028"), 0.55f);
         }
 
@@ -784,7 +800,7 @@ namespace HarvestPanic.World.Editor
             for (int k = 0; k < 30; k++) { int i = mazeRng.Next(cw - 1), j = mazeRng.Next(ch - 1); if (k % 2 == 0) wallE[i, j] = false; else wallN[i, j] = false; }
             void Wall(Vector3 a, Vector3 b)
             {
-                for (float t = 0.2f; t <= 1.0f; t += 0.4f)
+                for (float t = 0.125f; t <= 1.0f; t += 0.25f)
                 {
                     var p = Vector3.Lerp(a, b, t);
                     Place(NF, ((int)(p.x * 3 + p.z) & 3) == 0 ? "crops_cornStageC" : "crops_cornStageD", p + new Vector3(Rnd(-0.2f, 0.2f), 0, Rnd(-0.2f, 0.2f)), Rnd(0, 360), Rnd(2.3f, 2.7f), g);
@@ -968,7 +984,7 @@ namespace HarvestPanic.World.Editor
                 float x = Rnd(-118f, 52f), z = Rnd(-140f, 100f);
                 if (Blocked(x, z)) continue;
                 int kind = _rng.Next(10);
-                if (kind < 2) Place(NF, k % 2 == 0 ? "tree_default" : "tree_oak", new Vector3(x, 0, z), Rnd(0, 360), Rnd(6f, 9f), g, "trunk");
+                if (kind < 1) Place(NF, k % 2 == 0 ? "tree_default" : "tree_oak", new Vector3(x, 0, z), Rnd(0, 360), Rnd(6f, 9f), g, "trunk");
                 else if (kind < 4) Place(NF, k % 2 == 0 ? "plant_bush" : "plant_bushSmall", new Vector3(x, 0, z), Rnd(0, 360), Rnd(0.8f, 1.4f), g);
                 else if (kind < 8) Place(NF, new[] { "flower_yellowA", "flower_purpleA", "flower_yellowB", "flower_purpleB", "flower_redA" }[_rng.Next(5)], new Vector3(x, 0, z), Rnd(0, 360), Rnd(0.35f, 0.55f), g);
                 else if (kind < 9) Place(NF, "rock_smallB", new Vector3(x, 0, z), Rnd(0, 360), Rnd(0.4f, 0.9f), g);
@@ -984,6 +1000,19 @@ namespace HarvestPanic.World.Editor
             for (float x = -8f; x < 52f; x += 3.2f)
                 foreach (float s in new[] { -1f, 1f })
                     if (_rng.NextDouble() < 0.55) Place(NF, _rng.NextDouble() < 0.5 ? "flower_yellowC" : "flower_purpleA", new Vector3(x + Rnd(-0.8f, 0.8f), 0, s * Rnd(3.6f, 4.6f)), Rnd(0, 360), 0.45f, g);
+            // Tree groves and roadside cover so the spawn view has depth and hiding spots.
+            foreach (var grove in new[] { new Vector2(-8f, 24f), new Vector2(-6f, -24f), new Vector2(36f, 16f), new Vector2(38f, -20f), new Vector2(-40f, 30f), new Vector2(-38f, -26f) })
+                for (int k = 0; k < 6; k++)
+                {
+                    var p = new Vector3(grove.x + Rnd(-6f, 6f), 0, grove.y + Rnd(-5f, 5f));
+                    if (k < 3) Place(NF, k % 2 == 0 ? "tree_oak" : "tree_default", p, Rnd(0, 360), Rnd(6f, 8.5f), g, "trunk");
+                    else Place(NF, "plant_bushLarge", p, Rnd(0, 360), Rnd(1.2f, 1.8f), g, "box");
+                }
+            var hayMat = WorldAssets.Mat("Hay", WorldAssets.Hex("E3C46E"));
+            foreach (var hp in new[] { new Vector3(14f, 0, 5.5f), new Vector3(26f, 0, -5.8f), new Vector3(-2f, 0, 6f), new Vector3(40f, 0, 6.2f) })
+                Block("HayBale", hp + new Vector3(0, 0.45f, 0), new Vector3(1.2f, 0.9f, 1.8f), hayMat, g, Rnd(-20, 20));
+            FenceLine(new Vector3(-6f, 0, 3.8f), new Vector3(6f, 0, 3.8f), g);
+            FenceLine(new Vector3(9f, 0, -3.8f), new Vector3(24f, 0, -3.8f), g);
             // Fence the road edge near the bridge so the chokepoint reads.
             FenceLine(new Vector3(44f, 0, 3.6f), new Vector3(57.5f, 0, 3.4f), g);
             FenceLine(new Vector3(44f, 0, -3.6f), new Vector3(57.5f, 0, -3.4f), g);

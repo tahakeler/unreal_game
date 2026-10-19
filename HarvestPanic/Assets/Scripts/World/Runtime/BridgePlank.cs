@@ -82,7 +82,7 @@ namespace HarvestPanic.World
         void OnCollisionEnter(Collision c)
         {
             if (_state == PlankState.Broken || !WorldAuthority.IsServerOrOffline) return;
-            float d = PlankMath.ImpactDamage(c.impulse.magnitude);
+            float d = PlankMath.ImpactDamage(ImpactUnits.ToDesign(c.impulse.magnitude)); // thresholds are design units
             if (d > 0f) ApplyDamage(d);
         }
 
@@ -91,8 +91,21 @@ namespace HarvestPanic.World
         {
             if (_state == PlankState.Broken || amount <= 0f) return;
             _integrity = Mathf.Max(0f, _integrity - amount);
-            if (_integrity <= 0f) { SetState(PlankState.Broken, true); Announce(0.75f, NoiseTag.PlankBreak, true); }
+            if (_integrity <= 0f) { KnockRiders(); SetState(PlankState.Broken, true); Announce(0.75f, NoiseTag.PlankBreak, true); }
             else if (_state == PlankState.Intact && PlankMath.IsCracked(_integrity)) { SetState(PlankState.Cracked, true); Announce(0.3f, NoiseTag.Creak, false); }
+        }
+
+        /// <summary>Players standing on a breaking plank get a downward shove (design units) so they fall, not float.</summary>
+        void KnockRiders()
+        {
+            if (_box == null) return;
+            var t = transform;
+            Vector3 half = Vector3.Scale(_box.size, t.lossyScale) * 0.5f;
+            int n = Physics.OverlapBoxNonAlloc(t.TransformPoint(_box.center) + t.up * (half.y + sampleHeight * 0.5f), new Vector3(half.x, sampleHeight * 0.5f, half.z), _hits, t.rotation, ~0, QueryTriggerInteraction.Ignore);
+            var done = new HashSet<IKnockable>();
+            for (int i = 0; i < n; i++)
+                if (Knockables.TryGetFor(_hits[i].gameObject, out var k) && done.Add(k))
+                    k.ApplyImpulse(Vector3.down * 300f, _heaviestPlayer, BlameVerb.BrokePlank);
         }
 
         /// <summary>Server: full repair (each morning).</summary>

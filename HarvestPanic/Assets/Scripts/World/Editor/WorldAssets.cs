@@ -57,7 +57,6 @@ namespace HarvestPanic.World.Editor
                 m.SetColor("_EmissionColor", emission.Value);
                 m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
             }
-            m.enableGPUInstancing = true;
             if (create) AssetDatabase.CreateAsset(m, path); else EditorUtility.SetDirty(m);
             Cache[path] = m;
             return m;
