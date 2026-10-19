@@ -1,0 +1,19 @@
+{
+    "name": "HarvestPanic.AI",
+    "rootNamespace": "HarvestPanic.AI",
+    "references": [
+        "HarvestPanic.Core",
+        "HarvestPanic.Gameplay",
+        "Unity.Netcode.Runtime",
+        "Unity.AI.Navigation"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

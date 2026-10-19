@@ -1,0 +1,16 @@
+{
+    "name": "HarvestPanic.Customization",
+    "rootNamespace": "HarvestPanic.Customization",
+    "references": [
+        "HarvestPanic.Core"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

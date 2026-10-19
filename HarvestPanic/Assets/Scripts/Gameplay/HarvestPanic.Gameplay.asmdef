@@ -1,0 +1,20 @@
+{
+    "name": "HarvestPanic.Gameplay",
+    "rootNamespace": "HarvestPanic.Gameplay",
+    "references": [
+        "HarvestPanic.Core",
+        "HarvestPanic.Networking",
+        "Unity.Netcode.Runtime",
+        "Unity.InputSystem",
+        "Unity.Cinemachine"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
