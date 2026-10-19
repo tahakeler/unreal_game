@@ -25,6 +25,7 @@
         <ui:VisualElement name="prompt-bar" class="prompt-bar" picking-mode="Ignore">
             <ui:VisualElement class="prompt"><ui:Label text="R" class="display keycap" /><ui:Label text="Ready" class="bold prompt-text" /></ui:VisualElement>
             <ui:VisualElement class="prompt"><ui:Label text="Tab" class="display keycap" /><ui:Label text="Crew" class="bold prompt-text" /></ui:VisualElement>
+            <ui:VisualElement class="prompt"><ui:Label text="C" class="display keycap" /><ui:Label text="Wardrobe" class="bold prompt-text" /></ui:VisualElement>
             <ui:VisualElement name="prompt-bell" class="prompt"><ui:Label text="B" class="display keycap" /><ui:Label text="Dinner bell" class="bold prompt-text" /></ui:VisualElement>
             <ui:VisualElement class="prompt"><ui:Label text="Esc" class="display keycap" /><ui:Label text="Menu" class="bold prompt-text" /></ui:VisualElement>
         </ui:VisualElement>

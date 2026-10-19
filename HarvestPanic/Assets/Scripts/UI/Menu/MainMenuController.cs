@@ -283,7 +283,7 @@ namespace HarvestPanic.UI
         void OnCustomize()
         {
             if (!SessionAccess.TryOpenWardrobe())
-                ShowMessage("Customize", "The wardrobe is coming soon. Your farmer is currently wearing the default overalls.");
+                ShowMessage("Customize", "Pick your outfit at the wardrobe in the Lobby yard (press C there). Your farmer is wearing the default overalls until then.");
         }
 
         void OnSteamFriends()

@@ -124,6 +124,18 @@ namespace HarvestPanic.UI
         {
             try
             {
+                // Customization team: static WardrobeUI.Open(FarmerLoadoutSync) for the local farmer (exists once spawned, e.g. in the Lobby).
+                var sync = FindType("HarvestPanic.Customization.FarmerLoadoutSync");
+                var ui = FindType("HarvestPanic.Customization.WardrobeUI");
+                var local = sync?.GetProperty("Local", BindingFlags.Public | BindingFlags.Static)?.GetValue(null);
+                var open1 = ui?.GetMethod("Open", BindingFlags.Public | BindingFlags.Static);
+                if (local != null && open1 != null)
+                {
+                    var ps = open1.GetParameters();
+                    var args1 = new object[ps.Length];
+                    args1[0] = local;
+                    return open1.Invoke(null, args1) != null;
+                }
                 var iface = FindType("HarvestPanic.Core.IWardrobeUI") ?? FindTypeByName("IWardrobeUI");
                 if (iface == null) return false;
                 var tryGet = typeof(Services).GetMethod(nameof(Services.TryGet)).MakeGenericMethod(iface);

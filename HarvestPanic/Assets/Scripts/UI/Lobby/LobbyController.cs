@@ -98,6 +98,7 @@ namespace HarvestPanic.UI
             {
                 if (kb != null && kb.tabKey.wasPressedThisFrame || pad != null && pad.selectButton.wasPressedThisFrame) ToggleCrew();
                 if (kb != null && kb.rKey.wasPressedThisFrame || pad != null && pad.buttonNorth.wasPressedThisFrame) ToggleReady();
+                if (kb != null && kb.cKey.wasPressedThisFrame && !CrewOpen && !SessionAccess.TryOpenWardrobe()) Toast("The wardrobe is still being stitched. Try again in a moment.");
                 if (kb != null && kb.bKey.wasPressedThisFrame || pad != null && pad.leftShoulder.wasPressedThisFrame) RingBell();
             }
             else if (kb != null && kb.enterKey.wasPressedThisFrame) SendChat();
