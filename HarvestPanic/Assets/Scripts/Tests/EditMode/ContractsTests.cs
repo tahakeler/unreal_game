@@ -32,6 +32,59 @@ namespace HarvestPanic.Tests.EditMode
             }
         }
 
+        sealed class StubKnockable : MonoBehaviour, IKnockable
+        {
+            public bool IsDown { get; private set; }
+            public void ApplyImpulse(Vector3 impulse, ulong instigator, BlameVerb verb) => IsDown = true;
+            public void SendToBarn(BlameVerb reason, bool chargeFee) => IsDown = false;
+        }
+
+        [Test]
+        public void ImpactUnits_ConvertsBothWays()
+        {
+            Assert.That(ImpactUnits.ToDesign(40f), Is.EqualTo(400f));
+            Assert.That(ImpactUnits.ToUnity(ImpactUnits.ToDesign(7f)), Is.EqualTo(7f).Within(1e-5f));
+        }
+
+        [Test]
+        public void Knockables_FindsInterfaceOnParent()
+        {
+            var root = new GameObject("p");
+            var child = new GameObject("c");
+            child.transform.SetParent(root.transform);
+            var k = root.AddComponent<StubKnockable>();
+            try
+            {
+                Assert.That(Knockables.TryGetFor(child, out var found), Is.True);
+                found.ApplyImpulse(Vector3.up, 1, BlameVerb.KnockedOut);
+                Assert.That(k.IsDown, Is.True);
+                Assert.That(Knockables.TryGetFor(null, out _), Is.False);
+            }
+            finally { UnityEngine.Object.DestroyImmediate(root); }
+        }
+
+        sealed class StubFighter : ICarryableEvents
+        {
+            public event Action<ulong[]> OnForcedRelease;
+            public event Action<Vector3> OnStruggle;
+            public void Break(ulong[] ids) => OnForcedRelease?.Invoke(ids);
+            public void Wriggle(Vector3 v) => OnStruggle?.Invoke(v);
+        }
+
+        [Test]
+        public void CarryableEvents_AreOptionalAndRaiseToSubscribers()
+        {
+            object plain = new StubCarry();
+            Assert.That(plain is ICarryableEvents, Is.False, "plain carryables stay valid without the events");
+            var f = new StubFighter();
+            ulong[] released = null; var push = Vector3.zero;
+            f.OnForcedRelease += ids => released = ids;
+            f.OnStruggle += v => push = v;
+            f.Break(new ulong[] { 1, 2 }); f.Wriggle(Vector3.right * 120f);
+            Assert.That(released.Length, Is.EqualTo(2));
+            Assert.That(push.x, Is.EqualTo(120f));
+        }
+
         [TearDown] public void TearDown() => Services.Clear();
 
         [Test]

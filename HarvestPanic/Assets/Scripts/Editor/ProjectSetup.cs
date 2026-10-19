@@ -122,11 +122,17 @@ namespace HarvestPanic.Editor
             var scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
             AddGlobalVolume(profile);
 
-            var net = new GameObject("NetworkManager");
-            var utp = net.AddComponent<UnityTransport>();
-            utp.SetConnectionData("127.0.0.1", 7777, "0.0.0.0");
-            var nm = net.AddComponent<NetworkManager>();
-            nm.NetworkConfig = new NetworkConfig { NetworkTransport = utp };
+            // NetworkManager: the Networking prefab when it exists (NetworkingSetup.Configure creates it).
+            var nmPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(NetworkingSetup.NetworkManagerPrefabPath);
+            if (nmPrefab != null) PrefabUtility.InstantiatePrefab(nmPrefab, scene);
+            else
+            {
+                var net = new GameObject("NetworkManager");
+                var utp = net.AddComponent<UnityTransport>();
+                utp.SetConnectionData("127.0.0.1", 7777, "0.0.0.0");
+                var nm = net.AddComponent<NetworkManager>();
+                nm.NetworkConfig = new NetworkConfig { NetworkTransport = utp };
+            }
 
             EditorSceneManager.SaveScene(scene, BootstrapPath);
             var scenes = EditorBuildSettings.scenes.Where(s => s.path != BootstrapPath).ToList();
