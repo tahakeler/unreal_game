@@ -42,7 +42,7 @@ namespace HarvestPanic.Tests.PlayMode.Economy
             bool crateMoved = false;
             foreach (var g in Goods.All.ToArray())
             {
-                bool pumpkin = g.GoodsId == "Crop.PrizePumpkin", crate = g.GoodsId == "Product.EggCrate" && !crateMoved;
+                bool pumpkin = g.GoodsId == "Crop.PrizePumpkin", crate = g.GoodsId == "Product.Crate" && !crateMoved;
                 if (!pumpkin && !crate) continue;
                 crateMoved |= crate;
                 g.RecordTouch(0);
@@ -81,7 +81,7 @@ namespace HarvestPanic.Tests.PlayMode.Economy
             var ps = Object.Instantiate(original);
             ps.targetTexture = uiRt; ps.clearColor = true; ps.colorClearValue = Color.clear;
             doc.panelSettings = ps;
-            yield return null; yield return null; yield return new WaitForEndOfFrame();
+            for (int f = 0; f < 4; f++) yield return null;
 
             cam.targetTexture = sceneRt; cam.Render(); cam.Render(); cam.targetTexture = null;
             var a = Read(sceneRt); var b = Read(uiRt);

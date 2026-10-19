@@ -33,6 +33,7 @@ namespace HarvestPanic.Economy
         public float MultRuinedCrop = 0f, MultRuinedLivestock = 0.25f;
         public int CompostValue = 1;
         public float WaterBpsCrop = 15f, WaterBpsLivestock = 5f;
+        [Tooltip("IGoodsSoakable.ApplySoak = this many seconds of submersion.")] public float SoakSeconds = 1f;
 
         [Header("Freshness (goods-value §4)")]
         public float CropGrace = 120f, CropDecay = 480f;
@@ -62,7 +63,7 @@ namespace HarvestPanic.Economy
             new OrderableGoods { GoodsId = "Livestock.Pig", BaseQuantity = 2 },
             new OrderableGoods { GoodsId = "Livestock.Chicken", BaseQuantity = 3 },
             new OrderableGoods { GoodsId = "Product.Egg", BaseQuantity = 6 },
-            new OrderableGoods { GoodsId = "Product.EggCrate", BaseQuantity = 2 },
+            new OrderableGoods { GoodsId = "Product.Crate", BaseQuantity = 2 },
             new OrderableGoods { GoodsId = "Crop.PrizePumpkin", BaseQuantity = 1 },
             new OrderableGoods { GoodsId = "Crop.Turnip", BaseQuantity = 5 },
             new OrderableGoods { GoodsId = "Crop.Carrot", BaseQuantity = 5 },

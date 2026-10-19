@@ -190,7 +190,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: HarvestPanic.Economy::HarvestPanic.Economy.Goods
   ShowTopMostFoldoutHeaderGroup: 1
   definition: {fileID: 11400000, guid: 05987f76080a547c896e564f8c7dc83b, type: 2}
-  goodsId: Product.EggCrate
+  goodsId: Product.Crate
   kinematicCarry: 0
 --- !u!1001 &5367029043753929979
 PrefabInstance:

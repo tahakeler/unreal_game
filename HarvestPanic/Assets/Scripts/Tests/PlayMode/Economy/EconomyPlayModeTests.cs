@@ -74,7 +74,7 @@ namespace HarvestPanic.Tests.PlayMode.Economy
             Assert.AreEqual(director.Tuning.StartingBalance, director.Balance);
             Assert.IsFalse(director.IsMarketOpen);
 
-            Assert.IsTrue(Content.Goods.TryGet("Product.EggCrate", out var def));
+            Assert.IsTrue(Content.Goods.TryGet("Product.Crate", out var def));
             var crate = Object.Instantiate(def.WorldPrefab, new Vector3(0f, 0.4f, 0f), Quaternion.identity).GetComponent<Goods>();
             crate.NetworkObject.Spawn(true);
             crate.RecordTouch(NetworkManager.ServerClientId);

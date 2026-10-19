@@ -38,7 +38,7 @@ namespace HarvestPanic.Economy.Editor
             new GoodsSpec { Id = "Livestock.Pig", Asset = "Pig", Mesh = "SM_Pig", Cat = GoodsCategory.Livestock, Base = 60, Frag = 0.8f, Hands = 2, Mass = 40f, Alive = true },
             new GoodsSpec { Id = "Livestock.Chicken", Asset = "Chicken", Mesh = "SM_Chicken", Cat = GoodsCategory.Livestock, Base = 15, Frag = 0.6f, Hands = 1, Mass = 5f, Alive = true },
             new GoodsSpec { Id = "Product.Egg", Asset = "Egg", Mesh = "SM_Egg", Cat = GoodsCategory.Product, Base = 5, Frag = 2f, Hands = 1, Mass = 0.06f },
-            new GoodsSpec { Id = "Product.EggCrate", Asset = "EggCrate", Mesh = "SM_Crate", Cat = GoodsCategory.Product, Base = 30, Frag = 1.5f, Hands = 2, Mass = 4f },
+            new GoodsSpec { Id = "Product.Crate", Asset = "EggCrate", Mesh = "SM_Crate", Cat = GoodsCategory.Product, Base = 30, Frag = 1.5f, Hands = 2, Mass = 4f },
             new GoodsSpec { Id = "Crop.PrizePumpkin", Asset = "PrizePumpkin", Mesh = "SM_PrizePumpkin", Cat = GoodsCategory.Crop, Base = 300, Frag = 1.5f, Hands = 8, Mass = 180f },
             new GoodsSpec { Id = "Crop.Turnip", Asset = "Turnip", Mesh = "SM_Turnip", Cat = GoodsCategory.Crop, Base = 10, Frag = 1f, Hands = 1, Mass = 2f },
             new GoodsSpec { Id = "Crop.Carrot", Asset = "Carrot", Mesh = "SM_Carrot", Cat = GoodsCategory.Crop, Base = 8, Frag = 0.8f, Hands = 1, Mass = 0.3f },
@@ -321,7 +321,7 @@ namespace HarvestPanic.Economy.Editor
                 g.tag = MarkerTag.Goods;
             }
             GoodsMarker("Crop.PrizePumpkin", new Vector3(-3.5f, 0f, 2.5f), 1);
-            GoodsMarker("Product.EggCrate", new Vector3(-1.2f, 0f, 0.5f), 2);
+            GoodsMarker("Product.Crate", new Vector3(-1.2f, 0f, 0.5f), 2);
             GoodsMarker("Livestock.Pig", new Vector3(0.6f, 0f, 2.8f), 1);
             GoodsMarker("Livestock.Chicken", new Vector3(-1.6f, 0f, 3.2f), 1);
             GoodsMarker("Crop.Turnip", new Vector3(-4.2f, 0f, -0.2f), 3);

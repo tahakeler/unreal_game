@@ -16,7 +16,7 @@ namespace HarvestPanic.Economy
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Rigidbody))]
-    public sealed class Goods : NetworkBehaviour, IGoods, ICarryable
+    public sealed class Goods : NetworkBehaviour, IGoods, ICarryable, IGoodsSoakable
     {
         [SerializeField] GoodsDefinition definition;
         [SerializeField, Tooltip("Used when Definition is empty (resolved through Content.Goods).")] string goodsId;
@@ -209,6 +209,7 @@ namespace HarvestPanic.Economy
             float design = ImpactUnits.ToDesign(impulse);
             float dbp = EconomyMath.BruiseGain(design, Definition.Fragility, bruiseMult, Tuning);
             if (dbp <= 0f) return;
+            LastBruiseKind = BruiseKind.Impact;
             AddBruisePoints(dbp, instigator, verb, null);
         }
 
@@ -258,6 +259,22 @@ namespace HarvestPanic.Economy
 
         // ---------------- water ----------------
 
+        /// <summary>Kind of the most recent bruise (Impact or Soaked).</summary>
+        public BruiseKind LastBruiseKind { get; private set; }
+
+        /// <summary>
+        /// IGoodsSoakable: one-shot soak (river dunk, rain) = <see cref="EconomyTuning.SoakSeconds"/> of submersion
+        /// at the goods-value water rate (crops 15 BP/s, livestock 5 BP/s, ducks 0).
+        /// </summary>
+        public void ApplySoak(ulong instigator)
+        {
+            if (!IsEconomyAuthority || Definition == null || Definition.GoodsId == "Livestock.Duck") return;
+            float rate = Definition.Category == GoodsCategory.Livestock ? Tuning.WaterBpsLivestock : Tuning.WaterBpsCrop;
+            if (!PlayerIds.IsPlayer(instigator)) instigator = _touches.LastToucher(Time.time);
+            LastBruiseKind = BruiseKind.Soaked;
+            AddBruisePoints(rate * Tuning.SoakSeconds, instigator, BlameVerb.DroppedInRiver, "Hazard.River");
+        }
+
         void OnTriggerStay(Collider other)
         {
             if (!IsEconomyAuthority || Definition == null || other.gameObject.layer != LayerMask.NameToLayer(GameLayers.Water)) return;
@@ -269,6 +286,7 @@ namespace HarvestPanic.Economy
         void FlushWater()
         {
             float bp = _waterAccumBp; _waterAccumBp = 0f; _waterAccumTimer = 0f;
+            LastBruiseKind = BruiseKind.Soaked;
             AddBruisePoints(bp, _touches.LastToucher(Time.time), BlameVerb.DroppedInRiver, "Hazard.River");
         }
 

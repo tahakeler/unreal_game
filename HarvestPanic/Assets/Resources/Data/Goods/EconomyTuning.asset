@@ -57,7 +57,7 @@ MonoBehaviour:
     BaseQuantity: 3
   - GoodsId: Product.Egg
     BaseQuantity: 6
-  - GoodsId: Product.EggCrate
+  - GoodsId: Product.Crate
     BaseQuantity: 2
   - GoodsId: Crop.PrizePumpkin
     BaseQuantity: 1

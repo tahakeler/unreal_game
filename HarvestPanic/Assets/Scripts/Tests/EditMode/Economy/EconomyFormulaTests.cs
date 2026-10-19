@@ -279,7 +279,7 @@ namespace HarvestPanic.Tests.EditMode.Economy
         [Test] public void Market_OrderFillAndComplete()
         {
             var m = new Market(_t);
-            m.StartDay(42, 1, 4, 3, new[] { "Product.EggCrate", "Crop.PrizePumpkin", "Livestock.Pig" });
+            m.StartDay(42, 1, 4, 3, new[] { "Product.Crate", "Crop.PrizePumpkin", "Livestock.Pig" });
             Assert.AreEqual(3, m.Order.Count);
             foreach (var line in new List<OrderLine>(m.Order))
                 for (int i = 0; i < line.Quantity; i++) Assert.IsTrue(m.RecordSale(line.GoodsId, 10));
