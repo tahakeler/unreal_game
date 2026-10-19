@@ -34,8 +34,7 @@ qa-sandbox/
 docs/consistency-failures.md
 
 # === Build Output ===
-# Anchored to the repo root: on macOS core.ignorecase=true makes `build/` also
-# match Unreal's HarvestPanic/Build/ (platform icons/config, which IS tracked).
+# Anchored to the repo root; Unity build output is covered below at any depth.
 /build/
 /builds/
 /bin/
@@ -47,41 +46,50 @@ docs/consistency-failures.md
 *.so
 *.dylib
 *.app
+# Native plugins inside the Unity project ARE source (Steamworks etc.) — tracked via LFS
+!HarvestPanic/Assets/**/*.dll
+!HarvestPanic/Assets/**/*.dylib
+!HarvestPanic/Assets/**/*.so
 
-# === Engine: Unreal (HARVEST PANIC — project lives in HarvestPanic/) ===
-# Unanchored dir patterns match at any depth: HarvestPanic/Binaries/,
-# HarvestPanic/Plugins/<Plugin>/Intermediate/, etc.
-Binaries/
-Intermediate/
-Saved/
-DerivedDataCache/
-**/Build/Receipts/
-**/Platforms/*/Binaries/
-**/Platforms/*/Intermediate/
-ArchivedBuilds/
-StagedBuilds/
-# Generated IDE / project files (regenerate via GenerateProjectFiles)
-*.xcworkspace
-*.xcodeproj
-xcuserdata/
-*.code-workspace
-.vsconfig
+# === Engine: Unity (HARVEST PANIC — project lives in HarvestPanic/) ===
+# Unanchored patterns match at any depth (HarvestPanic/Library/, etc.).
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+# Generated IDE / project files (Unity regenerates them)
+.vs/
+.idea/
+.gradle/
+*.csproj
+*.unityproj
 *.sln
 *.suo
+*.tmp
 *.user
 *.userprefs
-*.opensdf
-*.sdf
-*.VC.db
-*.VC.opendb
+*.pidb
+*.booproj
+*.svd
 *.pdb
-*.ipch
-*.cachefile
-*.uatbuildrecord
-compile_commands.json
-# Rider
-.idea/
-*.sln.DotSettings.user
+*.mdb
+*.opendb
+*.VC.db
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+# Unity crash / analytics artefacts
+sysinfo.txt
+crashlytics-build.properties
+crashlytics*
+# Auto-generated asset bundles / addressables build output
+[Aa]ssets/[Ss]treamingAssets/aa/
+[Aa]ssets/[Ss]treamingAssets/aa.meta
 
 # === Compiled Shaders ===
 *.spv

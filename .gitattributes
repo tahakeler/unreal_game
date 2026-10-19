@@ -20,15 +20,48 @@
 # predates the rule -- run `git add --renormalize .` for that.
 .claude/**/*.md text eol=lf
 
-# === Git LFS — Unreal / HARVEST PANIC binary assets ===
+# === Unity YAML — Force Text serialization, kept as TEXT (not LFS) ===
+# Merge with UnityYAMLMerge; see docs/engine/unity-setup.md for the git config.
+*.unity text merge=unityyamlmerge eol=lf
+*.prefab text merge=unityyamlmerge eol=lf
+*.asset text merge=unityyamlmerge eol=lf
+*.mat text merge=unityyamlmerge eol=lf
+*.anim text merge=unityyamlmerge eol=lf
+*.controller text merge=unityyamlmerge eol=lf
+*.overrideController text merge=unityyamlmerge eol=lf
+*.physicMaterial text merge=unityyamlmerge eol=lf
+*.physicsMaterial2D text merge=unityyamlmerge eol=lf
+*.playable text merge=unityyamlmerge eol=lf
+*.mask text merge=unityyamlmerge eol=lf
+*.brush text merge=unityyamlmerge eol=lf
+*.flare text merge=unityyamlmerge eol=lf
+*.fontsettings text merge=unityyamlmerge eol=lf
+*.guiskin text merge=unityyamlmerge eol=lf
+*.giparams text merge=unityyamlmerge eol=lf
+*.renderTexture text merge=unityyamlmerge eol=lf
+*.spriteatlas text merge=unityyamlmerge eol=lf
+*.terrainlayer text merge=unityyamlmerge eol=lf
+*.lighting text merge=unityyamlmerge eol=lf
+*.meta text merge=unityyamlmerge eol=lf
+# Other Unity text formats
+*.cs text diff=csharp eol=lf
+*.asmdef text eol=lf
+*.asmref text eol=lf
+*.shader text eol=lf
+*.hlsl text eol=lf
+*.cginc text eol=lf
+*.compute text eol=lf
+*.shadergraph text eol=lf
+*.shadersubgraph text eol=lf
+*.vfx text eol=lf
+*.uxml text eol=lf
+*.uss text eol=lf
+*.inputactions text eol=lf
+*.json text eol=lf
+
+# === Git LFS — Unity / HARVEST PANIC binary assets ===
 # Run `git lfs install` once per machine. Paths are unanchored, so these apply
-# under HarvestPanic/ (Content/, Fab packs in Content/<PackName>/, RawAssets/).
-# Unreal packages
-*.uasset filter=lfs diff=lfs merge=lfs -text
-*.umap filter=lfs diff=lfs merge=lfs -text
-*.ubulk filter=lfs diff=lfs merge=lfs -text
-*.uexp filter=lfs diff=lfs merge=lfs -text
-*.upk filter=lfs diff=lfs merge=lfs -text
+# under HarvestPanic/Assets/ (including ThirdParty/<Pack>/).
 # 3D source
 *.fbx filter=lfs diff=lfs merge=lfs -text
 *.obj filter=lfs diff=lfs merge=lfs -text
@@ -68,17 +101,14 @@
 # Video
 *.mp4 filter=lfs diff=lfs merge=lfs -text
 *.mov filter=lfs diff=lfs merge=lfs -text
-*.bk2 filter=lfs diff=lfs merge=lfs -text
+*.webm filter=lfs diff=lfs merge=lfs -text
 # Fonts
 *.ttf filter=lfs diff=lfs merge=lfs -text
 *.otf filter=lfs diff=lfs merge=lfs -text
+# Native plugins / binaries (e.g. Facepunch.Steamworks, steam_api)
+*.dll filter=lfs diff=lfs merge=lfs -text
+*.dylib filter=lfs diff=lfs merge=lfs -text
+*.so filter=lfs diff=lfs merge=lfs -text
+*.bundle filter=lfs diff=lfs merge=lfs -text
 # Docs
 *.pdf filter=lfs diff=lfs merge=lfs -text
-
-# Unreal text files: keep normalized
-*.uproject text
-*.uplugin text
-*.ini text
-*.cpp text diff=cpp
-*.h text diff=cpp
-*.cs text diff=csharp
