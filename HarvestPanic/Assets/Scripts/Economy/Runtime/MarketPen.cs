@@ -63,7 +63,7 @@ namespace HarvestPanic.Economy
         void Update()
         {
             var dir = EconomyDirector.Instance;
-            if (dir == null || !dir.HasAuthority) return;
+            if (dir == null || !dir.IsEconomyAuthority) return;
             float accept = dir.ResolveParam(DayModifierStack.Params.AcceptSeconds, dir.Tuning.MarketAcceptSeconds);
             _scratch.Clear();
             foreach (var kv in _inside)

@@ -81,7 +81,7 @@ namespace HarvestPanic.Economy
         EconomyTuning Tuning => _t != null ? _t : (_t = EconomyTuning.Load());
         bool ReadRemote => IsSpawned && !IsServer;
         /// <summary>True where this instance may mutate state (server, or offline).</summary>
-        public bool HasAuthority => IsSpawned ? IsServer : !NetUtil.IsListening;
+        public bool IsEconomyAuthority => IsSpawned ? IsServer : !NetUtil.IsListening;
 
         /// <summary>Editor/test setup.</summary>
         public void Configure(GoodsDefinition def) { definition = def; goodsId = def != null ? def.GoodsId : goodsId; ApplyDefinition(); }
@@ -121,7 +121,7 @@ namespace HarvestPanic.Economy
 
         void Update()
         {
-            if (!HasAuthority || Definition == null) return;
+            if (!IsEconomyAuthority || Definition == null) return;
             float dt = Time.deltaTime;
             var dir = EconomyDirector.Instance;
             bool decaying = dir == null || dir.FreshnessRunning;
@@ -143,7 +143,7 @@ namespace HarvestPanic.Economy
 
         public void RecordTouch(ulong clientId)
         {
-            if (!HasAuthority || !PlayerIds.IsPlayer(clientId)) return;
+            if (!IsEconomyAuthority || !PlayerIds.IsPlayer(clientId)) return;
             _touches.Record(clientId, Time.time);
             _lastHandler = clientId;
             if (IsSpawned) _nvLastHandler.Value = clientId;
@@ -151,7 +151,7 @@ namespace HarvestPanic.Economy
 
         public void OnGrabbed(ulong clientId)
         {
-            if (!HasAuthority) return;
+            if (!IsEconomyAuthority) return;
             _holders.Add(clientId);
             RecordTouch(clientId);
             if (Definition != null && Definition.Category == GoodsCategory.Crop && _freshElapsed < 0f) _freshElapsed = 0f; // harvested
@@ -159,7 +159,7 @@ namespace HarvestPanic.Economy
 
         public void OnReleased(ulong clientId)
         {
-            if (!HasAuthority) return;
+            if (!IsEconomyAuthority) return;
             _holders.Remove(clientId);
             RecordTouch(clientId);
             _releasedAt = Time.time;
@@ -167,7 +167,7 @@ namespace HarvestPanic.Economy
 
         public void ApplyThrow(Vector3 velocity, ulong thrower)
         {
-            if (!HasAuthority) return;
+            if (!IsEconomyAuthority) return;
             _holders.Clear();
             RecordTouch(thrower);
             _thrower = thrower;
@@ -178,7 +178,7 @@ namespace HarvestPanic.Economy
         /// <summary>Adds or removes dynamic tags (server).</summary>
         public void SetTag(GoodsTag tag, bool on)
         {
-            if (!HasAuthority) return;
+            if (!IsEconomyAuthority) return;
             _tags = on ? _tags | tag : _tags & ~tag;
             if (IsSpawned) _nvTags.Value = (int)_tags;
         }
@@ -187,7 +187,7 @@ namespace HarvestPanic.Economy
 
         void OnCollisionEnter(Collision c)
         {
-            if (!HasAuthority || kinematicCarry) return;
+            if (!IsEconomyAuthority || kinematicCarry) return;
             float impulse = c.impulse.magnitude;
             if (impulse <= 0f) return;
             float now = Time.time;
@@ -203,7 +203,7 @@ namespace HarvestPanic.Economy
         /// <summary>Server only. <paramref name="impulse"/> in N·s; converted with ImpactUnits.ToDesign.</summary>
         public void ApplyBruise(float impulse, ulong instigator, BlameVerb verb)
         {
-            if (!HasAuthority || Definition == null || kinematicCarry) return;
+            if (!IsEconomyAuthority || Definition == null || kinematicCarry) return;
             var dir = EconomyDirector.Instance;
             float bruiseMult = dir != null ? dir.ResolveParam(DayModifierStack.Params.GoodsBruiseMult, 1f) : 1f;
             float design = ImpactUnits.ToDesign(impulse);
@@ -215,7 +215,7 @@ namespace HarvestPanic.Economy
         /// <summary>Server only. Adds raw bruise points (water, creatures) and reports/blames the loss.</summary>
         public void AddBruisePoints(float dbp, ulong instigator, BlameVerb verb, string causeTag)
         {
-            if (!HasAuthority || Definition == null || dbp <= 0f) return;
+            if (!IsEconomyAuthority || Definition == null || dbp <= 0f) return;
             var t = Tuning;
             var oldState = EconomyMath.StateFor(_bruise, t);
             float bOld = EconomyMath.BruiseMult(oldState, Definition.Category, t);
@@ -252,7 +252,7 @@ namespace HarvestPanic.Economy
         /// <summary>Despawn/out-of-bounds: full value lost to the last handler within the window.</summary>
         public void ReportLost(BlameVerb verb, string causeTag)
         {
-            if (!HasAuthority) return;
+            if (!IsEconomyAuthority) return;
             EmitLoss(-CurrentValue, _touches.LastToucher(Time.time), verb, causeTag);
         }
 
@@ -260,7 +260,7 @@ namespace HarvestPanic.Economy
 
         void OnTriggerStay(Collider other)
         {
-            if (!HasAuthority || Definition == null || other.gameObject.layer != LayerMask.NameToLayer(GameLayers.Water)) return;
+            if (!IsEconomyAuthority || Definition == null || other.gameObject.layer != LayerMask.NameToLayer(GameLayers.Water)) return;
             if (Definition.GoodsId == "Livestock.Duck") return;
             float rate = Definition.Category == GoodsCategory.Livestock ? Tuning.WaterBpsLivestock : Tuning.WaterBpsCrop;
             _waterAccumBp += rate * Time.fixedDeltaTime;

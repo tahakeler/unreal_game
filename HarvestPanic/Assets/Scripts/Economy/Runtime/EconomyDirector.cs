@@ -64,7 +64,7 @@ namespace HarvestPanic.Economy
         public event Action<ReceiptData> OnReceipt;
 
         public EconomyTuning Tuning => tuning != null ? tuning : (tuning = EconomyTuning.Load());
-        public bool HasAuthority => IsSpawned ? IsServer : !NetUtil.IsListening;
+        public bool IsEconomyAuthority => IsSpawned ? IsServer : !NetUtil.IsListening;
         bool ReadRemote => IsSpawned && !IsServer;
 
         // ---------------- read API (HUD) ----------------
@@ -167,7 +167,7 @@ namespace HarvestPanic.Economy
 
         void Update()
         {
-            if (!HasAuthority || !_started) return;
+            if (!IsEconomyAuthority || !_started) return;
             float dt = Time.deltaTime;
             _clock.DurationScale = EconomyDevCvars.DayScale;
             _clock.Tick(dt);
@@ -181,7 +181,7 @@ namespace HarvestPanic.Economy
         /// <summary>Host: new run from Week 1 Day 1.</summary>
         public void StartRun()
         {
-            if (!HasAuthority) return;
+            if (!IsEconomyAuthority) return;
             _started = true;
             _wallet.Reset();
             _ledger.StartWeek();
@@ -346,7 +346,7 @@ namespace HarvestPanic.Economy
         /// <summary>Host: leave Payout (next day or Sunday), or leave a paid Sunday.</summary>
         public void NextDay()
         {
-            if (!HasAuthority) { if (IsSpawned) RequestNextDayRpc(); return; }
+            if (!IsEconomyAuthority) { if (IsSpawned) RequestNextDayRpc(); return; }
             switch (_clock.Phase)
             {
                 case DayPhase.Payout:
@@ -370,14 +370,14 @@ namespace HarvestPanic.Economy
         /// <summary>Host: restart the run from Week 1.</summary>
         public void Restart()
         {
-            if (!HasAuthority) { if (IsSpawned) RequestRestartRpc(); return; }
+            if (!IsEconomyAuthority) { if (IsSpawned) RequestRestartRpc(); return; }
             StartRun();
         }
 
-        [Rpc(SendTo.Server, RequireOwnership = false)]
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         void RequestNextDayRpc(RpcParams p = default) { if (p.Receive.SenderClientId == NetworkManager.ServerClientId) NextDay(); }
 
-        [Rpc(SendTo.Server, RequireOwnership = false)]
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         void RequestRestartRpc(RpcParams p = default) { if (p.Receive.SenderClientId == NetworkManager.ServerClientId) Restart(); }
 
         void ResolveSunday()
@@ -405,7 +405,7 @@ namespace HarvestPanic.Economy
 
         public void AddWalletTxn(in WalletTxn txn)
         {
-            if (!HasAuthority) return;
+            if (!IsEconomyAuthority) return;
             var t = txn;
             t.DayIndex = _clock.DayIndex;
             t.Timestamp = _dayTime;
@@ -422,7 +422,7 @@ namespace HarvestPanic.Economy
 
         public int ChargeRespawnFee(ulong playerId, BlameVerb cause)
         {
-            if (!HasAuthority) return 0;
+            if (!IsEconomyAuthority) return 0;
             int fee = EconomyMath.RespawnFee(_clock.Week, _mods.Resolve(DayParams.EconomyRespawnFeeMult, 1f, _clock.Phase), Tuning);
             int before = _wallet.Balance, iouBefore = _wallet.IouThisWeek;
             AddWalletTxn(new WalletTxn { Type = WalletTxnType.RespawnFee, Amount = -fee, PlayerId = playerId });
@@ -433,7 +433,7 @@ namespace HarvestPanic.Economy
 
         public void EmitBlame(in BlameEvent evt)
         {
-            if (!HasAuthority) return;
+            if (!IsEconomyAuthority) return;
             var e = evt;
             e.DayIndex = (short)_clock.DayIndex;
             e.Timestamp = _dayTime;
@@ -461,7 +461,7 @@ namespace HarvestPanic.Economy
         public bool TrySell(IGoods item, ulong seller, out int finalValue)
         {
             finalValue = 0;
-            if (!HasAuthority || item == null || item.Definition == null) return false;
+            if (!IsEconomyAuthority || item == null || item.Definition == null) return false;
             if (!IsMarketOpen && !InSundownGrace) return false;
             if ((item.Tags & GoodsTag.Pocketed) != 0) return false;
             finalValue = QuoteValue(item, true);
@@ -514,7 +514,7 @@ namespace HarvestPanic.Economy
         /// <summary>Server: applies a modifier (weather, landlord visit, curse...). Rescales the running workday.</summary>
         public bool ApplyModifier(DayModifier mod, bool bypassCap = false)
         {
-            if (!HasAuthority) return false;
+            if (!IsEconomyAuthority) return false;
             bool ok = _mods.Apply(mod, _clock.Week, bypassCap);
             if (ok && (_clock.Phase == DayPhase.Workday || _clock.Phase == DayPhase.Dusk)) _clock.Rescale(BaseDuration(_clock.Phase));
             return ok;
@@ -594,7 +594,7 @@ namespace HarvestPanic.Economy
         /// <summary>Test/debug: jump the current timed phase to its end.</summary>
         public void DebugSkipPhase()
         {
-            if (!HasAuthority) return;
+            if (!IsEconomyAuthority) return;
             if (_clock.Duration > 0f) _clock.Tick(_clock.Remaining + 0.001f);
             else NextDay();
         }
