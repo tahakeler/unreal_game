@@ -91,11 +91,13 @@ a billing plan — most of the studio runs on whatever model you are already usi
 
 ### Engine Specialists
 
-This repo is configured for **Unreal Engine 5.8** only (Godot/Unity agent sets removed):
+This repo is configured for **Unity 6.3 LTS (6000.3.26f1, URP, C#)** only (Godot/Unreal agent sets removed; the earlier Unreal build is archived on branch `archive/unreal-final`):
 
 | Engine | Lead Agent | Sub-Specialists |
 |--------|-----------|-----------------|
-| **Unreal Engine 5** | `unreal-specialist` | GAS, Blueprints, Replication, UMG/CommonUI |
+| **Unity 6.3 LTS** | `unity-specialist` | DOTS/ECS, Shaders/VFX, Addressables, UI Toolkit/UGUI |
+
+Unity project: `HarvestPanic/` (`Assets/`, `Packages/`, `ProjectSettings/`). Setup: `docs/engine/unity-setup.md`.
 
 ## Slash Commands
 
@@ -271,8 +273,8 @@ CLAUDE.md                           # Master configuration
     workflow-catalog.yaml           # 7-phase pipeline definition (read by /help)
     templates/                      # 39 document templates (+ per-section guidance)
 src/                                # Game source code (Godot). The code root is
-                                    #   ENGINE-SPECIFIC: Unity compiles only
-                                    #   Assets/, Unreal builds from Source/<Module>/
+                                    #   ENGINE-SPECIFIC: this repo's Unity
+                                    #   code root is HarvestPanic/Assets/
 assets/                             # Art, audio, VFX, shaders, data files
 design/                             # GDDs, narrative docs, level designs
 docs/                               # Technical documentation and ADRs
@@ -356,10 +358,10 @@ auto mode.
 ### Path-Scoped Rules
 
 Coding standards are automatically enforced based on file location. The paths
-below are Godot's. Each rule also matches the Unity and Unreal layouts: the code
-rules match C# under `Assets/**/Gameplay/` and C++ under `Source/**/Gameplay/` (and `Core`,
+below are Godot's. Each rule also matches the Unity layout: the code
+rules match C# under `Assets/**/Gameplay/` and C# under `HarvestPanic/Assets/Scripts/Gameplay/` (and `Core`,
 `AI`, `Networking`, `UI`), data matches JSON under `Assets/**/Data/` and
-`Content/**/Data/`, shaders match by file type, and tests match
+`HarvestPanic/Assets/**/Data/`, shaders match by file type, and tests match
 C# under `Assets/Tests/` and C++ under `Source/**/Tests/`.
 
 | Path | Enforces |
@@ -395,7 +397,7 @@ This is a **template**, not a locked framework. Everything is meant to be custom
 - **Modify skills** — adjust workflows to match your team's process
 - **Add rules** — create new path-scoped rules for your project's directory structure
 - **Tune hooks** — adjust validation strictness, add new checks
-- **Pick your engine** — use the Godot, Unity, or Unreal agent set (or none)
+- **Pick your engine** — this fork ships the Unity agent set only
 - **Tune process weight** — `modes.rigor` and its underlying knobs in `project.yaml` (see [Configuration](#configuration)). Override per-run with `--review solo` on any skill.
 
 ## Platform Support
