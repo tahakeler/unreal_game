@@ -98,7 +98,13 @@ namespace HarvestPanic.Tests.PlayMode.CritterAI
             carry.OnGrabbed(1);
             for (int i = 0; i < 50; i++) Assert.That(carry.Struggle(0f), Is.False, "two holders = secure");
             carry.OnReleased(1);
+            var events = (ICarryableEvents)carry;
+            ulong[] released = null; int struggles = 0;
+            events.OnForcedRelease += ids => released = ids;
+            events.OnStruggle += _ => struggles++;
             Assert.That(carry.Struggle(0.2f), Is.True, "0.2 < 0.25 break chance");
+            Assert.That(struggles, Is.EqualTo(1));
+            Assert.That(released, Is.EqualTo(new ulong[] { 0 }), "holder 0 forced to let go");
             Assert.That(pig.State, Is.EqualTo(CritterState.Stunned));
             yield return new WaitForSeconds(2f);
             Assert.That(pig.State, Is.Not.EqualTo(CritterState.Stunned));
