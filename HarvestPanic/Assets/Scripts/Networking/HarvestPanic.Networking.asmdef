@@ -5,7 +5,8 @@
         "HarvestPanic.Core",
         "Unity.Netcode.Runtime",
         "Unity.Networking.Transport",
-        "Unity.Collections"
+        "Unity.Collections",
+        "Facepunch Transport for Netcode for GameObjects"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
