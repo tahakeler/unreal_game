@@ -84,6 +84,8 @@ namespace HarvestPanic.UI
             return true;
         }
 
+        public static bool TryHasSteam() => FindType("Steamworks.SteamFriends") != null;
+
         /// <summary>Opens the Steam friends overlay if the Steam transport assembly is present. False otherwise.</summary>
         public static bool TryOpenSteamOverlay()
         {
