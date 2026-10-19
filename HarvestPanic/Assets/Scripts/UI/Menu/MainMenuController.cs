@@ -20,6 +20,9 @@ namespace HarvestPanic.UI
         public bool IsConnecting { get; private set; }
 
         ISessionService _session;
+        ISessionPlatform _platform;
+        bool _hostSteam;
+        Button _transportBtn;
         VisualElement _root;
         readonly Dictionary<MenuScreen, VisualElement> _screens = new Dictionary<MenuScreen, VisualElement>();
         VisualElement _popupConnecting, _popupMessage, _hostPlayers;
@@ -36,6 +39,15 @@ namespace HarvestPanic.UI
         void OnEnable()
         {
             _session = UiRuntime.EnsureSession();
+            _platform = SessionAccess.Platform;
+            if (_platform != null)
+            {
+                var st = SettingsService.Current;
+                if (!string.IsNullOrEmpty(st.PlayerName)) _platform.SetLocalPlayerName(st.PlayerName);
+                _hostSteam = _platform.IsSteamAvailable;
+                _platform.OnLanSessionsChanged += OnLanChanged;
+                SettingsService.Changed += OnSettingsChanged;
+            }
             Build();
             _session.OnSessionChanged += OnSessionChanged;
             _session.OnError += OnSessionError;
@@ -43,10 +55,19 @@ namespace HarvestPanic.UI
             Stack.ClearTo(MenuScreen.Title);
             Cursor.lockState = CursorLockMode.None; Cursor.visible = true;
             Time.timeScale = 1f;
+            if (_platform != null && !string.IsNullOrEmpty(_platform.LastEndReason))
+            {
+                ShowMessage("Back at the farmhouse", _platform.LastEndReason);
+                _platform.ClearLastEndReason();
+            }
         }
+
+        void OnLanChanged() { if (Stack.Current == MenuScreen.Join) RefreshHosts(false); }
+        void OnSettingsChanged(GameSettings g) { if (_platform != null && !string.IsNullOrEmpty(g.PlayerName)) _platform.SetLocalPlayerName(g.PlayerName); }
 
         void OnDisable()
         {
+            if (_platform != null) { _platform.OnLanSessionsChanged -= OnLanChanged; _platform.StopLanSearch(); SettingsService.Changed -= OnSettingsChanged; }
             if (_session != null) { _session.OnSessionChanged -= OnSessionChanged; _session.OnError -= OnSessionError; }
             Stack.Changed -= OnScreenChanged;
         }
@@ -82,14 +103,23 @@ namespace HarvestPanic.UI
         {
             string name = string.IsNullOrWhiteSpace(_hostName.value) ? "Muddlebury Farm" : _hostName.value.Trim();
             BeginConnect("Opening the gate");
-            _session.StartHost(name, _maxPlayers);
+            if (_platform != null)
+            {
+                if (_hostSteam) _platform.HostSteam(name, _maxPlayers, true); else _platform.HostLan(name, _maxPlayers);
+            }
+            else _session.StartHost(name, _maxPlayers);
         }
 
         public void JoinAddress(string address)
         {
             if (string.IsNullOrWhiteSpace(address)) { ShowMessage("Which farm?", "Type an address or pick a farm from the list."); return; }
-            BeginConnect("Joining " + address.Trim());
-            _session.Join(address.Trim());
+            string a = address.Trim();
+            BeginConnect("Joining " + a);
+            if (_platform != null)
+            {
+                if (a.Length >= 10 && ulong.TryParse(a, out ulong steamId)) _platform.JoinSteam(steamId); else _platform.JoinLan(a);
+            }
+            else _session.Join(a);
         }
 
         public void SetMaxPlayers(int n)
@@ -131,11 +161,21 @@ namespace HarvestPanic.UI
 
             _root.Q<Label>("footer-version").text = "v" + Application.version + "  -  Muddlebury";
             string transport = SessionAccess.TransportLabel(_session);
+            if (_platform != null) transport = _hostSteam ? "STEAM" : "LAN";
             _footerMode.text = transport == "STEAM" ? "Steam online" : transport == "LAN" ? "LAN mode" : transport;
             _footerHint.text = "Arrows / D-pad: move     Enter / A: choose     Esc / B: back";
             _hostMode.text = transport == "STEAM" ? "Hosting over Steam. Friends join from the Steam overlay." : "Hosting over LAN. Friends on your network can find you.";
             _root.Q<Label>("host-card-sub").text = transport == "STEAM" ? "Start a Steam lobby for your friends." : "Start a LAN lobby. Friends on your network join.";
             _hostName.value = "Muddlebury Farm";
+            _transportBtn = _root.Q<Button>("btn-host-transport");
+            _transportBtn.style.display = _platform != null && _platform.IsSteamAvailable ? DisplayStyle.Flex : DisplayStyle.None;
+            _transportBtn.clicked += () =>
+            {
+                _hostSteam = !_hostSteam;
+                _transportBtn.text = _hostSteam ? "Over: Steam (tap to switch)" : "Over: LAN (tap to switch)";
+                _hostMode.text = _hostSteam ? "Hosting over Steam. Friends join from the Steam overlay." : "Hosting over LAN. Friends on your network can find you.";
+            };
+            _transportBtn.text = _hostSteam ? "Over: Steam (tap to switch)" : "Over: LAN (tap to switch)";
 
             Click("btn-play", OpenPlay);
             Click("btn-customize", OnCustomize);
@@ -148,7 +188,7 @@ namespace HarvestPanic.UI
             Click("btn-host-back", () => Stack.Pop());
             Click("btn-join-back", () => Stack.Pop());
             Click("btn-join-go", () => JoinAddress(_joinAddress.value));
-            Click("btn-refresh", RefreshHosts);
+            Click("btn-refresh", () => RefreshHosts());
             Click("btn-steam-friends", OnSteamFriends);
             Click("btn-connecting-cancel", CancelConnect);
             Click("btn-message-ok", HideMessage);
@@ -203,6 +243,7 @@ namespace HarvestPanic.UI
         // ------------------------------------------------------------------ screens
         void OnScreenChanged(MenuScreen? from, MenuScreen? to)
         {
+            if (_platform != null && from == MenuScreen.Join && to != MenuScreen.Join) _platform.StopLanSearch();
             foreach (var kv in _screens) kv.Value.EnableInClassList("is-active", to.HasValue && kv.Key == to.Value);
             if (!to.HasValue) return;
             switch (to.Value)
@@ -214,9 +255,9 @@ namespace HarvestPanic.UI
             }
         }
 
-        void RefreshHosts()
+        void RefreshHosts(bool search = true)
         {
-            SessionAccess.RefreshDiscovery(_session);
+            if (search) SessionAccess.RefreshDiscovery(_session);
             _hosts.Clear();
             _hosts.AddRange(SessionAccess.GetHosts(_session));
             _lanList.Rebuild();
@@ -295,7 +336,8 @@ namespace HarvestPanic.UI
             if (!IsConnecting || !_session.IsConnected) return;
             EndConnect();
             // Networking may load the Lobby itself; only load it here if we are still in the menu shortly after.
-            _loadAt = Time.unscaledTime + 0.35f;
+            // The real SessionService loads the Lobby itself through NGO; only the dev fake needs the UI to do it.
+            if (_session is FakeSessionService) _loadAt = Time.unscaledTime + 0.35f;
         }
 
         void OnSessionError(string message) => FailConnect(message);

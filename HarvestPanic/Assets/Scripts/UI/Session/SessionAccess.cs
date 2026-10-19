@@ -23,19 +23,36 @@ namespace HarvestPanic.UI
 
         public static bool TryGetSession(out ISessionService svc) => Services.TryGet(out svc);
 
+        /// <summary>The Networking team's platform layer (LAN list, Steam, player name). Null with the fake service.</summary>
+        public static ISessionPlatform Platform => Services.TryGet(out ISessionPlatform p) ? p : null;
+
         public static string TransportLabel(object svc)
         {
+            var plat = Platform;
+            if (plat != null)
+            {
+                if (plat.ActiveTransport == SessionTransport.Steam) return "STEAM";
+                if (plat.ActiveTransport == SessionTransport.Lan) return "LAN";
+                return plat.IsSteamAvailable ? "STEAM" : "LAN";
+            }
             if (svc == null) return "OFFLINE";
             var p = svc.GetType().GetProperty("TransportName", Pub);
             if (p != null && p.GetValue(svc) is string s && !string.IsNullOrWhiteSpace(s)) return s.ToUpperInvariant();
             return svc.GetType().Name.IndexOf("Steam", StringComparison.OrdinalIgnoreCase) >= 0 ? "STEAM" : "LAN";
         }
 
-        public static bool SupportsDiscovery(object svc) => svc?.GetType().GetProperty("DiscoveredHosts", Pub) != null;
+        public static bool SupportsDiscovery(object svc) => Platform != null || svc?.GetType().GetProperty("DiscoveredHosts", Pub) != null;
 
         public static List<LanHost> GetHosts(object svc)
         {
             var list = new List<LanHost>();
+            var plat = Platform;
+            if (plat != null)
+            {
+                foreach (var d in plat.LanSessions)
+                    list.Add(new LanHost { Name = string.IsNullOrEmpty(d.LobbyName) ? d.HostName : d.LobbyName, Address = d.Port > 0 ? d.Address + ":" + d.Port : d.Address, Players = d.Players, MaxPlayers = d.MaxPlayers, InProgress = d.InProgress });
+                return list;
+            }
             var p = svc?.GetType().GetProperty("DiscoveredHosts", Pub);
             if (p == null || !(p.GetValue(svc) is IEnumerable en)) return list;
             foreach (var item in en)
@@ -53,7 +70,7 @@ namespace HarvestPanic.UI
             return list;
         }
 
-        public static void RefreshDiscovery(object svc) => svc?.GetType().GetMethod("RefreshDiscovery", Type.EmptyTypes)?.Invoke(svc, null);
+        public static void RefreshDiscovery(object svc) { var plat = Platform; if (plat != null) { plat.StartLanSearch(); return; } svc?.GetType().GetMethod("RefreshDiscovery", Type.EmptyTypes)?.Invoke(svc, null); }
 
         public static bool SupportsChat(object svc) => svc?.GetType().GetMethod("SendChat", new[] { typeof(string) }) != null;
 
@@ -84,11 +101,13 @@ namespace HarvestPanic.UI
             return true;
         }
 
-        public static bool TryHasSteam() => FindType("Steamworks.SteamFriends") != null;
+        public static bool TryHasSteam() => Platform != null ? Platform.IsSteamAvailable : FindType("Steamworks.SteamFriends") != null;
 
         /// <summary>Opens the Steam friends overlay if the Steam transport assembly is present. False otherwise.</summary>
         public static bool TryOpenSteamOverlay()
         {
+            var plat = Platform;
+            if (plat != null) return plat.OpenInviteOverlay();
             try
             {
                 var t = FindType("Steamworks.SteamFriends");

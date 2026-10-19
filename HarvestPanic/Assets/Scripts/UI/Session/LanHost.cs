@@ -7,6 +7,7 @@ namespace HarvestPanic.UI
         public string Address;
         public int Players;
         public int MaxPlayers;
+        public bool InProgress;
         public string Display => string.IsNullOrEmpty(Name) ? Address : Name;
     }
 }

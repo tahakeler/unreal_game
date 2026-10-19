@@ -42,6 +42,7 @@
                     <ui:TextField name="host-name" label="Farm name" max-length="24" class="hp-field bold" />
                     <ui:Label text="Crew size" class="bold small-text" />
                     <ui:VisualElement name="host-players" class="row players-row" />
+                    <ui:Button name="btn-host-transport" text="Over: LAN" class="hp-btn hp-btn--small" />
                     <ui:Label name="host-mode" text="Hosting over LAN." class="body-text" />
                     <ui:Label name="host-solo" text="Solo is allowed, but the farm is tuned for 2 to 4 farmers." class="small-text muted" />
                 </ui:VisualElement>
