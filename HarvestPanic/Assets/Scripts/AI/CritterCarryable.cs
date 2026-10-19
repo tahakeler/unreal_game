@@ -16,7 +16,7 @@ namespace HarvestPanic.AI
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CritterBrain))]
-    public sealed class CritterCarryable : NetworkBehaviour, ICarryable
+    public sealed class CritterCarryable : NetworkBehaviour, ICarryable, ICarryableEvents
     {
         [SerializeField, Tooltip("Rigid attach (no spring wobble). Critters are carried kinematically.")] bool kinematicCarry = true;
 
@@ -27,10 +27,12 @@ namespace HarvestPanic.AI
         float _nextStruggle;
         ulong _lastThrower = PlayerIds.None;
 
-        /// <summary>Raised on the server at every struggle with the wriggle impulse (N*s) the holders should feel.</summary>
-        public event Action<Vector3> Struggled;
-        /// <summary>Raised on the server when the critter wriggles free; the listed holders must drop it.</summary>
-        public event Action<IReadOnlyList<ulong>> BrokeFree;
+        /// <inheritdoc/>
+        /// <remarks>Server only. Direction * <c>StruggleImpulse</c> in design units (personality values are GDD N*s).</remarks>
+        public event Action<Vector3> OnStruggle;
+        /// <inheritdoc/>
+        /// <remarks>Server only. Raised when the critter breaks free; the listed holders must drop it.</remarks>
+        public event Action<ulong[]> OnForcedRelease;
 
         /// <summary>Players currently holding the critter.</summary>
         public IReadOnlyList<ulong> Holders => _holders;
@@ -114,8 +116,8 @@ namespace HarvestPanic.AI
             StruggleCount++;
             Vector3 dir = Random.onUnitSphere; dir.y = Mathf.Abs(dir.y);
             Vector3 impulse = dir * p.StruggleImpulse;
-            Struggled?.Invoke(impulse);
-            if (_rb != null && !_rb.isKinematic) _rb.AddForce(impulse, ForceMode.Impulse);
+            OnStruggle?.Invoke(impulse);
+            if (_rb != null && !_rb.isKinematic) _rb.AddForce(impulse / ImpactUnits.ImpulseScale, ForceMode.Impulse);
 
             float chance = CritterMath.BreakFreeChance(p.SecureCarriers, _holders.Count, _brain.Tuning);
             if ((roll ?? Random.value) >= chance) return false;
@@ -125,11 +127,11 @@ namespace HarvestPanic.AI
 
         void BreakFree()
         {
-            var released = new List<ulong>(_holders);
+            var released = _holders.ToArray();
             _holders.Clear();
             Detach();
             foreach (var id in released) _brain.AddDamage(id, transform.position);
-            BrokeFree?.Invoke(released);
+            OnForcedRelease?.Invoke(released);
             Vector3 hop = Random.onUnitSphere; hop.y = 0f;
             hop = hop.normalized * _brain.Tuning.BreakFreeHopSpeed + Vector3.up * 2f;
             _brain.EndCarried(hop, _brain.Tuning.BreakFreeStunSeconds);

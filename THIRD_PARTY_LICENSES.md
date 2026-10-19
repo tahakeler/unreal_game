@@ -26,3 +26,23 @@ Licence verified on each source page on 2026-10-11 (poly.pizza model page field 
 
 Authors: Quaternius — https://quaternius.com (Patreon: https://www.patreon.com/quaternius). Kay Lousberg — https://kaylousberg.com.
 No CC-BY or other attribution-required asset is used. Do not add assets under any licence other than CC0/CC-BY without updating this file.
+
+## Unity environment packs (World team, Muddlebury) — added 2026-10-19
+
+CC0 1.0, verified on each kenney.nl asset page ("Creative Commons CC0") and in the pack's bundled License.txt
+(copied next to the imported models). Selected FBX models are in `HarvestPanic/Assets/ThirdParty/Environment/<Pack>/`,
+unmodified; palette materials and warmed atlas copies live in `HarvestPanic/Assets/Art/World/`.
+
+| Pack (Unity folder) | Version | Author | URL | Licence |
+|---|---|---|---|---|
+| Nature Kit (`KenneyNature`) | 2.1 | Kenney | https://kenney.nl/assets/nature-kit | CC0 1.0 |
+| Fantasy Town Kit (`KenneyFantasyTown`) | 2.0 | Kenney | https://kenney.nl/assets/fantasy-town-kit | CC0 1.0 |
+| Food Kit (`KenneyFood`) | 2.0 | Kenney | https://kenney.nl/assets/food-kit | CC0 1.0 |
+| Survival Kit (`KenneySurvival`) | 2.0 | Kenney | https://kenney.nl/assets/survival-kit | CC0 1.0 |
+
+## Unity rebuild — characters (`HarvestPanic/Assets/ThirdParty/Characters/`)
+Licence verified on each poly.pizza model page on 2026-10-19 (`"Licence":"CC0 1.0"`). GLBs downloaded to `tools/freeassets/downloads/` (gitignored) and converted to FBX with headless Blender 5.2 via `tools/freeassets/scripts/glb2fbx_blender.py` (the built-in straw hat faces were removed from `Farmer_Head` so the Hat slot owns the silhouette).
+
+| Asset (Unity) | Source model | Author | URL | Licence |
+|---|---|---|---|---|
+| QuaterniusFarmer/Farmer.fbx (body + Idle/Walk/Run/Wave/Death/Point clips; imported as a Generic rig. Dance and Jump clips are authored in-house by `HarvestPanic.Customization.Editor.FarmerAssetBuilder`) | Farmer (animated) | Quaternius | https://poly.pizza/m/7pn3R6hPvE | CC0 1.0 |
