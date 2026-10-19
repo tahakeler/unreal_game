@@ -63,6 +63,28 @@ namespace HarvestPanic.Tests.EditMode
             finally { UnityEngine.Object.DestroyImmediate(root); }
         }
 
+        sealed class StubFighter : ICarryableEvents
+        {
+            public event Action<ulong[]> OnForcedRelease;
+            public event Action<Vector3> OnStruggle;
+            public void Break(ulong[] ids) => OnForcedRelease?.Invoke(ids);
+            public void Wriggle(Vector3 v) => OnStruggle?.Invoke(v);
+        }
+
+        [Test]
+        public void CarryableEvents_AreOptionalAndRaiseToSubscribers()
+        {
+            object plain = new StubCarry();
+            Assert.That(plain is ICarryableEvents, Is.False, "plain carryables stay valid without the events");
+            var f = new StubFighter();
+            ulong[] released = null; var push = Vector3.zero;
+            f.OnForcedRelease += ids => released = ids;
+            f.OnStruggle += v => push = v;
+            f.Break(new ulong[] { 1, 2 }); f.Wriggle(Vector3.right * 120f);
+            Assert.That(released.Length, Is.EqualTo(2));
+            Assert.That(push.x, Is.EqualTo(120f));
+        }
+
         [TearDown] public void TearDown() => Services.Clear();
 
         [Test]
