@@ -1,0 +1,15 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01c26a594d7b74a76a8903e7dee1db10, type: 3}
+  m_Name: PlayerPrefabRef
+  m_EditorClassIdentifier: HarvestPanic.Networking::HarvestPanic.Networking.PlayerPrefabRef
+  prefab: {fileID: 8538185499229557775, guid: f3d566542b1a646ca9645b177c3f6be8, type: 3}

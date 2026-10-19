@@ -8,5 +8,11 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Bootstrap.unity
     guid: 3191bbaba96b04ce58525149fb1deb9d
+  - enabled: 1
+    path: Assets/Scenes/Networking/NetTest_Lobby.unity
+    guid: 9361737ba9f424af0819a57d1517ddbc
+  - enabled: 1
+    path: Assets/Scenes/Networking/NetTest_Farm.unity
+    guid: afc7d80951d4844579202dd0fd077c2e
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0
