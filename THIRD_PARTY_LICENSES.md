@@ -26,3 +26,11 @@ Licence verified on each source page on 2026-10-11 (poly.pizza model page field 
 
 Authors: Quaternius — https://quaternius.com (Patreon: https://www.patreon.com/quaternius). Kay Lousberg — https://kaylousberg.com.
 No CC-BY or other attribution-required asset is used. Do not add assets under any licence other than CC0/CC-BY without updating this file.
+
+## Unity rebuild — characters (`HarvestPanic/Assets/ThirdParty/Characters/`)
+Licence verified on each poly.pizza model page on 2026-10-19 (`"Licence":"CC0 1.0"`). GLBs downloaded to `tools/freeassets/downloads/` (gitignored) and converted to FBX with headless Blender 5.2 via `tools/freeassets/scripts/glb2fbx_blender.py` (the built-in straw hat faces were removed from `Farmer_Head` so the Hat slot owns the silhouette).
+
+| Asset (Unity) | Source model | Author | URL | Licence |
+|---|---|---|---|---|
+| QuaterniusFarmer/Farmer.fbx (body + Idle/Walk/Run/Wave/Death/Point clips) | Farmer (animated) | Quaternius | https://poly.pizza/m/7pn3R6hPvE | CC0 1.0 |
+| QuaterniusFarmer/FarmerAnims_Platformer.fbx (Jump clips, retargeted via Humanoid) | Animated Platformer Character | Quaternius | https://poly.pizza/m/kKtL4zvS3n | CC0 1.0 |
