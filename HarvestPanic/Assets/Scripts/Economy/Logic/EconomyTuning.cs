@@ -21,11 +21,11 @@ namespace HarvestPanic.Economy
     {
         public const string ResourcePath = "Data/Goods/EconomyTuning";
 
-        [Header("Bruising (goods-value §4). Impulse is in design units: dv(m/s) x ImpactSpeedToDesignImpulse")]
+        [Header("Bruising (goods-value §4). Impulse in design units (Core ImpactUnits)")]
         public float ImpulseMin = 400f;
         public float ImpulseScale = 40f;
-        [Tooltip("Converts contract N*s / mass (= delta-v, m/s) into GDD impulse units (5.4 m/s shoulder drop -> ~1200).")]
-        public float ImpactSpeedToDesignImpulse = 222f;
+        [Tooltip("Seconds after release during which the Player carry system reports bruises (we skip own collisions).")]
+        public float CarryReportWindow = 2f;
         public float PerHitBruiseCap = 60f;
         public float ImpulseSolverErrorAbove = 20000f;
         public float ScuffedAt = 10f, BruisedAt = 35f, BustedAt = 65f, RuinedAt = 100f;
