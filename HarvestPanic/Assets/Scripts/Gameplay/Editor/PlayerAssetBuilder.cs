@@ -389,7 +389,16 @@ namespace HarvestPanic.Gameplay.Editor
             var prefab = PrefabUtility.SaveAsPrefabAsset(root, path);
             Object.DestroyImmediate(root);
             AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
-            return AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            // Persist the NetworkObject GlobalObjectIdHash (NGO only computes it in OnValidate).
+            var no = asset.GetComponent<NetworkObject>();
+            if (no != null)
+            {
+                typeof(NetworkObject).GetMethod("OnValidate", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public)?.Invoke(no, null);
+                EditorUtility.SetDirty(asset);
+                AssetDatabase.SaveAssetIfDirty(asset);
+            }
+            return asset;
         }
     }
 }
