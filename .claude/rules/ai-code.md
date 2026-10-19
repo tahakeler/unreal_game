@@ -1,8 +1,8 @@
 ---
 paths:
-  - "src/ai/**"
+  - "HarvestPanic/Assets/Scripts/AI/**"
+  - "HarvestPanic/Assets/**/{AI,Ai,ai}/**/*.cs"
   - "Assets/**/{AI,Ai,ai}/**/*.cs"
-  - "Source/**/{AI,Ai,ai}/**/*.{h,cpp}"
 ---
 
 # AI Code Rules

@@ -1,7 +1,8 @@
 ---
 paths:
-  - "Source/**/{Gameplay,gameplay}/**/*.{h,cpp}"
-  - "HarvestPanic/Source/**/{Gameplay,gameplay}/**/*.{h,cpp}"
+  - "HarvestPanic/Assets/Scripts/Gameplay/**"
+  - "HarvestPanic/Assets/**/{Gameplay,gameplay}/**/*.cs"
+  - "Assets/**/{Gameplay,gameplay}/**/*.cs"
 ---
 
 # Gameplay Code Rules
@@ -9,7 +10,7 @@ paths:
 - ALL gameplay values MUST come from external config/data files, NEVER hardcoded
 - Use delta time for ALL time-dependent calculations (frame-rate independence)
 - NO direct references to UI code — use events for cross-system communication
-  (Unreal delegates / multicast events)
+  (C# events / UnityEvents)
 - Every gameplay system must implement a clear interface
 - State machines must have explicit transition tables with documented states
 - Write unit tests for all gameplay logic — separate logic from presentation
@@ -18,16 +19,16 @@ paths:
 
 ## Examples
 
-**Correct** (data-driven) — Unreal:
+**Correct** (data-driven) — Unity (values from a ScriptableObject):
 
-```cpp
-const float Damage = CombatConfig->BaseDamage;
-const float Speed = Stats->MovementSpeed * DeltaTime;
+```csharp
+float damage = combatConfig.BaseDamage;
+float speed = stats.MovementSpeed * Time.deltaTime;
 ```
 
 **Incorrect** (hardcoded):
 
-```cpp
-const float Damage = 25.f;   // VIOLATION: hardcoded gameplay value
-const float Speed  = 5.f;    // VIOLATION: not from config, not scaled by DeltaTime
+```csharp
+float damage = 25f;  // VIOLATION: hardcoded gameplay value
+float speed = 5f;    // VIOLATION: not from config, not scaled by Time.deltaTime
 ```

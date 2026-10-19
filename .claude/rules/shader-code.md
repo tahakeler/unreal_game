@@ -4,7 +4,7 @@ paths:
   - "**/*.gdshader"
   - "Assets/**/*.{shader,hlsl,cginc,compute,shadergraph}"
   - "Shaders/**"
-  - "**/*.{usf,ush}"
+  - "HarvestPanic/Assets/**/*.{shader,hlsl,cginc,compute,shadergraph}"
 ---
 
 # Shader Code Standards

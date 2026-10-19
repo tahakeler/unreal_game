@@ -1,7 +1,8 @@
 ---
 paths:
-  - "Source/**/{Core,core}/**/*.{h,cpp}"
-  - "HarvestPanic/Source/**/{Core,core}/**/*.{h,cpp}"
+  - "HarvestPanic/Assets/Scripts/Core/**"
+  - "HarvestPanic/Assets/**/{Core,core}/**/*.cs"
+  - "Assets/**/{Core,core}/**/*.cs"
 ---
 
 # Engine Code Rules
@@ -18,25 +19,23 @@ paths:
 
 ## Examples
 
-**Correct** (zero-alloc hot path) — Unreal:
+**Correct** (zero-alloc hot path) — Unity:
 
-```cpp
-// TArray member, reserved once; Reset() keeps the allocation
-void UProximityComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-                                        FActorComponentTickFunction* ThisTickFunction)
+```csharp
+private readonly Collider[] _nearbyCache = new Collider[64];  // allocated once
+
+void FixedUpdate()
 {
-    NearbyCache.Reset();
-    SpatialGrid->QueryRadius(GetComponentLocation(), Radius, NearbyCache);
+    int count = Physics.OverlapSphereNonAlloc(transform.position, radius, _nearbyCache);
 }
 ```
 
 **Incorrect** (allocating in hot path):
 
-```cpp
-void UProximityComponent::TickComponent(float DeltaTime, ELevelTick TickType,
-                                        FActorComponentTickFunction* ThisTickFunction)
+```csharp
+void FixedUpdate()
 {
-    TArray<AActor*> Nearby;  // VIOLATION: allocates every frame
-    UGameplayStatics::GetAllActorsWithTag(this, TEXT("Enemy"), Nearby);  // VIOLATION: world query every frame
+    var nearby = Physics.OverlapSphere(transform.position, radius);  // VIOLATION: allocates every frame
+    var enemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None); // VIOLATION: scene query every frame
 }
 ```

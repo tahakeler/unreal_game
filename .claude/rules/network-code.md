@@ -1,8 +1,8 @@
 ---
 paths:
-  - "src/networking/**"
+  - "HarvestPanic/Assets/Scripts/Networking/**"
+  - "HarvestPanic/Assets/**/{Networking,networking,Network,network}/**/*.cs"
   - "Assets/**/{Networking,networking,Network,network}/**/*.cs"
-  - "Source/**/{Networking,networking,Network,network}/**/*.{h,cpp}"
 ---
 
 # Network Code Rules

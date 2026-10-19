@@ -1,22 +1,18 @@
 ---
 paths:
-  - "Source/**/Tests/**/*.{h,cpp}"
-  - "HarvestPanic/Source/**/Tests/**/*.{h,cpp}"
+  - "HarvestPanic/Assets/Scripts/Tests/**"
+  - "HarvestPanic/Assets/Tests/**/*.cs"
+  - "Assets/Tests/**/*.cs"
 ---
 
 # Test Standards
 
 - Test naming follows the engine's language — every name says the scenario and
   the expected result:
-  - **Unreal (Automation):** class `F[System][Scenario]Test` — one per test:
-    each `IMPLEMENT_SIMPLE_AUTOMATION_TEST` defines its class, so a second test
-    reusing a name fails to link — test name
-    `<Project>.[System].[Scenario]` — the project's test command,
-    `Automation RunTests <Project>.`, runs every test whose name contains
-    `<Project>.` (a substring match, not a prefix). `<Project>.` is the root
-    that filter in `commands.test` uses: the project name, or the distinct root
-    `/setup-engine` chose when the project's name is also an engine area
-    (`Audio`, `Core`, `Input`, …) — name tests under whichever it is
+  - **Unity (NUnit, Unity Test Framework):** class `[System]Tests` in a file of
+    the same name, method `[Scenario]_[Expected]` in PascalCase; EditMode tests
+    under `HarvestPanic/Assets/Tests/EditMode/`, PlayMode under
+    `HarvestPanic/Assets/Tests/PlayMode/`, each with its own `.asmdef`
 - Every test must have a clear arrange/act/assert structure
 - Unit tests must not depend on external state (filesystem, network, database)
 - Integration tests must clean up after themselves
@@ -38,42 +34,36 @@ paths:
 
 ## Examples
 
-**Correct** (proper naming + Arrange/Act/Assert) — Unreal:
+**Correct** (proper naming + Arrange/Act/Assert) — Unity, NUnit (`HarvestPanic/Assets/Tests/EditMode/HealthTests.cs`):
 
-```cpp
-#include "Misc/AutomationTest.h"
+```csharp
+using NUnit.Framework;
 
-#if WITH_DEV_AUTOMATION_TESTS
-
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FHealthTakeDamageTest, "<Project>.Health.TakeDamageReducesHealth",
-    EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter)
-
-bool FHealthTakeDamageTest::RunTest(const FString& Parameters)
+public class HealthTests
 {
-    // Arrange
-    FHealthPool Health(100);
+    [Test]
+    public void TakeDamage_ReducesHealth()
+    {
+        // Arrange
+        var health = new Health(maxHealth: 100);
 
-    // Act
-    Health.TakeDamage(25);
+        // Act
+        health.TakeDamage(25);
 
-    // Assert
-    TestEqual(TEXT("health after 25 damage"), Health.GetCurrent(), 75);
-    return true;
+        // Assert
+        Assert.AreEqual(75, health.Current);
+    }
 }
-
-#endif
 ```
 
 **Incorrect**:
 
-```cpp
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTest1, "<Project>.Test1",  // VIOLATION: no descriptive name
-    EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter)
-bool FTest1::RunTest(const FString& Parameters)
+```csharp
+[Test]
+public void Test1()  // VIOLATION: no descriptive name
 {
-    FHealthPool H(100);
-    H.TakeDamage(25);  // VIOLATION: no arrange step, no clear assert
-    TestTrue(TEXT("hurt"), H.GetCurrent() < 100);  // VIOLATION: imprecise assertion
-    return true;
+    var h = new Health(100);
+    h.TakeDamage(25);              // VIOLATION: no arrange step, no clear assert
+    Assert.IsTrue(h.Current < 100); // VIOLATION: imprecise assertion
 }
 ```

@@ -1,8 +1,8 @@
 ---
 paths:
-  - "src/ui/**"
+  - "HarvestPanic/Assets/Scripts/UI/**"
+  - "HarvestPanic/Assets/**/{UI,Ui,ui}/**/*.cs"
   - "Assets/**/{UI,Ui,ui}/**/*.cs"
-  - "Source/**/{UI,Ui,ui}/**/*.{h,cpp}"
 ---
 
 # UI Code Rules

@@ -1250,16 +1250,20 @@ resolve_code_root() {
     *)       root="" ;;
   esac
 
-  # Unreal project in a subfolder (e.g. HarvestPanic/HarvestPanic.uproject):
-  # UBT's Source/ sits next to the .uproject, not at the repo root. Use it when
-  # there is no root-level Source/ and exactly one <dir>/*.uproject exists.
-  if [ "$root" = "Source" ] && [ ! -d "$_YH_ROOT/Source" ]; then
+  # Unity project in a subfolder (e.g. HarvestPanic/Assets + HarvestPanic/ProjectSettings):
+  # the editor compiles only <project>/Assets, not a repo-root Assets/. Use it when
+  # there is no root-level Assets/ and exactly one <dir>/Assets + <dir>/ProjectSettings
+  # pair exists. Also applies when no engine is configured (tree detection).
+  if { [ "$root" = "Assets" ] || [ -z "$root" ]; } && [ ! -d "$_YH_ROOT/Assets" ]; then
     local up upn=0 updir=""
-    for up in "$_YH_ROOT"/*/*.uproject; do
-      [ -f "$up" ] || continue
+    for up in "$_YH_ROOT"/*/ProjectSettings; do
+      [ -d "$up" ] && [ -d "${up%/*}/Assets" ] || continue
       upn=$((upn + 1)); updir="${up%/*}"; updir="${updir##*/}"
     done
-    [ "$upn" = 1 ] && root="$updir/Source"
+    if [ "$upn" = 1 ]; then
+      root="$updir/Assets"
+      [ -z "$src" ] && src="detected"
+    fi
   fi
 
   # 3. No usable engine value — believe the tree, but only if it is unambiguous.
