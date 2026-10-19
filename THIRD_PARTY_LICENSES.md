@@ -26,3 +26,13 @@ Licence verified on each source page on 2026-10-11 (poly.pizza model page field 
 
 Authors: Quaternius — https://quaternius.com (Patreon: https://www.patreon.com/quaternius). Kay Lousberg — https://kaylousberg.com.
 No CC-BY or other attribution-required asset is used. Do not add assets under any licence other than CC0/CC-BY without updating this file.
+
+## UI fonts (Unity project)
+
+Both fonts are licensed under the SIL Open Font License 1.1 (free for commercial use, embedding allowed, no attribution required but credited here). Licence texts sit next to the fonts.
+Fetched 2026-10-19 from the Google Fonts repository (https://github.com/google/fonts, `ofl/`). Nunito static weights were generated from the official variable font with fontTools `instancer` (wght 400 and 800); no glyph changes.
+
+| File (`HarvestPanic/Assets/Art/UI/Fonts/`) | Family | Author | URL | Licence |
+|---|---|---|---|---|
+| `LilitaOne-Regular.ttf` | Lilita One | Juan Montoreano | https://fonts.google.com/specimen/Lilita+One | OFL 1.1 (`OFL-LilitaOne.txt`) |
+| `Nunito-Regular.ttf`, `Nunito-ExtraBold.ttf` | Nunito | Vernon Adams, Cyreal, Jacques Le Bailly | https://fonts.google.com/specimen/Nunito | OFL 1.1 (`OFL-Nunito.txt`) |

@@ -1,0 +1,4 @@
+.pause-root { background-color: rgba(43, 33, 24, 0.55); }
+.pause-sign { width: 640px; }
+.pause-title { font-size: 56px; color: var(--paper); margin-bottom: 8px; white-space: normal; -unity-text-outline-width: 4px; -unity-text-outline-color: var(--ink); text-shadow: 0 5px 0 var(--ink); }
+.pause-sign .small-text { margin-bottom: 20px; }

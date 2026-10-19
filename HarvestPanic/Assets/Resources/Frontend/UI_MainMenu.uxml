@@ -1,0 +1,115 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="root" class="hp-root">
+
+        <!-- TITLE -->
+        <ui:VisualElement name="title-screen" class="screen">
+            <ui:VisualElement name="logo-block" class="logo-block">
+                <ui:Label text="HARVEST" class="display logo logo-1" />
+                <ui:Label text="PANIC!" class="display logo logo-2" />
+                <ui:Label name="tagline" text="A co-op farm. Everything has legs." class="bold tagline" />
+            </ui:VisualElement>
+            <ui:VisualElement name="title-menu" class="sign menu-sign">
+                <ui:Button name="btn-play" text="Play" class="hp-btn hp-btn--primary" />
+                <ui:Button name="btn-customize" text="Customize" class="hp-btn" />
+                <ui:Button name="btn-settings" text="Settings" class="hp-btn" />
+                <ui:Button name="btn-quit" text="Quit" class="hp-btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- PLAY: host or join -->
+        <ui:VisualElement name="play-screen" class="screen centered">
+            <ui:VisualElement class="sign wide-sign">
+                <ui:Label text="Play" class="display sign-title" />
+                <ui:VisualElement class="row cards">
+                    <ui:Button name="btn-host-card" class="hp-btn card-btn">
+                        <ui:Label text="Host a Farm" class="display card-title" />
+                        <ui:Label name="host-card-sub" text="Start a lobby. Friends join you." class="card-sub" />
+                    </ui:Button>
+                    <ui:Button name="btn-join-card" class="hp-btn card-btn">
+                        <ui:Label text="Join a Farm" class="display card-title" />
+                        <ui:Label text="LAN list, address or Steam friends." class="card-sub" />
+                    </ui:Button>
+                </ui:VisualElement>
+                <ui:Button name="btn-play-back" text="Back" class="hp-btn hp-btn--small" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- HOST -->
+        <ui:VisualElement name="host-screen" class="screen centered">
+            <ui:VisualElement class="sign wide-sign">
+                <ui:Label text="Host a Farm" class="display sign-title" />
+                <ui:VisualElement class="paper-card">
+                    <ui:TextField name="host-name" label="Farm name" max-length="24" class="hp-field bold" />
+                    <ui:Label text="Crew size" class="bold small-text" />
+                    <ui:VisualElement name="host-players" class="row players-row" />
+                    <ui:Label name="host-mode" text="Hosting over LAN." class="body-text" />
+                    <ui:Label name="host-solo" text="Solo is allowed, but the farm is tuned for 2 to 4 farmers." class="small-text muted" />
+                </ui:VisualElement>
+                <ui:VisualElement class="row buttons-row">
+                    <ui:Button name="btn-host-go" text="Open the Gate" class="hp-btn hp-btn--primary" />
+                    <ui:Button name="btn-host-back" text="Back" class="hp-btn hp-btn--small" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- JOIN -->
+        <ui:VisualElement name="join-screen" class="screen centered">
+            <ui:VisualElement class="sign wide-sign">
+                <ui:Label text="Join a Farm" class="display sign-title" />
+                <ui:VisualElement class="paper-card">
+                    <ui:VisualElement class="row">
+                        <ui:Label text="Farms on your network" class="bold heading" />
+                        <ui:VisualElement class="spacer" />
+                        <ui:Button name="btn-refresh" text="Refresh" class="hp-btn hp-btn--small" />
+                    </ui:VisualElement>
+                    <ui:ListView name="lan-list" fixed-item-height="68" selection-type="Single" class="lan-list" />
+                    <ui:Label name="lan-empty" text="No farms found yet. Is your friend hosting on this network?" class="small-text muted" />
+                    <ui:VisualElement class="row join-row">
+                        <ui:TextField name="join-address" label="Or type an address" max-length="64" class="hp-field bold join-field" />
+                        <ui:Button name="btn-join-go" text="Join" class="hp-btn hp-btn--primary hp-btn--small hp-btn--center" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="row buttons-row">
+                    <ui:Button name="btn-steam-friends" text="Steam Friends" class="hp-btn" />
+                    <ui:Button name="btn-join-back" text="Back" class="hp-btn hp-btn--small" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- SETTINGS (filled by SettingsPanel) -->
+        <ui:VisualElement name="settings-screen" class="screen centered">
+            <ui:VisualElement name="settings-host" class="settings-host" />
+        </ui:VisualElement>
+
+        <!-- FOOTER -->
+        <ui:VisualElement name="footer" class="footer">
+            <ui:VisualElement class="chip">
+                <ui:Label name="footer-mode" text="LAN" />
+            </ui:VisualElement>
+            <ui:VisualElement class="spacer" />
+            <ui:Label name="footer-hint" text="" class="bold footer-hint" />
+            <ui:VisualElement class="spacer" />
+            <ui:Label name="footer-version" text="v0.1" class="bold footer-version" />
+        </ui:VisualElement>
+
+        <!-- POPUPS -->
+        <ui:VisualElement name="popup-connecting" class="popup-layer">
+            <ui:VisualElement class="sign popup">
+                <ui:Label name="connecting-title" text="Connecting" class="display heading on-dark" />
+                <ui:Label name="connecting-body" text="Knocking on the farm gate..." class="body-text on-dark" />
+                <ui:Button name="btn-connecting-cancel" text="Cancel" class="hp-btn hp-btn--small" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="popup-message" class="popup-layer">
+            <ui:VisualElement class="sign popup">
+                <ui:VisualElement class="row">
+                    <ui:Label name="message-badge" text="!" class="badge" />
+                    <ui:Label name="message-title" text="Message" class="display heading on-dark" />
+                </ui:VisualElement>
+                <ui:Label name="message-body" text="" class="body-text on-dark" />
+                <ui:Button name="btn-message-ok" text="OK" class="hp-btn hp-btn--small" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

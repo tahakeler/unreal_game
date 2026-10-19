@@ -1,0 +1,128 @@
+/* HARVEST PANIC UI theme: Grandpa's farm ledger + feed-store signage (art-bible section 7).
+   Reserved colours (gold = money, tomato = loss/blame, plum = landlord, lime = danger) are NOT used for decoration here. */
+:root, .hp-root {
+    --paper: #F6EBD3;
+    --paper-dark: #E3D3AA;
+    --ink: #2B2118;
+    --ink-soft: rgba(43, 33, 24, 0.55);
+    --cream: #FFF4D6;
+    --wood: #8A6040;
+    --wood-dark: #5E3F27;
+    --leaf: #7FA34A;
+    --pumpkin: #E8782A;
+    --sky: #9ED0E6;
+    --font-size-body: 26px;
+    --font-size-small: 22px;
+    --font-size-button: 36px;
+    --spacing-md: 14px;
+}
+
+.hp-root {
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-Regular.ttf");
+    font-size: var(--font-size-body);
+    color: var(--ink);
+}
+
+.display { -unity-font-definition: url("project:///Assets/Art/UI/Fonts/LilitaOne-Regular.ttf"); }
+.bold { -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"); }
+
+.screen { position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: none; }
+.screen.is-active { display: flex; }
+
+/* ---------- Buttons: paper cards. Focus = thick left bar + scale + cream fill (never colour only) ---------- */
+.hp-btn {
+    min-height: 76px; margin: 0 0 14px 0; padding: 0 30px;
+    background-color: var(--paper);
+    border-width: 4px; border-left-width: 4px; border-bottom-width: 8px;
+    border-color: var(--ink); border-radius: 16px;
+    color: var(--ink); font-size: var(--font-size-button);
+    -unity-font-definition: url("project:///Assets/Art/UI/Fonts/LilitaOne-Regular.ttf");
+    -unity-text-align: middle-left;
+    transition-property: scale, translate, background-color, border-left-width;
+    transition-duration: 0.12s;
+}
+.hp-btn:hover { background-color: var(--cream); translate: 8px 0; }
+.hp-btn:focus { background-color: var(--cream); border-left-width: 18px; scale: 1.04 1.04; translate: 10px 0; }
+.hp-btn:active { scale: 0.97 0.97; border-bottom-width: 4px; }
+.hp-btn:disabled { opacity: 0.45; }
+.hp-btn--primary { background-color: var(--leaf); }
+.hp-btn--primary:hover, .hp-btn--primary:focus { background-color: #9BC15F; }
+.hp-btn--small { min-height: 56px; font-size: 28px; padding: 0 20px; margin: 0 10px 0 0; }
+.hp-btn--center { -unity-text-align: middle-center; }
+.hp-btn--selected { background-color: var(--sky); border-bottom-width: 4px; }
+
+/* ---------- Panels ---------- */
+.sign {
+    background-color: var(--wood);
+    border-width: 5px; border-bottom-width: 12px; border-color: var(--ink); border-radius: 22px;
+    padding: 28px 30px 20px 30px;
+}
+.paper-card {
+    background-color: var(--paper);
+    border-width: 4px; border-bottom-width: 10px; border-color: var(--ink); border-radius: 18px;
+    padding: 24px 28px;
+}
+.sign-title {
+    font-size: 64px; color: var(--paper); margin-bottom: 18px;
+    -unity-text-outline-width: 4px; -unity-text-outline-color: var(--ink);
+    text-shadow: 0 5px 0 var(--ink);
+}
+.heading { font-size: 40px; margin-bottom: 8px; }
+.body-text { font-size: var(--font-size-body); white-space: normal; }
+.small-text { font-size: var(--font-size-small); white-space: normal; }
+.muted { color: var(--ink-soft); }
+.on-dark { color: var(--paper); }
+.row { flex-direction: row; align-items: center; }
+.spacer { flex-grow: 1; }
+
+/* ---------- Text fields ---------- */
+.hp-field { margin: 4px 0 12px 0; }
+.hp-field > Label { font-size: var(--font-size-small); -unity-font-style: bold; margin-bottom: 4px; color: var(--ink); min-width: 0; }
+.hp-field .unity-base-text-field__input {
+    background-color: var(--cream); color: var(--ink);
+    border-width: 3px; border-color: var(--ink); border-radius: 12px;
+    padding: 8px 14px; font-size: 30px; min-height: 58px; -unity-text-align: middle-left;
+}
+.hp-field .unity-base-text-field__input:focus { border-width: 5px; background-color: #FFFFFF; }
+
+/* ---------- Sliders ---------- */
+.hp-slider { flex-grow: 1; margin: 0 16px; height: 44px; }
+.hp-slider .unity-base-slider__drag-container { height: 44px; }
+.hp-slider .unity-base-slider__tracker {
+    height: 14px; top: 15px; background-color: var(--paper-dark);
+    border-width: 3px; border-color: var(--ink); border-radius: 8px;
+}
+.hp-slider .unity-base-slider__dragger {
+    width: 34px; height: 34px; top: 5px; margin-left: -17px;
+    background-color: var(--paper); border-width: 4px; border-color: var(--ink); border-radius: 17px;
+}
+.hp-slider:focus .unity-base-slider__dragger { background-color: var(--leaf); scale: 1.25 1.25; }
+.hp-slider .unity-base-slider__drag-container > .unity-base-slider__dragger-border { display: none; }
+
+/* ---------- Popups ---------- */
+.popup-layer { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background-color: rgba(43, 33, 24, 0.6); align-items: center; justify-content: center; display: none; }
+.popup-layer.is-active { display: flex; }
+.popup { width: 760px; max-width: 90%; }
+.popup .heading { font-size: 52px; margin-bottom: 14px; }
+
+.badge {
+    width: 64px; height: 64px; border-radius: 32px; border-width: 4px; border-color: var(--ink); background-color: var(--cream);
+    -unity-text-align: middle-center; font-size: 44px; margin-right: 20px;
+    -unity-font-definition: url("project:///Assets/Art/UI/Fonts/LilitaOne-Regular.ttf");
+}
+
+.footer {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 64px;
+    flex-direction: row; align-items: center; padding: 0 40px;
+}
+.chip {
+    flex-direction: row; align-items: center; background-color: var(--paper);
+    border-width: 3px; border-color: var(--ink); border-radius: 20px; padding: 2px 18px; font-size: var(--font-size-small);
+    -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf");
+}
+
+/* High-contrast / colourblind helpers set on the root by ThemeSwitcher */
+.hp-root--reduced-motion * { transition-duration: 0s; }
+.hp-root--text-large { --font-size-body: 30px; --font-size-small: 26px; --font-size-button: 40px; }
+.hp-root--text-small { --font-size-body: 24px; --font-size-small: 20px; --font-size-button: 32px; }
