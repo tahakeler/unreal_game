@@ -17,7 +17,7 @@ Cross-talk = register an interface in `Services` (`Services.Register<T>`, `Get<T
 
 | Contract | Type(s) | Provider -> consumers |
 |---|---|---|
-| Carry | `ICarryable` | carryable prefabs -> Player carry |
+| Carry | `ICarryable`, optional `ICarryableEvents` (`OnForcedRelease(ulong[])`, `OnStruggle(Vector3)`) | carryable prefabs -> Player carry; carry subscribes only if `carryable is ICarryableEvents` |
 | Noise | `NoiseEvent`, `NoiseSource`, `NoiseTag`, `INoiseService` | Player (voice/impact) -> AI, World |
 | Critter Personality | `CritterPersonality` SO (+enums) | AI team authors; all spawners read |
 | Goods | `GoodsDefinition` SO, `IGoods`, `BruiseReport`, `TouchHistory` | Economy -> Player, AI |
