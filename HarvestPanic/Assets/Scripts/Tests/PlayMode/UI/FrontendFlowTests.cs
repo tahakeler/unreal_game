@@ -131,7 +131,7 @@ namespace HarvestPanic.Tests.PlayMode.UI
             yield return Settle(); yield return Shot(lobby.Panel, dir, "lobby_crew");
         }
 
-        static IEnumerator Settle() { for (int i = 0; i < 20; i++) yield return null; yield return new WaitForSecondsRealtime(0.5f); }
+        static IEnumerator Settle() { for (int i = 0; i < 20; i++) yield return null; yield return null; }
 
         static IEnumerator Shot(UiPanel panel, string dir, string name)
         {
@@ -143,7 +143,7 @@ namespace HarvestPanic.Tests.PlayMode.UI
             foreach (var c in Camera.allCameras) if (c.isActiveAndEnabled) { cam = c; break; }
             if (cam != null) { cam.targetTexture = camRt; }
             for (int i = 0; i < 4; i++) yield return null;
-            yield return new WaitForEndOfFrame();
+            yield return null; yield return null;
             var prev = RenderTexture.active;
             var bg = new Texture2D(W, H, TextureFormat.RGBA32, false); var fg = new Texture2D(W, H, TextureFormat.RGBA32, false);
             RenderTexture.active = camRt; bg.ReadPixels(new Rect(0, 0, W, H), 0, 0); bg.Apply();
