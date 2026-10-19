@@ -152,7 +152,7 @@ namespace HarvestPanic.AI
         void OnCollisionEnter(Collision c)
         {
             if (!Authority || _goods == null || _brain.State != CritterState.Stunned) return;
-            float impulse = c.impulse.magnitude * _brain.Tuning.ImpactImpulseScale;
+            float impulse = ImpactUnits.ToDesign(c.impulse.magnitude) * _brain.Tuning.ImpactImpulseScale;
             ulong who = PlayerIds.IsPlayer(_lastThrower) ? _lastThrower : _goods.LastHandlerId;
             _goods.ApplyBruise(impulse, who, PlayerIds.IsPlayer(_lastThrower) ? BlameVerb.Threw : BlameVerb.Dropped);
         }

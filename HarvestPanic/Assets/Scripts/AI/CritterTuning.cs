@@ -70,7 +70,8 @@ namespace HarvestPanic.AI
         [Min(0)] public float BreakFreeStunSeconds = 0.25f;
         [Tooltip("Max airborne time before the stun timer starts anyway (s).")] [Min(0)] public float MaxAirSeconds = 3f;
         [Tooltip("Squeal loudness when a Screams critter is grabbed (livestock-roster: 0.7).")] [Range(0, 1)] public float GrabSquealLoudness = 0.7f;
-        [Tooltip("Unity N*s to contract impulse units for bruising (Economy to confirm).")] [Min(0)] public float ImpactImpulseScale = 1f;
+        [Tooltip("Charge hit reach beyond the agent radius (m).")] [Min(0)] public float ChargeHitReach = 0.6f;
+        [Tooltip("Extra multiplier on ImpactUnits.ToDesign(unity impulse) for critter bruising (1 = contract).")] [Min(0)] public float ImpactImpulseScale = 1f;
 
         [Header("Flock (chickens)")]
         [Range(0, 90)] public float FlockScatterJitterDegrees = 50f;
