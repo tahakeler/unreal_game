@@ -85,6 +85,43 @@ namespace HarvestPanic.Tests.EditMode
             Assert.That(push.x, Is.EqualTo(120f));
         }
 
+        sealed class Zone : IMovementModifierSource
+        {
+            public float Mult;
+            public float GetSpeedMultiplier(Vector3 position) => position.x > 0 ? Mult : 1f;
+        }
+
+        sealed class Soakable : IGoodsSoakable
+        {
+            public ulong Last;
+            public void ApplySoak(ulong instigator) => Last = instigator;
+        }
+
+        [Test]
+        public void MovementModifiers_MultiplyAllSources()
+        {
+            MovementModifiers.Clear();
+            var a = new Zone { Mult = 0.5f }; var b = new Zone { Mult = 0.8f };
+            MovementModifiers.Register(a); MovementModifiers.Register(a); MovementModifiers.Register(b);
+            Assert.That(MovementModifiers.Evaluate(Vector3.right), Is.EqualTo(0.4f).Within(1e-5f));
+            Assert.That(MovementModifiers.Evaluate(Vector3.left), Is.EqualTo(1f));
+            MovementModifiers.Unregister(a);
+            Assert.That(MovementModifiers.Evaluate(Vector3.right), Is.EqualTo(0.8f).Within(1e-5f));
+            MovementModifiers.Clear();
+        }
+
+        [Test]
+        public void DayParamsAndSoak_ContractsCompile()
+        {
+            Assert.That(DayParams.MudSpeedMult, Is.EqualTo("Mud.SpeedMult"));
+            Assert.That(DayParams.BridgeSafeLoadMult, Is.EqualTo("Bridge.SafeLoadMult"));
+            Assert.That(DayParams.BridgePlankBreakMult, Is.EqualTo("Bridge.PlankBreakMult"));
+            var s = new Soakable();
+            ((IGoodsSoakable)s).ApplySoak(PlayerIds.Nature);
+            Assert.That(s.Last, Is.EqualTo(PlayerIds.Nature));
+            Assert.That(BruiseKind.Soaked, Is.Not.EqualTo(BruiseKind.Impact));
+        }
+
         [TearDown] public void TearDown() => Services.Clear();
 
         [Test]

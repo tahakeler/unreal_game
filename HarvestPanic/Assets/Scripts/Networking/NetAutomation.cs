@@ -77,7 +77,7 @@ namespace HarvestPanic.Networking
             if (!_done && scene == _session.Config.gameScene && _session.Players.Count >= _expect && replicatedPlayers >= _expect && (!_host || _hostLoadedAll))
             {
                 _done = true;
-                Write($"ok=1 scene={scene} players={_session.Players.Count} replicated={replicatedPlayers} names={Names()}");
+                Write($"ok=1 scene={scene} players={_session.Players.Count} replicated={replicatedPlayers} playerStartMarkers={LevelMarker.FindAll(MarkerRole.PlayerStart).Count} names={Names()}");
                 // Host lingers so the client can observe its final state; client exits when the host leaves or after 3 s.
                 ScheduleQuit(0, _host ? 4f : 3f);
             }

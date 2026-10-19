@@ -26,6 +26,8 @@ Cross-talk = register an interface in `Services` (`Services.Register<T>`, `Get<T
 | Economy | `IEconomyService`, `WalletTxn` | Economy -> everyone |
 | Player hooks | `IPlayerHooks` | Player prefab -> Customization |
 | Knock/shove | `IKnockable`, `Knockables.TryGetFor` | Player root -> AI, hazards, wagons |
+| Movement zones | `IMovementModifierSource`, `MovementModifiers.Register/Unregister/Evaluate(pos)` | World zones (mud) -> Player controller multiplies speed by `Evaluate` |
+| Soak | `BruiseKind`, optional `IGoodsSoakable.ApplySoak(instigator)` | Economy implements; river/rain callers check `goods is IGoodsSoakable` |
 | Impact units | `ImpactUnits` | all (see below) |
 | Session | `ISessionService`, `PlayerInfo` | Networking -> Frontend UI (v0, add-only) |
 | Markers | `MarkerRole`, `MarkerTag`, `LevelMarker` | World places -> owners spawn |
@@ -76,3 +78,5 @@ Verified by `ContractsTests.Layers_AreDefinedAndCollisionMatrixIsSensible`. Note
 All GDD impulse thresholds (bruise 400, ragdoll 900, KO 1800, plank 800, critter charge) are design units =
 Unity collision impulse (N*s) x `ImpactUnits.ImpulseScale` (10). Always convert with
 `ImpactUnits.ToDesign(collision.impulse.magnitude)` before comparing; `IKnockable.ApplyImpulse` takes design units.
+
+New `DayParams`: `Bridge.SafeLoadMult`, `Bridge.PlankBreakMult`, `Mud.SpeedMult`.

@@ -4,7 +4,8 @@
     "references": [
         "HarvestPanic.Core",
         "Unity.Netcode.Runtime",
-        "Unity.Collections"
+        "Unity.Collections",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

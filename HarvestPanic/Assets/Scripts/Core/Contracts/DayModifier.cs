@@ -39,6 +39,12 @@ namespace HarvestPanic.Core
         public const string NoiseVoiceRadiusMult = "Noise.VoiceRadiusMult";
         /// <summary>Respawn fee multiplier.</summary>
         public const string EconomyRespawnFeeMult = "Economy.RespawnFeeMult";
+        /// <summary>Multiplier on the load a bridge plank carries safely.</summary>
+        public const string BridgeSafeLoadMult = "Bridge.SafeLoadMult";
+        /// <summary>Multiplier on plank break chance.</summary>
+        public const string BridgePlankBreakMult = "Bridge.PlankBreakMult";
+        /// <summary>Player speed multiplier in mud.</summary>
+        public const string MudSpeedMult = "Mud.SpeedMult";
     }
 
     /// <summary>
