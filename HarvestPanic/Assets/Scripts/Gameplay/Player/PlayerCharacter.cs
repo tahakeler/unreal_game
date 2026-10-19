@@ -72,6 +72,7 @@ namespace HarvestPanic.Gameplay
         BlameVerb _respawnCause;
         int _playerLayer, _ragdollLayer;
         bool _offlineLocal;
+        int _spawnPoseFrames;
 
         // ---- Accessors -------------------------------------------------------------------------------------
 
@@ -207,6 +208,7 @@ namespace HarvestPanic.Gameplay
                 Local = this;
                 _input.Activate();
                 _motor.InitOwner();
+                _spawnPoseFrames = 2; // re-commit the server spawn pose through the owner NetworkTransform
                 DisableForeignCameras();
             }
             ApplyPhysicsMode(PlayerStateMachine.IsPhysicsDriven(State) || State == PlayerState.Respawning);
@@ -504,6 +506,7 @@ namespace HarvestPanic.Gameplay
 
             if (IsOwner)
             {
+                if (_spawnPoseFrames > 0 && --_spawnPoseFrames == 0) OwnerTeleport(transform.position, Quaternion.Euler(0f, transform.eulerAngles.y, 0f));
                 if (_physicsMode && !_rb.isKinematic) _rest.Tick(_rb.linearVelocity.magnitude, Time.deltaTime);
                 if (CanGetUp && _input.JumpPressed) GetUpRpc();
                 if (HasControl && _input.HollerPressed) Holler();
