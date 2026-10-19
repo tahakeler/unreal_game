@@ -555,6 +555,7 @@ namespace HarvestPanic.AI
             if (_rb != null)
             {
                 _rb.isKinematic = false;
+                _rb.interpolation = RigidbodyInterpolation.Interpolate;
                 _rb.useGravity = true;
                 _rb.linearVelocity = velocity;
                 _rb.angularVelocity = Vector3.zero;
@@ -568,7 +569,7 @@ namespace HarvestPanic.AI
         void RecoverToNavMesh()
         {
             Vector3 p = transform.position;
-            if (_rb != null) { _rb.linearVelocity = Vector3.zero; _rb.angularVelocity = Vector3.zero; _rb.isKinematic = true; }
+            if (_rb != null) { _rb.linearVelocity = Vector3.zero; _rb.angularVelocity = Vector3.zero; _rb.isKinematic = true; _rb.interpolation = RigidbodyInterpolation.None; }
             transform.rotation = Quaternion.Euler(0f, transform.eulerAngles.y, 0f);
             if (_agent == null) return;
             if (NavMesh.SamplePosition(p, out var hit, 4f, NavMesh.AllAreas))

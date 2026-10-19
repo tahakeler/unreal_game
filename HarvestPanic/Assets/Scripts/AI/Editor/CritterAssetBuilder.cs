@@ -264,7 +264,7 @@ namespace HarvestPanic.AI.Editor
                 var rb = root.AddComponent<Rigidbody>();
                 rb.isKinematic = true;
                 rb.mass = s.MassKg;
-                rb.interpolation = RigidbodyInterpolation.Interpolate;
+                rb.interpolation = RigidbodyInterpolation.None; // agent drives the transform; brain enables interpolation while thrown
                 rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
 
                 var agent = root.AddComponent<NavMeshAgent>();
