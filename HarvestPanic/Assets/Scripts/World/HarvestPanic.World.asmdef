@@ -3,7 +3,8 @@
     "rootNamespace": "HarvestPanic.World",
     "references": [
         "HarvestPanic.Core",
-        "HarvestPanic.Gameplay",
+        "Unity.Netcode.Runtime",
+        "Unity.Collections",
         "Unity.AI.Navigation"
     ],
     "includePlatforms": [],

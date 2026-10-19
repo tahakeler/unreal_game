@@ -3,8 +3,8 @@
     "rootNamespace": "HarvestPanic.Gameplay",
     "references": [
         "HarvestPanic.Core",
-        "HarvestPanic.Networking",
         "Unity.Netcode.Runtime",
+        "Unity.Collections",
         "Unity.InputSystem",
         "Unity.Cinemachine"
     ],

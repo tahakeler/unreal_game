@@ -3,7 +3,6 @@
     "rootNamespace": "HarvestPanic.UI",
     "references": [
         "HarvestPanic.Core",
-        "HarvestPanic.Gameplay",
         "Unity.InputSystem"
     ],
     "includePlatforms": [],

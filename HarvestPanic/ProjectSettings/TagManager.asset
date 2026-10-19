@@ -3,19 +3,28 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - HP_PlayerStart
+  - HP_MarketPen
+  - HP_CritterSpawner
+  - HP_Goods
+  - HP_BridgePlank
+  - HP_River
+  - HP_RiverPile
+  - HP_BarnRespawn
+  - HP_Wardrobe
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Critter
+  - Carryable
+  - Bridge
+  - Interactable
+  - Ragdoll
   - 
   - 
   - 

@@ -2,7 +2,9 @@
     "name": "HarvestPanic.Customization",
     "rootNamespace": "HarvestPanic.Customization",
     "references": [
-        "HarvestPanic.Core"
+        "HarvestPanic.Core",
+        "Unity.Netcode.Runtime",
+        "Unity.Collections"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
