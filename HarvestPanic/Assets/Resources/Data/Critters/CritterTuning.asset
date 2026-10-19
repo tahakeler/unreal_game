@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6699b82271e44481ea4b1dd92b34a723, type: 3}
+  m_Name: CritterTuning
+  m_EditorClassIdentifier: HarvestPanic.AI::HarvestPanic.AI.CritterTuning
+  TickHz: 10
+  GlobalSpeedMult: 1
+  GlobalNoiseMult: 1
+  WeightProximity: 0.5
+  WeightSprint: 0.2
+  WeightSight: 0.15
+  OtherSourcesWeight: 0.25
+  NoiseDecayPerSecond: 0.25
+  DamageThreat: 0.6
+  DamageDecayPerSecond: 0.3
+  SprintSpeedThreshold: 5.2
+  MaxThreatSources: 16
+  AlertTellSeconds: 0.4
+  AlertDecaySeconds: 3
+  FleeQueryInterval: 0.25
+  FleeDistance: 12
+  FleeSampleRadius: 3
+  CorneredCostRatio: 3
+  CorneredPlayerRadius: 4
+  CorneredPlayersNeeded: 2
+  CorneredMinSeconds: 2
+  CorneredMaxSeconds: 5
+  JukeSpeedMult: 1.15
+  LureRange: 15
+  LureThreatFactor: 0.8
+  LuredIgnoreBelow: 0.5
+  LuredBreakAbove: 0.8
+  LureMemorySeconds: 8
+  EatDistance: 1.5
+  WanderRadius: 6
+  IdleMinSeconds: 2
+  IdleMaxSeconds: 5
+  WanderSpeedFraction: 0.5
+  StuckSeconds: 3
+  StuckWarpSeconds: 8
+  BreakFreePerMissingCarrier: 0.2
+  BreakFreeBase: 0.05
+  BreakFreeMax: 0.9
+  BreakFreeHopSpeed: 3
+  StunSeconds: 1.5
+  DropStunSeconds: 0.6
+  BreakFreeStunSeconds: 0.25
+  MaxAirSeconds: 3
+  GrabSquealLoudness: 0.7
+  ImpactImpulseScale: 1
+  FlockScatterJitterDegrees: 50
+  FlockOutwardWeight: 1.2
+  FlockRegroupSeconds: 15
+  FlockRegroupRadius: 3
+  FlockJoinRadius: 12
