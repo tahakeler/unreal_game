@@ -46,9 +46,9 @@ namespace HarvestPanic.AI.Editor
         public static readonly Spec[] Specs =
         {
             new Spec { Name = "Pig", Fbx = AnimalsDir + "/Pig/Pig.fbx", HeadBone = "Head", CritterId = "Critter.Pig", GoodsId = "Livestock.Pig", ShortId = "pig",
-                       Fit = Fit.Length, TargetM = 1.10f, BaseValue = 60, CarryHands = 2, Fragility = 0.8f, MassKg = 30f },
+                       Fit = Fit.Length, TargetM = 1.10f, BaseValue = 60, CarryHands = 2, Fragility = 0.8f, MassKg = 30f, Tint = new Color(0.949f, 0.639f, 0.627f) },
             new Spec { Name = "Chicken", Fbx = AnimalsDir + "/Chicken/Chicken.fbx", HeadBone = "Body_end", CritterId = "Critter.Chicken", GoodsId = "Livestock.Chicken", ShortId = "chicken",
-                       Fit = Fit.Height, TargetM = 0.33f, BaseValue = 15, CarryHands = 1, Fragility = 0.6f, MassKg = 2.5f },
+                       Fit = Fit.Height, TargetM = 0.33f, BaseValue = 15, CarryHands = 1, Fragility = 0.6f, MassKg = 2.5f, Tint = new Color(0.97f, 0.95f, 0.88f) },
         };
 
         [MenuItem("Harvest Panic/Critters/Build Critter Assets")]
@@ -252,6 +252,9 @@ namespace HarvestPanic.AI.Editor
                 var bounds = FitModel(model.transform, s);
 
                 foreach (var t in root.GetComponentsInChildren<Transform>(true)) t.gameObject.layer = layer;
+                var mat = SpeciesMaterial(s);
+                foreach (var r in model.GetComponentsInChildren<Renderer>(true))
+                    r.sharedMaterials = Enumerable.Repeat(mat, r.sharedMaterials.Length).ToArray();
                 var anim = model.GetComponent<Animator>() ?? model.AddComponent<Animator>();
                 anim.runtimeAnimatorController = ac;
                 anim.applyRootMotion = false;
@@ -347,6 +350,19 @@ namespace HarvestPanic.AI.Editor
             foreach (var mf in model.GetComponentsInChildren<MeshFilter>(true))
                 if (mf.sharedMesh != null) foreach (var v in mf.sharedMesh.vertices) Add(mf.transform.TransformPoint(v));
             return b;
+        }
+
+        /// <summary>URP Lit material per species (art-bible tint; the FBX flat colours do not survive URP import).</summary>
+        static Material SpeciesMaterial(Spec s)
+        {
+            string path = $"{PrefabDir}/Materials/M_Critter_{s.Name}.mat";
+            if (!AssetDatabase.IsValidFolder(PrefabDir + "/Materials")) AssetDatabase.CreateFolder(PrefabDir, "Materials");
+            var m = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (m == null) { m = new Material(Shader.Find("Universal Render Pipeline/Lit")); AssetDatabase.CreateAsset(m, path); }
+            m.SetColor("_BaseColor", s.Tint);
+            m.SetFloat("_Smoothness", 0.15f);
+            EditorUtility.SetDirty(m);
+            return m;
         }
 
         static void BuildNetworkList(List<GameObject> prefabs)
