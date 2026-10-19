@@ -116,6 +116,9 @@ namespace HarvestPanic.Gameplay
             return head.position + head.forward * c.HoldDistance + Vector3.down * c.HoldDrop;
         }
 
+        /// <summary>Current look direction.</summary>
+        public Vector3 HeadPivotForward() => _pc.HeadPivot.forward;
+
         /// <summary>World rotation for a rigidly held tool.</summary>
         public Quaternion ToolRotation => _pc.HeadPivot.rotation;
 

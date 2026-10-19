@@ -1,0 +1,22 @@
+{
+    "name": "HarvestPanic.Gameplay.Editor",
+    "rootNamespace": "HarvestPanic.Gameplay.Editor",
+    "references": [
+        "HarvestPanic.Core",
+        "HarvestPanic.Gameplay",
+        "Unity.Netcode.Runtime",
+        "Unity.Cinemachine",
+        "Unity.InputSystem",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Core.Runtime"
+    ],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
