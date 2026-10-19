@@ -1,0 +1,991 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4696162cd38e4168bfd4c28a3146e90, type: 3}
+  m_Name: CosmeticCatalog
+  m_EditorClassIdentifier: HarvestPanic.Customization::HarvestPanic.Customization.CosmeticCatalog
+  unlockAllCosmetics: 1
+  palette:
+  - name: Denim Blue
+    color: {r: 0.23137255, g: 0.43529412, b: 0.81960785, a: 1}
+    fantasy: 0
+  - name: Pumpkin Orange
+    color: {r: 0.9411765, g: 0.5411765, b: 0.14117648, a: 1}
+    fantasy: 0
+  - name: Clover Green
+    color: {r: 0.24705882, g: 0.68235296, b: 0.3529412, a: 1}
+    fantasy: 0
+  - name: Lilac
+    color: {r: 0.654902, g: 0.48235294, b: 0.8784314, a: 1}
+    fantasy: 0
+  - name: Barn Brick
+    color: {r: 0.6117647, g: 0.2901961, b: 0.22745098, a: 1}
+    fantasy: 0
+  - name: Mustard
+    color: {r: 0.8509804, g: 0.69411767, b: 0.23137255, a: 1}
+    fantasy: 0
+  - name: Pond Teal
+    color: {r: 0.18039216, g: 0.6117647, b: 0.6117647, a: 1}
+    fantasy: 0
+  - name: Sky
+    color: {r: 0.49411765, g: 0.78431374, b: 0.9098039, a: 1}
+    fantasy: 0
+  - name: Bubblegum
+    color: {r: 0.9490196, g: 0.5529412, b: 0.69803923, a: 1}
+    fantasy: 0
+  - name: Landlord Plum
+    color: {r: 0.35686275, g: 0.16470589, b: 0.43137255, a: 1}
+    fantasy: 0
+  - name: Moss
+    color: {r: 0.36862746, g: 0.49803922, b: 0.22745098, a: 1}
+    fantasy: 0
+  - name: Rust
+    color: {r: 0.70980394, g: 0.3372549, b: 0.16862746, a: 1}
+    fantasy: 0
+  - name: Navy
+    color: {r: 0.14117648, g: 0.20392157, b: 0.36862746, a: 1}
+    fantasy: 0
+  - name: Charcoal
+    color: {r: 0.22745098, g: 0.22745098, b: 0.2509804, a: 1}
+    fantasy: 0
+  - name: Cream
+    color: {r: 0.9490196, g: 0.9019608, b: 0.78431374, a: 1}
+    fantasy: 0
+  - name: Snow
+    color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
+    fantasy: 0
+  - name: Sand
+    color: {r: 0.8039216, g: 0.7019608, b: 0.5411765, a: 1}
+    fantasy: 0
+  - name: Mud Brown
+    color: {r: 0.41960785, g: 0.2901961, b: 0.18039216, a: 1}
+    fantasy: 0
+  - name: Wheat
+    color: {r: 0.8901961, g: 0.7607843, b: 0.47843137, a: 1}
+    fantasy: 0
+  - name: Mint
+    color: {r: 0.62352943, g: 0.8784314, b: 0.7529412, a: 1}
+    fantasy: 0
+  - name: Lemon
+    color: {r: 0.9607843, g: 0.9019608, b: 0.3882353, a: 1}
+    fantasy: 0
+  - name: Coral
+    color: {r: 0.9490196, g: 0.47058824, b: 0.36078432, a: 1}
+    fantasy: 0
+  - name: Slate
+    color: {r: 0.43137255, g: 0.49803922, b: 0.5803922, a: 1}
+    fantasy: 0
+  - name: Hot Pink
+    color: {r: 0.8784314, g: 0.30980393, b: 0.627451, a: 1}
+    fantasy: 0
+  skinTones:
+  - name: Buttermilk
+    color: {r: 0.9647059, g: 0.84313726, b: 0.7647059, a: 1}
+    fantasy: 0
+  - name: Rosy Apple
+    color: {r: 0.9411765, g: 0.75686276, b: 0.6901961, a: 1}
+    fantasy: 0
+  - name: Peach Cobbler
+    color: {r: 0.92156863, g: 0.7529412, b: 0.627451, a: 1}
+    fantasy: 0
+  - name: Honeycomb
+    color: {r: 0.8509804, g: 0.63529414, b: 0.4862745, a: 1}
+    fantasy: 0
+  - name: Almond
+    color: {r: 0.7882353, g: 0.58431375, b: 0.41960785, a: 1}
+    fantasy: 0
+  - name: Maple
+    color: {r: 0.7529412, g: 0.52156866, b: 0.3764706, a: 1}
+    fantasy: 0
+  - name: Toffee
+    color: {r: 0.6901961, g: 0.47058824, b: 0.3137255, a: 1}
+    fantasy: 0
+  - name: Pecan
+    color: {r: 0.61960787, g: 0.41568628, b: 0.2784314, a: 1}
+    fantasy: 0
+  - name: Cinnamon
+    color: {r: 0.54901963, g: 0.3529412, b: 0.23529412, a: 1}
+    fantasy: 0
+  - name: Cocoa
+    color: {r: 0.47843137, g: 0.30588236, b: 0.2, a: 1}
+    fantasy: 0
+  - name: Coffee Bean
+    color: {r: 0.3529412, g: 0.21568628, b: 0.14509805, a: 1}
+    fantasy: 0
+  - name: Black Walnut
+    color: {r: 0.24313726, g: 0.14901961, b: 0.101960786, a: 1}
+    fantasy: 0
+  - name: Pickled
+    color: {r: 0.62352943, g: 0.827451, b: 0.6039216, a: 1}
+    fantasy: 1
+  - name: Moonstruck
+    color: {r: 0.56078434, g: 0.7058824, b: 0.9411765, a: 1}
+    fantasy: 1
+  nameTags:
+  - name: Denim Blue
+    color: {r: 0.23137255, g: 0.43529412, b: 0.81960785, a: 1}
+    shape: 0
+  - name: Pumpkin Orange
+    color: {r: 0.9411765, g: 0.5411765, b: 0.14117648, a: 1}
+    shape: 1
+  - name: Clover Green
+    color: {r: 0.24705882, g: 0.68235296, b: 0.3529412, a: 1}
+    shape: 2
+  - name: Lilac
+    color: {r: 0.654902, g: 0.48235294, b: 0.8784314, a: 1}
+    shape: 3
+  - name: Sunflower
+    color: {r: 0.9607843, g: 0.81960785, b: 0.25882354, a: 1}
+    shape: 4
+  - name: Teal
+    color: {r: 0.18039216, g: 0.76862746, b: 0.76862746, a: 1}
+    shape: 5
+  - name: Pink
+    color: {r: 0.9490196, g: 0.48235294, b: 0.70980394, a: 1}
+    shape: 6
+  - name: Snow
+    color: {r: 0.9490196, g: 0.9490196, b: 0.9490196, a: 1}
+    shape: 7
+  bodies:
+  - name: Sturdy
+    flavour: Built like a hay bale. Falls like one too.
+    bodyScale: {x: 1.12, y: 0.96, z: 1.12}
+    headScale: 1.18
+  - name: Lanky
+    flavour: Can reach the top shelf. Cannot reach a decision.
+    bodyScale: {x: 0.9, y: 1.08, z: 0.9}
+    headScale: 1.1
+  hats:
+  - id: 1
+    key: hat.straw
+    displayName: Straw Hat
+    flavour: Smells like Grandpa. Smells like regret.
+    unlock: 0
+    blocksFirstPersonView: 0
+    prefab: {fileID: 0}
+    parts:
+    - shape: 2
+      position: {x: 0, y: -0.07, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.56, y: 0.025, z: 0.56}
+      color: {r: 0.9098039, g: 0.78431374, b: 0.44705883, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 2
+      position: {x: 0, y: -0.01, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.25, y: 0.12, z: 0.25}
+      color: {r: 0.9098039, g: 0.78431374, b: 0.44705883, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 2
+      position: {x: 0, y: -0.045, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.26, y: 0.035, z: 0.26}
+      color: {r: 0.7529412, g: 0.26666668, b: 0.22745098, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: 0, y: 0.045, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.24, y: 0.05, z: 0.24}
+      color: {r: 0.7882353, g: 0.63529414, b: 0.30588236, a: 1}
+      tint: 0
+      taper: 0
+  - id: 2
+    key: hat.trucker
+    displayName: Trucker Cap
+    flavour: Free with any purchase of 400 lb of feed.
+    unlock: 0
+    blocksFirstPersonView: 0
+    prefab: {fileID: 0}
+    parts:
+    - shape: 1
+      position: {x: 0, y: -0.04, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.25, y: 0.2, z: 0.26}
+      color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
+      tint: 1
+      taper: 0
+    - shape: 0
+      position: {x: 0, y: -0.075, z: 0.16}
+      euler: {x: -8, y: 0, z: 0}
+      size: {x: 0.21, y: 0.022, z: 0.15}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 1
+      taper: 0
+    - shape: 0
+      position: {x: 0, y: -0.035, z: 0.11}
+      euler: {x: -20, y: 0, z: 0}
+      size: {x: 0.16, y: 0.08, z: 0.03}
+      color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: 0, y: 0.06, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.04, y: 0.04, z: 0.04}
+      color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
+      tint: 0
+      taper: 0
+  - id: 3
+    key: hat.bucket
+    displayName: Bucket Helmet
+    flavour: Holds water. Doesn't hold dignity.
+    unlock: 2
+    blocksFirstPersonView: 1
+    prefab: {fileID: 0}
+    parts:
+    - shape: 4
+      position: {x: 0, y: -0.2, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.32, y: 0.3, z: 0.32}
+      color: {r: 0.6039216, g: 0.6392157, b: 0.6784314, a: 1}
+      tint: 0
+      taper: 0.78
+    - shape: 2
+      position: {x: 0, y: -0.19, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.335, y: 0.025, z: 0.335}
+      color: {r: 0.49019608, g: 0.52156866, b: 0.56078434, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 0
+      position: {x: 0, y: 0.11, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.3, y: 0.02, z: 0.02}
+      color: {r: 0.3529412, g: 0.3764706, b: 0.40784314, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 0
+      position: {x: 0, y: -0.12, z: 0.17}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.12, y: 0.03, z: 0.01}
+      color: {r: 0.14901961, g: 0.13333334, b: 0.12156863, a: 1}
+      tint: 0
+      taper: 0
+  - id: 4
+    key: hat.pumpkin
+    displayName: Pumpkin Head
+    flavour: The Scarecrow thinks you're cute.
+    unlock: 3
+    blocksFirstPersonView: 1
+    prefab: {fileID: 0}
+    parts:
+    - shape: 1
+      position: {x: 0, y: -0.14, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.46, y: 0.4, z: 0.44}
+      color: {r: 0.9411765, g: 0.5411765, b: 0.14117648, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: 0.1, y: -0.14, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.3, y: 0.38, z: 0.42}
+      color: {r: 0.8784314, g: 0.47843137, b: 0.11764706, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: -0.1, y: -0.14, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.3, y: 0.38, z: 0.42}
+      color: {r: 0.8784314, g: 0.47843137, b: 0.11764706, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 2
+      position: {x: 0, y: 0.1, z: 0}
+      euler: {x: 0, y: 0, z: 12}
+      size: {x: 0.05, y: 0.1, z: 0.05}
+      color: {r: 0.30980393, g: 0.47843137, b: 0.16470589, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 4
+      position: {x: -0.07, y: -0.08, z: 0.205}
+      euler: {x: 90, y: 0, z: 0}
+      size: {x: 0.07, y: 0.06, z: 0.02}
+      color: {r: 0.14901961, g: 0.13333334, b: 0.12156863, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 4
+      position: {x: 0.07, y: -0.08, z: 0.205}
+      euler: {x: 90, y: 0, z: 0}
+      size: {x: 0.07, y: 0.06, z: 0.02}
+      color: {r: 0.14901961, g: 0.13333334, b: 0.12156863, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 0
+      position: {x: 0, y: -0.2, z: 0.2}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.17, y: 0.035, z: 0.02}
+      color: {r: 0.14901961, g: 0.13333334, b: 0.12156863, a: 1}
+      tint: 0
+      taper: 0
+  - id: 5
+    key: hat.cowboy
+    displayName: Cowboy Hat
+    flavour: The bull has opinions.
+    unlock: 0
+    blocksFirstPersonView: 0
+    prefab: {fileID: 0}
+    parts:
+    - shape: 1
+      position: {x: 0, y: -0.07, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.6, y: 0.05, z: 0.48}
+      color: {r: 0.5411765, g: 0.3529412, b: 0.20392157, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 2
+      position: {x: 0, y: 0, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.24, y: 0.14, z: 0.26}
+      color: {r: 0.5411765, g: 0.3529412, b: 0.20392157, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 0
+      position: {x: 0, y: 0.07, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.05, y: 0.03, z: 0.2}
+      color: {r: 0.43137255, g: 0.27058825, b: 0.15294118, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 2
+      position: {x: 0, y: -0.045, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.25, y: 0.03, z: 0.27}
+      color: {r: 0.14901961, g: 0.13333334, b: 0.12156863, a: 1}
+      tint: 0
+      taper: 0
+  - id: 6
+    key: hat.chef
+    displayName: Chef Toque
+    flavour: Yes, chef. No, chef. Where's the pig, chef?
+    unlock: 1
+    blocksFirstPersonView: 0
+    prefab: {fileID: 0}
+    parts:
+    - shape: 2
+      position: {x: 0, y: 0.02, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.24, y: 0.16, z: 0.24}
+      color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: 0, y: 0.2, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.36, y: 0.28, z: 0.36}
+      color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: 0.09, y: 0.25, z: 0.04}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.2, y: 0.2, z: 0.2}
+      color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: -0.08, y: 0.27, z: -0.05}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.2, y: 0.2, z: 0.2}
+      color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
+      tint: 0
+      taper: 0
+  - id: 7
+    key: hat.flowercrown
+    displayName: Flower Crown
+    flavour: Picked from the cursed patch. Probably fine.
+    unlock: 1
+    blocksFirstPersonView: 0
+    prefab: {fileID: 0}
+    parts:
+    - shape: 2
+      position: {x: 0, y: -0.07, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.25, y: 0.02, z: 0.26}
+      color: {r: 0.30980393, g: 0.5411765, b: 0.22745098, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: 0, y: -0.06, z: 0.13}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.075, y: 0.06, z: 0.075}
+      color: {r: 0.9490196, g: 0.5529412, b: 0.69803923, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: 0, y: -0.034999996, z: 0.13}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.03, y: 0.03, z: 0.03}
+      color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: 0.080348454, y: -0.06, z: 0.09958577}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.075, y: 0.06, z: 0.075}
+      color: {r: 0.9607843, g: 0.9019608, b: 0.3882353, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: 0.080348454, y: -0.034999996, z: 0.09958577}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.03, y: 0.03, z: 0.03}
+      color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: 0.12310097, y: -0.06, z: 0.022574253}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.075, y: 0.06, z: 0.075}
+      color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: 0.12310097, y: -0.034999996, z: 0.022574253}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.03, y: 0.03, z: 0.03}
+      color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: 0.10825317, y: -0.06, z: -0.065000005}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.075, y: 0.06, z: 0.075}
+      color: {r: 0.654902, g: 0.48235294, b: 0.8784314, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: 0.10825317, y: -0.034999996, z: -0.065000005}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.03, y: 0.03, z: 0.03}
+      color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: 0.0427525, y: -0.06, z: -0.12216004}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.075, y: 0.06, z: 0.075}
+      color: {r: 0.9490196, g: 0.5529412, b: 0.69803923, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: 0.0427525, y: -0.034999996, z: -0.12216004}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.03, y: 0.03, z: 0.03}
+      color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: -0.04275252, y: -0.06, z: -0.12216003}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.075, y: 0.06, z: 0.075}
+      color: {r: 0.9607843, g: 0.9019608, b: 0.3882353, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: -0.04275252, y: -0.034999996, z: -0.12216003}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.03, y: 0.03, z: 0.03}
+      color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: -0.10825318, y: -0.06, z: -0.06499998}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.075, y: 0.06, z: 0.075}
+      color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: -0.10825318, y: -0.034999996, z: -0.06499998}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.03, y: 0.03, z: 0.03}
+      color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: -0.123100966, y: -0.06, z: 0.022574259}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.075, y: 0.06, z: 0.075}
+      color: {r: 0.654902, g: 0.48235294, b: 0.8784314, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: -0.123100966, y: -0.034999996, z: 0.022574259}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.03, y: 0.03, z: 0.03}
+      color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: -0.080348425, y: -0.06, z: 0.099585794}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.075, y: 0.06, z: 0.075}
+      color: {r: 0.9490196, g: 0.5529412, b: 0.69803923, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: -0.080348425, y: -0.034999996, z: 0.099585794}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.03, y: 0.03, z: 0.03}
+      color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
+      tint: 0
+      taper: 0
+  - id: 8
+    key: hat.cone
+    displayName: Traffic Cone
+    flavour: Road works ahead. The road is you.
+    unlock: 2
+    blocksFirstPersonView: 0
+    prefab: {fileID: 0}
+    parts:
+    - shape: 4
+      position: {x: 0, y: -0.06, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.24, y: 0.62, z: 0.24}
+      color: {r: 1, g: 0.41568628, b: 0.07450981, a: 1}
+      tint: 0
+      taper: 0.12
+    - shape: 4
+      position: {x: 0, y: 0.12, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.175, y: 0.09, z: 0.175}
+      color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
+      tint: 0
+      taper: 0.8
+    - shape: 4
+      position: {x: 0, y: 0.3, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.12, y: 0.08, z: 0.12}
+      color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
+      tint: 0
+      taper: 0.75
+    - shape: 0
+      position: {x: 0, y: -0.07, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.34, y: 0.03, z: 0.34}
+      color: {r: 0.9098039, g: 0.3529412, b: 0.047058824, a: 1}
+      tint: 0
+      taper: 0
+  - id: 9
+    key: hat.viking
+    displayName: Viking Horns
+    flavour: Raids barns. Only his own.
+    unlock: 1
+    blocksFirstPersonView: 0
+    prefab: {fileID: 0}
+    parts:
+    - shape: 1
+      position: {x: 0, y: -0.07, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.26, y: 0.22, z: 0.27}
+      color: {r: 0.5568628, g: 0.5882353, b: 0.61960787, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 2
+      position: {x: 0, y: -0.1, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.27, y: 0.04, z: 0.28}
+      color: {r: 0.6901961, g: 0.5411765, b: 0.22745098, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 0
+      position: {x: 0, y: -0.05, z: 0.12}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.035, y: 0.14, z: 0.04}
+      color: {r: 0.6901961, g: 0.5411765, b: 0.22745098, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 4
+      position: {x: 0.12, y: -0.03, z: 0}
+      euler: {x: 0, y: 0, z: -62}
+      size: {x: 0.08, y: 0.26, z: 0.08}
+      color: {r: 0.9490196, g: 0.9019608, b: 0.78431374, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 4
+      position: {x: -0.12, y: -0.03, z: 0}
+      euler: {x: 0, y: 0, z: 62}
+      size: {x: 0.08, y: 0.26, z: 0.08}
+      color: {r: 0.9490196, g: 0.9019608, b: 0.78431374, a: 1}
+      tint: 0
+      taper: 0
+  - id: 10
+    key: hat.fedora
+    displayName: Grandpa's Fedora
+    flavour: He wore it to every bank meeting. It never helped.
+    unlock: 2
+    blocksFirstPersonView: 0
+    prefab: {fileID: 0}
+    parts:
+    - shape: 2
+      position: {x: 0, y: -0.06, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.42, y: 0.02, z: 0.38}
+      color: {r: 0.2901961, g: 0.2509804, b: 0.21960784, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 2
+      position: {x: 0, y: 0, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.23, y: 0.12, z: 0.22}
+      color: {r: 0.2901961, g: 0.2509804, b: 0.21960784, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 0
+      position: {x: 0, y: 0.06, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.06, y: 0.025, z: 0.16}
+      color: {r: 0.22745098, g: 0.19607843, b: 0.17254902, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 2
+      position: {x: 0, y: -0.035, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.235, y: 0.03, z: 0.225}
+      color: {r: 0.14901961, g: 0.13333334, b: 0.12156863, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 3
+      position: {x: 0.12, y: 0.02, z: -0.02}
+      euler: {x: 0, y: 0, z: -35}
+      size: {x: 0.025, y: 0.14, z: 0.02}
+      color: {r: 0.9607843, g: 0.81960785, b: 0.25882354, a: 1}
+      tint: 0
+      taper: 0
+  faces:
+  - id: 1
+    key: face.moustache
+    displayName: Grandpa Moustache
+    flavour: Inherited. Like the debt.
+    unlock: 1
+    blocksFirstPersonView: 0
+    prefab: {fileID: 0}
+    parts:
+    - shape: 1
+      position: {x: 0.045, y: -0.085, z: 0}
+      euler: {x: 0, y: 0, z: 18}
+      size: {x: 0.1, y: 0.04, z: 0.05}
+      color: {r: 0.3529412, g: 0.21568628, b: 0.14509805, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: -0.045, y: -0.085, z: 0}
+      euler: {x: 0, y: 0, z: -18}
+      size: {x: 0.1, y: 0.04, z: 0.05}
+      color: {r: 0.3529412, g: 0.21568628, b: 0.14509805, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: 0.1, y: -0.07, z: -0.01}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.035, y: 0.035, z: 0.035}
+      color: {r: 0.3529412, g: 0.21568628, b: 0.14509805, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: -0.1, y: -0.07, z: -0.01}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.035, y: 0.035, z: 0.035}
+      color: {r: 0.3529412, g: 0.21568628, b: 0.14509805, a: 1}
+      tint: 0
+      taper: 0
+  - id: 2
+    key: face.goggles
+    displayName: Safety Goggles
+    flavour: Mandatory around llamas.
+    unlock: 1
+    blocksFirstPersonView: 0
+    prefab: {fileID: 0}
+    parts:
+    - shape: 2
+      position: {x: 0.048, y: 0, z: 0.012}
+      euler: {x: 90, y: 0, z: 0}
+      size: {x: 0.08, y: 0.03, z: 0.08}
+      color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 2
+      position: {x: -0.048, y: 0, z: 0.012}
+      euler: {x: 90, y: 0, z: 0}
+      size: {x: 0.08, y: 0.03, z: 0.08}
+      color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 2
+      position: {x: 0.048, y: 0, z: 0.028}
+      euler: {x: 90, y: 0, z: 0}
+      size: {x: 0.062, y: 0.005, z: 0.062}
+      color: {r: 0.49411765, g: 0.78431374, b: 0.9098039, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 2
+      position: {x: -0.048, y: 0, z: 0.028}
+      euler: {x: 90, y: 0, z: 0}
+      size: {x: 0.062, y: 0.005, z: 0.062}
+      color: {r: 0.49411765, g: 0.78431374, b: 0.9098039, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 2
+      position: {x: 0, y: 0, z: -0.1}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.235, y: 0.025, z: 0.235}
+      color: {r: 0.22745098, g: 0.22745098, b: 0.2509804, a: 1}
+      tint: 0
+      taper: 0
+  - id: 3
+    key: face.sunglasses
+    displayName: Sunglasses
+    flavour: Too cool for the coop.
+    unlock: 1
+    blocksFirstPersonView: 0
+    prefab: {fileID: 0}
+    parts:
+    - shape: 0
+      position: {x: 0.045, y: 0, z: 0.012}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.075, y: 0.045, z: 0.015}
+      color: {r: 0.11764706, g: 0.105882354, b: 0.09803922, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 0
+      position: {x: -0.045, y: 0, z: 0.012}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.075, y: 0.045, z: 0.015}
+      color: {r: 0.11764706, g: 0.105882354, b: 0.09803922, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 0
+      position: {x: 0, y: 0.012, z: 0.012}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.03, y: 0.01, z: 0.012}
+      color: {r: 0.11764706, g: 0.105882354, b: 0.09803922, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 0
+      position: {x: 0.088, y: 0.01, z: -0.04}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.008, y: 0.01, z: 0.1}
+      color: {r: 0.11764706, g: 0.105882354, b: 0.09803922, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 0
+      position: {x: -0.088, y: 0.01, z: -0.04}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.008, y: 0.01, z: 0.1}
+      color: {r: 0.11764706, g: 0.105882354, b: 0.09803922, a: 1}
+      tint: 0
+      taper: 0
+  - id: 4
+    key: face.clownnose
+    displayName: Clown Nose
+    flavour: Honk. The chickens respect you less now.
+    unlock: 1
+    blocksFirstPersonView: 0
+    prefab: {fileID: 0}
+    parts:
+    - shape: 1
+      position: {x: 0, y: -0.04, z: 0.03}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.065, y: 0.065, z: 0.065}
+      color: {r: 0.8980392, g: 0.28235295, b: 0.23137255, a: 1}
+      tint: 0
+      taper: 0
+  backs:
+  - id: 1
+    key: back.basket
+    displayName: Harvest Basket Backpack
+    flavour: Holds nothing. The physics team was very clear.
+    unlock: 1
+    blocksFirstPersonView: 0
+    prefab: {fileID: 0}
+    parts:
+    - shape: 4
+      position: {x: 0, y: -0.2, z: -0.15}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.32, y: 0.36, z: 0.24}
+      color: {r: 0.72156864, g: 0.5411765, b: 0.2901961, a: 1}
+      tint: 0
+      taper: 1.25
+    - shape: 2
+      position: {x: 0, y: 0.16, z: -0.15}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.4, y: 0.03, z: 0.3}
+      color: {r: 0.6117647, g: 0.4392157, b: 0.21960784, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 4
+      position: {x: 0.06, y: 0.15, z: -0.15}
+      euler: {x: 0, y: 0, z: -12}
+      size: {x: 0.06, y: 0.2, z: 0.06}
+      color: {r: 0.9411765, g: 0.5411765, b: 0.14117648, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: -0.07, y: 0.2, z: -0.13}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.11, y: 0.11, z: 0.11}
+      color: {r: 0.24705882, g: 0.68235296, b: 0.3529412, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 1
+      position: {x: 0, y: 0.19, z: -0.2}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.1, y: 0.1, z: 0.1}
+      color: {r: 0.7019608, g: 0.6392157, b: 0.9019608, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 0
+      position: {x: 0.1, y: 0, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.035, y: 0.42, z: 0.02}
+      color: {r: 0.41960785, g: 0.2901961, b: 0.18039216, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 0
+      position: {x: -0.1, y: 0, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.035, y: 0.42, z: 0.02}
+      color: {r: 0.41960785, g: 0.2901961, b: 0.18039216, a: 1}
+      tint: 0
+      taper: 0
+  - id: 2
+    key: back.cape
+    displayName: Cape
+    flavour: Every hero needs one. You are not a hero.
+    unlock: 1
+    blocksFirstPersonView: 0
+    prefab: {fileID: 0}
+    parts:
+    - shape: 0
+      position: {x: 0, y: -0.28, z: -0.07}
+      euler: {x: -8, y: 0, z: 0}
+      size: {x: 0.44, y: 0.62, z: 0.025}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 2
+      taper: 0
+    - shape: 2
+      position: {x: 0, y: 0.03, z: -0.02}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.32, y: 0.04, z: 0.12}
+      color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
+      tint: 0
+      taper: 0
+  - id: 3
+    key: back.pitchfork
+    displayName: Pitchfork Holster
+    flavour: For decoration. Allegedly.
+    unlock: 1
+    blocksFirstPersonView: 0
+    prefab: {fileID: 0}
+    parts:
+    - shape: 2
+      position: {x: 0, y: -0.05, z: -0.09}
+      euler: {x: 0, y: 0, z: 30}
+      size: {x: 0.035, y: 1.1, z: 0.035}
+      color: {r: 0.5411765, g: 0.3764706, b: 0.2509804, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 0
+      position: {x: -0.27, y: 0.42, z: -0.09}
+      euler: {x: 0, y: 0, z: 30}
+      size: {x: 0.2, y: 0.025, z: 0.025}
+      color: {r: 0.6039216, g: 0.6392157, b: 0.6784314, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 4
+      position: {x: -0.27, y: 0.55, z: -0.09}
+      euler: {x: 0, y: 0, z: 30}
+      size: {x: 0.025, y: 0.24, z: 0.025}
+      color: {r: 0.6039216, g: 0.6392157, b: 0.6784314, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 4
+      position: {x: -0.19, y: 0.5, z: -0.09}
+      euler: {x: 0, y: 0, z: 30}
+      size: {x: 0.025, y: 0.24, z: 0.025}
+      color: {r: 0.6039216, g: 0.6392157, b: 0.6784314, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 4
+      position: {x: -0.35, y: 0.6, z: -0.09}
+      euler: {x: 0, y: 0, z: 30}
+      size: {x: 0.025, y: 0.24, z: 0.025}
+      color: {r: 0.6039216, g: 0.6392157, b: 0.6784314, a: 1}
+      tint: 0
+      taper: 0
+    - shape: 0
+      position: {x: 0, y: 0, z: -0.03}
+      euler: {x: 0, y: 0, z: 30}
+      size: {x: 0.36, y: 0.035, z: 0.02}
+      color: {r: 0.41960785, g: 0.2901961, b: 0.18039216, a: 1}
+      tint: 0
+      taper: 0
+  emotes:
+  - id: 1
+    key: wave
+    displayName: Wave
+    animState: Wave
+    kind: 0
+    duration: 1.5
+    cooldown: 1.5
+    loopsUntilMove: 0
+    noiseLoudness: 0.6
+    placesPing: 0
+    unlock: 0
+  - id: 2
+    key: point
+    displayName: Point
+    animState: Point
+    kind: 0
+    duration: 1.2
+    cooldown: 1.2
+    loopsUntilMove: 0
+    noiseLoudness: 0
+    placesPing: 1
+    unlock: 0
+  - id: 3
+    key: dance
+    displayName: Dance
+    animState: Dance
+    kind: 0
+    duration: 0
+    cooldown: 1
+    loopsUntilMove: 1
+    noiseLoudness: 0
+    placesPing: 0
+    unlock: 0
+  - id: 4
+    key: faint
+    displayName: Faint
+    animState: Faint
+    kind: 1
+    duration: 2
+    cooldown: 5
+    loopsUntilMove: 0
+    noiseLoudness: 0
+    placesPing: 0
+    unlock: 0
+  emoteRateLimit: 2
+  pingLifetime: 3
+  pingMaxDistance: 60
+  previewDistance: 2.5
+  previewMinDistance: 1.2
+  previewMaxDistance: 3.5
+  poofDuration: 0.3
+  surpriseHatChance: 0.95
+  baseMaterial: {fileID: 2100000, guid: 1ec5a7786a9cd4918bf11c0477a7dc08, type: 2}
+  unlitMaterial: {fileID: 2100000, guid: 57179d85b7cc94f43ba95a94b1432514, type: 2}
+  farmerPrefab: {fileID: 2725604790473067528, guid: 075cf37c1748d470b8bdb6528a420eaa, type: 3}
+  wardrobePanel: {fileID: 11400000, guid: 70dbc01d8b0764afabab01b90269f174, type: 2}

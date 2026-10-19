@@ -39,3 +39,10 @@ unmodified; palette materials and warmed atlas copies live in `HarvestPanic/Asse
 | Fantasy Town Kit (`KenneyFantasyTown`) | 2.0 | Kenney | https://kenney.nl/assets/fantasy-town-kit | CC0 1.0 |
 | Food Kit (`KenneyFood`) | 2.0 | Kenney | https://kenney.nl/assets/food-kit | CC0 1.0 |
 | Survival Kit (`KenneySurvival`) | 2.0 | Kenney | https://kenney.nl/assets/survival-kit | CC0 1.0 |
+
+## Unity rebuild — characters (`HarvestPanic/Assets/ThirdParty/Characters/`)
+Licence verified on each poly.pizza model page on 2026-10-19 (`"Licence":"CC0 1.0"`). GLBs downloaded to `tools/freeassets/downloads/` (gitignored) and converted to FBX with headless Blender 5.2 via `tools/freeassets/scripts/glb2fbx_blender.py` (the built-in straw hat faces were removed from `Farmer_Head` so the Hat slot owns the silhouette).
+
+| Asset (Unity) | Source model | Author | URL | Licence |
+|---|---|---|---|---|
+| QuaterniusFarmer/Farmer.fbx (body + Idle/Walk/Run/Wave/Death/Point clips; imported as a Generic rig. Dance and Jump clips are authored in-house by `HarvestPanic.Customization.Editor.FarmerAssetBuilder`) | Farmer (animated) | Quaternius | https://poly.pizza/m/7pn3R6hPvE | CC0 1.0 |
