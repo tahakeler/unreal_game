@@ -1,3 +1,4 @@
+using Cursor = UnityEngine.Cursor;
 using System;
 using System.Collections.Generic;
 using HarvestPanic.Core;
@@ -16,6 +17,8 @@ namespace HarvestPanic.UI
         public const float ReadyHoldTime = 1f;
 
         [SerializeField] LobbyFallbackWalker fallbackWalker;
+        [SerializeField, Tooltip("Static overview camera used until a real player camera exists.")] Camera lobbyCamera;
+        float _camPoll;
         [SerializeField, Tooltip("Seconds to wait for a real player before enabling the fallback walker.")] float playerWait = 1.5f;
 
         public StartSequence Sequence { get; } = new StartSequence();
@@ -70,11 +73,21 @@ namespace HarvestPanic.UI
                 if (cc.gameObject.layer == playerLayer && !cc.transform.IsChildOf(fallbackWalker.transform)) return;
             fallbackWalker.gameObject.SetActive(true);
             fallbackWalker.enabled = true;
+            if (lobbyCamera != null) lobbyCamera.gameObject.SetActive(false);
+        }
+
+        void PollCameras()
+        {
+            if (lobbyCamera == null || !lobbyCamera.gameObject.activeSelf) return;
+            foreach (var c in FindObjectsByType<Camera>(FindObjectsSortMode.None))
+                if (c != lobbyCamera && c.enabled && c.gameObject.activeInHierarchy && c.targetTexture == null && c.cameraType == CameraType.Game)
+                { lobbyCamera.gameObject.SetActive(false); return; }
         }
 
         void Update()
         {
             float dt = Time.unscaledDeltaTime;
+            _camPoll -= dt; if (_camPoll <= 0f) { _camPoll = 0.5f; PollCameras(); }
             if (_toastLeft > 0f) { _toastLeft -= dt; if (_toastLeft <= 0f) _toast.RemoveFromClassList("is-shown"); }
             if (_graceLeft > 0f) _graceLeft -= dt;
             else if (!_session.IsConnected) { SceneLoader.Load(SceneLoader.MainMenu); enabled = false; return; }

@@ -1,3 +1,4 @@
+using Cursor = UnityEngine.Cursor;
 using HarvestPanic.Core;
 using UnityEngine;
 using UnityEngine.InputSystem;
