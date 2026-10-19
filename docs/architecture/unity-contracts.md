@@ -25,6 +25,8 @@ Cross-talk = register an interface in `Services` (`Services.Register<T>`, `Get<T
 | Day Modifier | `DayModifier` SO, `DayParams`, `IDayModifierService` | Economy -> AI, noise, World |
 | Economy | `IEconomyService`, `WalletTxn` | Economy -> everyone |
 | Player hooks | `IPlayerHooks` | Player prefab -> Customization |
+| Knock/shove | `IKnockable`, `Knockables.TryGetFor` | Player root -> AI, hazards, wagons |
+| Impact units | `ImpactUnits` | all (see below) |
 | Session | `ISessionService`, `PlayerInfo` | Networking -> Frontend UI (v0, add-only) |
 | Markers | `MarkerRole`, `MarkerTag`, `LevelMarker` | World places -> owners spawn |
 | Layers | `GameLayers` | all |
@@ -69,3 +71,8 @@ Tags: HP_PlayerStart, HP_MarketPen, HP_CritterSpawner, HP_Goods, HP_BridgePlank,
 Collision matrix: everything collides by default except Water, Interactable (triggers; they only see Player, Critter, Carryable),
 Ragdoll-Ragdoll, Ragdoll-Player (capsule disabled while ragdolled), Bridge-Bridge, Interactable-Interactable.
 Verified by `ContractsTests.Layers_AreDefinedAndCollisionMatrixIsSensible`. Note: Unity stores each matrix row as little-endian bytes.
+
+## Impact units
+All GDD impulse thresholds (bruise 400, ragdoll 900, KO 1800, plank 800, critter charge) are design units =
+Unity collision impulse (N*s) x `ImpactUnits.ImpulseScale` (10). Always convert with
+`ImpactUnits.ToDesign(collision.impulse.magnitude)` before comparing; `IKnockable.ApplyImpulse` takes design units.
