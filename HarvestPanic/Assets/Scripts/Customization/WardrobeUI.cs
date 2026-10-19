@@ -79,8 +79,8 @@ namespace HarvestPanic.Customization
         void OnEnable()
         {
             if (_doc == null) return;
-            _prevLock = Cursor.lockState; _prevVisible = Cursor.visible;
-            Cursor.lockState = CursorLockMode.None; Cursor.visible = true;
+            _prevLock = UnityEngine.Cursor.lockState; _prevVisible = UnityEngine.Cursor.visible;
+            UnityEngine.Cursor.lockState = CursorLockMode.None; UnityEngine.Cursor.visible = true;
             FarmerEmotes.InputBlocked = true;
             _preview = WardrobePreview.Create(_catalog);
             _preview?.Apply(_working);
@@ -103,7 +103,7 @@ namespace HarvestPanic.Customization
             if (confirm && _target != null) _target.RequestLoadout(_working);
             Current = null;
             FarmerEmotes.InputBlocked = false;
-            Cursor.lockState = _prevLock; Cursor.visible = _prevVisible;
+            UnityEngine.Cursor.lockState = _prevLock; UnityEngine.Cursor.visible = _prevVisible;
             if (_preview != null) Destroy(_preview.gameObject);
             Destroy(gameObject);
             Closed?.Invoke(confirm);

@@ -32,5 +32,4 @@ Licence verified on each poly.pizza model page on 2026-10-19 (`"Licence":"CC0 1.
 
 | Asset (Unity) | Source model | Author | URL | Licence |
 |---|---|---|---|---|
-| QuaterniusFarmer/Farmer.fbx (body + Idle/Walk/Run/Wave/Death/Point clips) | Farmer (animated) | Quaternius | https://poly.pizza/m/7pn3R6hPvE | CC0 1.0 |
-| QuaterniusFarmer/FarmerAnims_Platformer.fbx (Jump clips, retargeted via Humanoid) | Animated Platformer Character | Quaternius | https://poly.pizza/m/kKtL4zvS3n | CC0 1.0 |
+| QuaterniusFarmer/Farmer.fbx (body + Idle/Walk/Run/Wave/Death/Point clips; imported as a Generic rig. Dance and Jump clips are authored in-house by `HarvestPanic.Customization.Editor.FarmerAssetBuilder`) | Farmer (animated) | Quaternius | https://poly.pizza/m/7pn3R6hPvE | CC0 1.0 |
