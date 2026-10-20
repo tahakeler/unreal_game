@@ -3,6 +3,8 @@
     "rootNamespace": "HarvestPanic.Tests.PlayMode",
     "references": [
         "HarvestPanic.Core",
+        "HarvestPanic.Networking",
+        "Unity.Netcode.Runtime",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

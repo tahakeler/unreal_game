@@ -40,8 +40,24 @@ namespace HarvestPanic.Gameplay
             _core.OnNoise += Relay;
         }
 
-        void OnEnable() => Services.Register<INoiseService>(this);
-        void OnDisable() => Services.Unregister<INoiseService>(this);
+        void OnEnable()
+        {
+            Services.Register<INoiseService>(this);
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        void OnDisable()
+        {
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+            Services.Unregister<INoiseService>(this);
+        }
+
+        // A temporary provider (a test fake, a replay tool) that registers and later unregisters would otherwise
+        // leave the registry empty for the rest of the session; this persistent provider reclaims the slot.
+        void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
+        {
+            if (!Services.TryGet(out INoiseService _)) Services.Register<INoiseService>(this);
+        }
 
         void Relay(NoiseEvent e)
         {
