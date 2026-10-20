@@ -4,7 +4,7 @@
 > **Consumes**: Critter Personality (critter-ai), Goods Item (goods-value), Noise Event (proximity-voice)
 
 ## 1. Overview
-The roster is the data layer for farm animals. Each species is a Critter Personality asset plus a Goods Item entry (base value, fragility, carry hands) plus a signature behavior. Species get added by data; signature behaviors are small StateTree tasks plugged into `ST_Critter` slots.
+The roster is the data layer for farm animals. Each species is a Critter Personality asset plus a Goods Item entry (base value, fragility, carry hands) plus a signature behavior. Species get added by data; signature behaviors are small state-machine tasks plugged into `CritterStateMachine` slots.
 
 ## 2. Player Fantasy
 Every animal is a different puzzle with a different personality. You learn that the goat climbs the roof, the sheep follow whoever is in front, and you never, ever run at the bull. Mastery is knowing which friend handles which animal.

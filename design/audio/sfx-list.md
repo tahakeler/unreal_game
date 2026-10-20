@@ -142,7 +142,7 @@ Single MetaSound driven by `Mass`, `ImpactSpeed`, `MaterialPair`, `DollarLoss`. 
 | SFX_Market_ChaChing | Item accepted/sold | 4 (by value tier: <$30, <$100, <$300, ≥$300) | P0 | FS CC0 vintage cash register; tiers add coin cascade |
 | SFX_Market_ChaChing_Abort | Critter leaves pen before 2.0 s ("ka-ch…") | 2 | P1 | first half of ChaChing, cut + record "boop" |
 | SFX_Market_SoldCrate | Teleported into SOLD crate | 2 | P2 | SYN "pop" + wood thunk |
-| SFX_Market_Bell_Sundown | Market close bell at 0:00 | 1 | P0 | SON/FS CC0 handbell; Quartz-locked |
+| SFX_Market_Bell_Sundown | Market close bell at 0:00 | 1 | P0 | SON/FS CC0 handbell; DSP-clock-locked |
 | SFX_Market_Bell_Warning | 0:30 warning | 1 | P0 | same bell, two short rings |
 | AMB_Market_Bed | Market area ambience | 1 loop | P2 | murmur-less: wind flags, wood stalls (avoid speech-like walla vs voice chat) |
 
@@ -183,7 +183,7 @@ Single MetaSound driven by `Mass`, `ImpactSpeed`, `MaterialPair`, `DollarLoss`. 
 | UI_TwistCard_Reveal | Morning twist card | 2 | P0 | paper flip + diary pen scratch |
 | UI_Order_Board | Morning Order shown | 1 | P1 | chalk scribble |
 | UI_DuskVote_Open / Cast / Result | Dusk vote | 1 / 2 / 2 | P1 | owl hoot / pebble in jar / gavel |
-| UI_Timer_PocketWatch_Tick | Last 60 s, Quartz eighth notes | 2 (tick/tock) | P0 | FS CC0 pocket watch / REC |
+| UI_Timer_PocketWatch_Tick | Last 60 s, DSP-clock eighth notes | 2 (tick/tock) | P0 | FS CC0 pocket watch / REC |
 | UI_Ping_Marker | Player ping | 2 | P1 | SYN two-note whistle |
 | UI_Emote_Shout | Shout emote (voice fallback; drives ducking in no-voice lobbies) | 4 per character | P0 | REC "HEY!"-style yell (avoid words beyond "hey"/"oi" for localization) |
 | UI_Shop_Purchase / Insufficient | Shop | 2 / 1 | P1 | register / empty-pocket fabric flap |

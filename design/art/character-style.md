@@ -6,7 +6,7 @@
 
 **Fantasy:** a cheerful but slightly unqualified farmhand who inherited a mess. Think "first day on the job, borrowed overalls."
 
-- **Base body**: UE5 template mannequin (Manny/Quinn) with a stylized override: chunky proportions via bone scale (head 1.15x, hands 1.2x for first-person reads, feet 1.15x), a toon-flat material `MI_Farmer_Base` (no mannequin plastic look).
+- **Base body**: Unity Humanoid mannequin rig with a stylized override: chunky proportions via bone scale (head 1.15x, hands 1.2x for first-person reads, feet 1.15x), a toon-flat material `MI_Farmer_Base` (no mannequin plastic look).
 - **Uniform**: overalls (team colour, the largest area visible to others) over a neutral shirt, rubber boots, work gloves. Overalls are a **skeletal mesh merge** layer, or for the slice, a material zone on the mannequin plus a bib mesh.
 - **Face**: no realistic face. A simple **decal face** (painted eyes + mouth) on a rounded head mask, swappable per cosmetic. This keeps it cheap and makes emote and ragdoll expressions funny (face swaps to "X_X" on KO, "O_O" on scare).
 - **First-person view**: arms + gloves + sleeve cuffs in team colour. The player sees their own hands constantly, so **gloves and sleeves are a cosmetic slot**; hats show in the shadow and in the Camcorder replay.

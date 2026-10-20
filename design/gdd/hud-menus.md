@@ -12,7 +12,7 @@ All screen-space and diegetic UI: a minimal in-world HUD during the day, the lob
 > **Quick reference** — Layer: `Presentation` · Priority: `VS (payout) / Alpha` · Key deps: `day-loop`, `blame-ledger`, `farm-upgrades`, `shared-wallet-economy`
 
 ## Overview
-Built in UMG with CommonUI (gamepad + mouse parity). The day HUD shows only four persistent elements; everything else lives on diegetic props (Grandpa's pocket watch, the manifest clipboard on the wagon, price chalkboards at the market). Between days, full-screen menus present the receipt, shop and awards.
+Built in UI Toolkit (gamepad + mouse parity). The day HUD shows only four persistent elements; everything else lives on diegetic props (Grandpa's pocket watch, the manifest clipboard on the wagon, price chalkboards at the market). Between days, full-screen menus present the receipt, shop and awards.
 
 ## Player Fantasy
 The screen is clean so the chaos reads. You learn the time by glancing at the sunset and the watch, the order by the clipboard. Menus feel like paperwork from a hostile bank: funny, fast, never a chore.

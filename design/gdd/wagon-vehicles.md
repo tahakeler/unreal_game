@@ -11,7 +11,7 @@ The wagon is a large physics cart that carries many goods at once. It has no eng
 "Load it all and go!" A full wagon feels like a jackpot rolling toward market, which makes it devastating when one wheel goes off the bridge edge.
 
 ## 3. Detailed Rules
-1. **Wagon:** Chaos physics body, 120 kg empty, 4 wheels, bed 2.0 × 1.2 m, side walls 0.4 m. Capacity is physical (whatever fits), soft cap 400 kg cargo (Bigger Wagon Lv1/2/3: 550 / 700 / 850 kg with a larger bed).
+1. **Wagon:** PhysX physics body, 120 kg empty, 4 wheels, bed 2.0 × 1.2 m, side walls 0.4 m. Capacity is physical (whatever fits), soft cap 400 kg cargo (Bigger Wagon Lv1/2/3: 550 / 700 / 850 kg with a larger bed).
 2. **Moving it:** the front handle has 2 grab points, the back has 2 push points. Force per player = 900 N. A hitched animal pulls at its `CritterPullN` (Critter Personality) toward its own flee/lure target — it is not steered directly; a rider can lead it with the feed bucket.
 3. **Steering:** the front handle sets the axle angle (max 35°). With no one at the front, the axle centers slowly.
 4. **Brake:** a lever at the side, 1 hand. Locks the wheels (sliding friction 0.8).

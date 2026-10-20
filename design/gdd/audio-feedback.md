@@ -12,7 +12,7 @@ The sound of the farm: MetaSounds-driven impacts and bruises that sound worse th
 > **Quick reference** — Layer: `Presentation` · Priority: `Alpha` · Key deps: `goods-value`, `critter-ai`, `day-loop`, `blame-ledger`, `proximity-voice`
 
 ## Overview
-Audio is organized into five buses (Voice, Critters, Impacts, Music, UI/Stingers) with a ducking matrix that always prioritizes proximity voice. Impacts are parameterized by mass, velocity and $ lost. Critters announce state changes (flee, charge, hide) with distinct barks. Music runs on a Quartz-clocked state machine tied to day phase and chaos level.
+Audio is organized into five buses (Voice, Critters, Impacts, Music, UI/Stingers) with a ducking matrix that always prioritizes proximity voice. Impacts are parameterized by mass, velocity and $ lost. Critters announce state changes (flee, charge, hide) with distinct barks. Music runs on a DSP-clock-scheduled state machine tied to day phase and chaos level.
 
 ## Player Fantasy
 Every bonk is cartoon-crisp and tells you exactly how much it cost. You hear the bull winding up before you see it. When the pig hits the water, the band stops.
@@ -24,7 +24,7 @@ Every bonk is cartoon-crisp and tells you exactly how much it cost. You hear the
 2. **Impacts (MetaSound `MS_Impact`):** inputs `Mass (kg)`, `ImpactSpeed (m/s)`, `MaterialPair`, `DollarLoss`. Pitch down with mass; adds a "crunch" layer when DollarLoss > $10, and a "cash register clunk" sweetener when DollarLoss > $40. Max 12 concurrent impact voices; quietest stolen.
 3. **Bruise feedback:** each bruise plays a short squeak/squelch tied to bruise type (goods-value bruise taxonomy) plus a coin-drop tick whose count = floor(DollarLoss / 10), max 5.
 4. **Critter barks:** each Critter Personality state transition has a bark: Idle (ambient, 8–15 s random), Alert (rising), Flee (panic squeal), Charge wind-up (0.8 s telegraph, mandatory), Hide (muffled giggle for cursed crops). Bark cooldown per critter 2 s; global max 6 barks/s.
-5. **Music states:** Morning (calm banjo), Roundup (bluegrass loop, intensity layers 1–3 by Chaos Level), Crunch (last 60 s: tempo +15%, fiddle), Dusk (sparse, creepy pump organ), Night Threat (when a night creature is within 30 m of any player), Market (accordion), Sunday (Landlord theme, oompah in minor). Transitions on bar boundaries (Quartz) except Disaster.
+5. **Music states:** Morning (calm banjo), Roundup (bluegrass loop, intensity layers 1–3 by Chaos Level), Crunch (last 60 s: tempo +15%, fiddle), Dusk (sparse, creepy pump organ), Night Threat (when a night creature is within 30 m of any player), Market (accordion), Sunday (Landlord theme, oompah in minor). Transitions on bar boundaries (DSP-clock scheduling) except Disaster.
 6. **Disaster stinger:** on `OnDisaster` music hard-cuts to silence for 0.6 s (record-scratch on Severity ≥ 80), then a 1.5 s comedic stinger by verb (river: slide-whistle + splash; plank: trombone wah-wah; wagon: cymbal crash), then music resumes at layer −1.
 7. **Noise awareness:** sounds that the game counts as Noise Events (proximity-voice contract) get an audible "echo tail" so players learn loud = consequences.
 8. **Diegetic UI:** pocket watch ticks in last 60 s; wallet "ka-ching" on sale, "wah" on loss.

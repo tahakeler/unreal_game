@@ -22,7 +22,7 @@
 | Instrumentation | Solo clawhammer banjo, harmonica, light upright bass, distant rooster on bar 1 (diegetic-ish), birdsong bed is ambience (not in music) |
 | Mood | Lazy optimism; "Grandpa's diary" warmth; the calm before chaos |
 | Stems | banjo, harmonica, bass |
-| Adaptive | None. Outro triggered on Workday start, Quartz Bar |
+| Adaptive | None. Outro triggered on Workday start, bar-quantized (DSP-clock) |
 | References | Animal Crossing morning hours (calm loops); Stardew Valley "Spring" (warm acoustic); classic Looney Tunes barnyard openers (timing) |
 
 ## 2. `MUS_Workday_Roundup` — Workday (Roundup L1–L3)
@@ -46,7 +46,7 @@
 | Instrumentation | Roundup arrangement re-recorded at tempo (not time-stretched), fiddle lead with frantic double-stops, pocket-watch tick layer (eighths), cowbell/anvil hits on bar 1 |
 | Mood | Cooking-show countdown run by farmers who can't cook |
 | Stems | Rhythm, fiddle lead, banjo, tick (tick separable for Night Threat overlap) |
-| Adaptive | Entered on Bar; ends exactly on bell (Quartz-scheduled); photo-finish grace 2 s = sustained final chord + crowd-less "ta-da" or "wah" depending on whether the last item sold |
+| Adaptive | Entered on Bar; ends exactly on bell (DSP-clock-scheduled); photo-finish grace 2 s = sustained final chord + crowd-less "ta-da" or "wah" depending on whether the last item sold |
 | References | Overcooked final-minute music, game-show countdown cues, "Orange Blossom Special" fiddle energy |
 
 ## 4. `MUS_Night_Dusk` — Night (Dusk + Night Threat)

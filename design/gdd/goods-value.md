@@ -89,7 +89,7 @@ When an item is accepted by a market zone (`day-loop`), the sale value is comput
 ```
 ΔBP = max(0, I − I_min) / I_scale × Fragility × M_bruise
 ```
-- `I` = impulse magnitude (N·s, from Chaos hit), `I_min` = 400 N·s, `I_scale` = 40 N·s per BP, `M_bruise` = Day Modifier param `Goods.BruiseMult` (default 1.0, range 0.5–2.0).
+- `I` = impulse magnitude (N·s, from physics hit), `I_min` = 400 N·s, `I_scale` = 40 N·s per BP, `M_bruise` = Day Modifier param `Goods.BruiseMult` (default 1.0, range 0.5–2.0).
 - Example: a pig (Frag 0.8) dropped from shoulder height, I ≈ 1200 → (800/40)×0.8 = **16 BP** → Scuffed. Prize pumpkin (1.5) off the bridge onto rocks, I ≈ 3000 → 65 × 1.5 = **97.5 BP** → Busted.
 
 **Bruise multiplier** `B(state)`: Pristine 1.00 · Scuffed 0.85 · Bruised 0.60 · Busted 0.30 · Ruined 0.00 (crop/product) / 0.25 (livestock).
@@ -117,7 +117,7 @@ V = round( BaseValue × B × F × D × O × ValueModifierMult )
 - **Pocketed Golden Egg** (`Goods.Pocketed`): value is not added to wallet; tracked by `blame-ledger` for the Sunday reveal. If the pocketing player is knocked out, the egg drops and its tag is cleared.
 - **Growing pumpkin** reaching its 8-hand (4-carrier) stage while one player holds it: player is pinned, ΔBP from the drop is attributed to "Pumpkin" (nobody), because it's funnier when nobody is to blame.
 - **Item destroyed by out-of-bounds / despawn**: logged as full value loss to `LastHandlerId` if within 3 s, else `Nobody`.
-- **Impulse spikes from physics explosions (Chaos jitter)**: per-hit ΔBP capped at 60 BP; ignore hits with I > 20,000 as solver errors.
+- **Impulse spikes from physics explosions (solver jitter)**: per-hit ΔBP capped at 60 BP; ignore hits with I > 20,000 as solver errors.
 - **Client prediction**: clients show predicted value float; server state wins, correction tweens over 0.3 s.
 
 ## 6. Dependencies

@@ -4,7 +4,7 @@
 > **Consumes**: Critter Personality (critter-ai), Goods Item (goods-value), Noise Event (proximity-voice)
 
 ## 1. Overview
-NPC rivals from neighboring farms visit some days to steal from your wagon, sabotage the bridge, or poach livestock. They are humanoid critters: a Critter Personality with `Trait.Thief`, using the same StateTree with extra Steal/Sabotage tasks. Players can chase, tackle and steal back, including raiding the rival's cart.
+NPC rivals from neighboring farms visit some days to steal from your wagon, sabotage the bridge, or poach livestock. They are humanoid critters: a Critter Personality with `Trait.Thief`, using the same state machine with extra Steal/Sabotage tasks. Players can chase, tackle and steal back, including raiding the rival's cart.
 
 ## 2. Player Fantasy
 "Oh no you DON'T, Clem." A grudge match with recurring cartoon villains you love to hate, and the joy of stealing your pig back from them.

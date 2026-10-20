@@ -47,7 +47,7 @@ photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high
 
 *Sheep and Crow are EA in the roster; generated in this batch for style-family consistency (one animal family per art-bible risk note). Crow also unblocks the Crow Passenger cosmetic.
 
-**Farmer base — skipped.** UE5 Manny/Quinn + bone scale + toon material + overalls bib (character-style) covers it and keeps the Game Animation Sample retarget free. Revisit only if the mannequin fails the 40 m team-readability test.
+**Farmer base — skipped.** a stock humanoid mannequin rig + bone scale + toon material + overalls bib (character-style) covers it and keeps animation retargeting free. Revisit only if the mannequin fails the 40 m team-readability test.
 
 ---
 
@@ -177,7 +177,7 @@ photorealistic, PBR scan, realistic fur strands, hair cards, noisy texture, high
 - **Prompt**: `[PREFIX], cartoon villainous landlord, very tall and thin man, absurdly tall black-plum top hat about 40% of total height, long plum tailcoat, narrow shoulders, pointy nose, thin curled moustache, monocle, holding a ledger book, smug expression, T-pose`
 - **Negative**: `[SHARED], realistic human, muscular, gun, cane spikes`
 - **Tris** 12,000 · **Tex** 2048 (1 material) · **Scale** 230 cm tall incl. hat (body 140 cm) · **Pivot** feet
-- **Rig**: Tripo biped; **retarget to UE Manny** (IK Retargeter) so Game Animation Sample idles work. **Anims**: idle, walk.
+- **Rig**: Tripo biped; **retarget to the Unity Humanoid avatar** (Mecanim) so stock humanoid idles work. **Anims**: idle, walk.
 - **UE import**: capsule r 30 / hh 115. No carry mass (NPC; landlord-events). Sockets: `hat`, `hand_r` (ledger), `head`.
 - **Readability**: hat = 40% height is the whole character (gap list). Plum must not be used by any team colour.
 
