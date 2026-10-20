@@ -82,3 +82,8 @@ Unity collision impulse (N*s) x `ImpactUnits.ImpulseScale` (10). Always convert 
 `ImpactUnits.ToDesign(collision.impulse.magnitude)` before comparing; `IKnockable.ApplyImpulse` takes design units.
 
 New `DayParams`: `Bridge.SafeLoadMult`, `Bridge.PlankBreakMult`, `Mud.SpeedMult`.
+
+## Integration decisions
+- `IGoods.ApplyBruise(impulse, ...)` takes DESIGN units. Callers convert raw Unity impulse with `ImpactUnits.ToDesign`. River soak (600) is already design units.
+- `IPlayerHooks.PlayEmote`: the implementer (Customization) emits the emote noise; Player does not.
+- Critters are sold via AI's `CritterGoods` (the single `IGoods` on critter prefabs); MarketPen accepts any `IGoods`.
