@@ -18,7 +18,7 @@ namespace HarvestPanic.AI.Night
         [Tooltip("Seconds before a repelled/finished creature slot is re-bought from the pool")] public float RespawnCooldown = 20f;
         [Tooltip("Nominal night length for the ceiling estimate, s")] public float NightSeconds = 180f;
         [Header("Mr. Stitches")]
-        public float StitchesSpeed = 7f, StitchesDragSpeed = 2.5f, ViewDistance = 40f, FogViewDistance = 15f;
+        public float StitchesSpeed = 7f, StitchesDragSpeed = 2.5f, StitchesFarmerDragSeconds = 3.5f, ViewDistance = 40f, FogViewDistance = 15f;
         [Range(0f, 1f)] public float MinVisibleFraction = 0.15f;
         public float GrabRange = 1.4f, GrabImpulse = 2400f, GrabCooldown = 6f, TeleportDistance = 30f, AfkSeconds = 60f;
         public float DefaultVerticalFov = 70f, DefaultAspect = 16f / 9f;

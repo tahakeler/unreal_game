@@ -42,6 +42,8 @@ namespace HarvestPanic.Gameplay
         public float ShakeMaxDegrees = 4f;
         [Tooltip("Impulse (design N*s) giving full trauma")] public float ShakeFullImpulse = 900f;
         [Tooltip("Trauma decay per second")] public float ShakeDecay = 2f;
+        [Tooltip("Horizontal speed (m/s) a downed body is dragged at (IDraggable, Mr. Stitches)")] public float DragSpeed = 2.5f;
+        [Tooltip("Max drag acceleration (m/s^2) toward the drag velocity")] public float DragAccel = 12f;
         public float MouseSensitivity = 0.12f;
         public float GamepadLookSpeed = 160f;
         public float PitchLimit = 85f;

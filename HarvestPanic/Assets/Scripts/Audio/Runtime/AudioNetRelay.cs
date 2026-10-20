@@ -5,7 +5,8 @@ using UnityEngine;
 namespace HarvestPanic.Audio
 {
     /// <summary>
-    /// Forwards server-routed noise cues to clients (noise events are raised on the server only). Host already played
+    /// Forwards server noises (polish-2: full <see cref="NoiseEvent"/> via <see cref="BroadcastNoise"/>; legacy routed cues via
+    /// <see cref="Broadcast"/>) to clients (noise events are raised on the server only). Host already played
     /// the cue locally, so the RPC targets NotServer (no double play on host). Footsteps go unreliable, the rest reliable.
     /// Spawned by <see cref="AudioNetBootstrapper"/>; prefab listed in Resources/NetworkPrefabs/Audio.
     /// </summary>
@@ -30,6 +31,59 @@ namespace HarvestPanic.Audio
             var gain = (sbyte)Mathf.Clamp(Mathf.RoundToInt(cue.GainDb), -80, 20);
             if (cue.Event == AudioEvents.FootstepDirt) r.CueUnreliableRpc((ushort)id, cue.Position, gain);
             else r.CueRpc((ushort)id, cue.Position, gain);
+        }
+
+        /// <summary>Noise payloads received from the server (tests).</summary>
+        public int ReceivedNoiseCount { get; private set; }
+
+        readonly System.Collections.Generic.List<ulong> _targets = new System.Collections.Generic.List<ulong>(4);
+
+        /// <summary>
+        /// Server (polish-2): forward the whole noise to every remote client so they can route the sound, raise
+        /// <see cref="NoiseCueFeed"/> (captions, local reactions) and duck on shouts. Footsteps skip their owner, who
+        /// already played them locally (predicted). Returns the number of clients targeted.
+        /// </summary>
+        public static int BroadcastNoise(in NoiseEvent e)
+        {
+            var r = Instance;
+            if (r == null || !r.IsSpawned || !r.IsServer) return 0;
+            r._targets.Clear();
+            bool foot = e.Source == NoiseSource.Footstep;
+            foreach (var id in r.NetworkManager.ConnectedClientsIds)
+            {
+                if (id == NetworkManager.ServerClientId) continue;
+                if (foot && id == e.BlamedPlayerId) continue;
+                r._targets.Add(id);
+            }
+            if (r._targets.Count == 0) return 0;
+            ulong[] ids = r._targets.ToArray();
+            var target = r.RpcTarget.Group(ids, RpcTargetUse.Temp);
+            var loud = (byte)Mathf.Clamp(Mathf.RoundToInt(e.Loudness * 255f), 0, 255);
+            if (foot) r.NoiseUnreliableRpc((byte)e.Source, loud, e.Radius, e.Location, e.InstigatorId, e.BlamedPlayerId, (int)e.Tags, target);
+            else r.NoiseRpc((byte)e.Source, loud, e.Radius, e.Location, e.InstigatorId, e.BlamedPlayerId, (int)e.Tags, target);
+            return r._targets.Count;
+        }
+
+        [Rpc(SendTo.SpecifiedInParams)]
+        void NoiseRpc(byte source, byte loud, float radius, Vector3 pos, ulong instigator, ulong blamed, int tags, RpcParams p = default) =>
+            ReceiveNoise(source, loud, radius, pos, instigator, blamed, tags);
+
+        [Rpc(SendTo.SpecifiedInParams, Delivery = RpcDelivery.Unreliable)]
+        void NoiseUnreliableRpc(byte source, byte loud, float radius, Vector3 pos, ulong instigator, ulong blamed, int tags, RpcParams p = default) =>
+            ReceiveNoise(source, loud, radius, pos, instigator, blamed, tags);
+
+        void ReceiveNoise(byte source, byte loud, float radius, Vector3 pos, ulong instigator, ulong blamed, int tags)
+        {
+            if (IsServer) return; // host already handled it
+            ReceivedNoiseCount++;
+            var e = new NoiseEvent
+            {
+                Source = (NoiseSource)source, Loudness = loud / 255f, Radius = radius, Location = pos,
+                InstigatorId = instigator, BlamedPlayerId = blamed, Tags = (NoiseTag)tags,
+                ServerTime = NetworkManager != null ? NetworkManager.ServerTime.Time : 0d,
+            };
+            NoiseCueFeed.Raise(e);
+            if (Services.TryGet(out IAudioService svc) && svc is AudioService a) a.HandleRemoteNoise(e);
         }
 
         [Rpc(SendTo.NotServer)]

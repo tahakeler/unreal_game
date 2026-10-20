@@ -28,7 +28,7 @@ namespace HarvestPanic.UI
         TipDef _showing;
         float _tipUntil, _markerScanAt;
         readonly List<Vector3> _bridges = new List<Vector3>(), _pens = new List<Vector3>();
-        INoiseService _noise;
+        bool _noiseHooked;
         IEconomyService _economy;
         bool _dayStartedSent, _shopSent, _captionsDirty;
 
@@ -83,7 +83,7 @@ namespace HarvestPanic.UI
         // ------------------------------------------------------------------ signals
         void Hook()
         {
-            if (_noise == null && Services.TryGet(out INoiseService n)) { _noise = n; _noise.OnNoise += OnNoise; }
+            if (!_noiseHooked) { _noiseHooked = true; NoiseCueFeed.OnNoiseCue += OnNoise; } // every peer (polish-2), not server-only OnNoise
             if (_economy == null && Services.TryGet(out IEconomyService e))
             {
                 _economy = e;
@@ -94,9 +94,10 @@ namespace HarvestPanic.UI
 
         void Unhook()
         {
-            if (_noise != null) _noise.OnNoise -= OnNoise;
+            if (_noiseHooked) NoiseCueFeed.OnNoiseCue -= OnNoise;
+            _noiseHooked = false;
             if (_economy != null) { _economy.OnWalletTxn -= OnTxn; _economy.OnDisaster -= OnDisaster; }
-            _noise = null; _economy = null;
+            _economy = null;
         }
 
         void OnTxn(WalletTxn t) { if (t.Type == WalletTxnType.Sale) Rules.MarkLearned("sell"); }

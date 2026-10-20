@@ -355,7 +355,35 @@ def main():
     for i in range(3):
         put("SFX_Critter_Cow_Moo", f"sfx_critter_cow_moo_{i+1:02d}", cow_moo(400 + i))
         put("SFX_Critter_Goat_Bleat", f"sfx_critter_goat_bleat_{i+1:02d}", goat_bleat(500 + i))
+    # Polish-2: appended last (no shared rng use).
+    put("STG_Landlord_Tuba", "stg_landlord_tuba_01", landlord_tuba())
+    write(os.path.join(root, "MUS_Night_Threat", "mus_night_threat_loop.wav"), night_threat_loop(), peak=0.6)
 
+
+
+def landlord_tuba():
+    """Pompous oom-pah 'here comes the rent' sting: two low tuba hits then a long sagging note."""
+    out = []
+    for i, (f, d) in enumerate([(note("Bb1"), 0.22), (note("F1"), 0.22), (note("Bb1"), 0.9)]):
+        sag = (lambda t, f=f: f * (1 - 0.03 * t)) if i == 2 else (lambda t, f=f: f)
+        x = lowpass(osc(sag, d, "saw"), 420)
+        mix(out, apply(x, env_adsr(len(x), 0.02, 0.08, 0.75, 0.2)), int([0.0, 0.26, 0.52][i] * SR))
+    return out
+
+
+def night_threat_loop(sec=9.6):
+    """Seamless low drone (D1+A1, slow beating) with a heartbeat every 1.2 s: tension bed for the night phase."""
+    n = int(sec * SR)
+    out = []
+    for i in range(n):
+        t = i / SR
+        trem = 0.6 + 0.4 * math.sin(2 * math.pi * t / sec * 4)
+        out.append(trem * (0.5 * math.sin(2 * math.pi * 36.71 * t) + 0.35 * math.sin(2 * math.pi * 55.25 * t) + 0.12 * math.sin(2 * math.pi * 73.6 * t)))
+    for b in range(int(sec / 1.2)):
+        for k, (at, g) in enumerate([(0.0, 1.0), (0.22, 0.7)]):
+            thump = apply(osc(lambda t: 48 * (1 - 0.5 * t), 0.18), exp_decay(int(0.18 * SR), 0.05))
+            mix(out, thump, int((b * 1.2 + at) * SR), 0.9 * g)
+    return out[:n]
 
 if __name__ == "__main__":
     main()
