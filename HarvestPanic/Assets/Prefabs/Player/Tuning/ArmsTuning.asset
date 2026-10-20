@@ -16,14 +16,14 @@ MonoBehaviour:
   UpperLength: 0.3
   ForeLength: 0.32
   ElbowPole: {x: -0.7, y: -1, z: -0.25}
-  MaxStretch: 1.45
-  IdleHand: {x: -0.2, y: -0.235, z: 0.42}
-  ReachDistance: 0.62
+  MaxStretch: 1.6
+  IdleHand: {x: -0.19, y: -0.25, z: 0.52}
+  ReachDistance: 0.52
   ReachHalfSpread: 0.13
-  ReachDrop: 0.07
-  ReachBlend: 0.8
+  ReachDrop: 0.12
+  ReachBlend: 0.65
   GripInset: 0.02
-  GripLow: 0.25
+  GripLow: -0.55
   GripMaxHalfSpread: 0.42
   ThrowPull: 0.16
   ThrowLift: 0.06
@@ -37,12 +37,12 @@ MonoBehaviour:
   LookSwaySharpness: 10
   WalkBob: 0.012
   UpperRadius: 0.058
-  ElbowRadius: 0.052
-  WristRadius: 0.04
-  SleeveFraction: 0.5
-  GloveStart: 0.78
-  GauntletRadius: 0.054
-  HandScale: 1.25
+  ElbowRadius: 0.05
+  WristRadius: 0.034
+  SleeveFraction: 0.58
+  GloveStart: 0.86
+  GauntletRadius: 0.045
+  HandScale: 1.05
   Shirt: {r: 0.78, g: 0.33, b: 0.24, a: 1}
   Glove: {r: 0.56, g: 0.38, b: 0.22, a: 1}
   Skin: {r: 0.93, g: 0.72, b: 0.56, a: 1}

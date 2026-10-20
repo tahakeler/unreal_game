@@ -134,7 +134,7 @@ namespace HarvestPanic.Gameplay
             var r = g.AddComponent<MeshRenderer>();
             r.sharedMaterial = mat;
             r.shadowCastingMode = ShadowCastingMode.Off;
-            r.receiveShadows = true;
+            r.receiveShadows = false; // the owner's own (shadow-only) body would darken the sleeves
             r.lightProbeUsage = LightProbeUsage.Off;
             r.reflectionProbeUsage = ReflectionProbeUsage.Off;
             return g;
@@ -238,7 +238,7 @@ namespace HarvestPanic.Gameplay
             Vector3 idleL = t.IdleHand, idleR = Mirror(t.IdleHand);
             Vector3 pl = idleL, pr = idleR;
             Vector3 fwdL = new Vector3(0.22f, 0.25f, 1f), fwdR = Mirror(fwdL);
-            Vector3 upL = new Vector3(-0.9f, 0.7f, 0f), upR = Mirror(upL);
+            Vector3 upL = new Vector3(-1f, 0.45f, 0f), upR = Mirror(upL); // loose fists, palms turned inward
             float curlL = curl, curlR = curl;
 
             switch (Pose)

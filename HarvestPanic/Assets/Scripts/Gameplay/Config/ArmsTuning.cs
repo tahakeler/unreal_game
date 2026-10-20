@@ -15,16 +15,16 @@ namespace HarvestPanic.Gameplay
         public float UpperLength = 0.3f;
         public float ForeLength = 0.32f;
         [Tooltip("Elbow pole direction (left arm): elbows sit down and outward")] public Vector3 ElbowPole = new Vector3(-0.7f, -1f, -0.25f);
-        [Tooltip("Cartoon stretch: arms may lengthen up to this factor to reach a held object's sides")] public float MaxStretch = 1.45f;
+        [Tooltip("Cartoon stretch: arms may lengthen up to this factor to reach a held object's sides")] public float MaxStretch = 1.6f;
 
         [Header("Poses (palm centre, left hand)")]
-        public Vector3 IdleHand = new Vector3(-0.2f, -0.235f, 0.42f);
-        [Tooltip("Reach: hands move toward the aim point up to this distance from the eyes")] public float ReachDistance = 0.62f;
+        public Vector3 IdleHand = new Vector3(-0.19f, -0.25f, 0.52f);
+        [Tooltip("Reach: hands move toward the aim point up to this distance from the eyes")] public float ReachDistance = 0.52f;
         public float ReachHalfSpread = 0.13f;
-        public float ReachDrop = 0.07f;
-        [Tooltip("Blend from idle to the reach pose (0..1)")] public float ReachBlend = 0.8f;
+        public float ReachDrop = 0.12f;
+        [Tooltip("Blend from idle to the reach pose (0..1)")] public float ReachBlend = 0.65f;
         [Tooltip("Palm sits this far outside a held object's side")] public float GripInset = 0.02f;
-        [Tooltip("Hands grip this fraction down from the object centre toward its bottom")] public float GripLow = 0.25f;
+        [Tooltip("Hands grip this fraction from the centre toward the bottom (negative = toward the top edge)")] public float GripLow = -0.55f;
         [Tooltip("Max hand spread from centre line when gripping very wide items")] public float GripMaxHalfSpread = 0.42f;
         [Tooltip("Hand pull-back at full throw charge (m)")] public float ThrowPull = 0.16f;
         public float ThrowLift = 0.06f;
@@ -42,12 +42,12 @@ namespace HarvestPanic.Gameplay
 
         [Header("Shape (m)")]
         public float UpperRadius = 0.058f;
-        public float ElbowRadius = 0.052f;
-        public float WristRadius = 0.04f;
-        [Tooltip("Sleeve covers this fraction of the forearm from the elbow")] public float SleeveFraction = 0.5f;
-        [Tooltip("Glove gauntlet starts at this fraction of the forearm")] public float GloveStart = 0.78f;
-        public float GauntletRadius = 0.054f;
-        [Tooltip("Uniform hand scale (props and hands read ~1.2x in first person)")] public float HandScale = 1.25f;
+        public float ElbowRadius = 0.05f;
+        public float WristRadius = 0.034f;
+        [Tooltip("Sleeve covers this fraction of the forearm from the elbow")] public float SleeveFraction = 0.58f;
+        [Tooltip("Glove gauntlet starts at this fraction of the forearm")] public float GloveStart = 0.86f;
+        public float GauntletRadius = 0.045f;
+        [Tooltip("Uniform hand scale (props and hands read ~1.2x in first person)")] public float HandScale = 1.05f;
 
         [Header("Default colours (overridden by the farmer loadout)")]
         public Color Shirt = new Color(0.78f, 0.33f, 0.24f);

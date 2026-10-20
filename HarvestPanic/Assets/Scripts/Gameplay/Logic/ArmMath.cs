@@ -26,7 +26,7 @@ namespace HarvestPanic.Gameplay
                 case ArmPose.GripTwoHands: return 0.45f;
                 case ArmPose.Tool: return 0.92f;
                 case ArmPose.ThrowSwing: return 0.05f;
-                default: return 0.4f;
+                default: return 0.62f;
             }
         }
 
@@ -67,7 +67,7 @@ namespace HarvestPanic.Gameplay
         {
             float hx = Mathf.Min(halfExtents.x + inset, maxHalfSpread);
             float y = center.y - halfExtents.y * low;
-            float z = center.z - halfExtents.z * 0.35f; // nearer half of the side faces
+            float z = center.z - halfExtents.z * 0.6f; // near edge of the side faces (closest to the camera)
             left = new Vector3(center.x - hx, y, z);
             right = new Vector3(center.x + hx, y, z);
         }
