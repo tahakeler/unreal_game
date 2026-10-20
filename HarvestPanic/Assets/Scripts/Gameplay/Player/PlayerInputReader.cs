@@ -1,3 +1,4 @@
+using HarvestPanic.Core;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -48,13 +49,28 @@ namespace HarvestPanic.Gameplay
             if (_instance != null) { _instance.Disable(); Destroy(_instance); }
         }
 
+        void Update()
+        {
+            // Cursor: locked for FPS control, released while a UI modal (wardrobe, menus) blocks input.
+            if (!_active || UseScripted || Application.isBatchMode) return;
+            bool blocking = InputModal.IsBlocking;
+            var want = blocking ? CursorLockMode.None : CursorLockMode.Locked;
+            if (Cursor.lockState != want) { Cursor.lockState = want; Cursor.visible = blocking; }
+        }
+
+        void OnDisable()
+        {
+            if (_active && !Application.isBatchMode) { Cursor.lockState = CursorLockMode.None; Cursor.visible = true; }
+        }
+
         void LateUpdate()
         {
             Scripted.JumpPressed = Scripted.InteractPressed = Scripted.InteractReleased = false;
             Scripted.ThrowReleased = Scripted.UsePressed = Scripted.UseReleased = Scripted.HollerPressed = false;
         }
 
-        bool Dev => _active && !UseScripted && _instance != null;
+        /// <summary>Device input is live: active owner, not scripted, and no UI modal (Core InputModal) is open.</summary>
+        bool Dev => _active && !UseScripted && _instance != null && !InputModal.IsBlocking;
 
         public Vector2 Move => UseScripted ? Scripted.Move : Dev ? _move.ReadValue<Vector2>() : Vector2.zero;
         /// <summary>Look delta: mouse pixels or stick (-1..1); <see cref="LookIsStick"/> tells which.</summary>
