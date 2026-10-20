@@ -18,7 +18,7 @@ namespace HarvestPanic.Gameplay
     /// (state, carry, impulses, noise, fees) is decided on the server.
     /// </summary>
     [DefaultExecutionOrder(-60)]
-    public sealed class PlayerCharacter : NetworkBehaviour, IPlayerHooks, IKnockable, ICarryable, IGrabGate, ISelfSimulatedCarryable
+    public sealed class PlayerCharacter : NetworkBehaviour, IPlayerHooks, IKnockable, IDraggable, ICarryable, IGrabGate, ISelfSimulatedCarryable
     {
         [Header("Config")]
         [SerializeField] PlayerTuning tuning;
@@ -267,6 +267,7 @@ namespace HarvestPanic.Gameplay
         public void PublishOwnerState(bool sprinting, bool crouched, float stamina)
         {
             if (!IsSpawned || !IsOwner) return;
+            OwnerTickDrag();
             byte mode = (byte)(crouched ? 2 : sprinting ? 1 : 0);
             if (_moveMode.Value != mode) _moveMode.Value = mode;
             byte s = (byte)Mathf.Clamp(Mathf.RoundToInt(stamina), 0, 255);
@@ -320,6 +321,65 @@ namespace HarvestPanic.Gameplay
             if (replace) _rb.linearVelocity = velocity; else _rb.linearVelocity += velocity;
             _rest.Reset();
         }
+
+        // ---- Drag (IDraggable, polish-2) ----------------------------------------------------------------------
+        Vector3 _dragTarget;
+        float _dragUntil = -1f;
+        /// <summary>True while the owner is simulating a drag (tests).</summary>
+        public bool IsBeingDragged => _dragUntil > Time.time;
+
+        /// <inheritdoc />
+        public void RequestDrag(Vector3 toward, float seconds)
+        {
+            if (!IsServer || !IsDown || seconds <= 0f) return;
+            DragOwnerRpc(toward, seconds);
+        }
+
+        [Rpc(SendTo.Owner)]
+        void DragOwnerRpc(Vector3 toward, float seconds)
+        {
+            _dragTarget = toward;
+            _dragUntil = Time.time + seconds;
+        }
+
+        void OwnerTickDrag()
+        {
+            if (_dragUntil <= Time.time) return;
+            if (!_physicsMode || _rb.isKinematic || _carriedBy.Value != PlayerIds.None) { _dragUntil = -1f; return; }
+            Vector3 to = _dragTarget - _rb.position; to.y = 0f;
+            if (to.sqrMagnitude < 1f) { _dragUntil = -1f; return; }
+            Vector3 v = _rb.linearVelocity; Vector3 flat = new Vector3(v.x, 0f, v.z);
+            Vector3 want = to.normalized * tuning.DragSpeed;
+            Vector3 dv = Vector3.ClampMagnitude(want - flat, tuning.DragAccel * Time.fixedDeltaTime);
+            _rb.AddForce(dv, ForceMode.VelocityChange);
+            _rest.Reset(); // being dragged is not "at rest"
+        }
+
+        // ---- Owner-predicted footsteps (polish-2): the server does not relay our own footsteps back to us --------
+        Vector3 _ownerFootPos;
+        float _ownerFootDistance;
+
+        void OwnerTickFootsteps()
+        {
+            Vector3 p = transform.position;
+            Vector3 d = p - _ownerFootPos; d.y = 0f;
+            _ownerFootPos = p;
+            if (IsServer) return; // host hears its own server-emitted footsteps already
+            if (State != PlayerState.Normal || MoveMode == 2 || d.sqrMagnitude > 4f) { _ownerFootDistance = 0f; return; }
+            _ownerFootDistance += d.magnitude;
+            bool sprint = MoveMode == 1;
+            if (_ownerFootDistance < (sprint ? tuning.StrideSprint : tuning.StrideWalk)) return;
+            _ownerFootDistance = 0f;
+            float loud = sprint ? tuning.SprintFootstepLoudness : tuning.WalkFootstepLoudness;
+            if (Services.TryGet(out IAudioService audio))
+                audio.PlayAt(OwnFootstepEvent, p, Mathf.Clamp(loud / 0.5f, 0.125f, 2f)); // same gain curve as Audio's NoiseRouting
+            OwnFootstepsPlayed++;
+        }
+
+        /// <summary>Audio event the owner plays for its own footsteps (Audio's FootstepDirt).</summary>
+        public const string OwnFootstepEvent = "SFX_Player_Footstep_Dirt";
+        /// <summary>Locally predicted footsteps (tests).</summary>
+        public int OwnFootstepsPlayed { get; private set; }
 
         [Rpc(SendTo.Owner)]
         void ImpactFeedbackOwnerRpc(float designImpulse)
@@ -516,6 +576,7 @@ namespace HarvestPanic.Gameplay
                 if (_physicsMode && !_rb.isKinematic) _rest.Tick(_rb.linearVelocity.magnitude, Time.deltaTime);
                 if (CanGetUp && _input.JumpPressed) GetUpRpc();
                 if (HasControl && _input.HollerPressed) Holler();
+                OwnerTickFootsteps();
             }
 
             if (IsServer) ServerTick();

@@ -123,6 +123,7 @@ namespace HarvestPanic.AI.Night
                 Vector3 toField = _dir.NearestPost(transform.position) - h.transform.position; toField.y = 0f;
                 Vector3 yank = (toField.sqrMagnitude > 0.01f ? toField.normalized : -transform.forward) * _t.GrabImpulse + Vector3.up * _t.GrabImpulse * 0.3f;
                 k.ApplyImpulse(yank, PlayerIds.Nature, BlameVerb.KnockedOut);
+                if (k is IDraggable drag) drag.RequestDrag(_dir.NearestPost(transform.position), _t.StitchesFarmerDragSeconds); // polish-2: owner drags the KO'd body
                 _nextGrab = Time.time + _t.GrabCooldown;
                 Debug.Log("[Night] Mr. Stitches grabbed a farmer");
                 break;

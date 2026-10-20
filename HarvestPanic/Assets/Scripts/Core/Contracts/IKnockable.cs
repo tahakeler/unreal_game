@@ -18,6 +18,17 @@ namespace HarvestPanic.Core
         void SendToBarn(BlameVerb reason, bool chargeFee);
     }
 
+    /// <summary>
+    /// Optional, add-only (polish-2): a downed body that can be dragged (e.g. by Mr. Stitches). Implemented by the
+    /// Player root next to <see cref="IKnockable"/>; callers check <c>knockable is IDraggable</c>. Server only; the
+    /// implementation forwards to the owning client, which simulates the ragdoll.
+    /// </summary>
+    public interface IDraggable
+    {
+        /// <summary>Server: pull the body toward <paramref name="toward"/> (world point) for <paramref name="seconds"/>. Ignored unless down.</summary>
+        void RequestDrag(Vector3 toward, float seconds);
+    }
+
     /// <summary>Lookup helpers for <see cref="IKnockable"/>.</summary>
     public static class Knockables
     {

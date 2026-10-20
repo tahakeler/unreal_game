@@ -63,6 +63,7 @@ namespace HarvestPanic.Gameplay
         {
             if (logEvents) Debug.Log($"[Noise] {e.Source} L={e.Loudness:0.00} R={e.Radius:0.0} at {e.Location} tags={e.Tags} by {e.BlamedPlayerId}");
             OnNoise?.Invoke(e);
+            NoiseCueFeed.Raise(e); // every-peer presentation feed (clients get it via Audio's relay)
         }
 
         /// <summary>True when this process is allowed to create noise events.</summary>

@@ -269,6 +269,15 @@ namespace HarvestPanic.Audio
         /// <summary>Server side: route a noise, play it here and relay it to clients.</summary>
         public void HandleNoise(NoiseEvent e)
         {
+            AudioNetRelay.BroadcastNoise(e); // polish-2: clients route + caption themselves (also unrouted noises)
+            RouteAndPlay(e);
+        }
+
+        /// <summary>Client side (polish-2): a noise relayed by the server; route and play it here only.</summary>
+        public void HandleRemoteNoise(NoiseEvent e) => RouteAndPlay(e);
+
+        void RouteAndPlay(in NoiseEvent e)
+        {
             var lp = ListenerPos(out bool has);
             if ((e.Source == NoiseSource.Shout || e.Source == NoiseSource.Voice) && (!has || Vector3.Distance(lp, e.Location) <= VoiceDuckRadius))
                 _shoutUntil = Time.unscaledTime + ShoutDuckHold;
@@ -276,7 +285,6 @@ namespace HarvestPanic.Audio
             if (!NoiseRouting.TryRoute(e, critter, out var cue)) return;
             OnCueHeard(cue);
             PlayCue(cue);
-            AudioNetRelay.Broadcast(cue);
         }
 
         /// <summary>Bookkeeping shared by locally routed and relayed cues (chaos estimate).</summary>
