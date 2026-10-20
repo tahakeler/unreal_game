@@ -115,8 +115,10 @@ namespace HarvestPanic.Tests.PlayMode.Weather
             eco.DebugSkipPhase(); // -> Dusk
             yield return WaitFor(() => eco.Phase == DayPhase.Dusk || eco.Phase == DayPhase.Payout, 5f, "Dusk/Payout");
             while (eco.Phase != DayPhase.Payout) { eco.DebugSkipPhase(); yield return null; }
-            eco.NextDay();
-            yield return null; yield return null;
+            eco.NextDay(); // Payout -> Shop
+            yield return null;
+            if (eco.Phase == DayPhase.Shop) { eco.NextDay(); yield return null; } // Shop -> Morning
+            yield return null;
             Assert.AreEqual(DayPhase.Morning, eco.Phase);
             Assert.AreEqual(1, eco.DayIndex);
             Assert.IsTrue(day.HasWorldTag(WeatherDeck.WorldTag(WeatherKind.Rain)), "rain re-applied on day 2");
