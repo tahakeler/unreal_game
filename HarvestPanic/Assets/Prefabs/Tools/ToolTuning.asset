@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50e53f2318b6f449cb76edcbe40045e7, type: 3}
+  m_Name: ToolTuning
+  m_EditorClassIdentifier: HarvestPanic.Gameplay::HarvestPanic.Gameplay.ToolTuning
+  NetWindUp: 0.5
+  NetCooldown: 1
+  NetReach: 1.5
+  NetArc: 90
+  NetMaxHands: 1
+  NetCapacity: 1
+  NetEscapeChance: 0.2
+  NetEscapeInterval: 5
+  NetDefaultAgility: 0
+  FeedLoudness: 0.4
+  FeedShakeInterval: 0.5
+  FeedUses: 10
+  FeedRefillRadius: 6

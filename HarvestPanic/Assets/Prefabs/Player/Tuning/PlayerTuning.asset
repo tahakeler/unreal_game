@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a166e62e29e24970af86df4456b21fc, type: 3}
+  m_Name: PlayerTuning
+  m_EditorClassIdentifier: HarvestPanic.Gameplay::HarvestPanic.Gameplay.PlayerTuning
+  WalkSpeed: 4
+  SprintSpeed: 6.5
+  CrouchSpeed: 2
+  JumpApex: 1.1
+  Gravity: 20
+  Acceleration: 40
+  AirAcceleration: 8
+  StandHeight: 1.8
+  CrouchHeight: 1.2
+  Radius: 0.35
+  EyeAboveCentre: 0.64
+  MassKg: 70
+  StaminaMax: 100
+  SprintDrain: 15
+  CarryDrainPerLoad: 8
+  StaminaRegen: 25
+  StaminaRegenDelay: 1
+  SprintResumeStamina: 30
+  BaseFov: 90
+  SprintFovKick: 8
+  FovLerpSpeed: 8
+  HeadBobAmplitude: 0.016
+  HeadBobFrequency: 1.8
+  ShakeMaxDegrees: 4
+  ShakeFullImpulse: 900
+  ShakeDecay: 2
+  MouseSensitivity: 0.12
+  GamepadLookSpeed: 160
+  PitchLimit: 85
+  RagdollImpulse: 900
+  TripLoadRatio: 0.7
+  TripSlopeDegrees: 25
+  RestSpeed: 0.5
+  RestTime: 0.5
+  GetUpDuration: 1.2
+  KoDuration: 8
+  ReviveHold: 1.5
+  KoRagdollCount: 3
+  KoWindow: 20
+  RagdollLaunchPerImpulse: 0.006
+  RagdollLaunchMax: 12
+  LowStaminaThreshold: 20
+  LowStaminaMult: 0.7
+  LoadThresholdFactor: 0.4
+  RespawnDelay: 5
+  KillZ: -25
+  YeetBlameWindow: 6
+  HollerLoudness: 0.8
+  HollerCooldown: 2
+  WalkFootstepLoudness: 0.1
+  SprintFootstepLoudness: 0.25
+  StrideWalk: 1.5
+  StrideSprint: 2.2

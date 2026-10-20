@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec825483f5a8648078fa61c709b801de, type: 3}
+  m_Name: CarryTuning
+  m_EditorClassIdentifier: HarvestPanic.Gameplay::HarvestPanic.Gameplay.CarryTuning
+  GrabRange: 1.8
+  GrabRangeSlack: 0.75
+  HoldDistance: 1.25
+  HoldDrop: 0.35
+  ToolHoldOffset: {x: 0.32, y: -0.38, z: 0.65}
+  TapVsHoldSeconds: 0.25
+  HandStiffness: 1500
+  HandDamping: 120
+  HandMaxForce: 2500
+  CarriedAngularDamping: 2.5
+  SlipDistance: 1.2
+  SlipTime: 0.3
+  KgPerHand: 25
+  CarrySpeedFloor: 0.35
+  ThrowSpeedMin: 4
+  ThrowSpeedMax: 14
+  ThrowChargeTime: 1
+  ThrowMassRef: 10
+  ThrowMassFloor: 0.3
+  HeaveMaxMass: 40
+  ThrownWindow: 2
+  BruiseImpactMin: 400
+  HeavyImpact: 800
+  LightImpactLoudness: 0.3
+  HeavyImpactLoudness: 0.6
+  ImpactReportWindow: 2
+  TouchWindow: 3
+  TouchCapacity: 3
+  HoldTouchRefresh: 1
+  WobbleAmplitude: 0.05
+  WobbleFrequency: 1.3
