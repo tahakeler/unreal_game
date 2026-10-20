@@ -135,6 +135,7 @@ namespace HarvestPanic.Weather
                 var em = _rain.emission; em.rateOverTime = raining ? (k == WeatherKind.Storm ? 1600f : 900f) : 0f;
                 var main = _rain.main; main.maxParticles = k == WeatherKind.Storm ? StormCap : RainCap;
                 var vel = _rain.velocityOverLifetime; vel.x = wind.x; vel.z = wind.z;
+                if (snap && !raining) _rain.Clear();
                 if (snap && raining) { _rain.Clear(); _rain.Simulate(1.2f, true, true); _rain.Play(); }
             }
             if (_leaves != null)
@@ -143,6 +144,7 @@ namespace HarvestPanic.Weather
                 _leaves.transform.rotation = windy ? Quaternion.LookRotation(wind.normalized) : Quaternion.identity;
                 var em = _leaves.emission; em.rateOverTime = windy ? Mathf.Clamp(wind.magnitude * 2.5f, 5f, 30f) : 0f;
                 var main = _leaves.main; main.startSpeed = new ParticleSystem.MinMaxCurve(wind.magnitude * 0.8f, wind.magnitude * 1.2f);
+                if (snap && !windy) _leaves.Clear();
                 if (snap && windy) { _leaves.Clear(); _leaves.Simulate(3f, true, true); _leaves.Play(); }
             }
         }
@@ -163,14 +165,14 @@ namespace HarvestPanic.Weather
             ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             var main = ps.main;
             main.loop = true; main.playOnAwake = false; main.simulationSpace = ParticleSystemSimulationSpace.World;
-            main.startLifetime = 1.1f; main.startSpeed = 0f; main.startSize = new ParticleSystem.MinMaxCurve(0.02f, 0.035f);
+            main.startLifetime = 1.1f; main.startSpeed = 0f; main.startSize = new ParticleSystem.MinMaxCurve(0.012f, 0.022f);
             main.startColor = new Color(0.78f, 0.84f, 0.92f, 0.55f); main.maxParticles = RainCap;
             var shape = ps.shape; shape.shapeType = ParticleSystemShapeType.Box; shape.scale = new Vector3(36f, 1f, 36f);
             var vel = ps.velocityOverLifetime; vel.enabled = true; vel.space = ParticleSystemSimulationSpace.World;
             vel.x = 0f; vel.y = -16f; vel.z = 0f;
             var col = ps.collision; col.enabled = false;
             var r = go.GetComponent<ParticleSystemRenderer>();
-            r.renderMode = ParticleSystemRenderMode.Stretch; r.velocityScale = 0.05f; r.lengthScale = 2.5f;
+            r.renderMode = ParticleSystemRenderMode.Stretch; r.velocityScale = 0.05f; r.lengthScale = 2.5f; r.maxParticleSize = 0.004f; // keep near-camera streaks thin
             r.sharedMaterial = _rainMat != null ? _rainMat : Fallback(new Color(0.8f, 0.86f, 0.95f, 0.5f));
             r.shadowCastingMode = ShadowCastingMode.Off; r.receiveShadows = false; r.enableGPUInstancing = true;
             ps.Play();
