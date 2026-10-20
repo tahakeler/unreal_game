@@ -1,3 +1,4 @@
+using HarvestPanic.Core;
 using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -87,13 +88,13 @@ namespace HarvestPanic.Gameplay
             if (!down && grounded && speedRatio > 0.05f)
             {
                 _bobPhase += dt * t.HeadBobFrequency * Mathf.PI * 2f * Mathf.Max(0.6f, speedRatio);
-                float amp = t.HeadBobAmplitude * speedRatio;
+                float amp = t.HeadBobAmplitude * speedRatio * CameraComfort.BobScale;
                 bob = new Vector3(Mathf.Cos(_bobPhase) * amp * 0.5f, Mathf.Sin(_bobPhase * 2f) * amp, 0f);
             }
 
             // Impact shake: trauma^2 * max degrees, decaying (5d).
             _trauma = Mathf.Max(0f, _trauma - t.ShakeDecay * dt);
-            float shake = t.ShakeMaxDegrees * _trauma * _trauma;
+            float shake = t.ShakeMaxDegrees * _trauma * _trauma * CameraComfort.ShakeScale;
             float n = Time.time * 25f;
             Quaternion shakeRot = Quaternion.Euler(
                 shake * (Mathf.PerlinNoise(n, 0.1f) * 2f - 1f),
@@ -104,7 +105,8 @@ namespace HarvestPanic.Gameplay
             pivot.localRotation = shakeRot;
 
             // Sprint FOV kick.
-            float targetFov = t.BaseFov + (_motor != null && _motor.IsSprinting ? t.SprintFovKick : 0f);
+            float baseFov = CameraComfort.BaseFov > 0f ? CameraComfort.BaseFov : t.BaseFov;
+            float targetFov = baseFov + (_motor != null && _motor.IsSprinting ? t.SprintFovKick * CameraComfort.FovKickScale : 0f);
             _fov = Mathf.Lerp(_fov, targetFov, 1f - Mathf.Exp(-t.FovLerpSpeed * dt));
             if (vcam != null)
             {

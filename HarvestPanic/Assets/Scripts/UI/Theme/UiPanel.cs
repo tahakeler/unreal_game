@@ -11,7 +11,7 @@ namespace HarvestPanic.UI
     public sealed class UiPanel : MonoBehaviour
     {
         const string ResPath = "Frontend/";
-        static readonly string[] SharedSheets = { "USS_Default_Theme", "USS_Default_Menu", "USS_Default_Lobby", "USS_Default_Pause" };
+        static readonly string[] SharedSheets = { "USS_Default_Theme", "USS_Default_Menu", "USS_Default_Lobby", "USS_Default_Pause", "USS_Default_Onboarding" };
 
         PanelSettings _panel;
         UIDocument _doc;
@@ -67,6 +67,11 @@ namespace HarvestPanic.UI
             Root.EnableInClassList("hp-root--text-small", s.TextSize == 0);
             Root.EnableInClassList("hp-root--text-large", s.TextSize == 2);
             Root.EnableInClassList("hp-root--reduced-motion", s.ReducedMotion);
+            foreach (ColorblindMode m in System.Enum.GetValues(typeof(ColorblindMode)))
+            {
+                string cls = UiPalette.RootClass(m);
+                if (cls.Length > 0) Root.EnableInClassList(cls, m == s.Colorblind);
+            }
         }
 
         void OnDestroy()

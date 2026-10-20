@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 namespace HarvestPanic.UI
@@ -20,7 +21,11 @@ namespace HarvestPanic.UI
         Button _firstTab;
         int _tab;
 
-        static readonly string[] TabNames = { "Gameplay", "Audio", "Video", "Access" };
+        static readonly string[] TabNames = { "Gameplay", "Controls", "Audio", "Video", "Access" };
+
+        static InputActionRebindingExtensions.RebindingOperation _rebind;
+        /// <summary>True while waiting for a key/button press (pause menu must not treat Esc as back).</summary>
+        public static bool IsListening => _rebind != null;
 
         public SettingsPanel(VisualElement host)
         {
@@ -64,6 +69,7 @@ namespace HarvestPanic.UI
 
         public void Close()
         {
+            if (_rebind != null) { _rebind.Cancel(); }
             SettingsService.Persist();
             Closed?.Invoke();
         }
@@ -78,8 +84,9 @@ namespace HarvestPanic.UI
             switch (index)
             {
                 case 0: BuildGameplay(s, Commit); break;
-                case 1: BuildAudio(s, Commit); break;
-                case 2: BuildVideo(s, Commit); break;
+                case 1: BuildControls(); break;
+                case 2: BuildAudio(s, Commit); break;
+                case 3: BuildVideo(s, Commit); break;
                 default: BuildAccess(s, Commit); break;
             }
         }
@@ -91,6 +98,80 @@ namespace HarvestPanic.UI
             AddSlider("Look sensitivity", GameSettings.MinSensitivity, GameSettings.MaxSensitivity, s.Sensitivity, v => { s.Sensitivity = v; commit(); }, v => v.ToString("0.0") + "x");
             AddToggle("Invert Y axis", s.InvertY, v => { s.InvertY = v; commit(); });
             AddSlider("Field of view", GameSettings.MinFov, GameSettings.MaxFov, s.Fov, v => { s.Fov = Mathf.Round(v); commit(); }, v => Mathf.RoundToInt(v) + "");
+            AddToggle("Head bob", s.CameraBob, v => { s.CameraBob = v; commit(); });
+            AddSlider("Camera shake", 0, 1, s.CameraShake, v => { s.CameraShake = Mathf.Round(v * 20f) / 20f; commit(); }, Pct);
+            AddToggle("Grandpa's tapes (tips)", s.TipsEnabled, v => { s.TipsEnabled = v; commit(); });
+            var replay = new Button(() => { new PlayerPrefsTipStore().ClearAll(); }) { text = "Replay all tapes", name = "btn-replay-tapes" };
+            replay.AddToClassList("hp-btn"); replay.AddToClassList("hp-btn--small");
+            _tabContent.Add(replay);
+        }
+
+        // ---------------------------------------------------------------- controls (rebinding)
+        Label _bindWarning;
+
+        void BuildControls()
+        {
+            var head = Row("Action");
+            head.Add(new VisualElement { style = { flexGrow = 1 } });
+            foreach (var t in new[] { "Keyboard + mouse", "Gamepad" }) { var l = new Label(t); l.AddToClassList("bold"); l.AddToClassList("bind-btn"); head.Add(l); }
+            var rows = new Dictionary<string, VisualElement>();
+            foreach (var d in InputBindings.Defaults)
+            {
+                string key = d.Action + "|" + d.Label;
+                if (!rows.TryGetValue(key, out var row))
+                {
+                    row = Row(d.Label); row.Add(new VisualElement { style = { flexGrow = 1 } });
+                    rows[key] = row;
+                    if (d.Group == InputBindings.PadGroup) row.Add(new VisualElement { name = "kb-gap", style = { minWidth = 230 } });
+                }
+                row.Add(BindButton(d));
+                if (d.Action == "Move" && d.Group == InputBindings.KbmGroup) row.Add(new VisualElement { style = { minWidth = 230 } });
+            }
+            _bindWarning = new Label(""); _bindWarning.AddToClassList("small-text"); _bindWarning.AddToClassList("bind-warning");
+            _tabContent.Add(_bindWarning);
+            var reset = new Button(() => { InputBindings.ResetAll(); SelectTab(_tab); }) { text = "Reset controls", name = "btn-bind-reset" };
+            reset.AddToClassList("hp-btn"); reset.AddToClassList("hp-btn--small");
+            _tabContent.Add(reset);
+        }
+
+        Button BindButton(BindingDef def)
+        {
+            var b = new Button { text = InputBindings.Display(def), name = "bind-" + def.Action.ToLowerInvariant() + "-" + def.DefaultPath.Replace("<", "").Replace(">", "").Replace("/", "-").ToLowerInvariant() };
+            b.AddToClassList("hp-btn"); b.AddToClassList("hp-btn--small"); b.AddToClassList("hp-btn--center"); b.AddToClassList("bind-btn");
+            b.clicked += () => StartRebind(def, b);
+            return b;
+        }
+
+        void StartRebind(BindingDef def, Button b)
+        {
+            if (_rebind != null) return;
+            var action = InputBindings.Template.FindActionMap(InputBindings.MapName).FindAction(def.Action);
+            int index = InputBindings.TemplateIndex(action, def);
+            if (index < 0) return;
+            b.text = "Press a key... (Esc cancels)";
+            b.AddToClassList("bind-btn--listening");
+            _rebind = action.PerformInteractiveRebinding(index)
+                .WithControlsExcluding("<Mouse>/position").WithControlsExcluding("<Mouse>/delta").WithControlsExcluding("<Pointer>/position")
+                .WithCancelingThrough("<Keyboard>/escape")
+                .OnMatchWaitForAnother(0.1f);
+            if (def.IsKeyboardMouse) _rebind.WithControlsHavingToMatchPath("<Keyboard>").WithControlsHavingToMatchPath("<Mouse>");
+            else _rebind.WithControlsHavingToMatchPath("<Gamepad>");
+            void Finish(bool apply)
+            {
+                string path = apply ? action.bindings[index].effectivePath : null;
+                _rebind?.Dispose(); _rebind = null;
+                b.RemoveFromClassList("bind-btn--listening");
+                if (apply)
+                {
+                    action.RemoveBindingOverride(index);
+                    if (InputBindings.TryFindConflict(def, path, out var other))
+                        _bindWarning.text = $"Heads up: {InputBindings.DisplayPath(path)} is also bound to {other.Label}.";
+                    else _bindWarning.text = "";
+                    InputBindings.SetOverride(def.Action, def.DefaultPath, path);
+                }
+                b.text = InputBindings.Display(def);
+            }
+            _rebind.OnComplete(_ => Finish(true)).OnCancel(_ => Finish(false)).Start();
         }
 
         void BuildAudio(GameSettings s, Action commit)
@@ -114,6 +195,9 @@ namespace HarvestPanic.UI
             AddChoice("Text size", new[] { "Small", "Default", "Large" }, s.TextSize, i => { s.TextSize = i; commit(); });
             AddChoice("Colour-blind mode", new[] { "Off", "Deuteranopia", "Protanopia", "Tritanopia" }, (int)s.Colorblind, i => { s.Colorblind = (ColorblindMode)i; commit(); });
             AddToggle("Reduced motion", s.ReducedMotion, v => { s.ReducedMotion = v; commit(); });
+            AddToggle("Captions for sounds", s.Subtitles, v => { s.Subtitles = v; commit(); });
+            AddSlider("Caption background", 0, 1, s.CaptionBackground, v => { s.CaptionBackground = Mathf.Round(v * 20f) / 20f; commit(); }, Pct);
+            AddToggle("Grandpa's tapes (tips)", s.TipsEnabled, v => { s.TipsEnabled = v; commit(); });
             var note = new Label("Shapes and labels always back up colours, so every mode stays readable.");
             note.AddToClassList("small-text"); note.AddToClassList("muted");
             _tabContent.Add(note);

@@ -12,9 +12,10 @@ namespace HarvestPanic.UI
 
     public sealed class PlayerPrefsSettingsStore : ISettingsStore
     {
-        const string Key = "HarvestPanic.Settings.v1";
-        public bool TryRead(out string json) { json = PlayerPrefs.GetString(Key, null); return !string.IsNullOrEmpty(json); }
-        public void Write(string json) { PlayerPrefs.SetString(Key, json); PlayerPrefs.Save(); }
+        readonly string _key;
+        public PlayerPrefsSettingsStore(string key = "HarvestPanic.Settings.v1") { _key = key; }
+        public bool TryRead(out string json) { json = PlayerPrefs.GetString(_key, null); return !string.IsNullOrEmpty(json); }
+        public void Write(string json) { PlayerPrefs.SetString(_key, json); PlayerPrefs.Save(); }
     }
 
     public sealed class MemorySettingsStore : ISettingsStore
