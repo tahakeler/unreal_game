@@ -1,0 +1,18 @@
+{
+    "name": "HarvestPanic.Camcorder",
+    "rootNamespace": "HarvestPanic.Camcorder",
+    "references": [
+        "HarvestPanic.Core",
+        "Unity.Netcode.Runtime",
+        "Unity.InputSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
