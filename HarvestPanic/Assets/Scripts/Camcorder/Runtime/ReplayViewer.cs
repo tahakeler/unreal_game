@@ -16,6 +16,9 @@ namespace HarvestPanic.Camcorder
     /// </summary>
     public sealed class ReplayViewer : MonoBehaviour
     {
+        /// <summary>Raised after the viewer closed (HUD releases input/cursor).</summary>
+        public event System.Action Closed;
+
         public Moment Current { get; private set; }
         public bool IsOpen => Current != null;
         public float Time { get; private set; }
@@ -95,6 +98,7 @@ namespace HarvestPanic.Camcorder
             _ghosts.Clear();
             Cam = null; Current = null; Exporting = false;
             InputModal.Pop(this);
+            Closed?.Invoke();
         }
 
         void OnDestroy() => Close();

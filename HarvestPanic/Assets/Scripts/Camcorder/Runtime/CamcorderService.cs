@@ -263,7 +263,7 @@ namespace HarvestPanic.Camcorder
 
         public static string PlayerName(ulong clientId)
         {
-            if (clientId == PlayerIds.None) return "Nature";
+            if (clientId == PlayerIds.None || clientId == PlayerIds.Nature) return "Nature";
             if (Services.TryGet(out ISessionService s) && s.Players != null)
                 foreach (var p in s.Players) if (p.ClientId == clientId && !string.IsNullOrEmpty(p.Name)) return p.Name;
             return "Farmer " + (clientId + 1);
@@ -521,7 +521,9 @@ namespace HarvestPanic.Camcorder
             if (_pending == null) return;
             var cam = Camera.main;
             if (cam == null || !cam.isActiveAndEnabled) return;
-            var tex = ClipRender.RenderToTexture(cam, Tuning.thumbnailWidth, Tuning.thumbnailHeight);
+            var tex = _pending.Manual || _pending.Focus == Vector3.zero
+                ? ClipRender.RenderToTexture(cam, Tuning.thumbnailWidth, Tuning.thumbnailHeight)
+                : ClipRender.RenderWide(cam, _pending.Focus, Tuning.thumbnailWidth, Tuning.thumbnailHeight);
             if (tex == null) return;
             if (_pending.Thumb != null) Destroy(_pending.Thumb);
             _pending.Thumb = tex;

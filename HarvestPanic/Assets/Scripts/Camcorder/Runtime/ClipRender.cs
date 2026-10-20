@@ -42,5 +42,29 @@ namespace HarvestPanic.Camcorder
             }
             finally { RenderTexture.ReleaseTemporary(rt); }
         }
+    
+        /// <summary>
+        /// "Grandpa angle" picture: a temporary camera copied from <paramref name="template"/>, placed up and back from
+        /// <paramref name="focus"/> (facing the same way as the player), so the best shot shows the disaster, not first-person hands.
+        /// </summary>
+        public static Texture2D RenderWide(Camera template, Vector3 focus, int w, int h, float distance = 9f, float height = 5f)
+        {
+            if (template == null) return null;
+            var fwd = Vector3.ProjectOnPlane(template.transform.forward, Vector3.up);
+            if (fwd.sqrMagnitude < 1e-4f) fwd = Vector3.forward;
+            fwd.Normalize();
+            var go = new GameObject("CamcorderThumbCam");
+            try
+            {
+                var cam = go.AddComponent<Camera>();
+                cam.CopyFrom(template);
+                cam.enabled = false;
+                cam.fieldOfView = 50f;
+                var pos = focus - fwd * distance + Vector3.up * height;
+                cam.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(focus + Vector3.up * 0.8f - pos));
+                return RenderToTexture(cam, w, h);
+            }
+            finally { Object.Destroy(go); }
+        }
     }
 }

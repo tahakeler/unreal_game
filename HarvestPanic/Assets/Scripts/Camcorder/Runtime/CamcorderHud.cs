@@ -49,11 +49,20 @@ namespace HarvestPanic.Camcorder
             Build();
             _svc.Toast += ShowToast;
             _svc.PayoutReached += ShowCard;
+            _svc.Viewer.Closed += OnViewerClosed;
+        }
+
+        void OnViewerClosed()
+        {
+            if (_export != null) { StopCoroutine(_export); _export = null; }
+            if (_viewer != null) _viewer.style.display = DisplayStyle.None;
+            RestoreOtherUi();
+            if (!ShelfOpen) Release();
         }
 
         void OnDestroy()
         {
-            if (_svc != null) { _svc.Toast -= ShowToast; _svc.PayoutReached -= ShowCard; }
+            if (_svc != null) { _svc.Toast -= ShowToast; _svc.PayoutReached -= ShowCard; if (_svc.Viewer != null) _svc.Viewer.Closed -= OnViewerClosed; }
             RestoreCursor();
             InputModal.Pop(this);
         }
@@ -250,9 +259,31 @@ namespace HarvestPanic.Camcorder
             _root.Add(_viewer);
         }
 
+        readonly System.Collections.Generic.List<(VisualElement el, StyleEnum<DisplayStyle> was)> _hiddenRoots = new System.Collections.Generic.List<(VisualElement, StyleEnum<DisplayStyle>)>();
+
+        /// <summary>Hides every other UIDocument (gameplay HUD) while the replay plays; restored on close. Presentation only.</summary>
+        void HideOtherUi()
+        {
+            foreach (var d in FindObjectsByType<UIDocument>(FindObjectsSortMode.None))
+            {
+                if (d == _doc || !d.isActiveAndEnabled || d.rootVisualElement == null) continue;
+                var r = d.rootVisualElement;
+                if (r.resolvedStyle.display == DisplayStyle.None || r.style.display == DisplayStyle.None) continue;
+                _hiddenRoots.Add((r, r.style.display));
+                r.style.display = DisplayStyle.None;
+            }
+        }
+
+        void RestoreOtherUi()
+        {
+            foreach (var (el, was) in _hiddenRoots) if (el != null) el.style.display = was;
+            _hiddenRoots.Clear();
+        }
+
         public void ShowViewer(Moment m)
         {
             EnsureBuilt();
+            HideOtherUi();
             HideCard();
             _vTitle.text = m.Title;
             _scrub.highValue = Mathf.Max(0.01f, m.Duration);
@@ -273,13 +304,7 @@ namespace HarvestPanic.Camcorder
             for (int i = 0; i < 3; i++) _speedBtns[i].style.unityFontStyleAndWeight = Mathf.Approximately(v.Speed, speeds[i]) ? FontStyle.Bold : FontStyle.Normal;
         }
 
-        public void CloseViewer()
-        {
-            if (_export != null) { StopCoroutine(_export); _export = null; }
-            _svc.Viewer.Close();
-            _viewer.style.display = DisplayStyle.None;
-            if (!ShelfOpen) Release();
-        }
+        public void CloseViewer() => _svc.Viewer.Close(); // OnViewerClosed tidies up
 
         public void StartExport()
         {
