@@ -56,7 +56,42 @@ namespace HarvestPanic.AI.Editor
             new Spec { Name = "Chicken", Fbx = AnimalsDir + "/Chicken/Chicken.fbx", HeadBone = "Body_end", CritterId = "Critter.Chicken", GoodsId = "Livestock.Chicken", ShortId = "chicken",
                        Fit = Fit.Height, TargetM = 0.33f, BaseValue = 15, CarryHands = 1, Fragility = 0.6f, MassKg = 2.5f, Tint = new Color(0.97f, 0.95f, 0.88f),
                        Tripo = "Chicken", TripoTargetM = 0.40f, AnimStyle = CritterProceduralAnim.Style.Chicken },
+            // Cow: goods-value $150 / fragility 0.7. Hands 4 (2 carriers) per the cow-goat feature brief (roster says 6/3: see docs/qa/cow-goat-progress.md).
+            new Spec { Name = "Cow", Fbx = AnimalsDir + "/Cow/Cow.fbx", HeadBone = "Head", CritterId = "Critter.Cow", GoodsId = "Livestock.Cow", ShortId = "cow",
+                       Fit = Fit.Length, TargetM = 2.10f, BaseValue = 150, CarryHands = 4, Fragility = 0.7f, MassKg = 300f, Tint = new Color(0.93f, 0.91f, 0.86f) },
+            // Goat: $70 / 0.5 / 2 hands. No goat model in the CC0 packs yet: Quaternius Sheep rig, scaled down and tinted goat-brown.
+            new Spec { Name = "Goat", Fbx = AnimalsDir + "/Sheep/Sheep.fbx", HeadBone = "Head", CritterId = "Critter.Goat", GoodsId = "Livestock.Goat", ShortId = "goat",
+                       Fit = Fit.Length, TargetM = 1.05f, BaseValue = 70, CarryHands = 2, Fragility = 0.5f, MassKg = 35f, Tint = new Color(0.62f, 0.5f, 0.38f) },
         };
+
+        public const string LivestockTuningPath = DataDir + "/LivestockTuning.asset";
+
+        static LivestockTuning BuildLivestockTuning()
+        {
+            var t = AssetDatabase.LoadAssetAtPath<LivestockTuning>(LivestockTuningPath);
+            if (t == null) { t = ScriptableObject.CreateInstance<LivestockTuning>(); AssetDatabase.CreateAsset(t, LivestockTuningPath); }
+            return t;
+        }
+
+        /// <summary>Species signature components + a LODGroup (LOD0 = model, culled below 1.5% screen height).</summary>
+        static void AddSignatureAndLod(GameObject root, Spec s, Transform model)
+        {
+            var lt = BuildLivestockTuning();
+            if (s.Name == "Cow") root.AddComponent<CowBehaviour>().Configure(lt);
+            if (s.Name == "Goat") root.AddComponent<GoatBehaviour>().Configure(lt, model);
+            AddLod(root);
+        }
+
+        /// <summary>Critter LODs: LOD0 full mesh with shadows; LOD1 same mesh (shared) to 4%; culled below 1.5% of screen height.</summary>
+        public static void AddLod(GameObject root)
+        {
+            var renderers = root.GetComponentsInChildren<Renderer>(true);
+            if (renderers.Length == 0) return;
+            var lod = root.TryGetComponent<LODGroup>(out var existing) ? existing : root.AddComponent<LODGroup>();
+            lod.fadeMode = LODFadeMode.None;
+            lod.SetLODs(new[] { new LOD(0.04f, renderers), new LOD(0.015f, renderers) });
+            lod.RecalculateBounds();
+        }
 
         [MenuItem("Harvest Panic/Critters/Build Critter Assets")]
         public static void BuildAll()
@@ -124,6 +159,34 @@ namespace HarvestPanic.AI.Editor
                 Set(so, "ComedyFlags", (int)ComedyFlag.Screams); Set(so, "Curiosity", 0.2f);
                 SetLures(so, (LureTag.FeedBucket, 0.9f));
                 SetNoise(so, (NoiseTag.Food, NoiseReaction.Lure, 0.9f), (NoiseTag.Whistle, NoiseReaction.Flee, 0.8f), (NoiseTag.WhistleLong, NoiseReaction.Ignore, 0f));
+            }
+            else if (s.Name == "Cow")
+            {
+                // Big Martha - lazy, stubborn: 150/300 cm/s, AlertRadius 6, NoiseSens 0.5, Freeze, feed bucket 0.95, SecureCarriers 2 (brief), barely flees.
+                Set(so, "Traits", (int)(CritterTrait.Loud));
+                Set(so, "MoveSpeed", 1.5f); Set(so, "SprintSpeed", 3.0f); Set(so, "Acceleration", 4f);
+                Set(so, "AlertRadius", 6f); Set(so, "NoiseSensitivity", 0.5f); Set(so, "SightCone", 200f);
+                Set(so, "AlertThreshold", 0.45f); Set(so, "FleeThreshold", 0.85f); Set(so, "CalmThreshold", 0.3f); Set(so, "CalmTime", 2f);
+                Set(so, "CorneredResponse", (int)CorneredResponse.Freeze); Set(so, "SizeClass", (int)SizeClass.Large);
+                Set(so, "Agility", 0f); Set(so, "CritterPullN", 900f); Set(so, "SecureCarriers", 2); Set(so, "StruggleImpulse", 200f);
+                Set(so, "StruggleIntervalMin", 1.5f); Set(so, "StruggleIntervalMax", 3f);
+                Set(so, "HerdMode", (int)HerdMode.None); Set(so, "ShortcutAccess", (int)NavShortcut.None);
+                Set(so, "ComedyFlags", (int)ComedyFlag.None); Set(so, "Curiosity", 0.05f); Set(so, "PenEscapeChance", 0.3f);
+                SetLures(so, (LureTag.FeedBucket, 0.95f));
+                SetNoise(so, (NoiseTag.Food, NoiseReaction.Lure, 0.95f), (NoiseTag.Whistle, NoiseReaction.Ignore, 0f), (NoiseTag.WhistleLong, NoiseReaction.Ignore, 0f));
+            }
+            else if (s.Name == "Goat")
+            {
+                // Gary - curious, climber, chaotic: 300/520 cm/s, AlertRadius 9, NoiseSens 0.7, Charge, feed 0.4 / shiny 0.5, Curiosity 0.6.
+                Set(so, "Traits", (int)(CritterTrait.Climber | CritterTrait.Aggressive | CritterTrait.Thief));
+                Set(so, "MoveSpeed", 3.0f); Set(so, "SprintSpeed", 5.2f); Set(so, "Acceleration", 18f);
+                Set(so, "AlertRadius", 9f); Set(so, "NoiseSensitivity", 0.7f); Set(so, "SightCone", 240f);
+                Set(so, "CorneredResponse", (int)CorneredResponse.Charge); Set(so, "ChargeImpulse", 1100f); Set(so, "SizeClass", (int)SizeClass.Medium);
+                Set(so, "Agility", 4f); Set(so, "CritterPullN", 400f); Set(so, "SecureCarriers", 1); Set(so, "StruggleImpulse", 120f);
+                Set(so, "HerdMode", (int)HerdMode.None); Set(so, "ShortcutAccess", (int)NavShortcut.Climb);
+                Set(so, "ComedyFlags", (int)ComedyFlag.None); Set(so, "Curiosity", 0.6f); Set(so, "Aggression", 0.5f);
+                SetLures(so, (LureTag.FeedBucket, 0.4f), (LureTag.Shiny, 0.5f));
+                SetNoise(so, (NoiseTag.Food, NoiseReaction.Lure, 0.4f), (NoiseTag.Whistle, NoiseReaction.Ignore, 0f), (NoiseTag.WhistleLong, NoiseReaction.Ignore, 0f));
             }
             else
             {
@@ -305,6 +368,7 @@ namespace HarvestPanic.AI.Editor
                 root.AddComponent<CritterGoods>().ConfigureFallback(s.GoodsId, s.ShortId, s.BaseValue, s.Fragility, s.CarryHands, s.MassKg);
                 root.AddComponent<CritterCarryable>();
                 root.AddComponent<CritterPresentation>().Configure(model.transform, anim);
+                AddSignatureAndLod(root, s, model.transform);
 
                 string path = $"{PrefabDir}/Critter_{s.Name}.prefab";
                 var prefab = PrefabUtility.SaveAsPrefabAsset(root, path);
@@ -371,6 +435,7 @@ namespace HarvestPanic.AI.Editor
                 root.AddComponent<CritterCarryable>();
                 root.AddComponent<CritterPresentation>().Configure(null, null);   // procedural anim owns the pivot
                 root.AddComponent<CritterProceduralAnim>().Configure(pivot, s.AnimStyle, bounds.size.y * 0.45f, renderer);
+                AddSignatureAndLod(root, s, pivot);
 
                 string path = $"{PrefabDir}/Critter_{s.Name}.prefab";
                 var prefab = PrefabUtility.SaveAsPrefabAsset(root, path);
@@ -512,6 +577,8 @@ namespace HarvestPanic.AI.Editor
             }
             Marker("CritterSpawner_Pig", "Critter.Pig", 1, new Vector3(0f, 0f, 0f));
             Marker("CritterSpawner_Chicken", "Critter.Chicken", 6, new Vector3(5f, 0f, 4f));
+            Marker("CritterSpawner_Cow", "Critter.Cow", 1, new Vector3(-6f, 0f, 6f));
+            Marker("CritterSpawner_Goat", "Critter.Goat", 1, new Vector3(6f, 0f, -4f));
 
             var cam = new GameObject("Main Camera").AddComponent<Camera>();
             cam.tag = "MainCamera";

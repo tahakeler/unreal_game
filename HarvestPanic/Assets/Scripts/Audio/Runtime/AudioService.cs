@@ -272,8 +272,8 @@ namespace HarvestPanic.Audio
             var lp = ListenerPos(out bool has);
             if ((e.Source == NoiseSource.Shout || e.Source == NoiseSource.Voice) && (!has || Vector3.Distance(lp, e.Location) <= VoiceDuckRadius))
                 _shoutUntil = Time.unscaledTime + ShoutDuckHold;
-            bool chicken = e.Source == NoiseSource.Critter || (e.Tags & NoiseTag.Squeal) != 0 ? IsChicken(e.InstigatorId) : false;
-            if (!NoiseRouting.TryRoute(e, chicken, out var cue)) return;
+            string critter = e.Source == NoiseSource.Critter || (e.Tags & NoiseTag.Squeal) != 0 ? CritterKey(e.InstigatorId) : null;
+            if (!NoiseRouting.TryRoute(e, critter, out var cue)) return;
             OnCueHeard(cue);
             PlayCue(cue);
             AudioNetRelay.Broadcast(cue);
@@ -285,16 +285,15 @@ namespace HarvestPanic.Audio
             if (cue.Event == AudioEvents.PigSqueal || cue.Event == AudioEvents.ChickenPanic) _recentPanics.Enqueue(Time.unscaledTime);
         }
 
-        static bool IsChicken(ulong networkObjectId)
+        static string CritterKey(ulong networkObjectId)
         {
-            if (networkObjectId == 0) return false;
+            if (networkObjectId == 0) return null;
             var nm = NetworkManager.Singleton;
-            if (nm == null || nm.SpawnManager == null) return false;
-            if (!nm.SpawnManager.SpawnedObjects.TryGetValue(networkObjectId, out var no) || no == null) return false;
+            if (nm == null || nm.SpawnManager == null) return null;
+            if (!nm.SpawnManager.SpawnedObjects.TryGetValue(networkObjectId, out var no) || no == null) return null;
             var goods = no.GetComponentInChildren<IGoods>();
             string id = goods != null ? goods.GoodsId : null;
-            if (string.IsNullOrEmpty(id)) id = no.name;
-            return id.IndexOf("chicken", StringComparison.OrdinalIgnoreCase) >= 0;
+            return string.IsNullOrEmpty(id) ? no.name : id;
         }
 
         // ------------------------------------------------------------------ economy

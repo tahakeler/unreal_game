@@ -271,6 +271,23 @@ def bull_telegraph():
     return mix(out, scrape, int(0.4 * SR), 0.6)
 
 
+def cow_moo(seed):
+    # Low, long "mooo": saw with formant-ish lowpass sweep and slow pitch droop.
+    r = random.Random(seed); sec = r.uniform(1.1, 1.5); f0 = r.uniform(95, 120)
+    f = lambda t: f0 * (1.15 - 0.25 * t / sec) * (1 + 0.02 * math.sin(2 * math.pi * 5 * t))
+    x = mix(osc(f, sec, "saw"), osc(lambda t: f(t) * 2, sec), 0, 0.3)
+    x = lowpass(x, 700)
+    return apply(x, env_adsr(len(x), 0.15, 0.2, 0.85, 0.35))
+
+
+def goat_bleat(seed):
+    # Nasal wavering "meh-eh-eh": square with fast vibrato.
+    r = random.Random(seed); sec = r.uniform(0.5, 0.7); f0 = r.uniform(330, 420)
+    f = lambda t: f0 * (1 + 0.08 * math.sin(2 * math.pi * 11 * t))
+    x = lowpass(osc(f, sec, "square"), 2500)
+    return apply(x, env_adsr(len(x), 0.02, 0.08, 0.75, 0.15))
+
+
 def player_shout(seed):
     r = random.Random(seed); sec = r.uniform(0.4, 0.6); f0 = r.uniform(180, 240)
     f = lambda t: f0 * (1 + 0.25 * math.sin(math.pi * t / sec))
@@ -334,6 +351,10 @@ def main():
         put("SFX_Player_Shout", f"sfx_player_shout_{i+1:02d}", player_shout(300 + i))
     put("SFX_Critter_Bull_Telegraph", "sfx_critter_bull_telegraph_01", bull_telegraph())
     write(os.path.join(root, "AMB_Farm_Day", "amb_farm_day_loop.wav"), farm_day_bed(), peak=0.5)
+    # Livestock (feature/cow-goat): appended last; per-call seeds, no shared rng use.
+    for i in range(3):
+        put("SFX_Critter_Cow_Moo", f"sfx_critter_cow_moo_{i+1:02d}", cow_moo(400 + i))
+        put("SFX_Critter_Goat_Bleat", f"sfx_critter_goat_bleat_{i+1:02d}", goat_bleat(500 + i))
 
 
 if __name__ == "__main__":

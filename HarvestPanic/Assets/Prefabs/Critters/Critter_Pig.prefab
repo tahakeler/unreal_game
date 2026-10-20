@@ -82,6 +82,7 @@ GameObject:
   - component: {fileID: 4446935765906566145}
   - component: {fileID: 6877883930238023568}
   - component: {fileID: 159825213375560955}
+  - component: {fileID: 2255716444592652505}
   m_Layer: 6
   m_Name: Critter_Pig
   m_TagString: Untagged
@@ -332,6 +333,29 @@ MonoBehaviour:
   style: 0
   pivotHeight: 0.32707238
   cullRenderer: {fileID: 4061800245159117124}
+--- !u!205 &2255716444592652505
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7631799141166285252}
+  serializedVersion: 2
+  m_LocalReferencePoint: {x: -0.000000059604645, y: 0.36341375, z: 0}
+  m_Size: 1.1
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0.04
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 4061800245159117124}
+  - screenRelativeHeight: 0.015
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 4061800245159117124}
+  m_Enabled: 1
 --- !u!1001 &3431738984750865856
 PrefabInstance:
   m_ObjectHideFlags: 0

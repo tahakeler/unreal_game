@@ -67,6 +67,8 @@ namespace HarvestPanic.AI
         public Vector3 Home { get => _home; set => _home = value; }
         /// <summary>Extra flee-speed multiplier (GrumpyMods, set by <see cref="CritterGoods"/>).</summary>
         public float SpeedMultiplier { get; set; } = 1f;
+        /// <summary>Server: while Time.time is below this, Idle/Wander do not pick new wander targets (signature tasks such as a goat headbutt telegraph or perch).</summary>
+        public float ExternalHoldUntil { get; set; }
 
         /// <summary>Raised on every peer when the state changes (old, new).</summary>
         public event Action<CritterState, CritterState> StateChanged;
@@ -239,7 +241,7 @@ namespace HarvestPanic.AI
                 case CritterState.Wander:
                     if (TryLure(T)) break;
                     if (T >= personality.AlertThreshold) { Enter(CritterState.Alert); break; }
-                    TickIdleWander();
+                    if (_now >= ExternalHoldUntil) TickIdleWander();
                     break;
 
                 case CritterState.Alert:

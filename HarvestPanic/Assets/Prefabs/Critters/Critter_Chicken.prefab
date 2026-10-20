@@ -50,6 +50,7 @@ GameObject:
   - component: {fileID: 5867668065325381679}
   - component: {fileID: 7835191113903833721}
   - component: {fileID: 7519392795764247944}
+  - component: {fileID: 3131273090014557279}
   m_Layer: 6
   m_Name: Critter_Chicken
   m_TagString: Untagged
@@ -300,6 +301,29 @@ MonoBehaviour:
   style: 1
   pivotHeight: 0.17999999
   cullRenderer: {fileID: 8259902080736675334}
+--- !u!205 &3131273090014557279
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7790729343006770614}
+  serializedVersion: 2
+  m_LocalReferencePoint: {x: 0, y: 0.2, z: 0.000000014901161}
+  m_Size: 0.4
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0.04
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 8259902080736675334}
+  - screenRelativeHeight: 0.015
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 8259902080736675334}
+  m_Enabled: 1
 --- !u!1 &9183322816035783742
 GameObject:
   m_ObjectHideFlags: 0

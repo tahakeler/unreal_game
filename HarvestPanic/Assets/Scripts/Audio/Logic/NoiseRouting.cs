@@ -17,7 +17,11 @@ namespace HarvestPanic.Audio
         /// Maps a server noise to a sound cue. <paramref name="instigatorIsChicken"/> is resolved by the caller
         /// (critter personality lookup). Returns false for noises with no sound (voice: players hear the real voice).
         /// </summary>
-        public static bool TryRoute(in NoiseEvent e, bool instigatorIsChicken, out SoundCue cue)
+        public static bool TryRoute(in NoiseEvent e, bool instigatorIsChicken, out SoundCue cue) =>
+            TryRoute(e, instigatorIsChicken ? "chicken" : null, out cue);
+
+        /// <summary>Species-aware routing: <paramref name="critterKey"/> is the instigator's goods/critter id (any case), or null.</summary>
+        public static bool TryRoute(in NoiseEvent e, string critterKey, out SoundCue cue)
         {
             cue = new SoundCue { Position = e.Location, GainDb = 0f };
             var t = e.Tags;
@@ -27,13 +31,24 @@ namespace HarvestPanic.Audio
             else if (e.Source == NoiseSource.Footstep) { cue.Event = AudioEvents.FootstepDirt; cue.GainDb = LoudnessDb(e.Loudness, 0.5f); }
             else if (e.Source == NoiseSource.Shout) cue.Event = AudioEvents.PlayerShout;
             else if (e.Source == NoiseSource.Critter || (t & NoiseTag.Squeal) != 0)
-                cue.Event = instigatorIsChicken ? AudioEvents.ChickenPanic : AudioEvents.PigSqueal;
+                cue.Event = CritterEvent(critterKey);
             else if ((t & NoiseTag.Metal) != 0) cue.Event = AudioEvents.ImpactMetal;
             else if (e.Source == NoiseSource.Tool) cue.Event = AudioEvents.ToolMetal;
             else if (e.Source == NoiseSource.Impact || e.Source == NoiseSource.Hazard || e.Source == NoiseSource.Vehicle)
             { cue.Event = AudioEvents.ImpactCrate; cue.GainDb = LoudnessDb(e.Loudness, 0.5f); }
             else return false;
             return true;
+        }
+
+        /// <summary>Critter vocal event for a goods/critter id (pig squeal is the default).</summary>
+        public static string CritterEvent(string critterKey)
+        {
+            if (string.IsNullOrEmpty(critterKey)) return AudioEvents.PigSqueal;
+            string k = critterKey.ToLowerInvariant();
+            if (k.Contains("chicken")) return AudioEvents.ChickenPanic;
+            if (k.Contains("cow")) return AudioEvents.CowMoo;
+            if (k.Contains("goat")) return AudioEvents.GoatBleat;
+            return AudioEvents.PigSqueal;
         }
 
         /// <summary>

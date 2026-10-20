@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3486d80179fe74d2db11c7b01809501c, type: 3}
+  m_Name: LivestockTuning
+  m_EditorClassIdentifier: HarvestPanic.AI::HarvestPanic.AI.LivestockTuning
+  MooInterval: 20
+  MooJitter: 4
+  MooLoudness: 0.5
+  MooOnGrab: 1
+  HeadbuttRange: 1.8
+  HeadbuttConeDeg: 70
+  HeadbuttTelegraph: 0.6
+  HeadbuttHitReach: 2.2
+  HeadbuttImpulse: 1100
+  HeadbuttLift: 0.35
+  HeadbuttCooldown: 7
+  HeadbuttChance: 0.5
+  ClimbSearchRadius: 5
+  ClimbMinHeight: 0.5
+  ClimbMaxHeight: 2.2
+  ClimbChance: 0.25
+  HopSeconds: 0.55
+  PerchBoredSeconds: 45
+  PerchMinSeconds: 4
+  GrazeSearchRadius: 8
+  GrazeAffinity: 0.7
+  BiteRange: 1.3
+  BiteInterval: 1.5
+  BiteImpulse: 1400
+  CheckHz: 4

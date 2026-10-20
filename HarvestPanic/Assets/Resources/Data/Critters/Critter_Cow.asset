@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61af07a6475bb46f390b4f7c1ab9dbf2, type: 3}
+  m_Name: Critter_Cow
+  m_EditorClassIdentifier: HarvestPanic.Core::HarvestPanic.Core.CritterPersonality
+  <CritterId>k__BackingField: Critter.Cow
+  <Traits>k__BackingField: 512
+  <Prefab>k__BackingField: {fileID: 3424008464724141670, guid: 01745ad9ee034478fabe57195a2c6956, type: 3}
+  <GoodsId>k__BackingField: Livestock.Cow
+  <MoveSpeed>k__BackingField: 1.5
+  <SprintSpeed>k__BackingField: 3
+  <Acceleration>k__BackingField: 4
+  <AlertRadius>k__BackingField: 6
+  <AlertThreshold>k__BackingField: 0.45
+  <FleeThreshold>k__BackingField: 0.85
+  <CalmThreshold>k__BackingField: 0.3
+  <CalmTime>k__BackingField: 2
+  <NoiseSensitivity>k__BackingField: 0.5
+  <NoiseSourceMult>k__BackingField: []
+  <NoiseTagResponses>k__BackingField:
+  - Tag: 16
+    Reaction: 1
+    Strength: 0.95
+  - Tag: 32
+    Reaction: 0
+    Strength: 0
+  - Tag: 64
+    Reaction: 0
+    Strength: 0
+  <SightCone>k__BackingField: 200
+  <LureAffinity>k__BackingField:
+  - Lure: 1
+    Affinity: 0.95
+  <EatTime>k__BackingField: 3
+  <CorneredResponse>k__BackingField: 0
+  <ChargeImpulse>k__BackingField: 0
+  <SizeClass>k__BackingField: 3
+  <Agility>k__BackingField: 0
+  <CritterPullN>k__BackingField: 900
+  <SecureCarriers>k__BackingField: 2
+  <StruggleImpulse>k__BackingField: 200
+  <StruggleIntervalMin>k__BackingField: 1.5
+  <StruggleIntervalMax>k__BackingField: 3
+  <GrumpyMods>k__BackingField:
+    FleeSpeedMult: 1.5
+    AggressionAdd: 0.3
+  <PenEscapeChance>k__BackingField: 0.3
+  <HerdMode>k__BackingField: 0
+  <ShortcutAccess>k__BackingField: 0
+  <ActivePhase>k__BackingField: 0
+  <Aggression>k__BackingField: 0
+  <StealTargets>k__BackingField: []
+  <Curiosity>k__BackingField: 0.05
+  <BarkSet>k__BackingField: []
+  <ComedyFlags>k__BackingField: 0

@@ -1142,6 +1142,9 @@ namespace HarvestPanic.World.Editor
             AddMarker(barn, MarkerRole.BarnRespawn);
             AddMarker(Marker("CritterSpawner_Pig", PigPen + new Vector3(3f, 0.1f, -1f), g), MarkerRole.CritterSpawner, "Critter.Pig", 3);
             AddMarker(Marker("CritterSpawner_Chicken", Coop + new Vector3(2f, 0.1f, -2f), g), MarkerRole.CritterSpawner, "Critter.Chicken", 8);
+            // Livestock (feature/cow-goat): keep in sync with HarvestPanic.AI.Editor.LivestockSceneHook.Markers.
+            AddMarker(Marker("CritterSpawner_Cow", PigPen + new Vector3(-14f, 0.1f, -12f), g), MarkerRole.CritterSpawner, "Critter.Cow", 1);
+            AddMarker(Marker("CritterSpawner_Goat", PigPen + new Vector3(-11f, 0.1f, -4f), g), MarkerRole.CritterSpawner, "Critter.Goat", 1);
             AddMarker(Marker("Goods_PrizePumpkin", Pumpkins + new Vector3(0, 0.1f, 0), g), MarkerRole.Goods, "Crop.PrizePumpkin");
             for (int i = 0; i < 4; i++)
                 AddMarker(Marker($"Goods_Crate_{i}", new Vector3(-12.5f + (i % 2) * 1.4f, 0.1f, 6.5f + (i / 2) * 1.4f), g), MarkerRole.Goods, "Product.Crate", 1, i);
