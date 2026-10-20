@@ -26,8 +26,9 @@ namespace HarvestPanic.Tests.PlayMode.Weather
             t.SetConnectionData("127.0.0.1", port);
             var nm = go.AddComponent<NetworkManager>();
             nm.NetworkConfig = new NetworkConfig { NetworkTransport = t, EnableSceneManagement = false };
-            nm.NetworkConfig.Prefabs.NetworkPrefabsLists.Add(Resources.Load<NetworkPrefabsList>("NetworkPrefabs/Economy"));
-            nm.NetworkConfig.Prefabs.NetworkPrefabsLists.Add(Resources.Load<NetworkPrefabsList>("NetworkPrefabs/Weather"));
+            // Register every team's list: other systems (night, landlord, audio) also spawn on the server.
+            foreach (var list in Resources.LoadAll<NetworkPrefabsList>("NetworkPrefabs"))
+                nm.NetworkConfig.Prefabs.NetworkPrefabsLists.Add(list);
             return nm;
         }
 
