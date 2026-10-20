@@ -58,10 +58,10 @@ namespace HarvestPanic.AI.Editor
                        Tripo = "Chicken", TripoTargetM = 0.40f, AnimStyle = CritterProceduralAnim.Style.Chicken },
             // Cow: goods-value $150 / fragility 0.7. Hands 4 (2 carriers) per the cow-goat feature brief (roster says 6/3: see docs/qa/cow-goat-progress.md).
             new Spec { Name = "Cow", Fbx = AnimalsDir + "/Cow/Cow.fbx", HeadBone = "Head", CritterId = "Critter.Cow", GoodsId = "Livestock.Cow", ShortId = "cow",
-                       Fit = Fit.Length, TargetM = 2.10f, BaseValue = 150, CarryHands = 4, Fragility = 0.7f, MassKg = 300f, Tint = new Color(0.93f, 0.91f, 0.86f) },
-            // Goat: $70 / 0.5 / 2 hands. No goat model in the CC0 packs yet: Quaternius Sheep rig, scaled down and tinted goat-brown.
+                       Fit = Fit.Length, TargetM = 2.10f, BaseValue = 150, CarryHands = 4, Fragility = 0.7f, MassKg = 300f, Tint = new Color(0.66f, 0.45f, 0.28f) },
+            // Goat: $70 / 0.5 / 2 hands. No goat model in the CC0 packs yet: Quaternius Sheep rig, scaled down and tinted goat off-white (cow is Jersey brown so they read apart).
             new Spec { Name = "Goat", Fbx = AnimalsDir + "/Sheep/Sheep.fbx", HeadBone = "Head", CritterId = "Critter.Goat", GoodsId = "Livestock.Goat", ShortId = "goat",
-                       Fit = Fit.Length, TargetM = 1.05f, BaseValue = 70, CarryHands = 2, Fragility = 0.5f, MassKg = 35f, Tint = new Color(0.62f, 0.5f, 0.38f) },
+                       Fit = Fit.Length, TargetM = 1.05f, BaseValue = 70, CarryHands = 2, Fragility = 0.5f, MassKg = 35f, Tint = new Color(0.86f, 0.84f, 0.78f) },
         };
 
         public const string LivestockTuningPath = DataDir + "/LivestockTuning.asset";

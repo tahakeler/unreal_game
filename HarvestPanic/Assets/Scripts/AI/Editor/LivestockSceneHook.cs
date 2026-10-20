@@ -51,7 +51,7 @@ namespace HarvestPanic.AI.Editor
             Vector3 c = Ground(Markers[0].pos), g = Ground(Markers[1].pos);
             Vector3 mid = (c + g) * 0.5f;
             Vector3 cowPos = Ground(mid + new Vector3(-1.4f, 0f, 0f)), goatPos = Ground(mid + new Vector3(1.4f, 0f, 0.4f));
-            Place(cow.Prefab, cowPos, 160f);
+            Place(cow.Prefab, cowPos, 250f);
             Place(goat.Prefab, goatPos, 220f);
             var camGo = new GameObject("QA Cam");
             var cam = camGo.AddComponent<Camera>();
