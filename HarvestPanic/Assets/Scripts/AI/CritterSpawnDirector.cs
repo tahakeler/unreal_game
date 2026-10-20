@@ -49,7 +49,28 @@ namespace HarvestPanic.AI
                 return;
             }
             if (nm != null && !nm.IsServer) return;
+            // Objects spawned while the server is still loading the scene for clients are not delivered to them;
+            // wait for the NGO scene event to complete, then spawn (a solo host has no scene event and spawns now).
+            if (nm != null && nm.SceneManager != null && nm.SceneManager.IsSceneEventInProgress())
+            {
+                if (!_waitingSceneEvent)
+                {
+                    _waitingSceneEvent = true;
+                    nm.SceneManager.OnLoadEventCompleted += OnSceneEventDone;
+                }
+                return;
+            }
             SpawnForMarkers(LevelMarker.FindAll(MarkerRole.CritterSpawner), nm != null && nm.IsListening);
+        }
+
+        bool _waitingSceneEvent;
+
+        void OnSceneEventDone(string sceneName, LoadSceneMode mode, List<ulong> completed, List<ulong> timedOut)
+        {
+            _waitingSceneEvent = false;
+            var nm = NetworkManager.Singleton;
+            if (nm != null && nm.SceneManager != null) nm.SceneManager.OnLoadEventCompleted -= OnSceneEventDone;
+            TrySpawnAll();
         }
 
         void SpawnForMarkers(List<LevelMarker> markers, bool networked)
