@@ -48,7 +48,7 @@ namespace HarvestPanic.AI.Night
             if (_dir == null) { _dir = NightDirector.Instance; if (_dir == null) return; _t = _dir.Tuning; }
             float fog = Services.TryGet(out IDayModifierService mods) ? mods.Resolve(DayParams.WeatherFogDistance, 0f) : 0f;
             NightMath.Samples(WorldBounds, _pts);
-            ObservedNow = NightMath.IsObserved(NightObservers.Current(_t), _pts, NightMath.ViewDistance(fog, _t), _t.MinVisibleFraction, HasLos);
+            ObservedNow = NightMath.IsObserved(NightObservers.Current(_t), _pts, NightMath.ViewDistance(fog, _t), _t.MinVisibleFraction, _hasLos ??= HasLos);
             if (ObservedNow) { _unseenSince = -1f; SetMode(Mode.Watched); HoldDragged(); return; }
             if (_unseenSince < 0f) _unseenSince = Time.time;
 
@@ -67,13 +67,16 @@ namespace HarvestPanic.AI.Night
             TryGrab();
         }
 
+        readonly List<Vector3> _seenPts = new List<Vector3>(16);
+        System.Func<Vector3, Vector3, bool> _hasLos;
+
         bool HasLos(Vector3 eye, Vector3 p) => !Physics.Linecast(eye, p, NightDirector.LosMask, QueryTriggerInteraction.Ignore);
 
         bool PointSeen(Vector3 p)
         {
             var b = new Bounds(NightDirector.Ground(p) + Vector3.up * 1.4f, new Vector3(1.2f, 2.6f, 1f));
-            var pts = new List<Vector3>(); NightMath.Samples(b, pts);
-            return NightMath.IsObserved(NightObservers.Current(_t), pts, _t.ViewDistance, _t.MinVisibleFraction, HasLos);
+            var pts = _seenPts; pts.Clear(); NightMath.Samples(b, pts); // perf: reused list + cached delegate (no per-frame GC)
+            return NightMath.IsObserved(NightObservers.Current(_t), pts, _t.ViewDistance, _t.MinVisibleFraction, _hasLos ??= HasLos);
         }
 
         void Teleport(Vector3 p)

@@ -90,8 +90,8 @@ namespace HarvestPanic.Tests.PlayMode.Perf
             sb.AppendLine("## Top 30 by self time"); sb.AppendLine("| Marker | self ms/frame | calls/frame | GC B/frame |"); sb.AppendLine("|---|---|---|---|");
             foreach (var kv in self.OrderByDescending(k => k.Value).Take(30))
                 sb.AppendLine($"| `{kv.Key}` | {kv.Value / frames:0.000} | {Get(calls, kv.Key) / frames:0.#} | {Get(gc, kv.Key) / frames:0} |");
-            sb.AppendLine(); sb.AppendLine("## Top 30 by GC alloc"); sb.AppendLine("| Marker | GC B/frame | self ms/frame | calls/frame |"); sb.AppendLine("|---|---|---|---|");
-            foreach (var kv in gc.Where(k => k.Value > 0).OrderByDescending(k => k.Value).Take(30))
+            sb.AppendLine(); sb.AppendLine("## Top 60 by GC alloc (inclusive)"); sb.AppendLine("| Marker | GC B/frame | self ms/frame | calls/frame |"); sb.AppendLine("|---|---|---|---|");
+            foreach (var kv in gc.Where(k => k.Value > 0).OrderByDescending(k => k.Value).Take(60))
                 sb.AppendLine($"| `{kv.Key}` | {kv.Value / frames:0} | {Get(self, kv.Key) / frames:0.000} | {Get(calls, kv.Key) / frames:0.#} |");
             sb.AppendLine(); sb.Append(RendererAudit());
             var outDir = Path.Combine(PerfHarness.RepoRoot, "docs", "qa", "perf", "raw"); Directory.CreateDirectory(outDir);

@@ -22,7 +22,15 @@ namespace HarvestPanic.Weather
             Saturation = Mathf.Lerp(a.Saturation, b.Saturation, t), PostExposure = Mathf.Lerp(a.PostExposure, b.PostExposure, t),
         };
 
-        static Color Hex(string h) { ColorUtility.TryParseHtmlString("#" + h, out var c); return c; }
+        // perf: memoized -- ForPhase/WithWeather run every LateUpdate and the "#" + h concat was ~650 B/frame of GC
+        static readonly System.Collections.Generic.Dictionary<string, Color> HexCache = new System.Collections.Generic.Dictionary<string, Color>();
+        static Color Hex(string h)
+        {
+            if (HexCache.TryGetValue(h, out var c)) return c;
+            ColorUtility.TryParseHtmlString("#" + h, out c);
+            HexCache[h] = c;
+            return c;
+        }
 
         /// <summary>
         /// Art bible §4.3 phase table: Morning #FFE2B8 warm and low, Workday #FFF3DC bright (arc up then down),
