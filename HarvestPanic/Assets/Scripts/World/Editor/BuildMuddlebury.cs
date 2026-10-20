@@ -364,6 +364,57 @@ namespace HarvestPanic.World.Editor
             return go;
         }
 
+        // ------------------------------------------------------------------ Tripo (owner-generated) set pieces
+
+        const string TripoDir = "Assets/ThirdParty/Tripo";
+
+        /// <summary>Instantiates a Tripo FBX (real size, +Z front) snapped to the ground, static, with a box collider.</summary>
+        static GameObject TripoPlace(string model, Vector3 pos, float yaw, Transform parent, Material mat = null)
+        {
+            var src = AssetDatabase.LoadAssetAtPath<GameObject>($"{TripoDir}/{model}/{model}.fbx");
+            if (src == null) return null;
+            var go = (GameObject)PrefabUtility.InstantiatePrefab(src, parent);
+            go.transform.SetPositionAndRotation(new Vector3(pos.x, GroundY(pos.x, pos.z) + pos.y, pos.z), Quaternion.Euler(0f, yaw, 0f));
+            if (mat != null) foreach (var r in go.GetComponentsInChildren<Renderer>()) r.sharedMaterial = mat;
+            go.isStatic = true;
+            foreach (Transform c in go.GetComponentsInChildren<Transform>()) c.gameObject.isStatic = true;
+            AddBox(go);
+            return go;
+        }
+
+        /// <summary>Tripo market stall; each stall gets a tint variant of the base material (art-director to confirm tints).</summary>
+        static GameObject TripoStall(string name, Vector3 pos, float yaw, Transform parent)
+        {
+            string basePath = "Assets/Art/Tripo/Materials/M_Tripo_MarketStall.mat";
+            var baseMat = AssetDatabase.LoadAssetAtPath<Material>(basePath);
+            if (baseMat == null) return null;
+            Color tint = name.Contains("Greengrocer") ? WorldAssets.Hex("D9EBCF") : name.Contains("Oddities") ? WorldAssets.Hex("E3DAF0") : Color.white;
+            Material mat = baseMat;
+            if (tint != Color.white)
+            {
+                string path = $"Assets/Art/Tripo/Materials/M_Tripo_MarketStall_{name.Replace("Stall_", "")}.mat";
+                mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+                if (mat == null) { mat = new Material(baseMat); AssetDatabase.CreateAsset(mat, path); }
+                mat.CopyPropertiesFromMaterial(baseMat);
+                mat.SetColor("_BaseColor", tint);
+                EditorUtility.SetDirty(mat);
+            }
+            return TripoPlace("MarketStall", pos, yaw, parent, mat);
+        }
+
+        /// <summary>Tripo pen gate with its hinge post at <paramref name="hinge"/>; yaw 0 runs the gate along +X.</summary>
+        static GameObject TripoGate(string name, Vector3 hinge, float yaw, Transform parent)
+        {
+            var go = TripoPlace("PenGate", hinge, 0f, parent);
+            if (go == null) return null;
+            go.name = name;
+            // The export pivots on the hinge; make sure the leaf runs along +X before swinging it open.
+            var b = RendererBounds(go);
+            float flip = b.center.x < hinge.x ? 180f : 0f;
+            go.transform.rotation = Quaternion.Euler(0f, yaw + flip, 0f);
+            return go;
+        }
+
         static void AddBox(GameObject go)
         {
             var b = RendererBounds(go);
@@ -679,7 +730,9 @@ namespace HarvestPanic.World.Editor
             var pig = Group("Pig Pen");
             // 18 x 12, south gate (gap), north critter hole behind hay.
             FenceRect(PigPen, 18f, 12f, pig, (0, 9f, 3f), (2, 13f, 1.2f));
-            Place(NF, "fence_gate", PigPen + new Vector3(-2.2f, 0, -6.4f), 30f, 1.2f, pig);
+            // Owner's Tripo gate hinged on the west edge of the south gap, swung open outward (Kenney gate as fallback).
+            if (TripoGate("PenGate_PigPen", PigPen + new Vector3(-1.5f, 0, -6f), 55f, pig) == null)
+                Place(NF, "fence_gate", PigPen + new Vector3(-2.2f, 0, -6.4f), 30f, 1.2f, pig);
             var hay = WorldAssets.Mat("Hay", WorldAssets.Hex("E3C46E"));
             Block("HayBale (hole cover)", PigPen + new Vector3(-4f, 0.45f, 7.6f), new Vector3(1.9f, 0.9f, 1.2f), hay, pig);
             Block("Trough", PigPen + new Vector3(6f, 0.3f, 3.5f), new Vector3(2.6f, 0.6f, 0.8f), WorldAssets.Mat("Post", WorldAssets.Hex("7A5236")), pig);
@@ -698,6 +751,7 @@ namespace HarvestPanic.World.Editor
             for (int i = 0; i < 6; i++)
                 Place(NF, "grass", Coop + new Vector3(Rnd(-6, 6), 0, Rnd(-6, 6)), Rnd(0, 360), 0.4f, coop);
             Place(FD, "bag", Coop + new Vector3(4.5f, 0, 5f), 20f, 0.8f, coop);
+            TripoGate("PenGate_Coop", Coop + new Vector3(-1.5f, 0, -7.5f), 55f, coop);
         }
 
         static void Mud(string name, Vector3 centre, Vector3 size, Transform parent, bool wetSurface = false)
@@ -931,7 +985,7 @@ namespace HarvestPanic.World.Editor
             };
             foreach (var s in stallSpecs)
             {
-                var st = Place(FT, s.model, s.pos, s.yaw, 3.2f, g, "box");
+                var st = TripoStall(s.name, s.pos, s.yaw, g) ?? Place(FT, s.model, s.pos, s.yaw, 3.2f, g, "box");
                 if (st != null) st.name = s.name;
                 for (int i = 0; i < 3; i++)
                     Place(FD, s.goods == "meat-ribs" ? (i == 0 ? "barrel" : "bag") : s.goods, s.pos + Quaternion.Euler(0, s.yaw, 0) * new Vector3(-0.8f + i * 0.8f, 0, 1.6f), Rnd(0, 360), 0.45f, g);
