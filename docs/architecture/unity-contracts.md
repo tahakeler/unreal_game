@@ -30,6 +30,9 @@ Cross-talk = register an interface in `Services` (`Services.Register<T>`, `Get<T
 | Soak | `BruiseKind`, optional `IGoodsSoakable.ApplySoak(instigator)` | Economy implements; river/rain callers check `goods is IGoodsSoakable` |
 | Input gating | `InputModal.Push/Pop(owner)`, `IsBlocking`, `Count`, `Changed` | UI (pause, crew overlay) and Customization (wardrobe) push; Player skips look/move/interact while blocking |
 | Social (optional) | `ISessionSocial` (`Kick`, `SendChat`, `OnChat`) | Networking may implement; UI checks `is`/`TryGet` |
+| Weather | `IWeatherService` (`Current`, `ForecastText`, `Wind`, `OnWeatherChanged`), `WeatherKind` (byte, add-only) | World/Weather `WeatherDirector` -> HUD, Audio, AI (presentation only; gameplay via `Mod.Weather.Day.*`) |
+| Day modifier write | `IDayModifierWriter.ApplyModifier(mod, bypassCap)` (server) | Economy director -> Weather (and future landlord/curse sources) |
+| Day clock | `IDayClockService` (`Phase` as `DayClockPhase`, `PhaseProgress01`) | Economy director -> lighting, Audio |
 | Impact units | `ImpactUnits` | all (see below) |
 | Session | `ISessionService`, `PlayerInfo` | Networking -> Frontend UI (v0, add-only) |
 | Markers | `MarkerRole`, `MarkerTag`, `LevelMarker` | World places -> owners spawn |
@@ -87,3 +90,9 @@ New `DayParams`: `Bridge.SafeLoadMult`, `Bridge.PlankBreakMult`, `Mud.SpeedMult`
 - `IGoods.ApplyBruise(impulse, ...)` takes DESIGN units. Callers convert raw Unity impulse with `ImpactUnits.ToDesign`. River soak (600) is already design units.
 - `IPlayerHooks.PlayEmote`: the implementer (Customization) emits the emote noise; Player does not.
 - Critters are sold via AI's `CritterGoods` (the single `IGoods` on critter prefabs); MarketPen accepts any `IGoods`.
+
+## Weather (feature/weather)
+- The WeatherDirector (prefab in `Resources/NetworkPrefabs/Weather.asset`, auto-spawned by `WeatherBootstrapper` on the server when a MarketPen/River marker exists) is the single source of truth for weather. It rolls `WeatherDeck.Roll(seed, dayIndex)` at Morning (seed replicated; `-hpWeatherSeed`, `-hpWeather <Kind>` for dev) and applies `Mod.Weather.Day.<Kind>` (ReplaceGroup `Group.Weather`, bypasses the chaos cap so sky and rules never disagree).
+- Economy's old `DrawWeather` returns early whenever an `IWeatherService` is registered (lead-approved minimal edit). The legacy `Mod.Weather.Fog/Storm/Heatwave` assets are no longer drawn while weather runs.
+- New DayParams: `River.CurrentMult` (RiverVolume sweep speed), `Weather.GroundSpeedMult` (global movement source), `Weather.SoakSeconds` (outdoor exposure before `IGoodsSoakable.ApplySoak(PlayerIds.Nature)`), `Weather.WindSpeed`, `Weather.FogDistance`.
+- Rebuild data: `-executeMethod HarvestPanic.Weather.Editor.WeatherAssetBuilder.Build`.

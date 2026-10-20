@@ -8,4 +8,4 @@
 - RiverVolume reads River.CurrentMult.
 
 ## Next
-- EditMode + PlayMode tests, screenshots, docs/architecture/unity-contracts.md update, full test run.
+- Done: tests (EditMode 136/136, PlayMode 27 pass + 8 GPU-only skips), screenshots, contracts doc. Remaining gaps: see report (lightning, washout, critter AlertRadius, roofs-only soak check, player wind push is feedback only).
