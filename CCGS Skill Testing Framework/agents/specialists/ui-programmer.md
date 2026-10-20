@@ -22,7 +22,7 @@ No gate IDs assigned.
 **Input:** The UX spec at `design/ux/inventory-flow.md` defines five slot states: default, hover, selected, empty-slot, locked-slot. Request: "Implement the inventory screen from the UX spec in `design/ux/inventory-flow.md`."
 **Expected behavior:**
 - Reads the UX spec before producing any code
-- Produces implementation using the project's configured UI framework (UI Toolkit, UGUI, UMG, or Godot Control nodes)
+- Produces implementation using the project's configured UI framework (UI Toolkit, UGUI, or Godot Control nodes)
 - Implements every state the spec defines (default, hover, selected, empty-slot, locked-slot) — none dropped, none invented
 - Binds inventory data to UI elements via the project's data model, not hardcoded values
 - Includes doc comments on public UI API per coding standards
@@ -55,7 +55,7 @@ No gate IDs assigned.
 **Input:** Engine context provided: project uses Godot 4.6 with Control node UI. Request: "Implement a scrollable item list for the inventory."
 **Expected behavior:**
 - Uses Godot's `ScrollContainer` + `VBoxContainer` + `ItemList` (or equivalent) pattern, not Canvas or UGUI
-- Does NOT produce Unity UGUI or Unreal UMG code for a Godot project
+- Does NOT produce Unity UI Toolkit or UGUI code for a Godot project
 - Checks the engine version reference (4.6) for any Control node API changes from 4.4/4.5 before using specific APIs
 - Produces GDScript or C# code consistent with the project's configured language
 

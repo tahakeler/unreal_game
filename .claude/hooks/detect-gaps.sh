@@ -73,15 +73,14 @@ fi
 
 # Check if source code exists.
 #
-# All three code roots, not just `src/`. Per .claude/docs/directory-structure.md
-# `src/` is the Godot row; Unity builds from `Assets/` and Unreal from
-# `Source/`. Testing only `src/` meant a Unity project with a full codebase
-# could still be greeted with "NEW PROJECT ... Run: /start".
+# Both code roots, not just `src/`. Per .claude/docs/directory-structure.md
+# `src/` is the Godot row; Unity builds from `Assets/`. Testing only `src/`
+# meant a Unity project with a full codebase could still be greeted with "NEW PROJECT ... Run: /start".
 #
 # Tested directly rather than through resolve_code_root: this check runs before
 # the config helper is guaranteed to be sourced, and "is there any code at all"
 # does not need the engine to be known.
-for _root in src Assets Source; do
+for _root in src Assets; do
   [ -d "$_root" ] || continue
   SRC_CHECK=$(find "$_root" -type f \( -name "*.gd" -o -name "*.cs" -o -name "*.cpp" -o -name "*.c" -o -name "*.h" -o -name "*.hpp" -o -name "*.rs" -o -name "*.py" -o -name "*.js" -o -name "*.ts" \) 2>/dev/null | head -1)
   if [ -n "$SRC_CHECK" ]; then
@@ -161,7 +160,7 @@ fi
 #
 # Checks 1, 3 and 4 were all hardcoded to `src/`, which .claude/docs/directory-
 # structure.md defines as the GODOT row of the code-root table -- Unity uses
-# `Assets/`, Unreal `Source/`. On those two engines every directory test below
+# `Assets/`. On Unity every directory test below
 # failed, the source-file count came back 0, and NONE of the three checks ran.
 # A project with 200 undocumented Unity systems produced the same empty output
 # as a fully documented one.
@@ -183,7 +182,7 @@ fi
 # .claude/rules/skill-authoring.md). Announce it, once, and only when the checks
 # would otherwise have had somewhere to look.
 if [ "$DOC_CHECKS" = true ] && [ -z "$CODE_ROOT" ]; then
-  if [ -d src ] || [ -d Assets ] || [ -d Source ]; then
+  if [ -d src ] || [ -d Assets ]; then
     echo "ℹ️  NOT CHECKED: code exists but the code root is ambiguous (engine.name unset, and the tree does not name one unambiguously)."
     echo "    Checks 1, 3 and 4 (design and architecture docs for existing code) did NOT run."
     echo "    Suggested action: /setup-engine, or set engine.name in project.yaml"

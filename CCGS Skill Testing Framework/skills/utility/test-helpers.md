@@ -5,7 +5,7 @@
 `/test-helpers [system-name | all | scaffold]` generates test helper files in
 the engine's **helper root** — the only place its test runner compiles them:
 `tests/helpers/` on Godot, `Assets/Tests/EditMode/Helpers/` on Unity (inside the
-`EditModeTests` assembly), `Source/<Module>/Private/Tests/Helpers/` on Unreal. It
+`EditModeTests` assembly). It
 writes base assertion and factory helpers (`scaffold`), and a
 `[helper root]/[system]_factory.[ext]` per system built from that system's GDD
 (`[system-name]` or `all`). No argument runs `scaffold` when no helpers exist,
@@ -202,7 +202,7 @@ None. `/test-helpers` is a scaffolding utility. No director gates apply.
 ## Protocol Compliance
 
 - [ ] Reads engine, language and test framework before generating any helper
-- [ ] Writes helpers only to the engine's helper root (`tests/helpers/`, `Assets/Tests/EditMode/Helpers/` or `Source/<Module>/Private/Tests/Helpers/`)
+- [ ] Writes helpers only to the engine's helper root (`tests/helpers/` or `Assets/Tests/EditMode/Helpers/`)
 - [ ] Section-greps the GDD for system helpers (numbered headings such as `## 4. Formulas` included); constants trace to its Formulas section
 - [ ] Godot signal asserts keep their flag in a Dictionary the lambda mutates and connect a variadic lambda (`func(...args)`) — a captured `bool` never changes in the caller, and a one-argument lambda fails on any other signal
 - [ ] Asserts only through the configured framework — never bare `assert()` — and generates nothing when that API cannot be confirmed
@@ -217,8 +217,6 @@ None. `/test-helpers` is a scaffolding utility. No director gates apply.
 
 - `all` mode (one factory per system with test files) follows Case 1 per system;
   not separately tested.
-- Unreal helper generation (`Source/<Module>/Private/Tests/Helpers/`) follows
-  Case 6's pattern for its own helper root; not separately tested. Nor is a
-  Unity project whose PlayMode tests need the helpers too (the skill asks before
-  creating a shared `TestHelpers.asmdef`).
+- A Unity project whose PlayMode tests need the helpers too (the skill asks before
+  creating a shared `TestHelpers.asmdef`) is not tested.
 - A requested system with no GDD is not tested; the skill does not define that path.

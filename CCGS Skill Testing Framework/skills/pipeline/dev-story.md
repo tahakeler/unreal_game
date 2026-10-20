@@ -337,7 +337,7 @@ The `full` column of the file-check table has its own STOP rule, so the
 **Fixture:**
 - `project.yaml` has no `engine` block; `.claude/docs/technical-preferences.md`
   reads `Engine: [TO BE CONFIGURED]`
-- The project has none of `src/`, `Assets/` or `Source/`
+- The project has neither `src/` nor `Assets/`
 - `modes.workflow: minimal`; the story is Type Logic
 
 **Input:** `/dev-story production/epics/[slug]/story-001-[slug].md`
@@ -443,8 +443,7 @@ The `full` column of the file-check table has its own STOP rule, so the
 ## Coverage Notes
 
 - The code root is covered for Godot (`src/`) and Unity (`Assets/`, Case 6) and for
-  an unresolved engine (Case 7). Unreal (`Source/<Module>/<System>/`, with the
-  editor-target build as the parse check) is not given a fixture.
+  an unresolved engine (Case 7).
 - The INCOMPLETE path is Case 9; `parse NOT VERIFIED` when the engine binary is
   unavailable is not given a fixture.
 - The Manifest Version mismatch prompt (`[A]` update / `[B]` keep old rules, which

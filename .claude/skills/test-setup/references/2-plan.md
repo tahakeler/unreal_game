@@ -18,9 +18,9 @@ tests/
   smoke/          — Critical path test list (15-minute manual gate)
   README.md       — Test framework documentation
 
-[Unity/Unreal: unit and integration tests go under the engine's test root
- instead — Unity Assets/Tests/EditMode|PlayMode/, Unreal
- Source/<Module>/Private/Tests/ — because neither compiles code in tests/]
+[Unity: unit and integration tests go under the engine's test root
+ instead — Assets/Tests/EditMode|PlayMode/ — because Unity does not
+ compile code in tests/]
 
 production/qa/
   evidence/       — Screenshot and manual test sign-off records

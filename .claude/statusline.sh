@@ -123,8 +123,8 @@ if [ -z "$stage" ]; then
   fi
 
   # Count source files (language-agnostic) under the engine's code root --
-  # src/, Assets/ or Source/ (directory-structure.md). Counting src/ alone left
-  # every Unity and Unreal project at 0, so this ladder never reached
+  # src/ or Assets/ (directory-structure.md). Counting src/ alone left
+  # every Unity project at 0, so this ladder never reached
   # Production. Capped at the threshold below: the status line runs on every
   # turn, and Unity's Assets/ can hold thousands of files, so find stops at 10.
   code_root=""

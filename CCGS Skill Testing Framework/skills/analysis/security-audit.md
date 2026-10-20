@@ -178,7 +178,7 @@ any review mode.
 - [ ] Release recommendation is NOT ASSESSED — INSUFFICIENT IMPLEMENTATION
 - [ ] Output names what was missing and which skill produces it
 - [ ] CLEAR TO SHIP is not reachable from a scan with nothing to look at
-- [ ] Variant — with no `engine.name`, `technical-preferences.md` at `[TO BE CONFIGURED]`, and both `src/` and `Source/` present, the code root is unresolved: no root is guessed, the code categories read `NOT ASSESSED — code root unresolved`, and the recommendation is never CLEAR TO SHIP
+- [ ] Variant — with no `engine.name`, `technical-preferences.md` at `[TO BE CONFIGURED]`, and both `src/` and `Assets/` present, the code root is unresolved: no root is guessed, the code categories read `NOT ASSESSED — code root unresolved`, and the recommendation is never CLEAR TO SHIP
 
 ---
 
@@ -255,4 +255,3 @@ any review mode.
   they restrict the categories run by the same rules.
 - An absent `engine.name` with a resolvable tree (every grep category NOT
   ASSESSED, with no fallback to the Godot lists) is not tested separately.
-- Unreal follows the same engine table as Case 5 and is not tested separately.

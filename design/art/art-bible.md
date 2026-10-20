@@ -1,7 +1,7 @@
 # HARVEST PANIC — Art Bible
 
 > **Status**: Draft v1 (Art Director, non-interactive pass 2026-10-11). The user approves; items marked **[DECIDE]** need sign-off.
-> **Engine**: UE 5.8.3, Mac (Apple Silicon) primary target. **Base pack**: Stylized Harvest Farm Environment (Emberlight Creations), `/Game/Emberlight`.
+> **Engine**: Unity 6.3 LTS (6000.3.26f1, URP), Mac (Apple Silicon) primary target. **Look reference**: Stylized Harvest Farm Environment (Emberlight Creations). In-project environment art lives in `Assets/ThirdParty/Environment/` (CC0 packs) and `Assets/Art/World/`.
 > **Companions**: `design/art/character-style.md`, `design/art/asset-gap-list.md`.
 
 ## 1. Visual Identity Statement
@@ -21,20 +21,20 @@ Test for any visual decision: *Would it look funny in a 15-second vertical clip 
 
 ## 3. Stylization Rules (matched to Emberlight)
 
-The Emberlight pack sets the baseline: low-to-mid poly, chunky bevels, painted albedo with baked gradient, almost no normal detail (the pack ships a flat `T_DefaultNormal`), world-aligned tiling (`MF_WorldAligned`), card-based wheat and grass (`SM_WheatCard02_Combined`, `NS_Wheat` wind), and a stylized sky BP (`BP_Embersky`).
+The Emberlight look sets the baseline: low-to-mid poly, chunky bevels, painted albedo with baked gradient, almost no normal detail (flat default normal), world-aligned (triplanar) tiling, card-based wheat and grass (vertex-offset wind, `VFX_Wheat` timing), and a stylized gradient sky.
 
 1. **Shape language**: rounded rectangles and soft wedges. Bevels are always visible at play distance. No sharp spikes except on night creatures, where *sharpness = danger*.
 2. **Proportion**: props run about 1.2x real-world scale, so tools read in first-person hands. Animals are **chibi-scaled**: heads 1.3–1.5x, legs short, bodies round (a pig is a bean with legs).
 3. **Surface**: albedo carries the shading. Roughness 0.6–0.9 everywhere, metallic 0 except tool heads (0.6, roughness 0.4). No photoscanned textures in the playable space. Quixel assets must be **re-materialed** with a flat-colour or gradient master (see §3.1) before use.
 4. **Texel density**: 256 px/m for environment, 512 px/m for critters and hero goods, 1024 px/m for first-person held tools. Gradient textures can go lower.
 5. **Outline**: no full-screen outline post (cost, plus it fights the Emberlight painterly look). Use **rim light/fresnel on interactables only** (§6).
-6. **Animation style**: snappy, with anticipation and overshoot. Squash and stretch on grab, drop and land (vertex WPO or bone scale). Crops wobble with a WPO wiggle material.
+6. **Animation style**: snappy, with anticipation and overshoot. Squash and stretch on grab, drop and land (Shader Graph vertex offset or bone scale). Crops wobble with a vertex-offset wiggle shader.
 
-### 3.1 Master materials (owned by technical-artist; spec here)
-- `M_HP_StylizedOpaque`: albedo × gradient tint, optional world-aligned (reuse `MF_WorldAligned`), roughness scalar, emissive mask, **InteractRim** param, **BruiseMask** (dynamic decal channel), **WetMud** layer (weather).
-- `M_HP_Foliage`: two-sided, wind (match `NS_Wheat` timing), dither LOD fade, colour variation by world position.
-- `M_HP_Critter`: as Opaque, plus a squash/stretch WPO, a **ValueGlint** sparkle mask, and **Muddy/Wet/Feathered** overlays.
-- `M_HP_Reskin`: a palette-swap material driven by a 4-colour Material Parameter Collection per region, so the same Emberlight meshes re-skin for Regions 2–5.
+### 3.1 Master shaders (URP Shader Graph; owned by technical-artist; spec here)
+- `M_HP_StylizedOpaque`: albedo × gradient tint, optional world-aligned (triplanar Sub Graph), roughness scalar, emissive mask, **InteractRim** param, **BruiseMask** (URP Decal Projector channel), **WetMud** layer (weather).
+- `M_HP_Foliage`: two-sided, wind (match `VFX_Wheat` timing), dither LOD cross-fade, colour variation by world position.
+- `M_HP_Critter`: as Opaque, plus a squash/stretch vertex offset, a **ValueGlint** sparkle mask, and **Muddy/Wet/Feathered** overlays.
+- `M_HP_Reskin`: a palette-swap material driven by 4 global shader colour properties per region (`Shader.SetGlobalColor`, set from a region `ScriptableObject`), so the same environment meshes re-skin for Regions 2–5.
 
 ## 4. Color System
 
@@ -48,9 +48,9 @@ The Emberlight pack sets the baseline: low-to-mid poly, chunky bevels, painted a
 | Danger (night) | Sick lime | `#B7F04A` | creature eyes, Scarecrow glint, cursed crop glow |
 | Landlord / debt | Royal plum | `#5B2A6E` | Landlord, quota UI, Sunday screens |
 
-**Rule:** gold and red are **reserved**. Environment art may not use saturated gold or red at more than 30% saturation, so money and loss always pop. (Emberlight barns are red. Desaturate barn red to a brick `#9C4A3A` in the reskin MPC, **[DECIDE]**.) Note the bull's "red hat" trigger: red hats are in-world exceptions and are meant to draw the eye.
+**Rule:** gold and red are **reserved**. Environment art may not use saturated gold or red at more than 30% saturation, so money and loss always pop. (Emberlight barns are red. Desaturate barn red to a brick `#9C4A3A` in the reskin palette, **[DECIDE]**.) Note the bull's "red hat" trigger: red hats are in-world exceptions and are meant to draw the eye.
 
-### 4.2 Region palettes (MPC `MPC_RegionPalette`: Ground, Foliage, Wood, Accent)
+### 4.2 Region palettes (`RegionPalette` global shader colours: Ground, Foliage, Wood, Accent)
 | Region / Town | Ground | Foliage | Wood | Accent | Mood |
 |---|---|---|---|---|---|
 | 1 Grandpa's Farm / Muddlebury | `#A88A5A` warm soil | `#7FA34A` | `#8A6040` | `#E9B949` harvest | Golden afternoon, Emberlight default |
@@ -62,40 +62,42 @@ The Emberlight pack sets the baseline: low-to-mid poly, chunky bevels, painted a
 Critter and goods colours are **fixed across regions**. Only the environment shifts, which keeps the V2 contrast rule true.
 
 ### 4.3 Time of day (per region, driven by the day-loop sundown timer)
-| Phase | Sun colour / intensity (lux) | Sky light | Fog | Grade |
+| Phase | Sun colour / intensity (reference lux) | Ambient | Fog | Grade |
 |---|---|---|---|---|
 | Morning | `#FFE2B8` / 6 | 1.0, warm | 0.01, light gold | Sat 1.05, temp 6000K |
 | Midday | `#FFF3DC` / 8 | 1.0 | 0.005 | Sat 1.1, neutral |
 | Dusk (last 20%) | `#FF9A6A` / 3, low angle 8° | 0.7, violet `#8A7AB8` | 0.02 coral | Sat 1.15, shadows tinted violet |
 | Night | Moon `#9EC4FF` / 0.4 | 0.25, teal `#1E3A4A` | 0.035 teal-black | Sat 0.8, shadows teal, highlights left alone, so lanterns stay warm |
 
-Night rule: **players must never be in the dark without a source.** Every player has a hat or handheld lantern pool (point light radius 6 m, `#FFB866`, 2000 cd, no shadow casting on low scalability). Darkness is for the *edges* of the screen.
+Night rule: **players must never be in the dark without a source.** Every player has a hat or handheld lantern pool (point light radius 6 m, `#FFB866`, 2000 cd, no shadow casting on the Low/Med quality levels). Darkness is for the *edges* of the screen.
 
-## 5. Lighting and Post-Process Recipe (UE 5.8)
+URP lights use unitless intensity, not physical lux/candela: treat the lux, cd and EV100 values in this section as relative targets and tune the matching URP intensities in-editor so the ratios between phases hold.
 
-**Default target: "Mac Medium"**, Apple M1/M2 base, 1080p at 60 fps, with Lumen off.
+## 5. Lighting and Post-Process Recipe (Unity 6.3 URP)
+
+**Default target: "Mac Medium"**, Apple M1/M2 base, 1080p at 60 fps, with no real-time GI.
 
 | Setting | Mac Low/Med | Mac High (M-Pro/Max) |
 |---|---|---|
-| Global illumination | Lumen **off**; Sky Light real-time capture + DFAO off; baked-feel via Sky Light 1.0 and Directional | Lumen GI **Software**, Scene Detail 1.0, Final Gather 1.0 |
-| Reflections | Screen Space | Lumen reflections low (roughness cutoff 0.4) |
-| Shadows | Virtual Shadow Maps **off**; CSM 3 cascades, dist 6000 cm, far shadow off | VSM on, distance 12000 cm |
-| Nanite | Off for foliage (cards + WPO); allowed on static rock/barn if ≥ 2x perf win measured | Same |
-| AA | TSR at 67% screen percentage (Low), 80% (Med) | TSR 100% |
+| Global illumination | No real-time GI; ambient from Skybox/Gradient (intensity 1.0) + Directional; baked lightmaps and light probes where the layout is static | Same, plus Adaptive Probe Volumes and SSAO |
+| Reflections | Reflection probes (baked) | Reflection probes + probe blending |
+| Shadows | 3 shadow cascades, max distance 60 m, soft shadows low | 4 cascades, max distance 120 m, soft shadows high |
+| Geometry | LOD Groups on everything; foliage as cards + vertex-offset wind; GPU instancing / SRP Batcher on | Same |
+| AA / scaling | FXAA or SMAA; render scale 0.67 (Low), 0.8 (Med) with FSR upscaling | TAA or SMAA; render scale 1.0 |
 
-**Post-process volume (global, unbound)**
-- Exposure: Manual, EV100 = 11 day / 9 dusk / 6 night (interpolated by the day-loop). No auto-exposure, because readability must not drift.
+**Global Volume (URP post-processing, `VolumeProfile`)**
+- Exposure: fixed (URP has no auto-exposure); Color Adjustments Post Exposure stepped day / dusk / night (interpolated by the day-loop), matching EV100 11 / 9 / 6. Readability must not drift.
 - Bloom: Standard, intensity 0.4, threshold 1.2 (lanterns and coin glints bloom; the sky does not).
 - Vignette 0.3 (0.45 at night). Chromatic aberration 0. Film grain 0 (it ruins clip compression).
-- Color grading: Saturation 1.1, Contrast 1.05, Shadows tint per §4.3. Tone curve: Filmic default, Toe 0.6 (lifted blacks so night stays readable).
+- Color grading: Saturation 1.1, Contrast 1.05, Shadows tint per §4.3 (Shadows Midtones Highlights). Tonemapping: Neutral or ACES, with Lift raised slightly (lifted blacks so night stays readable).
 - Motion blur **0** (first-person comedy clips must be crisp; also reduces motion sickness).
-- Exponential Height Fog + Volumetric fog **only on High**; on Low/Med, the fog weather twist uses height fog density 0.08 plus a card-based mist ring.
-- Directional light: Source Angle 2° (soft), cast shadows; Sky Atmosphere optional (Emberlight `BP_Embersky` preferred, cheaper).
+- Height/volumetric fog **only on High** (custom fog shader); on Low/Med, the fog weather twist uses URP distance fog (density 0.08) plus a card-based mist ring.
+- Directional light: soft shadows, cast shadows; procedural skybox or a gradient sky material (cheaper than a physical sky).
 
 ## 6. Readability Rules (first-person co-op)
 
 1. **Value contrast test**: grayscale the frame. Every critter and good must sit at least 2 value steps (on a 10-step scale) from what's directly behind it. Pigs are pink `#F2A3A0` against brown soil; chickens are white against green; goats are cream with dark horns.
-2. **Critter pop kit**: (a) saturation +20% over environment, (b) fresnel rim `#FFF4D6` at 0.3 intensity when within 15 m and fleeing, (c) a **dust kick** VFX trail when running, so motion is readable even in tall wheat. In tall crops, the critter's head or ears must clear the crop line, or the wheat must part visibly (WPO interaction).
+2. **Critter pop kit**: (a) saturation +20% over environment, (b) fresnel rim `#FFF4D6` at 0.3 intensity when within 15 m and fleeing, (c) a **dust kick** VFX trail when running, so motion is readable even in tall wheat. In tall crops, the critter's head or ears must clear the crop line, or the wheat must part visibly (vertex-offset interaction).
 3. **Goods value readability**: value is told by **tier glint + size**, not by text.
    | Tier | Base $ | Visual |
    |---|---|---|
@@ -137,33 +139,33 @@ All VFX are **cartoon-graphic**: flat-shaded sprite or mesh particles, 2–4 col
 | `vfx_spit_splat` | llama spit | screen-space green splat (2 s) | UI overlay |
 | `vfx_value_glint` | goods tier (§6.3) | star sparkle | ≤ 3 |
 
-Rules: impact VFX must spawn within 1 frame of the physics event (sell the comedy); max on-screen VFX budget: 300 particles total on Mac Med, GPU sim only on High.
+Rules: impact VFX must spawn within 1 frame of the physics event (sell the comedy); max on-screen VFX budget: 300 particles total on Mac Med; Particle System (CPU) on Low/Med, VFX Graph (GPU) only on High.
 
 ## 9. Asset Standards
 
-- **Naming**: `[category]_[name]_[variant]_[size].[ext]` for source files; UE assets keep the UE prefix convention: `SM_`, `SK_`, `M_`, `MI_`, `T_`, `NS_`, `WBP_`, e.g. `SK_Critter_Pig`, `MI_Critter_Pig_Muddy`, `T_UI_Btn_Primary_Hover`.
-- **Folders**: new art goes in `/Game/HarvestPanic/Art/{Characters,Critters,Goods,Environment,VFX,UI}`. Never edit `/Game/Emberlight` in place. Duplicate into `/Game/HarvestPanic/Art/Environment/EmberlightOverrides` instead.
-- **Textures**: sRGB for albedo, linear for masks, BC7 for albedo, BC5 normal (only if needed), packed ORM. Max 2048 for hero, 1024 for critters, 512 for props.
+- **Naming**: `[category]_[name]_[variant]_[size].[ext]` for source files; Unity assets keep a prefix convention: `SM_` (static model), `SK_` (rigged model), `M_` (material; variants as `M_<base>_<variant>`), `T_` (texture), `SG_` (Shader Graph), `VFX_` (VFX Graph / Particle System prefab), `UI_` (UXML/USS), e.g. `SK_Critter_Pig`, `M_Critter_Pig_Muddy`, `T_UI_Btn_Primary_Hover`.
+- **Folders**: new art goes in `Assets/Art/{Characters,Critters,Goods,World,VFX,UI}`. Never edit third-party packs in `Assets/ThirdParty/` in place. Duplicate into `Assets/Art/World/` (or the matching `Assets/Art/` folder) instead.
+- **Textures**: sRGB for albedo, linear (sRGB off) for masks, BC7 for albedo, BC5 normal (only if needed), packed mask map (metallic/occlusion/smoothness). Max 2048 for hero, 1024 for critters, 512 for props.
 
 ## 10. Performance Budgets (Mac Medium, 1080p, 60 fps = 16.6 ms)
 
 | Item | Budget |
 |---|---|
 | GPU frame | ≤ 12 ms (leave headroom for voice/net) |
-| Draw calls | ≤ 2,500 visible (instance fences, crops, hay with HISM/PCG) |
-| Triangles on screen | ≤ 2.5 M (non-Nanite) |
+| Draw calls | ≤ 2,500 visible (instance fences, crops, hay with GPU instancing / SRP Batcher) |
+| Triangles on screen | ≤ 2.5 M |
 | Critter | ≤ 6k tris LOD0, 3 LODs, ≤ 50 bones, 1 material (2 max) |
 | Player character | ≤ 15k tris incl. cosmetics, ≤ 3 materials |
 | Hat/back cosmetic | ≤ 1.5k tris, shares a cosmetics atlas |
 | Held tool (first-person) | ≤ 3k tris |
-| Simultaneous active critters | 30 skeletal, URO (update rate optimisation) beyond 25 m |
+| Simultaneous active critters | 30 skinned; Animator culling mode `Cull Update Transforms` when off-screen, and reduced animation update rate beyond 25 m |
 | Dynamic lights | ≤ 4 shadowed, ≤ 16 unshadowed (player lanterns don't cast shadows on Med) |
 | Texture pool | ≤ 1.5 GB (8 GB unified-memory Macs) |
 | Particles | ≤ 300 on screen (§8) |
 
-Scalability presets must ship as `Mac Low/Med/High` with Lumen, VSM and volumetrics only in High.
+Quality levels (URP Asset per level) must ship as `Mac Low/Med/High` with probe volumes, SSAO and volumetric fog only in High.
 
 ## 11. Open Decisions
 1. **[DECIDE]** Desaturate the Emberlight barn red to brick (recommended) or keep it as a landmark exception.
-2. **[DECIDE]** Lumen on High only (recommended) or no Lumen at all, for a single lighting path that is easier to QA.
+2. **[DECIDE]** Adaptive Probe Volumes on High only (recommended) or none at all, for a single lighting path that is easier to QA.
 3. **[DECIDE]** Fresnel rim on fleeing critters (recommended) vs. purely relying on saturation; the rim is cheap but slightly "gamey".

@@ -1,7 +1,7 @@
 # Game Concept: HARVEST PANIC
 
 **Status:** Final concept, revision 2: reworked into a long-form game (Creative Director). The user makes the final call.
-**Engine:** UE 5.8 on Apple Silicon (Mac). Online co-op for 2–4 players with proximity voice.
+**Engine:** Unity 6.3 LTS (URP) on Apple Silicon (Mac). Online co-op for 2–4 players with proximity voice.
 
 ## Hook
 Your crew inherited a cursed, debt-ridden farm from Grandpa. The Landlord, a smiling man in a too-tall hat, wants his money weekly. Round up feral livestock and runaway crops, haul them across the rickety bridge to market, and survive the nights when the farm wakes up. You can pay off the debt, but you'll never escape the chaos.
@@ -32,7 +32,7 @@ Your crew inherited a cursed, debt-ridden farm from Grandpa. The Landlord, a smi
 
 ### Layer 1: The Day (10–15 minutes, the core loop)
 1. **Morning:** read the market order and the day's twist (weather or a curse).
-2. **Round up:** chase fleeing livestock and crops (AdaptivePathfinding) with nets, lassos and lures.
+2. **Round up:** chase fleeing livestock and crops (NavMesh-driven flee AI) with nets, lassos and lures.
 3. **Haul:** load the wagon or carry by hand across the bridge to market. Bruises reduce value.
 4. **Dusk return:** an optional bonus haul at night, which is when Night Creatures appear.
 
@@ -43,7 +43,7 @@ Your crew inherited a cursed, debt-ridden farm from Grandpa. The Landlord, a smi
 
 ### Layer 3: The Debt Campaign (weeks to months of play)
 - Paying off the farm takes about 4–6 weeks of in-game Sundays per **Region**.
-- Each paid region unlocks the next **market town** and biome, each with new species, curses and Landlord twists. Biomes are built from the owned packs plus free Quixel content, reskinned and rearranged with PCG:
+- Each paid region unlocks the next **market town** and biome, each with new species, curses and Landlord twists. Biomes are built from the owned packs plus free CC0 content (Kenney, Quaternius), reskinned and rearranged with seeded procedural layouts:
   1. Grandpa's Farm (Harvest pack plus the Bridge pack)
   2. Misty Riverlands (Bridge/Nature pack used as the main map, with rafts)
   3. Haunted Orchard (night-heavy, owned assets with a fog and lighting pass)
@@ -84,32 +84,32 @@ Your crew inherited a cursed, debt-ridden farm from Grandpa. The Landlord, a smi
 | **Update 2: Haunted Orchard** | EA +5–6 months | Region 3, night-focused, 3 new creatures |
 | **Ongoing** | | Seasonal events (Harvest Fest, Halloween), cosmetics, community-voted creatures, mod support |
 
-Content scales by **combining systems** (species × curse × weather × Landlord event × PCG layout), not by authoring levels.
+Content scales by **combining systems** (species × curse × weather × Landlord event × procedural layout), not by authoring levels.
 
 ## Owned Asset Coverage
 
 | Need | Covered by |
 |---|---|
-| Farm map: barns, silos, fences, fields, crops, props | **Stylized Harvest Farm Environment** (Emberlight Creations) |
-| Bridge chokepoint, river, cliffs, foliage, transition biome | **Ready Map Vol 2 – Bridge Environment / Nature** (Six Sides Studios) |
-| Critter AI: fleeing, cornering, climbing, avoiding dynamic obstacles | **AdaptivePathfindingSystem v2.06** (NordVader), layered under StateTree flee/lure behaviors |
-| Physics carrying, wagon, ragdolls, bridge sway | UE 5.8 Chaos Physics with physics constraints (engine built-in) |
-| Prop scatter and layout variation | UE PCG framework (engine built-in) |
+| Farm map: barns, silos, fences, fields, crops, props | **Stylized Harvest Farm Environment** (Emberlight Creations) as the look reference; in-project farm art is CC0 (Kenney/Quaternius) under `Assets/ThirdParty/` until a Unity/FBX version of the pack is confirmed |
+| Bridge chokepoint, river, cliffs, foliage, transition biome | **Ready Map Vol 2 – Bridge Environment / Nature** (Six Sides Studios), if a Unity/FBX format is available on Fab; otherwise CC0 substitutes |
+| Critter AI: fleeing, cornering, climbing, avoiding dynamic obstacles | Unity **AI Navigation** package (`NavMeshSurface`, `NavMeshAgent`, `NavMeshObstacle` carving), layered under C# FSM flee/lure behaviors |
+| Physics carrying, wagon, ragdolls, bridge sway | Unity built-in 3D physics (PhysX) with joints (engine built-in) |
+| Prop scatter and layout variation | Custom seeded C# scatter/layout tool (Unity has no built-in PCG framework) |
 
-## Gaps to Fill (free Fab/Quixel or engine content)
+## Gaps to Fill (free Fab/Asset Store/CC0 or engine content)
 
 | Gap | Plan |
 |---|---|
-| Player characters | A stylized farmer character from the free Fab content, or the UE Mannequin with hats and overalls. Must match the stylized art direction. |
-| Player animations | UE Game Animation Sample (free) or Lyra animation sets, with motion matching. Add custom carry poses using Control Rig and IK. |
+| Player characters | A stylized farmer character from the free Fab content, or a Humanoid base mesh with hats and overalls. Must match the stylized art direction. |
+| Player animations | Free Humanoid (Mecanim) animation sets, retargeted through the Humanoid avatar. Add custom carry poses using the Animation Rigging package and IK. |
 | Livestock meshes and animations (pig, chicken, goat, cow) | Free stylized animal packs on Fab. **This is the highest-risk gap** and must be checked first. |
 | Living crop "creatures" | Reuse the farm pack's crop meshes with procedural legs, or squash-and-stretch with a vertex wiggle material. No new rig needed. |
-| Audio: animal SFX, footsteps, ambience, UI | Free Fab audio packs and Quixel/Fab freebies. MetaSounds for bruise/impact variation. |
-| Proximity voice | EOS Voice with 3D attenuation, or Steam with UE VOIP. Check Mac support. |
-| Tools (net, lasso, feed bucket) | Free Quixel props plus simple kitbash. Lasso uses the Cable component. |
-| UI | UMG with a stylized font from Google Fonts. |
+| Audio: animal SFX, footsteps, ambience, UI | Free Fab/Asset Store audio packs and CC0 freebies. C# sound-event players (`AudioSource` + `AudioMixer`) for bruise/impact variation. |
+| Proximity voice | Steam voice (Facepunch.Steamworks) played through 3D `AudioSource`s. Check Mac support. |
+| Tools (net, lasso, feed bucket) | Free CC0 props plus simple kitbash. Lasso uses a `LineRenderer` with a joint chain. |
+| UI | UI Toolkit (uGUI for world-space UI) with a stylized font from Google Fonts. |
 
-**Mac risk notes:** before committing, confirm on Mac that the pathfinding plugin compiles for UE 5.8 (arm64) and that EOS voice works. Avoid Nanite-only or Lumen-heavy setups on lower-end Macs and keep the art stylized and light.
+**Mac risk notes:** before committing, confirm on Mac (arm64) that the Steam transport and Steam voice work. Avoid heavy real-time GI and volumetric setups on lower-end Macs and keep the art stylized and light.
 
 ## 2-Week Vertical Slice
 **Goal:** Prove that chasing fleeing animals and carrying them across the bridge together is fun with 2–4 players on proximity voice.
@@ -117,14 +117,14 @@ Content scales by **combining systems** (species × curse × weather × Landlord
 **Week 1: Feel**
 - Listen-server session for 2–4 players with proximity voice.
 - Grab, carry and throw with physics handles, where carry speed scales with the number of hands. Ragdolls on big impacts.
-- One critter (the **pig**) uses AdaptivePathfinding to flee from players, take shortcuts, and get lured by a feed bucket.
+- One critter (the **pig**) uses the NavMesh to flee from players, take shortcuts, and get lured by a feed bucket.
 - One physics wagon.
 
 **Week 2: Loop**
-- One map: a farm area from the Harvest pack joined to the bridge and river from the Ready Map pack (hand placed, no PCG yet).
+- One map: a farm area from the Harvest pack joined to the bridge and river from the Ready Map pack (hand placed, no procedural layouts yet).
 - Two more goods: **chickens** (scatter swarm) and a **prize pumpkin** (4-person carry, fragile).
 - A manifest, a sundown timer, the market zone, and a payout screen with an itemized bruise report and instant restart.
 - One bridge hazard: a plank that breaks when overloaded.
 
 **Success criteria:** In a 4-player playtest, players laugh within 3 minutes, at least one shareable bridge disaster happens without prompting, and at least 3 of 4 players ask to go again.
-**Out of scope:** upgrades, modifiers, PCG layouts, extra species, progression, polish.
+**Out of scope:** upgrades, modifiers, procedural layouts, extra species, progression, polish.

@@ -62,11 +62,6 @@ and any `test-results/` you saved runs into, for `.xml` files.
 For Unity projects: game-ci test runner outputs NUnit XML to `test-results/`
 by default.
 
-For Unreal projects: automation logs go to `Saved/Logs/`. Grep for
-`Result={Success}` and `Result={Fail}` — each test prints
-`Test Completed. Result={<status>}`
-(`docs/engine-reference/unreal/current-best-practices.md` (removed — this repo is Unity-only), "Command Line").
-
 ### Option B — Local log files
 
 If a path argument is provided, read that file directly.
@@ -104,7 +99,6 @@ reads):
 **Plain text logs**:
 - Grep for pass/fail patterns:
   - Godot: `PASSED` / `FAILED` adjacent to test names
-  - Unreal: `Result={Success}` / `Result={Fail}`
   - Unity: `Test passed` / `Test failed`
 
 Build a table: `test_id → [run1_result, run2_result, run3_result, ...]`
@@ -166,9 +160,6 @@ Skip mechanisms, by engine — name only the one for the project's engine:
   cover them. Log it in the quarantine section and ask the user how their C#
   tests are skipped; do not invent an attribute.
 - **Unity (NUnit)**: `[Ignore("flaky: [cause]")]` — NUnit 3 requires the reason
-- **Unreal**: **NOT SOURCEABLE** — `docs/engine-reference/unreal/` (removed — this repo is Unity-only) documents no way
-  to skip an automation test. Log it in the quarantine section and ask the user
-  how their CI excludes a test; do not invent a flag.
 
 **Investigate and fix soon (Moderate):**
 > "This test is intermittently unreliable. Root cause appears to be [cause].

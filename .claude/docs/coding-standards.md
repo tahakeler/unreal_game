@@ -95,4 +95,4 @@ falling back to the defaults above when it is absent.
 - Engine-specific CI commands:
   - **Godot**: `godot --headless -s -d --remote-debug tcp://127.0.0.1:0 res://addons/gdUnit4/bin/GdUnitCmdTool.gd -a res://tests --ignoreHeadlessMode`
   - **Unity**: `game-ci/unity-test-runner@v4` (GitHub Actions)
-  - **Unreal**: headless runner with `-nullrhi` flag
+  - **Unity (local/CLI)**: `Unity -batchmode -nographics -projectPath HarvestPanic -runTests -testPlatform EditMode` (and `PlayMode`)

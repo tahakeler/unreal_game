@@ -15,7 +15,7 @@ paths:
   the `[system]_[name].json` file convention one line above and the engine idiom
   every other standard in this repo uses.
 
-  > **On Unity and Unreal this costs you a mapping layer — budget for it rather
+  > **On Unity this costs you a mapping layer — budget for it rather
   > than changing the keys.** `JsonUtility` binds by *exact field name*, and C#
   > fields are `camelCase` per `naming.variables`, so a snake_case file cannot bind
   > directly to the type that consumes it. Use a private nested DTO whose fields

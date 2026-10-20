@@ -10,9 +10,9 @@ model: sonnet
 # Engine Setup
 
 > **This repo is Unity-only (HARVEST PANIC, Unity 6.3 LTS 6000.3.26f1, URP, C#).**
-> Godot and Unreal specialist agents, reference docs and the Godot language
-> config were removed. The Godot/Unreal branches below are kept for upstream
-> parity but are unsupported here — only follow the Unity paths.
+> Godot specialist agents, reference docs and the Godot language config were
+> removed. The Godot branches below are kept for upstream parity but are
+> unsupported here — only follow the Unity paths.
 
 When this skill is invoked:
 

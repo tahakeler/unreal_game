@@ -55,9 +55,6 @@ less.** A fix release for 1.1.2.
   checks at commit; staged paths are now read from the project folder. **A JSON
   data file stored with Git LFS** is checked through its working copy instead of
   being blocked as invalid, and one with no working copy is named as skipped.
-- **`/smoke-check` no longer waits forever on Unreal.** The version check ran
-  `UnrealEditor-Cmd -version`, which opens the editor and never returns. It now
-  reads the engine's `Build.version` file.
 - **Registry lookups.** `/design-system` finds the entities other systems
   reference it from; the requirement lookups in `/create-stories`, `/dev-story`
   and `/story-done` no longer match `combat-ai` when asked for `combat`; the
@@ -110,7 +107,7 @@ less.** A fix release for 1.1.2.
 
 ## [1.1.2] — 2026-09-29
 
-**The default path works end to end, Unity and Unreal get the same care as
+**The default path works end to end, Unity gets the same care as
 Godot, and the checks tell you what they found.** A fix release for bugs in
 1.1.1, each reproduced before it was fixed.
 
@@ -188,21 +185,6 @@ Godot, and the checks tell you what they found.** A fix release for bugs in
   is no longer read as this run's. The project coherence check finds the editor
   from `commands.test` and reads `6000.3` and `6.3` as the same Unity, so a
   correctly set up project no longer reports its version as different.
-- **Unreal tests compile and are found.** The `qa-tester` template used a flag
-  that does not exist, and tests went in `Source/Tests/`, which is never built.
-  CI and `/smoke-check` build the editor target first: a fresh checkout has no
-  compiled game module, and the editor quit before running a test. The CI
-  template asks for a Windows self-hosted runner; it asked for any self-hosted
-  runner, so a repository with a Linux one could send the job there. Its steps
-  also run when the runner's folder has a space in it, which failed every step
-  before. The test
-  command prints its results — run from a shell, the editor printed nothing, so
-  "no tests matched" could not be told from a failure. Every Unreal command
-  names the editor by its full path and gives the project as an absolute path:
-  UE 5.7 does not find a relative `.uproject`, so the test, run and smoke
-  commands exited 1 before doing anything. A failing test and a run that
-  matched nothing both exit 255, so `/smoke-check` now reads the output to tell
-  them apart.
 - **`/smoke-check` runs your tests first**, and reports NOT ASSESSED when nothing
   ran instead of passing. At `qa.level: minimal`, where tests are waived, a
   project with no game tests is checked by its build, launch and critical paths
@@ -220,10 +202,8 @@ Godot, and the checks tell you what they found.** A fix release for bugs in
   editor the same way — it reported "no Godot binary" on a correct project —
   and looks for Unity Hub's editors on macOS and Linux as well as Windows.
   [UPGRADING.md](UPGRADING.md#v111--v112) says how to update a 1.1.x project.
-- **Engine skills read each engine's own output.** `/test-flakiness` looked for
-  `Result: Success`, which Unreal never prints, and read Unity results with a
-  JUnit pattern, so every test read as consistent; it now reads Unreal's
-  `Result={…}`, Unity's NUnit `<test-case>` results and gdUnit4's `reports/`
+- **Engine skills read each engine's own output.** `/test-flakiness` read Unity results with a
+  JUnit pattern, so every test read as consistent; it now reads Unity's NUnit `<test-case>` results and gdUnit4's `reports/`
   folder. `/test-helpers`' Godot signal asserts could never see a signal; they
   now record it in a Dictionary. `/content-audit` scans `Assets/` on Unity, where
   it found no content at all. The Godot and Unity references gain sourced
@@ -231,20 +211,18 @@ Godot, and the checks tell you what they found.** A fix release for bugs in
   `RecordRenderGraph` is URP's and documents HDRP's `CustomPass`, and
   `unity-shader-specialist` no longer applies the URP one to HDRP.
   `godot-csharp-specialist` uses `[Export(PropertyHint.Range, …)]` — there is
-  no `[ExportRange]` — and `ue-gas-specialist` and the GAS reference name the
-  base-value clamp hooks. Unreal test names follow the root `commands.test`
-  filters on.
-- **Unity and Unreal get the rules and checks Godot gets.** The coding rules for
+  no `[ExportRange]`.
+- **Unity gets the rules and checks Godot gets.** The coding rules for
   gameplay, engine, AI, network, UI, shader, data and test code now load in
-  `Assets/` and `Source/` projects. Broken data JSON in `Assets/**/Data/` and
-  `Content/**/Data/` is caught, PascalCase assets are no longer flagged, the
-  data-file rule applies to JSON only (not C# or C++ in a `Data/` folder), the
+  `Assets/` projects. Broken data JSON in `Assets/**/Data/` is caught,
+  PascalCase assets are no longer flagged, the
+  data-file rule applies to JSON only (not C# in a `Data/` folder), the
   test rule names tests the way each engine's language does,
   `/tech-debt`, `/launch-checklist` and `/release-checklist` stop reporting "no
   `src/`", the status line reaches Production, and session start no longer reads
-  every texture looking for TODOs. The Unity and Unreal code rules load on code
-  files only, and the shader, gameplay and engine rules give examples for all
-  three engines. Skill examples, templates and the rules reference name each
+  every texture looking for TODOs. The Unity code rules load on code
+  files only, and the shader, gameplay and engine rules give examples for each
+  engine. Skill examples, templates and the rules reference name each
   engine's code folder instead of only Godot's `src/`, and the guide's
   `/localize` and `/reverse-document` examples are ones that run.
 - **Test results mean what they say.** Each gdUnit4 exit code maps to a verdict —
@@ -255,26 +233,15 @@ Godot, and the checks tell you what they found.** A fix release for bugs in
   `qa-tester` Unity template compiles, and test output is gitignored. The Godot
   CI template asks for `checks: write`: without it the job failed on every new
   repository, even with every test passing. If you protect `main`, require the
-  job's check, not `test-results`, which passes even when a test fails. The `qa-tester` Unreal template
-  compiles as filled in and gives each test its own class — two tests that
-  shared one failed to link — and the Godot one frees its subject.
+  job's check, not `test-results`, which passes even when a test fails. The `qa-tester`
+  Godot template frees its subject.
 - **Engine reference corrections.** Godot's `@abstract` example gave an abstract
   method a body, which does not parse; the 4.4 `Texture2D` → `Texture` note now
   names the `Shader` default-texture methods it applies to, not the shading
-  language. Unreal's server RPC sample declares `WithValidation`, which its
-  `_Validate` function needs. The Unity Addressables migration example keeps its
+  language. The Unity Addressables migration example keeps its
   handle and releases it. `godot-gdextension-specialist` had the compatibility
   direction backwards: an extension built for an older Godot loads in a newer
   one, not the reverse.
-- **Unreal on Linux and macOS.** The Unreal commands named only Windows paths.
-  `/setup-engine` now writes Linux commands on Linux (`RunUAT.sh`,
-  `Engine/Binaries/Linux/UnrealEditor`), and `/smoke-check`, `/dev-story` and
-  `/test-setup` build the editor target there with `Build.sh`; on macOS it writes
-  the build command and leaves test, run and smoke for you to set, because Epic documents no
-  command-line editor inside `UnrealEditor.app`. `/smoke-check` picks the
-  commands for the machine it runs on and reports NOT ASSESSED for Unreal tests
-  on macOS until `commands.test` is set. The sources are in
-  `docs/engine-reference/unreal/current-best-practices.md`.
 
 ### Checks and hooks
 
@@ -437,7 +404,7 @@ Godot, and the checks tell you what they found.** A fix release for bugs in
   `creative-director` preloaded `/design-review` and `/brainstorm`, which need
   tools those agents don't have, and `producer` preloaded the skills that spawn
   it for a gate. Those preloads are gone.
-- **Unity and Unreal agents check their engine reference** before suggesting an
+- **Unity agents check their engine reference** before suggesting an
   API, as the Godot agents already did, and every engine agent asks which
   editor is installed when the pin says `NOT DETERMINED`. `godot-specialist` no
   longer tells itself to use WebSearch, a tool it doesn't have.
@@ -556,11 +523,11 @@ Godot, and the checks tell you what they found.** A fix release for bugs in
 - **`/skill-improve` no longer discards your uncommitted edits.** It reverted a
   rejected change with `git checkout`, dropping every edit to the skill since
   your last commit; it now restores the copy it saved.
-- **Test helpers compile on Unity and Unreal.** `/test-helpers` put them under
-  `tests/helpers/`, which neither engine builds; they now go in each engine's
+- **Test helpers compile on Unity.** `/test-helpers` put them under
+  `tests/helpers/`, which Unity does not build; they now go in each engine's
   test folder, and the Godot scene helper no longer extends a test suite.
   `/test-flakiness` names quarantine mechanisms from each test framework's own
-  documentation, and says Unreal's is not covered.
+  documentation.
 - **Templates match what the skills write.** The reverse-documentation GDD
   template has all eight standard sections. The art bible template had a
   different set of sections from the nine `/art-bible` writes; it now has those
@@ -571,8 +538,7 @@ Godot, and the checks tell you what they found.** A fix release for bugs in
   `/ux-review` asks for. Templates and skills use the same section names, and
   `/art-bible` and `/ux-design` list an existing document's sections by them.
 - **`/create-epics` works at `minimal`**, building epics from the brief instead
-  of stopping for GDDs. `/setup-engine` asks whether an Unreal project's
-  gameplay lives mostly in C++ or in Blueprints, and other skills fix smaller dead ends: `/onboard`
+  of stopping for GDDs. Other skills fix smaller dead ends: `/onboard`
   without a role, `/playtest-report` without an argument, a failed smoke test
   in `/hotfix`, and `/retrospective` pointing at the read-only `/sprint-status`.
 - **Directors can say they could not judge.** A director gate can now answer
@@ -586,8 +552,7 @@ Godot, and the checks tell you what they found.** A fix release for bugs in
   the resolved mode; `/settings` changes it when you mean to. It also numbers the
   new sprint after the last one and carries unfinished stories over.
 - **Checks that could pass on nothing now say so.** `/asset-audit` said
-  COMPLIANT with zero assets scanned — and on every Unreal project, whose assets
-  live in `Content/`; `/balance-check` said HEALTHY with no targets to compare;
+  COMPLIANT with zero assets scanned; `/balance-check` said HEALTHY with no targets to compare;
   `/code-review` said APPROVED when the engine review never ran. Each now
   reports NOT ASSESSED, as do `/launch-checklist`, `/team-polish`,
   `/localize qa` and `/project-stage-detect` where they could not check.
@@ -623,7 +588,7 @@ Godot, and the checks tell you what they found.** A fix release for bugs in
   waive a UI story's screenshot at `qa.level: minimal`.
 - **Agents.** `accessibility-specialist` drafts findings instead of following a
   programmer's workflow; `security-engineer` reports in `/security-audit`'s
-  format; `godot-specialist`, `unity-specialist` and `unreal-specialist` say
+  format; `godot-specialist` and `unity-specialist` say
   when a request is for another engine;
   and dozens of agents state rules their specs expected but their files left
   implied. A `.gdextension` example commented with `#` swallowed its
@@ -746,7 +711,7 @@ Godot, and the checks tell you what they found.** A fix release for bugs in
   overwrites the full audit. `security-engineer` gets a fixed brief that says
   every finding is rated from its table — it could arrive with findings
   already rated — and a category the audit had no source for (the usual case
-  on Unity and Unreal) is named with how to fix it. The credential scan also catches
+  on Unity) is named with how to fix it. The credential scan also catches
   `ApiKey`, `sk_live_…` and each engine's log call.
 - **Design skills finish on the path you're on.** `/art-bible` records a
   skipped sign-off in the art bible's header (`SKIPPED [date] — [mode] mode`),
@@ -802,10 +767,9 @@ Godot, and the checks tell you what they found.** A fix release for bugs in
   the network-side contract only; technical-artist names particle-specific
   reductions.
 
-Every engine command on Windows was run on Godot 4.6.1 (gdUnit4 6.1.3), Unity
-6000.3.23f1 and Unreal Engine 5.7 before it was written down, and the Godot and
-Unreal CI templates ran on GitHub Actions. The Unreal commands for Linux and
-macOS, the Unity CI template and the Unity assembly-definition guidance were
+Every engine command on Windows was run on Godot 4.6.1 (gdUnit4 6.1.3) and Unity
+6000.3.23f1 before it was written down, and the Godot CI template ran on
+GitHub Actions. The Unity CI template and the Unity assembly-definition guidance were
 checked against their documentation, not run. Checked on Claude
 Code 2.1.281 to 2.1.284, on Windows, Linux (bash 5 and 3.2) and macOS. **If you ran `/setup-engine` on 1.1.0 or 1.1.1**, your
 `project.yaml` still holds the old test and build commands —
@@ -888,8 +852,8 @@ studio production no longer have to carry the same overhead.
   `/create-stories` → `/dev-story`. On Godot, `/setup-engine` now also creates
   the `project.godot` the engine needs to open what those steps produce — until
   it did, the path delivered real source files with no project to load them, and
-  the claim above was not true. **Unity and Unreal projects must still be created
-  in their own editor first**; CCGS will not fabricate one, because it cannot
+  the claim above was not true. **Unity projects must still be created
+  in the Unity Editor first**; CCGS will not fabricate one, because it cannot
   source what those files should contain.
 
 - **`modes.review_mode`** — how many director agents review your work.
@@ -938,7 +902,7 @@ studio production no longer have to carry the same overhead.
   and close out stories — none of that should begin because a conversation
   drifted near the topic. Everything else still gets suggested as before.
 - **Engine specialists can only hand work to their own sub-specialists.** The
-  Godot, Unity and Unreal specialists are now limited to the four
+  Godot and Unity specialists are now limited to the four
   sub-specialists under each of them. Previously any of them could call any
   agent in the studio. This was already the documented rule; now it is enforced
   rather than trusted.
@@ -981,11 +945,11 @@ studio production no longer have to carry the same overhead.
 
 ### Fixed
 
-- **Unity and Unreal projects were silently skipping three commit and
+- **Unity projects were silently skipping three commit and
   session checks.** The hooks that look for hardcoded gameplay values,
   unowned TODOs, undocumented gameplay systems and missing architecture
   docs all searched `src/` — which is where Godot keeps code. Unity keeps
-  it in `Assets/` and Unreal in `Source/`, so on those engines the searches
+  it in `Assets/`, so on Unity the searches
   matched nothing, every check quietly did nothing, and the result was
   indistinguishable from a clean pass. They now resolve the code root from
   your engine, and if they cannot work out where your code lives they say
@@ -1053,9 +1017,9 @@ studio production no longer have to carry the same overhead.
 
 - **Windows is the verified platform.** Everything was checked on Windows.
   macOS and Linux should work but haven't been confirmed.
-- **No Unity or Unreal project was compiled.** Configuration, routing and
-  documentation were verified for both engines, but nothing here builds or
-  launches a real project in either.
+- **No Unity project was compiled.** Configuration, routing and
+  documentation were verified, but nothing here builds or
+  launches a real Unity project.
 - **Some engine reference details are marked unverified rather than guessed.**
   Where a version number or API detail couldn't be confirmed from a real source,
   it's flagged in place instead of filled in with something plausible. You'll

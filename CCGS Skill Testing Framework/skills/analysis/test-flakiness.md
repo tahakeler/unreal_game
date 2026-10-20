@@ -5,7 +5,7 @@
 `/test-flakiness` finds flaky tests from the results of multiple CI or local
 test runs. It takes a log path, `scan` (all available result files — JUnit XML
 from gdUnit4 in `reports/` or saved into `test-results/`, NUnit XML from Unity in
-`test-results/`, Unreal automation logs in `Saved/Logs/`), or `registry` (remediation guidance for tests already in the
+`test-results/`), or `registry` (remediation guidance for tests already in the
 quarantine section of `tests/regression-suite.md`). With no result data it lists
 three ways to get some and stops to ask. It builds a per-test history across
 runs, classifies each test that both passed and failed by fail rate — >25% High
@@ -100,7 +100,7 @@ None. Flakiness detection is an advisory quality skill; no gates are invoked.
 ### Case 3: No Result Data — List options and stop
 
 **Fixture:**
-- No `test-results/` directory, no `.github/` directory, no `Saved/Logs/`
+- No `test-results/` directory, no `reports/` directory, no `.github/` directory
 - No log path is given
 
 **Input:** `/test-flakiness scan`
@@ -167,7 +167,7 @@ None. Flakiness detection is an advisory quality skill; no gates are invoked.
 
 ## Protocol Compliance
 
-- [ ] Locates result data (`test-results/` XML, `Saved/Logs/`, or a given log path) before analysis; with none, lists the three options and stops to ask
+- [ ] Locates result data (`test-results/` or `reports/` XML, or a given log path) before analysis; with none, lists the three options and stops to ask
 - [ ] Classifies tests with both outcomes by fail rate: >25% High (quarantine), 5–25% Moderate (fix, do not quarantine), 1–5% Low (monitor)
 - [ ] Names a likely cause and fix direction from the cause table, using Grep on the test file
 - [ ] Counts a test as flaky only when it both passed and failed across runs with no code change between them
@@ -185,9 +185,7 @@ None. Flakiness detection is an advisory quality skill; no gates are invoked.
   `registry`) is not tested here.
 - Unity NUnit XML follows the same flow as Case 1, read from `<test-case`
   elements and their `result` attribute; not tested separately.
-- Unreal differs and is not tested here: its results are plain-text
-  `Result={Success}` / `Result={Fail}` lines in `Saved/Logs/` (each test prints
-  `Test Completed. Result={<status>}`), and its skip
-  mechanism is NOT SOURCEABLE, so a quarantined Unreal test is logged and the
-  user is asked how their CI excludes it. The same applies to gdUnit4 C# tests.
+- gdUnit4 C# tests are not tested here: their skip mechanism is NOT
+  SOURCEABLE, so a quarantined gdUnit4 C# test is logged and the user is asked
+  how their CI excludes it.
 - The Low tier (1–5%) needs 20 or more runs to reach and is not tested.

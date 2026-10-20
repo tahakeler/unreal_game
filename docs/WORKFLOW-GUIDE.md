@@ -104,7 +104,7 @@ OPTIONAL opportunities.
 Directories are created as needed. The system expects this layout:
 
 ```
-src/                  # Game source code (Godot; Unity: Assets/, Unreal: Source/<Module>/)
+src/                  # Game source code (Godot; Unity: Assets/Scripts/<Area>/)
   core/               # Engine/framework code
   gameplay/           # Gameplay systems
   ai/                 # AI systems
@@ -143,8 +143,8 @@ production/           # Sprint plans, milestones, releases
 > reach the phase that needs them. The important thing is to follow this
 > structure when you do create them, because the **rules system** enforces
 > standards based on file paths. Code in `src/gameplay/` gets gameplay rules,
-> code in `src/ai/` gets AI rules, and so on — and the same for C# and C++ in
-> Unity and Unreal `Gameplay/` and `AI/` folders.
+> code in `src/ai/` gets AI rules, and so on — and the same for C# in Unity's
+> `Assets/Scripts/Gameplay/` and `Assets/Scripts/AI/` folders.
 
 ---
 

@@ -187,7 +187,7 @@ less; settings read the same from a subfolder
 | **Long skills (14)** | `/adopt`, `/architecture-decision`, `/architecture-review`, `/create-architecture`, `/design-system`, `/dev-story`, `/gate-check`, `/prototype`, `/review-all-gdds`, `/setup-engine`, `/smoke-check`, `/story-done`, `/test-setup` and `/ux-design` keep each phase in `references/<phase>.md`; their steps are unchanged. `/skill-test` and `/skill-improve` read a skill's `references/` files too |
 | **Questions** | `automation-modes.md` and `effects-map.md`: a skipped, dismissed or empty answer is never an answer; 14 agents return options as a list for the skill to ask; `CLAUDE.md` and `agent-memory.md` name the three writes that need no "May I write?" |
 | **Settings** | `yaml-helper.sh` reads every setting under the project root when started from a subfolder; the local `platform.cert_tier` cannot override the lock; invalid `cert_tier` and `testing.strict` values count as unset |
-| **Hooks and scripts** | `validate-commit.sh` checks files a `git add` in the same command stages, skips non-system files in `design/gdd/`, checks a project in a subfolder of a larger repository, and reads Git LFS-stored JSON through its working copy; `project-coherence.sh` reads Unreal's `Build.version` |
+| **Hooks and scripts** | `validate-commit.sh` checks files a `git add` in the same command stages, skips non-system files in `design/gdd/`, checks a project in a subfolder of a larger repository, and reads Git LFS-stored JSON through its working copy |
 | **Permissions** | `settings.json`: seven allow rules removed, the two pytest rules narrowed, `Edit(**/.env*)` denied |
 | **Other skills** | Thirteen skills name the minimal route as a next step; registry lookups in `/design-system`, `/create-stories`, `/dev-story`, `/story-done`, `/consistency-check`, `/architecture-review`; `team-polish`, `team-ui`, `/scope-check`; `/start` writes one `modes:` block; every skill opens with a title |
 
@@ -211,8 +211,7 @@ pre-compact.sh, session-stop.sh
 .claude/docs/**                              ← EXCEPT technical-preferences.md,
                                                which is yours and unchanged in
                                                1.1.3
-docs/WORKFLOW-GUIDE.md, docs/CLAUDE.md, docs/COLLABORATIVE-DESIGN-PRINCIPLE.md,
-docs/engine-reference/unreal/plugins/gameplay-ability-system.md
+docs/WORKFLOW-GUIDE.md, docs/CLAUDE.md, docs/COLLABORATIVE-DESIGN-PRINCIPLE.md
 README.md, CHANGELOG.md, UPGRADING.md        ← keep your README if it is your
                                                game's
 CCGS Skill Testing Framework/
@@ -263,7 +262,7 @@ one — merge them into one.
 **Released:** 2026-09-29
 **Commit range:** `v1.1.1..v1.1.2`
 **Key themes:** The default minimal path end to end; engine test, build and
-parse commands that report the right result; Unity and Unreal treated like
+parse commands that report the right result; Unity treated like
 Godot; hook warnings you can see; skills that read the whole argument
 
 ### What Changed
@@ -271,11 +270,11 @@ Godot; hook warnings you can see; skills that read the whole argument
 | Category | Changes |
 |----------|---------|
 | **Minimal path** | `/help`, `/story-done`, `/sprint-status` and the status line follow the minimal route; about 25 default labels corrected; 10 skills and 4 director gates read `design/game-brief.md` when there is no concept doc; `/dev-story` and `/story-done` write the session checkpoint |
-| **Engine commands** | `/setup-engine`, `/test-setup`, `/dev-story`, `/smoke-check`, the `qa-tester` agent and `run-and-observe.md` use commands run on Windows with Godot 4.6.1, Unity 6000.3.23f1 and Unreal 5.7; Unreal's Linux and macOS commands come from Epic's documentation |
-| **Unity / Unreal** | Eight rules gain Unity (`Assets/`) and Unreal (`Source/`, `Content/`, `.usf`/`.ush`) globs; the commit and asset hooks check every engine's data folder; the status line and three checklists find the code root |
+| **Engine commands** | `/setup-engine`, `/test-setup`, `/dev-story`, `/smoke-check`, the `qa-tester` agent and `run-and-observe.md` use commands run on Windows with Godot 4.6.1 and Unity 6000.3.23f1 |
+| **Unity** | Eight rules gain Unity (`Assets/`) globs; the commit and asset hooks check every engine's data folder; the status line and three checklists find the code root |
 | **Hooks** | Warnings arrive as hook JSON (`hook_warn` in `yaml-helper.sh`); the commit and push checks find `git` anywhere in a command, skip quoted here-doc text, and run for the PowerShell tool; the commit check validates the staged copy of each data file; session start caps the checkpoint it prints |
 | **Skills (7)** | `/adopt`, `/balance-check`, `/gate-check`, `/review-all-gdds`, `/scope-check`, `/sprint-status`, `/story-readiness` read `$ARGUMENTS`, not its first word |
-| **Agents** | Nearly every agent file changed: directors answer each gate in the verdict words its definition file gives; `creative-director`, `producer` and `technical-director` keep memory in the project; `devops-engineer` is trunk-based and, with `community-manager`, runs on Sonnet; `qa-tester`'s Unity and Unreal templates compile; Unity and Unreal agents check their engine reference; agents that don't write code draft and ask before writing |
+| **Agents** | Nearly every agent file changed: directors answer each gate in the verdict words its definition file gives; `creative-director`, `producer` and `technical-director` keep memory in the project; `devops-engineer` is trunk-based and, with `community-manager`, runs on Sonnet; `qa-tester`'s Unity template compiles; Unity agents check their engine reference; agents that don't write code draft and ask before writing |
 
 No setting changes meaning, and nothing is migrated automatically.
 
@@ -311,12 +310,9 @@ docs/COLLABORATIVE-DESIGN-PRINCIPLE.md, docs/engine-reference/README.md
 docs/engine-reference/godot/current-best-practices.md, breaking-changes.md,
 deprecated-apis.md, modules/rendering.md;
 docs/engine-reference/unity/current-best-practices.md,
-plugins/addressables.md;
-docs/engine-reference/unreal/modules/networking.md,
-docs/engine-reference/unreal/current-best-practices.md,
-plugins/gameplay-ability-system.md
-                                             ← corrected examples; the Godot, Unity
-                                               and Unreal references gain Command Line
+plugins/addressables.md
+                                             ← corrected examples; the Godot and Unity
+                                               references gain Command Line
                                                sections (build and test commands per
                                                platform, with sources). If /setup-engine
                                                has updated your copy of one, merge
@@ -354,13 +350,12 @@ commands, or plain prose such as `git commit -m "push + pull"` (`push` then ` +`
 shipped file. If you have, keep your text, copy
 every `paths:` line from the shipped file — they changed in eight rules — and
 merge the five changed bodies named below. Without
-the Unity (`Assets/**`) and Unreal (`Source/**`, `Content/**`) globs the rule
-never loads on those engines. Keep each glob in double quotes — an unquoted
+the Unity (`Assets/**`) globs the rule
+never loads on Unity. Keep each glob in double quotes — an unquoted
 `*` breaks the frontmatter, and a rule whose frontmatter does not parse loads
-on every file. The code-rule globs now name their file types (`*.cs`,
-`*.{h,cpp}`), `data-files.md`'s end in `*.json`, and five rule bodies changed:
+on every file. The code-rule globs now name their file types (`*.cs`), `data-files.md`'s end in `*.json`, and five rule bodies changed:
 `test-standards.md` names tests per engine, `shader-code.md`,
-`gameplay-code.md` and `engine-code.md` give Unity and Unreal examples, and
+`gameplay-code.md` and `engine-code.md` give Unity examples, and
 `agent-memory.md` names every engine's code root.
 
 **`src/CLAUDE.md`** — if you have not edited it, overwrite it with the shipped
@@ -382,10 +377,6 @@ on 1.1.0 or 1.1.1:
 | Unity | `build` | `Unity -batchmode -quit -projectPath . -buildTarget <TARGET>` | `"<Unity editor>" -batchmode -quit -projectPath . -buildTarget <TARGET> -build<PLATFORM>Player Builds/<Target>/<Game>.exe` (e.g. `-buildWindows64Player`) |
 | Unity | `test` | `Unity -runTests -projectPath . -testPlatform PlayMode` | `"<Unity editor>" -batchmode -runTests -projectPath . -testPlatform EditMode -testResults test-results/editmode.xml` |
 | Unity | `smoke` | `Unity -batchmode -quit -projectPath . -executeMethod SmokeCheck.Run` | `"<Unity editor>" -batchmode -quit -projectPath . -logFile -` |
-| Unreal | `build` | `RunUAT.bat BuildCookRun -project=<project>.uproject -platform=Win64 -build -cook` | `"<UE root>/Engine/Binaries/DotNET/AutomationTool/AutomationTool.exe" BuildCookRun -project="$(pwd -W 2>/dev/null || pwd)/<project>.uproject" -platform=Win64 -build -cook` |
-| Unreal | `test` | `UnrealEditor-Cmd.exe <project>.uproject -ExecCmds="Automation RunTests <project>; Quit" -unattended -nullrhi` | `"<UE root>/Engine/Binaries/Win64/UnrealEditor-Cmd.exe" "$(pwd -W 2>/dev/null || pwd)/<project>.uproject" -ExecCmds="Automation RunTests <project>.; Quit" -unattended -nullrhi -stdout -FullStdOutLogOutput` |
-| Unreal | `smoke` | `UnrealEditor-Cmd.exe <project>.uproject -game -nullrhi -unattended -ExecCmds="Quit"` | `"<UE root>/Engine/Binaries/Win64/UnrealEditor-Cmd.exe" "$(pwd -W 2>/dev/null || pwd)/<project>.uproject" -game -nullrhi -unattended -stdout -ExecCmds="Quit"` |
-| Unreal | `run` | `UnrealEditor.exe <project>.uproject -game -windowed -ResX=1280 -ResY=720` | `"<UE root>/Engine/Binaries/Win64/UnrealEditor.exe" "$(pwd -W 2>/dev/null || pwd)/<project>.uproject" -game -windowed -ResX=1280 -ResY=720` |
 
 Godot also needs gdUnit4 installed under `addons/gdUnit4/`. If `godot` is not
 on your `PATH` (the default on Windows and macOS), `/setup-engine` now writes the
@@ -399,20 +390,6 @@ Unity's separate CLI, which rejects `-batchmode` with exit 2, the same code as a
 failed test. The quoted path needs a single-quoted YAML value:
 `test: '"C:/Program Files/Unity/Hub/Editor/<version>/Editor/Unity.exe" -batchmode …'`.
 
-The Unreal rows are the Windows commands. On Linux, `build` is
-`"<UE root>/Engine/Build/BatchFiles/RunUAT.sh" BuildCookRun … -platform=Linux -build -cook`
-and `test`, `run` and `smoke` use `"<UE root>/Engine/Binaries/Linux/UnrealEditor"`
-with the same arguments. On macOS keep only `build` (`RunUAT.sh … -platform=Mac`)
-and set the other three yourself: Epic documents no command-line editor inside
-`UnrealEditor.app`. `/setup-engine`'s Unreal section has the exact lines.
-
-For Unreal, `<UE root>` is the engine folder (`engine.path`) — no editor binary
-is on `PATH` — and the project path must be absolute: UE 5.7 does not find a
-relative `<project>.uproject` and exits 1 before running anything.
-`$(pwd -W 2>/dev/null || pwd)` gives the `C:/…` form in Git Bash, even with
-`MSYS_NO_PATHCONV` set. These values contain double quotes, so they take
-single-quoted YAML scalars too.
-
 **`.github/workflows/tests.yml` (Godot)** — if `/test-setup` wrote it, add
 `permissions:` with `contents: read` and `checks: write` to the `test` job, as
 the shipped template now does. The gdUnit4 action publishes a check run, and a
@@ -425,26 +402,9 @@ the gdUnit4 you commit under `addons/` and installs the latest release. If you
 protect `main`, require the `Run GdUnit4 Tests` job's check, not `test-results`,
 which passes even when a test fails.
 
-**`.github/workflows/tests.yml` (Unreal)** — if `/test-setup` wrote it, add the
-`Build Editor Target` step from the shipped `/test-setup` before the test step,
-set `UE_ROOT` on the runner, and replace `-log` with
-`-stdout -FullStdOutLogOutput` so the results reach the CI log. The 1.1.1
-template ran `Automation RunTests MyGame.`; change the filter to your project's
-test root (`<Project>.`, as in `commands.test`), or no test matches. A fresh checkout
-has no compiled game module, so without the build the editor quits before
-running a test. Change `runs-on: self-hosted` to `runs-on: [self-hosted, windows]`:
-with the bare label, GitHub can give the job to any self-hosted runner the
-repository has, including a Linux one with no Unreal on it. Change each
-`shell: bash` to `shell: bash --noprofile --norc -eo pipefail "{0}"`: the
-Windows runner passes bash its script path unquoted, so every step fails when
-the runner's folder has a space in it.
-
 **Tests written on 1.1.x** — Unity never compiled tests under `tests/`: move them
 to `Assets/Tests/EditMode/` or `Assets/Tests/PlayMode/`, each with an assembly
-definition (`/test-setup` shows the layout). Unreal never built `Source/Tests/`:
-move tests to `Source/<Module>/Private/Tests/`, and replace
-`EAutomationTestFlags::GameFilter` with
-`EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter`.
+definition (`/test-setup` shows the layout).
 
 **Director agents' memory** — `creative-director`, `producer` and
 `technical-director` now declare `memory: project`, so they read and write

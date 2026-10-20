@@ -14,7 +14,7 @@ It creates `tests/README.md`, `tests/smoke/critical-paths.md`,
 root: for Godot `tests/unit/` and `tests/integration/` (placeholder files, and
 no runner script — gdUnit4's `addons/gdUnit4/bin/GdUnitCmdTool.gd` is the
 runner); for Unity `Assets/Tests/EditMode/` and `Assets/Tests/PlayMode/` with
-their `.asmdef` files; for Unreal `Source/<Module>/Private/Tests/`. When the
+their `.asmdef` files. When the
 infrastructure already exists it exits early unless `force` is passed, and
 `force` only creates missing files — it never overwrites. No director gates
 apply. The verdict is COMPLETE when the scaffold is in place.
@@ -174,7 +174,7 @@ None. `/test-setup` is a scaffolding utility. No director gates apply.
 
 - [ ] Reads the engine (`project.yaml`, then `technical-preferences.md`) before generating any scaffold
 - [ ] Generates engine-appropriate test runner config and CI workflow (not generic)
-- [ ] Puts unit and integration tests in the engine's test root (`tests/` for Godot, `Assets/Tests/` for Unity, `Source/<Module>/Private/Tests/` for Unreal)
+- [ ] Puts unit and integration tests in the engine's test root (`tests/` for Godot, `Assets/Tests/` for Unity)
 - [ ] Creates `production/qa/evidence/` — the path the Phase 6 summary reports
 - [ ] Asks approval before creating files
 - [ ] Exits early when infrastructure exists; `force` creates only missing files and never overwrites
@@ -184,8 +184,6 @@ None. `/test-setup` is a scaffolding utility. No director gates apply.
 
 ## Coverage Notes
 
-- Unreal Engine test scaffolding (`Source/<Module>/Private/Tests/README.md`, a
-  self-hosted Windows CI runner) is not separately fixture-tested.
 - The `force` path on a partial scaffold (create only the missing files) is
   covered by protocol compliance, not by its own case.
 - The case where tests/ exists but is from a different engine (e.g., Unity tests

@@ -7,7 +7,7 @@
 > **Last Updated**: [Date]
 > **Version**: [1.0]
 > **Engine**: [Unity 6.3 LTS]
-> **UI Framework**: [Godot Control nodes / Unity UI Toolkit / Unreal UMG]
+> **UI Framework**: [Godot Control nodes / Unity UI Toolkit / Unity uGUI]
 > **Related Documents**:
 > - `design/art/art-bible.md` — visual standards (colors, typography, iconography)
 > - `design/accessibility-requirements.md` — accessibility commitments per feature

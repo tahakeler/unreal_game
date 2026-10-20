@@ -239,7 +239,7 @@ config block:
 ```
 Schema validation: ERRORS
   [project.yaml] modes.review_mode: 'chaotic' is not a valid value (expected: full|lean|solo)
-  [project.local.yaml] engine.name: 'Pygame' is not a valid value (expected: Godot|Unity|Unreal)
+  [project.local.yaml] engine.name: 'Pygame' is not a valid value (expected: Godot|Unity)
 ```
 
 ## Phase 3: View-one Mode

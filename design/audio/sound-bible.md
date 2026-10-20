@@ -1,7 +1,7 @@
 # HARVEST PANIC — Sound Bible
 
 > **Status**: Draft v0.1 · **Owner**: audio-director · **Last Updated**: 2026-10-11
-> **Engine**: UE 5.8.3 (MetaSounds, Submixes, Sound Classes/Mixes, Quartz, Audio Modulation)
+> **Engine**: Unity 6.3 LTS (built-in audio: `AudioSource`, `AudioMixer` groups/snapshots/exposed parameters, DSP-time scheduling)
 > **Source GDDs**: `design/gdd/audio-feedback.md` (authoritative for rules/knobs), `proximity-voice.md`, `livestock-roster.md`, `night-creatures.md`, `day-loop.md`, `blame-ledger.md`
 > **Companion docs**: `design/audio/sfx-list.md`, `design/audio/music-brief.md`
 
@@ -34,7 +34,7 @@ Real, dirty, close-miked farm Foley (mud, wood, straw, real animals) cut with ca
 ### 1.4 Do / Don't
 - DO: give every important event a transient you can identify with eyes closed in < 150 ms.
 - DO: let silence land. The 0.6 s DisasterCut is the funniest sound in the game.
-- DO: pitch-randomize everything (±1.5 st default, ±3 st critters) and never repeat the same variant twice in a row (MetaSound `Random Get` with no-repeats).
+- DO: pitch-randomize everything (±1.5 st default, ±3 st critters) and never repeat the same variant twice in a row (no-repeat random pick in the sound-event player).
 - DON'T: use laugh tracks, voiced announcer quips, or meme sounds (licensing + they age badly + they fight the players' own laughter).
 - DON'T: use real jump-scare screams at night. Night creatures are "light horror": dread through creaks, breath, rustle, and pitched silence; KO resolves with a cartoon "bonk + birdies" sting.
 - DON'T: let music carry information that only music carries (accessibility: every music-borne cue also has a caption/HUD/diegetic SFX).
@@ -45,7 +45,7 @@ Real, dirty, close-miked farm Foley (mud, wood, straw, real animals) cut with ca
 
 Instrument core ("The Porch Band"): banjo, fiddle, upright bass, washboard, jug, harmonica, acoustic guitar, accordion, tuba (Landlord), pump organ (night). Small, recognizable, cheap to stem.
 
-All gameplay cues are **stemmed** and **loop on bar boundaries** at a fixed tempo per cue so Quartz can sync transitions. Full briefs in `music-brief.md`.
+All gameplay cues are **stemmed** and **loop on bar boundaries** at a fixed tempo per cue so the DSP-time music clock can sync transitions. Full briefs in `music-brief.md`.
 
 | Phase (day-loop) | Music state (GDD) | Cue | Character | Tempo / Key *[AD]* |
 |---|---|---|---|---|
@@ -83,28 +83,28 @@ Sunday  : exclusive, entered from Shop/week-quota
 | L3 | + second banjo rolls, harmonica stabs, kick/stomp | Full hoedown panic |
 
 - **Hysteresis:** layer goes **up** on the next bar after ChaosLevel crosses the threshold; goes **down** only after ChaosLevel has stayed below the threshold for **8 s** (prevents flapping) *[AD]*.
-- **Layer fade:** stems fade in over 1 bar, fade out over 2 bars, via Audio Modulation Control Bus per stem.
+- **Layer fade:** stems fade in over 1 bar, fade out over 2 bars, via a mixer exposed parameter per stem.
 - **Post-disaster:** resume at `layer − 1` (min L1), then re-evaluate after 4 bars.
 - **Night Threat + Crunch overlap** (GDD edge case): Night Threat wins; Crunch adds only the pocket-watch tick stem.
 
 ### 3.3 Disaster cut (GDD rule 6)
 1. `OnDisaster` → music bus hard-cut (5 ms fade) to silence for `DisasterSilence` 0.6 s. Severity ≥ 80: record-scratch on cut.
 2. Stinger by verb, played **immediately** (not quantized; it must sync to the visual) — slide-whistle+splash (river), trombone wah-wah (plank), cymbal crash (wagon), generic "sad tuba" fallback.
-3. Music re-enters **Quartz-quantized to the next beat** (not bar) after the stinger, with the "banjo player clears his throat" pickup (`STG_Music_ThroatClear`) on the first resume of the day only (keep it special) *[AD]*.
+3. Music re-enters **quantized to the next beat** (DSP-time clock) (not bar) after the stinger, with the "banjo player clears his throat" pickup (`STG_Music_ThroatClear`) on the first resume of the day only (keep it special) *[AD]*.
 4. Multiple disasters within 3 s: one stinger; later ones get only the sweetener.
 
 ### 3.4 Diegetic overlays
-- Pocket-watch tick (last 60 s): Quartz-locked to the Crunch tempo (152 BPM eighth notes = tick), so it reads as both a clock and part of the band.
-- Sundown bell at 0:00 is sample-accurate on the Quartz clock downbeat (the music *lands* on the bell).
+- Pocket-watch tick (last 60 s): Locked to the Crunch tempo on the music clock (152 BPM eighth notes = tick), so it reads as both a clock and part of the band.
+- Sundown bell at 0:00 is sample-accurate on the music clock downbeat (`PlayScheduled`) (the music *lands* on the bell).
 
 ---
 
 ## 4. Mix: Buses, Priority, Ducking
 
-### 4.1 Submix tree
+### 4.1 Mixer group tree (`AudioMixer`)
 ```
 Master
-├── SM_Voice              (EOS / VoIP talkers; never ducked; own limiter)
+├── SM_Voice              (Steam voice talkers; never ducked; own limiter)
 ├── SM_Game
 │   ├── SM_Critters       (barks, swarms)
 │   ├── SM_Impacts        (MS_Impact, bruises, breaks, splashes)
@@ -112,7 +112,7 @@ Master
 │   └── SM_Ambience       (beds, river, wind, night)
 ├── SM_Music
 └── SM_UIStingers         (UI, stingers, cash, receipt; 2D)
-Reverb: SM_Reverb_Outdoor / SM_Reverb_Barn (send submixes)
+Reverb: SM_Reverb_Outdoor / SM_Reverb_Barn (send/return groups)
 ```
 The GDD's 5 buses map 1:1: Voice=SM_Voice, Critters, Impacts (+Player, Ambience as children of Game), Music, UI/Stingers.
 
@@ -140,8 +140,8 @@ The GDD's 5 buses map 1:1: Voice=SM_Voice, Critters, Impacts (+Player, Ambience 
 **Voice is never ducked.** Voice also gets a gentle dynamic EQ dip on SM_Game (−2 dB at 1–3 kHz while voice active) *[AD]* — cheaper in perceived loudness than more broadband ducking.
 
 ### 4.4 Implementation of ducking
-- Use **Audio Modulation**: a `Control Bus` per ducking target (`CB_Duck_Music`, `CB_Duck_Critters`, …) driven by `Control Bus Mix` activated from code (voice activity from `proximity-voice` VAD at 20 Hz; stinger start/end). Avoid submix sidechain envelope followers for voice, because EOS voice may not route through a submix we control on Mac/Steam fallback.
-- Concurrency: `SC_Impacts` max 12 (StopQuietest), `SC_CritterBarks` max 6/s global + 2 s per-critter cooldown (in code), `SC_Footsteps` max 8 (StopFarthest), `SC_Stingers` max 1 (StopOldest disallowed: new is rejected and downgraded to sweetener).
+- Use **mixer exposed parameters**: one ducking volume parameter per target group (`CB_Duck_Music`, `CB_Duck_Critters`, …) set from code with the attack/release above (voice activity from `proximity-voice` VAD at 20 Hz; stinger start/end). Avoid the mixer's Duck Volume sidechain for voice: driving the exposed parameters from the VAD signal gives exact attack/release per target group and works even before voice playback is routed through `SM_Voice`.
+- Concurrency (enforced by the C# sound-event player; Unity has no built-in concurrency groups): `SC_Impacts` max 12 (stop quietest), `SC_CritterBarks` max 6/s global + 2 s per-critter cooldown, `SC_Footsteps` max 8 (stop farthest), `SC_Stingers` max 1 (stop-oldest disallowed: new is rejected and downgraded to sweetener).
 
 ### 4.5 Frequency balance
 - Speech band 300 Hz–3 kHz: SFX are high-passed/shelved so no constant bed lives here; ambience beds HPF at 150 Hz and get −3 dB at 1–2 kHz.
@@ -150,38 +150,40 @@ The GDD's 5 buses map 1:1: Voice=SM_Voice, Critters, Impacts (+Player, Ambience 
 
 ### 4.6 Loudness & platform
 - Integrated target for the full game mix: **−16 LUFS** (PC/console norm; ≤ −1 dBTP). Asset targets in `sfx-list.md` §1.
-- Master limiter (Submix Effect: Dynamics, Limiter, −1 dBTP).
+- Master limiter (Compressor/limiter effect on the `Master` group, −1 dBTP).
 - Settings sliders: Master, Music, SFX, Voice, UI; plus "Voice priority boost" toggle (adds −3 dB extra duck) and "Reduce night ambience" accessibility option.
 
 ---
 
-## 5. UE 5.8 Implementation Recipe
+## 5. Unity 6.3 Implementation Recipe
 
 > Audio code is owned by gameplay-programmer/engine-programmer; this is the contract the audio team authors assets against.
 
-### 5.1 MetaSounds
+### 5.1 Sound events (ScriptableObject + C# players)
+Unity has no node-based audio graph, so each row below is a **sound-event asset** (a `ScriptableObject` holding clip banks and tuning) played by a small C# component that sets `AudioSource` pitch/volume from the inputs. The `MS_` names are kept as stable event IDs shared with the GDD and `sfx-list.md`.
+
 | Asset | Type | Inputs | Notes |
 |---|---|---|---|
-| `MS_Impact` | MetaSound Source (one-shot) | `Mass`(kg), `ImpactSpeed`(m/s), `MaterialPair`(int enum), `DollarLoss`($) | Wave Player per material bank; pitch = −12·clamp(Mass/400) st; crunch layer if `DollarLoss > 10`; register clunk if `> 40`; gain per GDD formula |
-| `MS_Bruise` | Source | `BruiseType`, `DollarLoss` | squeak/squelch + `floor(DollarLoss/10)` coin ticks (max 5) scheduled 60 ms apart via Trigger Repeat |
-| `MS_Critter_Bark` | Source (preset per species) | `State`(enum), `Excitement`(0–1) | Random Get (no repeat) per state array; pitch ±3 st; Excitement adds pitch + gain |
-| `MS_Critter_Swarm` | Source (looping) | `Density`(0–1), `Panic`(0–1) | One emitter for chicken flocks (GDD 40-chicken case): crossfades 3 layers (few/several/many clucks) + granular flutter |
-| `MS_Footstep` | Source | `Surface`(PhysMat), `Speed`(walk/sprint/quiet), `Wet` | quiet-walk = −12 dB, softer layer |
-| `MS_Plank` | Source | `Load`(0–1), `Stage`(creak/crack/break) | creak pitch drops & duration grows with Load |
-| `MS_River_Bed` | Source (looping) | `Distance`, `Flow` | 2D near/far blend |
-| `MS_Music_<Cue>` | Source (looping, stemmed) | per-stem `Layer` gains via Modulation | One MetaSound per cue, stems as parallel Wave Players started on same Quartz tick |
-| `MS_Receipt` | Source | `LineCount`, `IsNegative` | printer chatter loop + per-line tear; "wah" for negative totals |
+| `MS_Impact` | Sound event (one-shot) | `Mass`(kg), `ImpactSpeed`(m/s), `MaterialPair`(int enum), `DollarLoss`($) | Clip bank per material; pitch = −12·clamp(Mass/400) st; crunch layer if `DollarLoss > 10`; register clunk if `> 40`; gain per GDD formula |
+| `MS_Bruise` | Sound event | `BruiseType`, `DollarLoss` | squeak/squelch + `floor(DollarLoss/10)` coin ticks (max 5) scheduled 60 ms apart via `AudioSource.PlayScheduled` |
+| `MS_Critter_Bark` | Sound event (variant per species) | `State`(enum), `Excitement`(0–1) | Random pick (no repeat) per state array; pitch ±3 st; Excitement adds pitch + gain |
+| `MS_Critter_Swarm` | Sound event (looping) | `Density`(0–1), `Panic`(0–1) | One emitter for chicken flocks (GDD 40-chicken case): crossfades 3 layers (few/several/many clucks) + flutter loop |
+| `MS_Footstep` | Sound event | `Surface`(physics material), `Speed`(walk/sprint/quiet), `Wet` | quiet-walk = −12 dB, softer layer |
+| `MS_Plank` | Sound event | `Load`(0–1), `Stage`(creak/crack/break) | creak pitch drops & duration grows with Load |
+| `MS_River_Bed` | Sound event (looping) | `Distance`, `Flow` | 2D near/far blend |
+| `MS_Music_<Cue>` | Music cue (looping, stemmed) | per-stem `Layer` gains via mixer exposed parameters | One cue asset per state, stems as parallel `AudioSource`s started with `PlayScheduled` on the same DSP time |
+| `MS_Receipt` | Sound event | `LineCount`, `IsNegative` | printer chatter loop + per-line tear; "wah" for negative totals |
 
-Use **MetaSound Presets** for per-species/per-surface variation so the graph is authored once.
+Use **sound-event variants** (one asset per species/surface referencing a shared base) so the logic is authored once.
 
-### 5.2 Sound Classes & Submixes
-- Sound Classes: `SC_Master` → `SC_Voice`, `SC_Music`, `SC_SFX` (→ `SC_Critters`, `SC_Impacts`, `SC_Player`, `SC_Ambience`), `SC_UI`. Sound Classes carry user volume sliders (via Audio Modulation `Control Bus` per slider; preferred in 5.x over Sound Class Mixes).
-- Each MetaSound sets its `Default Submix` to the matching submix in §4.1.
-- `SM_Reverb_Barn` (Convolution, small wooden room IR) applied by an Audio Volume in the barn; outdoor uses a light algorithmic plate send at −20 dB.
+### 5.2 Audio Mixer groups
+- One `AudioMixer` asset (`HP_MainMixer`) with groups `Master` → `SM_Voice`, `SM_Music`, `SM_Game` (→ `SM_Critters`, `SM_Impacts`, `SM_Player`, `SM_Ambience`), `SM_UIStingers` (tree in §4.1). User volume sliders drive **exposed parameters** (dB) on those groups.
+- Each sound event sets its `AudioSource.outputAudioMixerGroup` to the matching group in §4.1.
+- `SM_Reverb_Barn` (small wooden room SFX Reverb settings) enabled by a trigger volume in the barn via a mixer snapshot; outdoor uses a light reverb send at −20 dB.
 
-### 5.3 Quartz
-- One Quartz clock: `QC_Music`, owned by the music manager (client-local; music is not replicated; phase changes come from replicated day-loop state).
-- Tempo/time-signature set per cue on entering a state.
+### 5.3 Music clock (DSP time)
+- One music clock in the client-local music manager, scheduled on `AudioSettings.dspTime` (music is not replicated; phase changes come from replicated day-loop state).
+- Tempo/time-signature set per cue on entering a state; bar/beat boundaries computed from the cue's BPM.
 - Quantization:
   - State transitions: `Bar`
   - Layer up/down: `Bar`
@@ -193,30 +195,32 @@ Use **MetaSound Presets** for per-species/per-surface variation so the graph is 
 - Clients compute transitions locally from the replicated timer; ±0.1 s clock agreement (day-loop AC1) is fine because music is not shared audio.
 
 ### 5.4 Attenuation presets (first person)
+Presets are `AudioSource` 3D settings (spatial blend, min/max distance, rolloff curve, spread) stored on the sound-event assets. Occlusion is a raycast in C# that drives volume and an `AudioLowPassFilter`.
+
 | Preset | Inner radius | Falloff to | Shape / Curve | Spatialization | Occlusion | Used by |
 |---|---|---|---|---|---|---|
-| `ATT_Player_Self` | — | — | 2D (non-spatialized), slight stereo | — | — | own footsteps, own grab/throw, own breath |
-| `ATT_Player_Other` | 2 m | 25 m | Log | Binaural (HRTF) optional, panning default | −6 dB, LPF 3 kHz | other players' Foley |
-| `ATT_Critter_Small` | 2 m | 30 m | Natural Sound | Panning | −6 dB, LPF 2.5 kHz | chicken, duck |
-| `ATT_Critter_Large` | 4 m | 60 m | Natural Sound | Panning + 0.5 spread at < 4 m | −4 dB | pig, cow, bull |
-| `ATT_Telegraph` | 6 m | 80 m | Linear (flat-ish, stays loud) | Panning, focus 100% | **none** | bull charge wind-up, creature-close warnings (must survive the mix) |
-| `ATT_Impact` | 3 m | 50 m | Log | Panning | −6 dB | MS_Impact, breaks |
-| `ATT_Hazard_Loud` | 5 m | 90 m | Natural Sound | Panning | −3 dB | plank break, splash, wagon crash |
-| `ATT_Ambience_Point` | 5 m | 40 m | Log | spread 0.7 | LPF only | river, windmill, coop |
-| `ATT_Night_Creature` | 1 m | 25 m | Log, steep | Binaural preferred (headphones), panning fallback | −6 dB | scarecrow rustle, breath |
+| `ATT_Player_Self` | — | — | 2D (spatial blend 0), slight stereo | — | — | own footsteps, own grab/throw, own breath |
+| `ATT_Player_Other` | 2 m | 25 m | Logarithmic | HRTF spatializer optional, panning default | −6 dB, LPF 3 kHz | other players' Foley |
+| `ATT_Critter_Small` | 2 m | 30 m | Logarithmic (custom natural curve) | Panning | −6 dB, LPF 2.5 kHz | chicken, duck |
+| `ATT_Critter_Large` | 4 m | 60 m | Logarithmic (custom natural curve) | Panning + spread 90° at < 4 m | −4 dB | pig, cow, bull |
+| `ATT_Telegraph` | 6 m | 80 m | Linear (flat-ish, stays loud) | Panning, full focus | **none** | bull charge wind-up, creature-close warnings (must survive the mix) |
+| `ATT_Impact` | 3 m | 50 m | Logarithmic | Panning | −6 dB | MS_Impact, breaks |
+| `ATT_Hazard_Loud` | 5 m | 90 m | Logarithmic (custom natural curve) | Panning | −3 dB | plank break, splash, wagon crash |
+| `ATT_Ambience_Point` | 5 m | 40 m | Logarithmic | spread 0.7 | LPF only | river, windmill, coop |
+| `ATT_Night_Creature` | 1 m | 25 m | Logarithmic, steep | HRTF spatializer preferred (headphones), panning fallback | −6 dB | scarecrow rustle, breath |
 | Voice | per `proximity-voice` (3 m full → 35 m silent, −9 dB/wall) | | | | | not our asset; listed for consistency |
 
-Rules: listener = camera; `bEnableListenerFocus` on critters so off-screen critters are slightly quieter (focus −3 dB), **except** `ATT_Telegraph`. Noise-Event-tagged sounds add a short "echo tail" (send to `SM_Reverb_Outdoor` +6 dB for 1 s) per GDD rule 7.
+Rules: the `AudioListener` is on the camera; off-screen critters are slightly quieter (a C# view-cone check, −3 dB), **except** `ATT_Telegraph`. Noise-Event-tagged sounds add a short "echo tail" (send to `SM_Reverb_Outdoor` +6 dB for 1 s) per GDD rule 7.
 
 ### 5.5 Event naming & routing
 - Runtime event names: `SFX_<Category>_<Subject>_<Action>` (e.g. `SFX_Critter_Pig_Squeal`), `MUS_<Phase>_<Name>`, `STG_<Context>_<Name>`, `AMB_<Area>_<Name>`, `UI_<Screen>_<Action>`.
 - Asset names follow the studio convention: `[category]_[context]_[name]_[variant].[ext]` → `sfx_critter_pig_squeal_01.wav`.
-- A `DT_AudioEvents` DataTable maps event name → MetaSound/preset, submix, attenuation, concurrency, caption id (onboarding-accessibility requires a caption id per bark/stinger).
+- An `AudioEvents` `ScriptableObject` table maps event name → sound event/variant, mixer group, attenuation preset, concurrency, caption id (onboarding-accessibility requires a caption id per bark/stinger).
 
 ### 5.6 Performance budget
-- Audio thread ≤ 1.5 ms on base M1 worst-case (GDD AC2). Hard caps: 64 voices total *[AD]*, 12 impacts, 8 footsteps, 6 barks/s, swarms as single emitters.
-- Streaming: music stems Stream (Force Stream), ambience loops Retain-on-Load for the level, short SFX Inline/Prime.
-- Compression: Ogg Vorbis/ADPCM per platform (Bink Audio for music in 5.x is fine). See `sfx-list.md` §1.
+- Audio thread ≤ 1.5 ms on base M1 worst-case (GDD AC2). Hard caps: 64 voices total *[AD]* (Project Settings → Audio → Max Real Voices), 12 impacts, 8 footsteps, 6 barks/s, swarms as single emitters.
+- Load types: music stems **Streaming**, ambience loops **Compressed In Memory** (preloaded for the scene), short SFX **Decompress On Load**.
+- Compression: Vorbis for music/ambience, ADPCM for short SFX. See `sfx-list.md` §1.
 
 ---
 
@@ -224,4 +228,4 @@ Rules: listener = camera; `bEnableListenerFocus` on critters so off-screen critt
 1. Is binaural (HRTF) acceptable on by default for night creatures (headphone-heavy audience), or opt-in only?
 2. Music sourcing: commissioned composer vs. CC0/royalty-free library + stem edits for VS? (Briefs are written to work for both.)
 3. Does Camcorder replay need a separate music render (to avoid replaying a DisasterCut twice)? GDD says stingers re-trigger; confirm desired.
-4. Confirm EOS voice on Mac exposes a VAD signal we can drive ducking from; otherwise drive from the local loudness value already computed for Noise Events.
+4. Confirm Steam voice (Facepunch.Steamworks) on Mac exposes a VAD signal we can drive ducking from; otherwise drive from the local loudness value already computed for Noise Events.

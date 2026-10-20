@@ -33,7 +33,7 @@ no QA plan, readiness check or sprint. `/story-done` names the next story.
 
 **With a sprint plan, after all sprint stories are done:** run `/team-qa sprint` to execute the full QA cycle and get a sign-off verdict before advancing the project stage.
 
-**Output:** Source code under the project's **code root** + test file under the engine's **test root** (`tests/` Godot, `Assets/Tests/` Unity, `Source/<Module>/Private/Tests/` Unreal — `.claude/docs/directory-structure.md`). Resolve the code root from `engine.name` (`src/` Godot, `Assets/` Unity, `Source/<Module>/` Unreal) per `.claude/docs/code-root-resolution.md`.
+**Output:** Source code under the project's **code root** + test file under the engine's **test root** (`tests/` Godot, `Assets/Tests/` Unity — `.claude/docs/directory-structure.md`). Resolve the code root from `engine.name` (`src/` Godot, `Assets/` Unity) per `.claude/docs/code-root-resolution.md`.
 
 ---
 

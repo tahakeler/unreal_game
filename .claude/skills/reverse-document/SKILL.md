@@ -31,10 +31,10 @@ appropriate design or architecture documentation. Use this when:
 - `concept` → Generate a concept document from prototype
 
 **Path**: Directory or file to analyze, under the code root — `src/` Godot,
-`Assets/` Unity, `Source/<Module>/` Unreal (`.claude/docs/code-root-resolution.md`)
+`Assets/` Unity (`.claude/docs/code-root-resolution.md`)
 - `src/gameplay/combat/` → All combat-related code (Godot)
 - `Assets/Scripts/Core/EventSystem.cs` → Specific file (Unity)
-- `Source/MyGame/Private/AI/` → A module folder (Unreal)
+- `Assets/Scripts/AI/` → An area folder (Unity)
 - `prototypes/stealth-mech/` → Prototype directory
 
 !`bash "${CLAUDE_SKILL_DIR}/../../hooks/yaml-helper.sh" resolve_config --keys workflow,system_overrides,automation`
@@ -64,7 +64,7 @@ generated — see Phase 5. Semantics of each tier are in
 **Examples**:
 ```bash
 /reverse-document design src/gameplay/magic-system
-/reverse-document architecture Source/MyGame/Private/EntityComponent
+/reverse-document architecture Assets/Scripts/EntityComponent
 /reverse-document concept prototypes/vehicle-combat
 ```
 

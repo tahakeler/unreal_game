@@ -144,30 +144,29 @@ platform.online are false`).
 
 ### Engine pattern sets — read this before any Category below
 
-**Every pattern list in Categories 1–3 was written for Godot.** On a Unity or
-Unreal project they match nothing, and this skill already states what a zero-hit
+**Every pattern list in Categories 1–3 was written for Godot.** On a Unity
+project they match nothing, and this skill already states what a zero-hit
 scan means: it renders the report clean, "the most dangerous possible failure for
 a security audit". That warning was earned along the **version** axis
 (`File.open` vs `FileAccess`) and the identical hole along the **engine** axis
 shipped anyway. Use the table for `engine.name` resolved in Phase 1.
 
-| Category | Godot | Unity | Unreal |
-|---|---|---|---|
-| 1 — Save / serialization | the Godot list below | **NOT SOURCEABLE** | **NOT SOURCEABLE** |
-| 2 — Network / multiplayer | the Godot list below | `ServerRpc`, `ClientRpc`, `NetworkVariable`, `NetworkObject`, `NetworkManager`, `NetworkBehaviour`, `IsServer`, `IsOwner` | `UFUNCTION`, `Server`, `Client`, `NetMulticast`, `Replicated`, `DOREPLIFETIME`, `GetLifetimeReplicatedProps`, `HasAuthority` |
-| 3 — Input | the Godot list below | `InputSystem`, `PlayerInput`, `ReadValue`, `InputValue` | `EnhancedInput`, `UInputAction`, `InputMappingContext`, `BindAction`, `FInputActionValue` |
-| 4 — Data exposure | engine-agnostic — the list below applies to all three | | |
-| 5, 6 | judgement and manifests, not greps — no engine set needed | | |
+| Category | Godot | Unity |
+|---|---|---|
+| 1 — Save / serialization | the Godot list below | **NOT SOURCEABLE** |
+| 2 — Network / multiplayer | the Godot list below | `ServerRpc`, `ClientRpc`, `NetworkVariable`, `NetworkObject`, `NetworkManager`, `NetworkBehaviour`, `IsServer`, `IsOwner` |
+| 3 — Input | the Godot list below | `InputSystem`, `PlayerInput`, `ReadValue`, `InputValue` |
+| 4 — Data exposure | engine-agnostic — the list below applies to both | |
+| 5, 6 | judgement and manifests, not greps — no engine set needed | |
 
-The Unity and Unreal names above are **sourced from this repo's pinned
-references** (`docs/engine-reference/unity/modules/{networking,input}.md`,
-`docs/engine-reference/unreal/modules/{networking,input}.md` (removed — this repo is Unity-only)), not from recall.
+The Unity names above are **sourced from this repo's pinned
+reference** (`docs/engine-reference/unity/modules/{networking,input}.md`), not from recall.
 Verify them against the pin before use and add what the reference documents that
 this table omits — it is a floor, not a complete set.
 
-> **`NOT SOURCEABLE` is a verdict, not a gap to fill from memory.** Neither
-> reference tree carries a serialization/save module, so the save-API names for
-> Unity and Unreal cannot be confirmed here. **Do not write them from training
+> **`NOT SOURCEABLE` is a verdict, not a gap to fill from memory.** The Unity
+> reference tree carries no serialization/save module, so the save-API names for
+> Unity cannot be confirmed here. **Do not write them from training
 > data.** A confidently wrong pattern list is worse in this skill than in any
 > other: it produces a scan that looks thorough, finds nothing, and reads as a
 > pass. Where the table says NOT SOURCEABLE, that category is **`NOT ASSESSED`**
@@ -234,8 +233,7 @@ Grep for: `get_input`, `Input.get_`, `input_map`, user-facing text fields — ch
 
 Grep case-insensitively in release-facing code for: `api[_-]?key`, `secret`,
 `password`, `token`, `private[_-]?key`, `sk_live`, `BEGIN PRIVATE KEY`, `DEBUG`,
-and the engine's print call (`print(` on Godot, `Debug.Log` on Unity, `UE_LOG`
-on Unreal).
+and the engine's print call (`print(` on Godot, `Debug.Log` on Unity).
 
 ### Category 5: Cheat and Anti-Tamper Vectors
 - Are gameplay-critical values stored only in memory, not in easily-editable files?
@@ -424,8 +422,8 @@ If it is **NOT ASSESSED**:
 >
 > Name the missing input for each category: `engine.name`, the code root, the
 > multiplayer scope (`/settings platform.multiplayer=…`), or — for a category the
-> Phase 3 table marks NOT SOURCEABLE on this engine, the usual cause on Unity and
-> Unreal — a save/serialization module in `docs/engine-reference/<engine>/modules/`
+> Phase 3 table marks NOT SOURCEABLE on this engine, the usual cause on Unity
+> — a save/serialization module in `docs/engine-reference/<engine>/modules/`
 > (Phase 3), naming that category.
 
 If it is **CLEAR TO SHIP**:

@@ -49,7 +49,7 @@ those five sections and tell the user it is optional at this workflow level.
 **`team.size`**: which agents are active (orthogonal to review_mode gate-depth and workflow docs).
 - **`individual`** (default): `gameplay-programmer` runs the pipeline; escalate `ai-programmer` only if the feature flags AI work. Other Team Composition agents are consulted via the gameplay-programmer, not spawned separately.
 - **`small`**: the full Team Composition pipeline below, as documented.
-- **`studio`**: full pipeline + engine sub-specialists + an adversarial review pass. *Engine sub-specialists*: the primary engine specialist's prompt says it may hand parts of its review to the sub-specialists its `tools:` grant names (for example `ue-gas-specialist` for abilities); below `studio` it answers alone. *Adversarial review pass*: Phase 5's qa-tester is told "your job is not to confirm this works — find how it breaks", and the report says the pass ran.
+- **`studio`**: full pipeline + engine sub-specialists + an adversarial review pass. *Engine sub-specialists*: the primary engine specialist's prompt says it may hand parts of its review to the sub-specialists its `tools:` grant names (for example `unity-dots-specialist` for DOTS/ECS work); below `studio` it answers alone. *Adversarial review pass*: Phase 5's qa-tester is told "your job is not to confirm this works — find how it breaks", and the report says the pass ran.
 A non-core agent needed at `individual` routes through the nearest active core agent with an informational note. **"Phase gate" means any phase that ends in an `AskUserQuestion` decision point this pipeline itself lists** — a transition under Decision Points above, or a **Gate** step written into the pipeline below — **whatever the `automation` mode.** `guided` and `autonomous` change how a gate is passed (it auto-advances, or is recorded with `log_decision`), not whether it is one, so bounded-exception condition (3) below holds at it in every mode. An agent restricted to "phase gates only" is spawned at those points and no others. This active-set scoping applies throughout the pipeline below: any phase that names an agent outside the active set routes through the nearest core agent rather than spawning it.
 
 **Announce the active set before Phase 1 — never let the collapse be silent.**
@@ -152,7 +152,7 @@ Delegate to **gameplay-programmer** (with **ai-programmer** if AI is involved):
 - Output: architecture sketch with file list and interface definitions
 
 Then spawn the **primary engine specialist** to validate the proposed architecture:
-- Is the class/node/component structure idiomatic for the pinned engine? (e.g., Godot node hierarchy, Unity MonoBehaviour vs DOTS, Unreal Actor/Component design)
+- Is the class/node/component structure idiomatic for the pinned engine? (e.g., Godot node hierarchy, Unity GameObject/MonoBehaviour composition vs DOTS)
 - Are there engine-native systems that should be used instead of custom implementations?
 - Any proposed APIs that are deprecated or changed in the pinned engine version?
 - Output: engine architecture notes — incorporate into the architecture before Phase 3 begins

@@ -47,7 +47,7 @@ Before asking anything, silently gather context so you can tailor your guidance.
 Check:
 - **Engine configured?** Read `engine.name` from `project.yaml`; if that key is absent or empty (including when `project.yaml` has no `engine:` block), fall back to `.claude/docs/technical-preferences.md` (an Engine field of `[TO BE CONFIGURED]`, or no file, means not set). The engine is configured if either source yields a real engine name.
 - **Game concept exists?** Check for `design/gdd/game-concept.md` (or `design/game-brief.md` at the `minimal` tier).
-- **Source code exists?** Resolve the code root from the `engine.name` read above (`src/` Godot, `Assets/` Unity, `Source/` Unreal; full order in `.claude/docs/code-root-resolution.md`), then Glob it for source files (`*.gd`, `*.cs`, `*.cpp`, `*.h`, `*.rs`, `*.py`, `*.js`, `*.ts`). **If the code root is unresolved, say so rather than concluding there is no code** — a Unity or Unreal project scanned as `src/` returns zero files and reads as greenfield.
+- **Source code exists?** Resolve the code root from the `engine.name` read above (`src/` Godot, `Assets/` Unity; full order in `.claude/docs/code-root-resolution.md`), then Glob it for source files (`*.gd`, `*.cs`, `*.cpp`, `*.h`, `*.rs`, `*.py`, `*.js`, `*.ts`). **If the code root is unresolved, say so rather than concluding there is no code** — a Unity project scanned as `src/` returns zero files and reads as greenfield.
 - **Prototypes exist?** Check for subdirectories in `prototypes/`.
 - **Design docs exist?** Count markdown files in `design/gdd/`.
 - **Production artifacts?** Check for files in `production/sprints/` or `production/milestones/`.

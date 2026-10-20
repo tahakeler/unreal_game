@@ -23,10 +23,9 @@ Before running anything, understand the environment:
 1. **Test framework check**: verify that **game** test files exist — not merely
    that `tests/` does. Check the engine's **test root** (from step 3; the table
    is in `.claude/docs/directory-structure.md` — Godot `tests/unit/` and
-   `tests/integration/`, Unity `Assets/Tests/`, Unreal
-   `Source/*/Private/Tests/`) and `tests/smoke/` for actual test files. A
-   **test file** is one the engine's test runner executes — a `*_test.gd` suite,
-   a C# test class, an Unreal automation test source. Markdown checklists do not
+   `tests/integration/`, Unity `Assets/Tests/`) and `tests/smoke/` for actual
+   test files. A **test file** is one the engine's test runner executes — a
+   `*_test.gd` suite or a C# test class. Markdown checklists do not
    count: `/test-setup` always writes `tests/smoke/critical-paths.md`, and
    counting it would hide exactly the zero-test state this step exists to catch.
    If none are found **at `qa.level: minimal`**, tests are waived at this level:
@@ -65,14 +64,14 @@ Before running anything, understand the environment:
    (a `[TO BE CONFIGURED]` value means not configured). Store this for test
    command selection in Phase 2.
 
-   Then find the **editor executable** — none of the three engines installs
+   Then find the **editor executable** — neither engine installs
    onto `PATH` by default on Windows or macOS, so a bare `godot` that does not
    resolve says nothing about whether the engine is installed. Take the first
    that resolves (the file exists, or `command -v` finds it): the executable
    `commands.test` names (its quoted path or first word), else the editor
    `engine.path` records, else the engine's name on `PATH` (`godot`). Use it
    wherever Phase 2 writes `godot` or `"<Unity editor>"`, quoting a path with a
-   space; on Unreal, `<UE root>` is `engine.path`. If none resolves, the test
+   space. If none resolves, the test
    runner is not available (Phase 2) — on Godot,
    `NOT ASSESSED — Godot executable not found (commands.test, engine.path, PATH)`.
 

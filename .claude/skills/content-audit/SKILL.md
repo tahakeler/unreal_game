@@ -152,12 +152,6 @@ the two happened — a reader cannot tell from a green result.
 For each content type found in Phase 1, scan the relevant directories to count
 what has been implemented. Use Glob and Grep to locate files.
 
-**On Unreal, content lives in `Content/`** — maps and data assets both — and the
-code root (`Source/<Module>/`) holds only C++. So on Unreal, every `assets/…` glob
-below also runs under `Content/` (`*.uasset` in place of the data extensions),
-and levels are `Content/**/*.umap`. Skipping this finds zero levels on every
-Unreal project and reports them NOT STARTED.
-
 **On Unity, content lives under `Assets/`** (compare the case exactly —
 `.claude/docs/code-root-resolution.md`), and rarely in a `data/` folder. So on
 Unity every `assets/…` glob below also runs under `Assets/`, without requiring
@@ -167,8 +161,8 @@ and `.prefab`. Skipping this finds zero items, abilities, quests and dialogue
 on a Unity project and reports them NOT STARTED.
 
 **Levels / Areas / Maps:**
-- Glob `assets/**/*.tscn`, `assets/**/*.unity`, `assets/**/*.umap`
-- Glob the **code root** for scene files: `*.tscn` (Godot), `*.unity` (Unity); on Unreal, `Content/**/*.umap` instead (above). Resolve the root per `.claude/docs/code-root-resolution.md`. **If the code root is unresolved, report `NOT ASSESSED — code root unresolved` rather than zero hits.**
+- Glob `assets/**/*.tscn`, `assets/**/*.unity`, `Assets/**/*.unity`
+- Glob the **code root** for scene files: `*.tscn` (Godot), `*.unity` (Unity). Resolve the root per `.claude/docs/code-root-resolution.md`. **If the code root is unresolved, report `NOT ASSESSED — code root unresolved` rather than zero hits.**
 - Look for scene files in subdirectories named `levels/`, `areas/`, `maps/`,
   `worlds/`, `stages/`
 - Count unique files that appear to be level/scene definitions (not UI scenes)

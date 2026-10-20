@@ -159,7 +159,7 @@ Spawn the `technical-artist` agent to:
 - Design any audio-reactive visual effects
 
 Spawn the **primary engine specialist** in parallel (`<engine>-specialist` derived from `engine.name` — Unity→`unity-specialist`; fall back to the Primary line of `## Engine Specialists` in `.claude/docs/technical-preferences.md`) to validate the integration approach:
-- Is the proposed audio middleware integration idiomatic for the engine? (e.g., Godot's built-in AudioStreamPlayer vs FMOD, Unity's Audio Mixer vs Wwise, Unreal's MetaSounds vs FMOD)
+- Is the proposed audio middleware integration idiomatic for the engine? (e.g., Godot's built-in AudioStreamPlayer vs FMOD, Unity's Audio Mixer vs Wwise or FMOD)
 - Any engine-specific audio node/component patterns that should be used?
 - Known audio system changes in the pinned engine version that affect the integration plan?
 - Output: engine audio integration notes to merge with the technical-artist's plan

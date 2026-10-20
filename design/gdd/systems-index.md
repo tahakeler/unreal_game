@@ -4,7 +4,7 @@
 > **Created**: 2026-10-10
 > **Source Concept**: design/game-concept.md (revision 2)
 > **Master GDD**: design/gdd/game-overview.md
-> **Engine**: UE 5.8, Apple Silicon Mac, 2–4 player listen server
+> **Engine**: Unity 6.3 LTS (URP), Apple Silicon Mac, 2–4 player listen server (Netcode for GameObjects host)
 
 ---
 
@@ -26,8 +26,8 @@ Layers: **Foundation** → **Core** → **Feature** → **Presentation** → **P
 | 1 | Session & Networking (lobby, listen server, join-in-progress, host migration-lite) | `session-networking` | Foundation | VS | Not Started | design/gdd/session-networking.md | — |
 | 2 | Player Character (movement, stamina, ragdoll, knockout, barn respawn) | `player-character` | Foundation | VS | Not Started | design/gdd/player-character.md | session-networking |
 | 3 | Physics Carry & Tethers (grab, multi-hand carry, throw, lasso/hitch ropes) | `physics-carry` | Foundation | VS | Not Started | design/gdd/physics-carry.md | player-character |
-| 4 | Proximity Voice & Noise (EOS 3D voice, loudness → world "noise events") | `proximity-voice` | Foundation | VS | Not Started | design/gdd/proximity-voice.md | session-networking |
-| 5 | Critter AI Framework (flee/lure/corner StateTree on AdaptivePathfinding, personality traits) | `critter-ai` | Core | VS | Not Started | design/gdd/critter-ai.md | physics-carry, proximity-voice |
+| 4 | Proximity Voice & Noise (Steam 3D voice, loudness → world "noise events") | `proximity-voice` | Foundation | VS | Not Started | design/gdd/proximity-voice.md | session-networking |
+| 5 | Critter AI Framework (flee/lure/corner C# FSM on AI Navigation NavMesh, personality traits) | `critter-ai` | Core | VS | Not Started | design/gdd/critter-ai.md | physics-carry, proximity-voice |
 | 6 | Goods Value & Bruising (base value, freshness, bruise types, damage → value) | `goods-value` | Core | VS | Not Started | design/gdd/goods-value.md | physics-carry |
 | 7 | Farm Tools (net, lasso, feed bucket, whistle; tool slots) | `farm-tools` | Core | VS | Not Started | design/gdd/farm-tools.md | physics-carry, critter-ai |
 | 8 | Wagon & Vehicles (physics wagon, hitching, later rafts / wheelbarrow) | `wagon-vehicles` | Core | VS | Not Started | design/gdd/wagon-vehicles.md | physics-carry |
@@ -49,7 +49,7 @@ Layers: **Foundation** → **Core** → **Feature** → **Presentation** → **P
 | 24 | Meta Progression, Cosmetics & Almanac (account unlocks, hats, almanac entries) | `meta-progression` | Feature | EA | Not Started | design/gdd/meta-progression.md | save-persistence, livestock-roster |
 | 25 | Eviction Mode (endless quota ladder, daily seed, leaderboard) | `eviction-mode` | Feature | EA | Not Started | design/gdd/eviction-mode.md | week-quota, region-campaign, save-persistence |
 | 26 | HUD, Menus & Ledger Screens (diegetic-first HUD, lobby, payout, shop UI) | `hud-menus` | Presentation | VS (payout) / Alpha | Not Started | design/gdd/hud-menus.md | day-loop, blame-ledger, farm-upgrades |
-| 27 | Audio & Comedy Feedback (MetaSounds bruise/impact, critter VO, music states) | `audio-feedback` | Presentation | Alpha | Not Started | design/gdd/audio-feedback.md | goods-value, critter-ai, day-loop |
+| 27 | Audio & Comedy Feedback (sound-event bruise/impact variation, critter VO, music states) | `audio-feedback` | Presentation | Alpha | Not Started | design/gdd/audio-feedback.md | goods-value, critter-ai, day-loop |
 | 28 | Onboarding & Accessibility (Grandpa's tape tutorial, subtitles, voice-free play) (inferred) | `onboarding-accessibility` | Polish | EA | Not Started | design/gdd/onboarding-accessibility.md | hud-menus, proximity-voice |
 
 | 29 | Character Customization & Emotes (loadout slots, wardrobe, unlocks, emotes 5–8) | `character-customization` | Presentation | VS (slots, 10 hats, 4 emotes) / Alpha / EA | Designed | design/gdd/character-customization.md | player-character, meta-progression, save-persistence |
@@ -139,7 +139,7 @@ Batch sizes: A 7, B 6, C 7, D 8. Batch D is mostly later-priority systems, so it
 ## Assumptions (made non-interactively; user may override)
 1. Priority tiers follow the concept roadmap (VS / Alpha / EA / Post) instead of the template's MVP tiers. The VS tier equals the MVP.
 2. Weather and daily twists are grouped with the creatures (Batch B) because both are "world acting against you" modifiers authored on the Day Modifier contract.
-3. Sessions use Steam lobbies (storefront) with an EOS voice backend. Fallback is EOS for both. The Mac EOS voice risk is flagged in proximity-voice.
+3. Sessions use Steam lobbies (storefront) via Facepunch.Steamworks with a Steam voice backend; sessions fall back to LAN over Unity Transport. The Mac Steam voice risk is flagged in proximity-voice.
 4. Save and persistence (inferred) uses run-scoped saves that are wiped on a failed Sunday, plus a separate account profile for unlocks.
 5. Onboarding and accessibility (inferred) are needed for streamers and players without a mic. Every voice-dependent mechanic needs a non-voice fallback (emote shout / quiet-walk button).
 6. Farm tools are split from physics-carry so that the carry GDD stays focused on the hand/constraint model.

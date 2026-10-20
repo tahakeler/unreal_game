@@ -341,7 +341,7 @@ Ground the concept in reality:
   Note platform implications if relevant (e.g., mobile means Unity is strongly preferred; console means Godot has limitations; web means Godot exports cleanly).
 
 - **Engine experience**: Use `AskUserQuestion` — "Do you already have an engine you work in?"
-  Options: `Godot` / `Unity` / `Unreal Engine 5` / `No preference — help me decide`
+  Options: `Godot` / `Unity` / `No preference — help me decide`
   - **This decision always prompts regardless of `modes.automation` —
     including `autonomous` mode.** Engine choice is a project-wide
     architectural commitment that downstream tooling depends on and is

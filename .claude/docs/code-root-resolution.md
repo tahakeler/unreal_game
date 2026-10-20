@@ -13,7 +13,6 @@ code. This file is the procedure for applying it.
 |---|---|---|
 | Godot | `src/` | No constraint; Godot loads from `res://` anywhere under the project root |
 | Unity | `Assets/` | Unity compiles **only** `Assets/` and `Packages/` |
-| Unreal | `Source/<Module>/` | UnrealBuildTool discovers modules under `Source/`; content lives in `Content/` |
 
 `src/` is the **Godot row of that table, not a universal path.**
 
@@ -24,7 +23,7 @@ code. This file is the procedure for applying it.
    `.claude/docs/technical-preferences.md`. A value of `[TO BE CONFIGURED]`
    does not count.
 3. Derivation from the tree, but **only when it is unambiguous**. Exactly one of
-   `src/`, `Assets/` or `Source/` present means that is the root. Two or more
+   `src/` or `Assets/` present means that is the root. Both
    present means the project is genuinely undecidable — do not guess. Compare the
    names exactly as the directory listing spells them: on Windows and default
    macOS an existence test for `Assets/` also succeeds on Godot's own `assets/`,
@@ -67,4 +66,4 @@ write to the wrong directory.
 Where a skill says `src/`, read it as *the code root* and substitute the table
 above. Where a skill greps, glob the resolved root. Where a skill writes,
 write under the resolved root and use the engine's own conventions beneath it
-(`Assets/Scripts/<System>/` on Unity, `Source/<Module>/<System>/` on Unreal).
+(`Assets/Scripts/<System>/` on Unity).

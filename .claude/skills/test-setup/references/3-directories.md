@@ -19,7 +19,7 @@ After approval, create the following files:
 # Test Infrastructure
 
 **Engine**: [engine name + version]
-**Test Framework**: [GdUnit4 | Unity Test Framework | UE Automation]
+**Test Framework**: [GdUnit4 | Unity Test Framework]
 **CI**: `.github/workflows/tests.yml`
 **Setup date**: [date]
 
@@ -32,9 +32,9 @@ tests/
   smoke/          # Critical path test list for /smoke-check gate
 ```
 
-[Unity/Unreal — replace the unit/integration lines: unit and integration tests
-live under the engine's test root, `Assets/Tests/EditMode|PlayMode/[System]/`
-or `Source/<Module>/Private/Tests/[System]/`; `tests/` keeps this README and
+[Unity — replace the unit/integration lines: unit and integration tests
+live under the engine's test root, `Assets/Tests/EditMode|PlayMode/[System]/`;
+`tests/` keeps this README and
 `smoke/`. Every `tests/unit/` path below means that test root.]
 
 ```
@@ -56,10 +56,6 @@ Names follow the engine's language (`.claude/rules/test-standards.md`):
   — `combat_damage_test.gd` → `test_base_attack_returns_expected_damage()`
 - **Unity**: class `[System]Tests` in `[System]Tests.cs`, method `[Scenario]_[Expected]`
   — `CombatTests.cs` → `BaseAttack_ReturnsExpectedDamage()`
-- **Unreal**: class `F[System][Scenario]Test`, test name `<Project>.[System].[Scenario]`
-  — `FCombatBaseAttackTest` → `<Project>.Combat.BaseAttack`
-  [`<Project>` is the root the filter in `commands.test` uses — write it out:
-  the project name, or the distinct root `/setup-engine` chose]
 
 ## Story Type → Test Evidence
 
@@ -200,46 +196,5 @@ found — report it as not assessed, never as a pass. Do not add `-quit`;
 its own results file, read the same way, and deleted before each run the same
 way. An Edit Mode run never runs the tests in `Assets/Tests/PlayMode/`, so
 `/smoke-check` runs both whenever that folder holds tests.
-
-#### Unreal Engine (`Engine: Unreal` or `Engine: UE5`)
-
-Tests live **inside the game module**: `Source/<Module>/Private/Tests/`, where
-`<Module>` is the primary game module (for a C++ project, the `.uproject` name).
-UnrealBuildTool compiles only module folders — a tests folder directly under
-`Source/` is not a module, so a test there is silently never built and every
-run reports `No automation tests matched`.
-
-Create `Source/<Module>/Private/Tests/README.md`. `<Project>.` in it — and
-`[ProjectName].` in the CI filter below — is the test root the filter in
-`commands.test` uses: the project name, or the distinct root `/setup-engine`
-chose when the project's name is also an engine area. Write that root:
-```markdown
-# Unreal Automation Tests
-Tests use the UE Automation Testing Framework and compile with this module.
-Wrap each test file in `#if WITH_DEV_AUTOMATION_TESTS` … `#endif`.
-Flags: `EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter`
-(there is no `GameFilter` flag).
-
-Run via: Session Frontend → Automation → select "<Project>." tests
-Or headlessly from the project root, after building the editor target — on a
-fresh checkout the editor exits before any test runs:
-"<UE root>/Engine/Binaries/DotNET/UnrealBuildTool/UnrealBuildTool.exe" <Project>Editor Win64 Development -Project="$(pwd -W 2>/dev/null || pwd)/<Project>.uproject"
-"<UE root>/Engine/Binaries/Win64/UnrealEditor-Cmd.exe" "$(pwd -W 2>/dev/null || pwd)/<Project>.uproject" -ExecCmds="Automation RunTests <Project>.; Quit" -unattended -nullrhi -stdout -FullStdOutLogOutput
-The project path must be absolute: UE does not find a relative one (exit 1,
-"Project file not found"). Those two lines are Windows'. On Linux build with
-`Engine/Build/BatchFiles/Linux/Build.sh <Project>Editor Linux Development -Project="$(pwd -W 2>/dev/null || pwd)/<Project>.uproject"` and run
-the tests with `Engine/Binaries/Linux/UnrealEditor` and the same arguments; on
-macOS build with `Engine/Build/BatchFiles/Mac/Build.sh <Project>Editor Mac Development -Project="$(pwd -W 2>/dev/null || pwd)/<Project>.uproject"`
-— Epic documents no command-line editor inside `UnrealEditor.app` for the test
-run (see `docs/engine-reference/unreal/current-best-practices.md` (removed — this repo is Unity-only), "Command Line").
-
-Read the output, not the exit code: a failing test and a run that matched nothing both exit 255.
-`Result={Fail}` is a failure; `No automation tests matched` means no test was
-built or named `<Project>.…`.
-
-Test class naming: F[System][Scenario]Test — one class per test; a second
-test reusing a class name fails to link
-Test name: "<Project>.[System].[Scenario]"
-```
 
 ---

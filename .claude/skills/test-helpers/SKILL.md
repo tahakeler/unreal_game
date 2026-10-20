@@ -29,7 +29,6 @@ the only place its test runner compiles them (`.claude/docs/directory-structure.
 |---|---|
 | Godot | `tests/helpers/` |
 | Unity | `Assets/Tests/EditMode/Helpers/` — inside the `EditModeTests` assembly `/test-setup` creates. If PlayMode tests need the same helpers, ask before creating `Assets/Tests/Helpers/TestHelpers.asmdef` and referencing it from both test assemblies. |
-| Unreal | `Source/<Module>/Private/Tests/Helpers/` |
 
 `tests/helpers/` below means the helper root for the project's engine.
 
@@ -96,12 +95,11 @@ If the engine is not configured in either source: "Engine not configured. Run `/
 ## 3. Load Existing Test Patterns
 
 Scan the engine's test root for patterns already in use (Godot `tests/`, Unity
-`Assets/Tests/`, Unreal `Source/<Module>/Private/Tests/`):
+`Assets/Tests/`):
 
 ```
 Glob pattern="tests/**/*_test.*"                  (Godot)
 Glob pattern="Assets/Tests/**/*Tests.cs"          (Unity)
-Glob pattern="Source/*/Private/Tests/**/*.cpp"    (Unreal)
 ```
 
 For a representative sample (up to 5 files), read the test files and extract:
@@ -318,63 +316,6 @@ public static class GameFactory
 
 ---
 
-### Unreal Engine (C++)
-
-**Base helper** (`Source/<Module>/Private/Tests/Helpers/GameTestHelpers.h`):
-
-```cpp
-#pragma once
-
-#include "CoreMinimal.h"
-#include "Misc/AutomationTest.h"
-
-/**
- * Game-specific assertion macros and helpers for [Project Name] automation tests.
- * Include in any test file that needs domain-specific assertions.
- *
- * Usage:
- *   GAME_TEST_ASSERT_IN_RANGE(TestName, DamageValue, 10.0f, 50.0f, TEXT("Damage"));
- */
-
-// Assert a float value is within inclusive range [Min, Max]
-#define GAME_TEST_ASSERT_IN_RANGE(TestName, Value, Min, Max, Label) \
-    TestTrue( \
-        FString::Printf(TEXT("%s (%.2f) in range [%.2f, %.2f]"), Label, Value, Min, Max), \
-        (Value) >= (Min) && (Value) <= (Max) \
-    )
-
-// Assert a UObject pointer is valid (not null, not garbage collected)
-#define GAME_TEST_ASSERT_VALID(TestName, Ptr, Label) \
-    TestTrue( \
-        FString::Printf(TEXT("%s is valid"), Label), \
-        IsValid(Ptr) \
-    )
-
-// Assert an Actor is in the world (spawned successfully)
-#define GAME_TEST_ASSERT_SPAWNED(TestName, ActorPtr, ClassName) \
-    TestNotNull( \
-        FString::Printf(TEXT("Spawned actor of class %s"), TEXT(#ClassName)), \
-        ActorPtr \
-    )
-
-/**
- * Helper to create a minimal test world.
- * Remember to call World->DestroyWorld(false) in teardown.
- */
-namespace GameTestHelpers
-{
-    inline UWorld* CreateTestWorld(const FString& WorldName = TEXT("TestWorld"))
-    {
-        UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
-        FWorldContext& WorldContext = GEngine->CreateNewWorldContext(EWorldType::Game);
-        WorldContext.SetCurrentWorld(World);
-        return World;
-    }
-}
-```
-
----
-
 ## 5. Generate System-Specific Helpers
 
 For `[system-name]` or `all` modes, generate a helper per system:
@@ -448,8 +389,7 @@ After writing: Verdict: **COMPLETE** — helper files created.
 
 "Helper files created. To use them in a test:
 - Godot: `class_name` is auto-imported — no explicit import needed
-- Unity: Add `using` directive or reference the test assembly
-- Unreal: `#include \"Tests/Helpers/GameTestHelpers.h\"` (from inside the module)"
+- Unity: Add `using` directive or reference the test assembly"
 
 ---
 

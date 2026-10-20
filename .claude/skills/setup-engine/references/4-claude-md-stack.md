@@ -19,13 +19,6 @@ If Godot was chosen, ask the user which language to use **before** showing the p
 
 Record the choice. It determines the CLAUDE.md template, naming conventions, specialist routing, and which agent is spawned for code files throughout the project.
 
-### Primary Language (Unreal)
-
-If Unreal was chosen, ask via `AskUserQuestion`: "Will most gameplay logic live in
-C++ or in Blueprints?" — `[A] C++ (Blueprints for tuning and prototyping)` /
-`[B] Blueprint-primary (C++ only where needed)`. Default to C++ if the user has no
-preference. The answer sets `engine.language` (`"C++"` or `"Blueprint"`).
-
 ---
 
 Read `CLAUDE.md` and show the user the proposed Technology Stack changes.
@@ -45,16 +38,6 @@ Update the Technology Stack section, replacing the `[CHOOSE]` placeholders with 
 - **Asset Pipeline**: Unity Asset Import Pipeline + Addressables
 ```
 
-**For Unreal:**
-```markdown
-- **Engine**: Unreal Engine [version]
-- **Language**: [C++ (primary), Blueprint (gameplay prototyping) | Blueprint (primary), C++ where needed]
-- **Build System**: Unreal Build Tool (UBT)
-- **Asset Pipeline**: Unreal Content Pipeline
-```
-The Language line follows the primary-language answer above: the first form for
-`[A]` (`engine.language: "C++"`), the second for `[B]` (`"Blueprint"`).
-
 ### Engine reference import
 
 In the same CLAUDE.md write, set the **Engine Version Reference** import to the
@@ -63,9 +46,8 @@ chosen engine. Find the line marked `ENGINE-REFERENCE-IMPORT` (an
 to point at the configured engine:
 - Godot → `@docs/engine-reference/godot/VERSION.md (removed — this repo is Unity-only)`
 - Unity → `@docs/engine-reference/unity/VERSION.md`
-- Unreal → `@docs/engine-reference/unreal/VERSION.md` (removed — this repo is Unity-only)
 
-This is why a fresh Unity or Unreal project no longer loads the Godot reference in
+This is why a fresh Unity project no longer loads the Godot reference in
 every session. It is idempotent — re-running `/setup-engine` for a different
 engine rewrites the same line. (The target `docs/engine-reference/<engine>/`
 directory is created in Section 8 below if it does not yet exist.)

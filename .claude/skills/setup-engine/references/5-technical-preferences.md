@@ -32,13 +32,6 @@ engine-appropriate defaults. Read the existing template first, then fill in:
 - Files: PascalCase matching class (e.g., `PlayerController.cs`)
 - Constants: PascalCase or UPPER_SNAKE_CASE
 
-**For Unreal (C++):**
-- Classes: Prefixed PascalCase (`A` for Actor, `U` for UObject, `F` for struct)
-- Variables: PascalCase (e.g., `MoveSpeed`)
-- Functions: PascalCase (e.g., `TakeDamage()`)
-- Booleans: `b` prefix (e.g., `bIsAlive`)
-- Files: Match class without prefix (e.g., `PlayerController.h`)
-
 ### Input & Platform Section
 
 Populate `## Input & Platform` using the answers gathered in Section 2 (or extracted
@@ -94,7 +87,7 @@ Example filled section:
   - Options: `[A] Set defaults now (60fps, 16.6ms frame budget, engine-appropriate draw call limit)` / `[B] Leave as [TO BE CONFIGURED] — I'll set these when I know my target hardware`
   - If [A]: populate with the suggested defaults. If [B]: leave as placeholder.
 - **Testing**: Suggest the engine-appropriate framework — **gdUnit4** for Godot,
-  NUnit for Unity, Automation Spec for Unreal — and ask before adding.
+  NUnit (Unity Test Framework) for Unity — and ask before adding.
   > **Must match `commands.test` in Section 5.5.1, which writes gdUnit4's own
   > runner (`res://addons/gdUnit4/bin/GdUnitCmdTool.gd`), and
   > `.claude/docs/coding-standards.md`, which names the same runner.** Naming GUT
@@ -131,29 +124,6 @@ Also populate the `## Engine Specialists` section in `technical-preferences.md` 
 | Scene / prefab / level files (.unity, .prefab) | unity-specialist |
 | Native extension / plugin files (.dll, native plugins) | unity-specialist |
 | General architecture review | unity-specialist |
-```
-
-**For Unreal:**
-```markdown
-## Engine Specialists
-- **Primary**: unreal-specialist
-- **Language/Code Specialist**: ue-blueprint-specialist (Blueprint graphs) or unreal-specialist (C++)
-- **Shader Specialist**: unreal-specialist (no dedicated shader specialist — primary covers materials)
-- **UI Specialist**: ue-umg-specialist (UMG widgets, CommonUI, input routing, widget styling)
-- **Additional Specialists**: ue-gas-specialist (Gameplay Ability System, attributes, gameplay effects), ue-replication-specialist (property replication, RPCs, client prediction, netcode)
-- **Routing Notes**: Invoke primary for C++ architecture and broad engine decisions. Invoke Blueprint specialist for Blueprint graph architecture and BP/C++ boundary design. Invoke GAS specialist for all ability and attribute code. Invoke replication specialist for any multiplayer or networked systems. Invoke UMG specialist for all UI implementation.
-
-### File Extension Routing
-
-| File Extension / Type | Specialist to Spawn |
-|-----------------------|---------------------|
-| Game code (.cpp, .h files) | unreal-specialist |
-| Shader / material files (.usf, .ush, Material assets) | unreal-specialist |
-| UI / screen files (.umg, UMG Widget Blueprints) | ue-umg-specialist |
-| Scene / prefab / level files (.umap, .uasset) | unreal-specialist |
-| Native extension / plugin files (Plugin .uplugin, modules) | unreal-specialist |
-| Blueprint graphs (.uasset BP classes) | ue-blueprint-specialist |
-| General architecture review | unreal-specialist |
 ```
 
 ### Collaborative Step

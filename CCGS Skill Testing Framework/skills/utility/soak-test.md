@@ -97,27 +97,28 @@ None. `/soak-test` is a QA planning utility. No director gates apply.
 
 ---
 
-### Case 3: Narrow Focus on Unreal — 4-hour memory soak
+### Case 3: Narrow Focus on Unity — 4-hour memory soak
 
 **Fixture:**
-- `project.yaml` has `engine.name: Unreal`
+- `project.yaml` has `engine.name: Unity`
 
 **Input:** `/soak-test 4h memory`
 
 **Expected behavior:**
 1. Checkpoints for `4h`: T+0, T+30, T+60, T+90, T+120, T+180, T+240
-2. Unreal memory items: a memory readout at each checkpoint — `stat memory`,
-   marked NOT SOURCEABLE since `docs/engine-reference/unreal/` (removed — this repo is Unity-only) does not cover
-   it; record Physical Memory Used and Available (units as displayed)
-3. Alert threshold: Physical Memory Used growth > 20% over the full soak,
-   against this run's T+0 — no absolute MB threshold
+2. Unity memory items: a memory readout at each checkpoint — the Memory Profiler
+   (Window → Analysis → Memory Profiler), marked NOT SOURCEABLE since
+   `docs/engine-reference/unity/` does not cover it; record Total Reserved
+   Memory, GC Allocated and Object Count (units as displayed)
+3. Alert threshold: GC Allocated growing monotonically across 3+ checkpoints —
+   a unit-free check, no absolute MB threshold
 4. Balance/fatigue observation items are not generated (focus is `memory`)
 5. Output path `production/qa/soak-test-[date]-4h.md`
 
 **Assertions:**
 - [ ] Checkpoints are exactly T+0, T+30, T+60, T+90, T+120, T+180, T+240
-- [ ] The Unreal threshold is a relative > 20% growth, not an absolute size
-- [ ] `stat memory` is marked NOT SOURCEABLE, a pointer to confirm rather than a verified command
+- [ ] The Unity threshold is the unit-free monotonic-growth check, not an absolute size
+- [ ] The Memory Profiler is marked NOT SOURCEABLE, a pointer to confirm rather than a verified command
 - [ ] Balance/fatigue items are omitted for focus `memory`
 - [ ] "May I write" names the `-4h.md` path
 

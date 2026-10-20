@@ -16,8 +16,8 @@ Each agent owns a specific domain, enforcing separation of concerns and quality.
 - **Platforms**: develop on macOS (Apple Silicon); ship Windows + macOS on Steam
 
 > **Note**: This repo is Unity-only. Use `unity-specialist` and the `unity-*`
-> sub-specialists; Godot and Unreal agent sets have been removed. The previous
-> Unreal build of the game is archived on branch `archive/unreal-final`.
+> sub-specialists; other engines' agent sets have been removed. The previous
+> build of the game is archived on branch `archive/unreal-final`.
 
 ## Project Structure
 

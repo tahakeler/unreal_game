@@ -9,7 +9,6 @@
 
 - Godot 4
 - Unity
-- Unreal Engine
 
 ### Godot 4
 
@@ -115,66 +114,5 @@ jobs:
 
 Note: Unity CI requires a `UNITY_LICENSE` secret. Add to GitHub repository
 secrets before the first CI run.
-
-### Unreal Engine
-
-Create `.github/workflows/tests.yml`:
-
-```yaml
-name: Automated Tests
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-jobs:
-  test:
-    name: Run UE Automation Tests
-    runs-on: [self-hosted, windows]  # UE requires a local runner with the editor installed
-
-    # The quoted "{0}" in each `shell:` below: the Windows runner passes bash
-    # its script path unquoted, so with plain `shell: bash` every step fails
-    # ("No such file or directory") when the runner's folder has a space.
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          lfs: true
-
-      # Binaries/ is gitignored, so a fresh checkout has no compiled game
-      # module: without this step the editor stops with "The game module could
-      # not be found" before running any test. UnrealBuildTool.exe, not
-      # Build.bat -- from bash, Build.bat fails on an engine path with spaces.
-      - name: Build Editor Target
-        run: |
-          "$UE_ROOT/Engine/Binaries/DotNET/UnrealBuildTool/UnrealBuildTool.exe" [ProjectName]Editor Win64 Development \
-            -Project="${{ github.workspace }}/[ProjectName].uproject"
-        shell: bash --noprofile --norc -eo pipefail "{0}"
-
-      # -stdout -FullStdOutLogOutput: without them the editor prints nothing
-      # here, and the results are only in Saved/Logs/.
-      - name: Run Automation Tests
-        run: |
-          "$UE_ROOT/Engine/Binaries/Win64/UnrealEditor-Cmd.exe" "${{ github.workspace }}/[ProjectName].uproject" \
-            -nullrhi -nosound \
-            -ExecCmds="Automation RunTests [ProjectName].; Quit" \
-            -unattended -stdout -FullStdOutLogOutput
-        shell: bash --noprofile --norc -eo pipefail "{0}"
-
-      - name: Upload Logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-logs
-          path: Saved/Logs/
-```
-
-Note: UE CI requires a self-hosted Windows runner with Unreal Editor installed.
-The `windows` label keeps the job off any Linux self-hosted runner the
-repository also has. Set the `UE_ROOT` environment variable on the runner to the engine folder
-(e.g. `C:/Program Files/Epic Games/UE_5.7`). `[ProjectName]Editor` is the
-editor target in `Source/[ProjectName]Editor.Target.cs`.
 
 ---

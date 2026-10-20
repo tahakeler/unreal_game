@@ -91,7 +91,7 @@ a billing plan — most of the studio runs on whatever model you are already usi
 
 ### Engine Specialists
 
-This repo is configured for **Unity 6.3 LTS (6000.3.26f1, URP, C#)** only (Godot/Unreal agent sets removed; the earlier Unreal build is archived on branch `archive/unreal-final`):
+This repo is configured for **Unity 6.3 LTS (6000.3.26f1, URP, C#)** only (other engines' agent sets removed; the earlier build is archived on branch `archive/unreal-final`):
 
 | Engine | Lead Agent | Sub-Specialists |
 |--------|-----------|-----------------|
@@ -340,7 +340,7 @@ auto mode.
 |------|---------|--------------|
 | `validate-commit.sh` | PreToolUse (Bash, PowerShell) | Checks for hardcoded values, TODO format, JSON validity, design doc sections — exits early if the command is not `git commit` |
 | `validate-push.sh` | PreToolUse (Bash, PowerShell) | Warns on pushes to protected branches — exits early if the command is not `git push` |
-| `validate-assets.sh` | PostToolUse (Write/Edit) | Checks data-file JSON under `assets/`, `Assets/` or `Content/`, and asset naming in Godot's `assets/` only — exits early if the file is under none of them |
+| `validate-assets.sh` | PostToolUse (Write/Edit) | Checks data-file JSON under `assets/` or `Assets/`, and asset naming in Godot's `assets/` only — exits early if the file is under none of them |
 | `session-start.sh` | Session open | Shows current branch and recent commits for orientation |
 | `detect-gaps.sh` | Session open | Detects fresh projects (suggests `/start`) and missing design docs when code or prototypes exist |
 | `pre-compact.sh` | Before compaction | Logs the compaction (its output does not reach Claude — `session-start.sh` restores context afterwards) |
@@ -362,7 +362,7 @@ below are Godot's. Each rule also matches the Unity layout: the code
 rules match C# under `Assets/**/Gameplay/` and C# under `HarvestPanic/Assets/Scripts/Gameplay/` (and `Core`,
 `AI`, `Networking`, `UI`), data matches JSON under `Assets/**/Data/` and
 `HarvestPanic/Assets/**/Data/`, shaders match by file type, and tests match
-C# under `Assets/Tests/` and C++ under `Source/**/Tests/`.
+C# under `Assets/Tests/`.
 
 | Path | Enforces |
 |------|----------|

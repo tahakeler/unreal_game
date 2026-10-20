@@ -1,6 +1,6 @@
 # HARVEST PANIC: Master Game Design Document
 
-> **Status**: Draft v0.1 · **Created**: 2026-10-10 · **Engine**: UE 5.8 (Apple Silicon Mac)
+> **Status**: Draft v0.1 · **Created**: 2026-10-10 · **Engine**: Unity 6.3 LTS, URP (Apple Silicon Mac)
 > **Source**: design/game-concept.md (rev 2) · **Systems**: design/gdd/systems-index.md
 > This hub links every system GDD. Detailed rules, formulas and tuning live in the per-system docs.
 
@@ -26,7 +26,7 @@ A 2–4 player online co-op physics comedy. Your crew inherits Grandpa's cursed,
 - **Primary:** friend groups aged 16–30 who play R.E.P.O., PEAK, Lethal Company and Chained Together on voice chat.
 - **Secondary:** streamers and content creators who need reliable laugh moments roughly every 3 minutes.
 - **Tertiary:** cozy farm fans who want a chaotic twist (Stardew/Overcooked crossover).
-- **Hardware:** runs on base M-series Macs and mid-range PCs, with stylized, light rendering (no Nanite/Lumen dependency).
+- **Hardware:** runs on base M-series Macs and mid-range PCs, with stylized, light rendering (no real-time GI or high-end rendering dependency).
 
 ## Loops
 ### Core loop: The Day (10–15 min) → `day-loop`
@@ -91,8 +91,8 @@ Livestock personalities × cursed crops × night creatures × weather (mud, wind
 7. **Optional betrayal:** pocket a golden egg; the ledger reveals it on Sunday.
 
 ## Multiplayer Model
-- 2–4 players, **listen server** (host authoritative), Steam lobbies with invite and join-in-progress at any time except the Sunday payout cutscene (`session-networking`). Solo is playable with scaled quotas (not a focus).
-- **Proximity voice:** EOS Voice with 3D attenuation, plus a radio upgrade for long-range channels. Voice loudness feeds the Noise Event system. A non-mic fallback ("Holler" and "Shush" buttons) is required.
+- 2–4 players, **listen server** (Netcode for GameObjects host, host authoritative), Steam lobbies with invite and join-in-progress at any time except the Sunday payout cutscene (`session-networking`). Solo is playable with scaled quotas (not a focus).
+- **Proximity voice:** Steam voice (Facepunch.Steamworks) with 3D attenuation, plus a radio upgrade for long-range channels. Voice loudness feeds the Noise Event system. A non-mic fallback ("Holler" and "Shush" buttons) is required.
 - Physics replication favors a "host-simulated, client-predicted grab" model. Clips beat precision, so acceptable desync is tuned for comedy rather than competitive accuracy (details in `session-networking`, `physics-carry`).
 - Host leave: the run auto-saves at day boundaries and the checkpoint is replicated to all roster players, so any of them can host the Resume ("migration-lite"). No live migration at EA.
 
@@ -149,7 +149,7 @@ Livestock personalities × cursed crops × night creatures × weather (mud, wind
 See design/gdd/systems-index.md for all 28 systems, dependencies, priorities and the 4 authoring batches.
 
 ## Open Questions
-1. Can the Mac build run EOS voice on UE 5.8 arm64? This is a blocker for the proximity-voice pillar and should be spiked first.
+1. Can the Mac build run Steam voice (Facepunch.Steamworks) on Unity 6.3 arm64? This is a blocker for the proximity-voice pillar and should be spiked first.
 2. Livestock asset availability (highest-risk art gap).
 3. Solo mode: supported tier or "technically possible"?
 4. ~~Should betrayal (golden egg) be opt-in per lobby?~~ Resolved: lobby toggle `BetrayalEnabled`, default ON (`blame-ledger`).

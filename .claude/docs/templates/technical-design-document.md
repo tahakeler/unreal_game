@@ -12,7 +12,7 @@
 
 | Field | Value |
 |-------|-------|
-| **Engine** | [e.g. Godot 4.6 / Unity 6 / Unreal Engine 5.7] |
+| **Engine** | [e.g. Godot 4.6 / Unity 6.3] |
 | **APIs Depended On** | [Specific classes/methods/nodes used, version-pinned — e.g. `CharacterBody3D.move_and_slide() (Godot 4.x)`] |
 | **References Consulted** | [engine-reference docs read before writing this — e.g. `docs/engine-reference/unity/modules/physics.md`] |
 | **Post-Cutoff Features Used** | [Features from engine versions beyond LLM training cutoff, or "None"] |

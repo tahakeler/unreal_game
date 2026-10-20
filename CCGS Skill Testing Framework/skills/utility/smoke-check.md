@@ -341,11 +341,7 @@ None. `/smoke-check` is a pre-QA utility skill. No director gates apply.
   confirms a result from their IDE or CI) is covered by the protocol compliance
   assertions above.
 - At `qa.level: minimal` a FAIL is advisory and never blocks hand-off; Case 2
-  pins `standard` to test the blocking path. Unity's `testcasecount="0"` and
-  Unreal's `No automation tests matched` (→ NOT ASSESSED) follow Case 6 Run A;
-  not separately fixture-tested.
-- The Linux and macOS Unreal commands (picked by `uname -s`) are not
-  fixture-tested. On macOS, Unreal tests are NOT ASSESSED until `commands.test`
-  is set — asserted in the skill, not given a case here.
+  pins `standard` to test the blocking path. Unity's `testcasecount="0"`
+  (→ NOT ASSESSED) follows Case 6 Run A; not separately fixture-tested.
 - A Play Mode run that cannot be made (`PlayMode: NOT RUN`, unconfirmed →
   NOT ASSESSED) is covered by protocol compliance, not by its own case.

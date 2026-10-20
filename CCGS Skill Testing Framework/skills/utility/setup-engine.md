@@ -16,7 +16,7 @@ or Both) before showing the Technology Stack. It then:
   `project.yaml` — the primary config store — after "May I write the `engine`,
   `specialists`, `naming`, and `commands` blocks to `project.yaml`?"
 - updates or creates `docs/engine-reference/<engine>/`, scaffolds
-  `project.godot` for Godot (never for Unity or Unreal), and reads everything
+  `project.godot` for Godot (never for Unity), and reads everything
   back with `project-coherence.sh`
 
 On a re-run it edits existing `project.yaml` blocks in place rather than
@@ -114,33 +114,34 @@ None. `/setup-engine` is a technical configuration skill. No director gates appl
 
 ---
 
-### Case 3: Unreal — C++ primary, Blueprint routed to its specialist
+### Case 3: Unity on macOS — probed editor path, C# with Inspector-tuned data
 
 **Fixture:**
-- Placeholders only; the user never states that the project is Blueprint-primary
-- The session runs on Windows (`uname -s` is neither `Linux` nor `Darwin`), so the Windows `commands` block applies
+- Placeholders only; the user mentions that gameplay tuning lives in ScriptableObjects and `[SerializeField]` fields
+- The session runs on macOS; the Hub editor is at `/Applications/Unity/Hub/Editor/6000.3.26f1/Unity.app/Contents/MacOS/Unity`, and bare `Unity` is not on `PATH`
 
-**Input:** `/setup-engine unreal 5.7`
+**Input:** `/setup-engine unity 6000.3.26f1`
 
 **Expected behavior:**
-1. The primary-language question defaults to C++, so CLAUDE.md Language reads
-   `C++ (primary), Blueprint (gameplay prototyping)` — the line follows the
-   answer, and a Blueprint-primary answer would write
-   `Blueprint (primary), C++ where needed`
-2. `project.yaml` gets `engine.language: "C++"` (Blueprint only when the project is Blueprint-primary)
-3. Routing: `.uasset` BP classes → ue-blueprint-specialist; `.umap`/`.uasset` → unreal-specialist;
-   `specialists.additional` includes ue-blueprint-specialist
-4. `commands` are written as single-quoted scalars under a
-   `# TODO: confirm these` comment; `engine.path` is recorded
+1. No language question; CLAUDE.md Language is `C#`, and `project.yaml` gets
+   `engine.language: "C#"` — Inspector-tuned data (ScriptableObjects,
+   `[SerializeField]` fields) does not change it
+2. Routing: `.cs` → unity-specialist; `.unity`/`.prefab` → unity-specialist;
+   `specialists.additional` is `[unity-dots-specialist, unity-addressables-specialist]`
+3. Section 3 probes the Hub install and reads that editor's `-version`; it never
+   runs bare `Unity`
+4. `test` and `smoke` start with the quoted full editor path, as single-quoted
+   scalars; the `build` target is asked, not defaulted; `engine.path` records
+   the editor executable
 5. Performance budgets are asked via `AskUserQuestion` (set defaults / leave
    `[TO BE CONFIGURED]`), not pre-filled
-6. No `.uproject` is scaffolded; verdict COMPLETE
+6. No Unity project is scaffolded; verdict COMPLETE
 
 **Assertions:**
-- [ ] Engine field is set to Unreal Engine 5.7 and `engine.language` is `C++`
-- [ ] Routing table includes `.uasset` and `.umap` entries
-- [ ] ue-blueprint-specialist is assigned for Blueprint graphs
-- [ ] `commands` carry the `# TODO: confirm these` comment
+- [ ] Engine field is set to Unity 6000.3.26f1 and `engine.language` is `C#`
+- [ ] Routing table includes `.cs`, `.unity` and `.prefab` entries
+- [ ] No `commands.*` value names bare `Unity`; each holds the probed editor path
+- [ ] `engine.path` records the editor executable
 - [ ] Verdict is COMPLETE
 
 ---
@@ -277,7 +278,7 @@ None. `/setup-engine` is a technical configuration skill. No director gates appl
 - [ ] Dual-writes `project.yaml` and `technical-preferences.md`, then reads `project.yaml` back to confirm they agree
 - [ ] On re-run, edits existing `project.yaml` blocks in place without duplicating them
 - [ ] Writes the probed editor path into `commands.*` — for Unity always, for Godot whenever `godot` is not on `PATH` — never a bare executable that does not resolve
-- [ ] Never defaults the Godot export preset or the Unity build target — asks for it; Unreal's `commands` are best-effort values matched to the machine's OS (`-platform=Win64` on Windows, `Linux` on Linux) under a `# TODO` comment; on macOS only `build` is written, and `test`, `run` and `smoke` stay TODO lines
+- [ ] Never defaults the Godot export preset or the Unity build target — asks for it
 - [ ] Writes the Section 3 probe into VERSION.md's `Installed at pin time` row whatever the outcome, after asking "May I record `Installed at pin time: …` in `docs/engine-reference/<engine>/VERSION.md`?"
 - [ ] Verdict is COMPLETE after configuration is written
 
@@ -288,12 +289,10 @@ None. `/setup-engine` is a technical configuration skill. No director gates appl
 - Godot C# and Both follow Case 1 with the A1/A2/A3 variants from
   `references/godot-language-config.md`; not separately tested.
 - The `refresh` and `upgrade` subcommands (Sections 10–11) are not tested here.
-- The Unreal Linux and macOS `commands` blocks (chosen by `uname -s`) are not
-  fixture-tested; Case 3 pins Windows.
+- The Unity editor paths on Windows and Linux are not fixture-tested; Case 3
+  pins macOS.
 - Section 6 is a lookup against the skill's own coverage table, asserted in
   Case 1. The Section 7 reference docs for a version with no reference set yet
   depend on WebSearch results; not assertion-tested.
 - A probe that cannot run reports `installed version NOT DETERMINED` — never
   "no engine installed"; not separately tested.
-- A Blueprint-primary Unreal answer (`engine.language: "Blueprint"`) follows
-  Case 3 with the other Language line; not separately tested.

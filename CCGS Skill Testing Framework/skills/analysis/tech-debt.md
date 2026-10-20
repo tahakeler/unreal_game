@@ -4,8 +4,8 @@
 
 `/tech-debt` tracks technical debt through four subcommands: `scan`, `add`,
 `prioritize` and `report`. With no subcommand it prints usage and stops with
-Verdict FAIL. `scan` searches the code root (resolved per engine: `src/`,
-`Assets/` or `Source/`) for `TODO`, `FIXME`, `HACK` and `@deprecated` markers,
+Verdict FAIL. `scan` searches the code root (resolved per engine: `src/` or
+`Assets/`) for `TODO`, `FIXME`, `HACK` and `@deprecated` markers,
 duplicated blocks, files over 500 lines and functions over 50 lines, sorts the
 findings into six debt categories, states how many files it covered, and asks
 "May I write these findings to `docs/tech-debt-register.md`?" before appending
@@ -126,7 +126,7 @@ invoked.
 
 **Fixture:**
 - `project.yaml` has no `engine.name`; `.claude/docs/technical-preferences.md` reads `[TO BE CONFIGURED]`
-- Both `src/` and `Source/` exist and hold source files, so the tree does not decide the root
+- Both `src/` and `Assets/` exist and hold source files, so the tree does not decide the root
 - `docs/tech-debt-register.md` exists with 3 entries
 
 **Input:** `/tech-debt scan`
@@ -242,7 +242,7 @@ invoked.
 ## Protocol Compliance
 
 - [ ] Requires a subcommand; without one prints usage and stops with FAIL
-- [ ] `scan` resolves the code root per engine (`src/`, `Assets/`, `Source/`) and states the number of files covered
+- [ ] `scan` resolves the code root per engine (`src/`, `Assets/`) and states the number of files covered
 - [ ] A zero-file or unresolved-root scan is NOT ASSESSED and writes nothing
 - [ ] Every register write is preceded by a "May I write" / "May I append" prompt naming `docs/tech-debt-register.md`, after the content is shown
 - [ ] `scan` appends and never overwrites existing entries; a finding matching an `Open` row updates it, and an `Open` row whose pattern is gone is proposed `Resolved [date]`, never deleted
@@ -259,5 +259,5 @@ invoked.
   added and resolved counts from each row's `Added` and `Resolved` dates,
   flagging items older than 3 sprints, Verdict COMPLETE — debt report generated)
   is not tested here.
-- Unity and Unreal scans differ only in the resolved root (`Assets/`,
-  `Source/`) and are not tested separately.
+- Unity scans differ only in the resolved root (`Assets/`) and are not tested
+  separately.

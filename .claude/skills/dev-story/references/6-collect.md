@@ -37,12 +37,10 @@ Before collecting anything:
      parse error — they are not parse checks.
    - **Unity:** `commands.smoke` (`-batchmode -quit -projectPath . -logFile -`)
      — exit 1 with `error CS…` lines when a script does not compile.
-   - **Unreal:** build the editor target —
-     `"<UE root>/Engine/Binaries/DotNET/UnrealBuildTool/UnrealBuildTool.exe" <Project>Editor Win64 Development -Project="<absolute path>/<Project>.uproject"`
-     on Windows; on Linux `"<UE root>/Engine/Build/BatchFiles/Linux/Build.sh" <Project>Editor Linux Development -Project=…`,
-     on macOS `…/Mac/Build.sh <Project>Editor Mac Development -Project=…` (from Epic's
-     documentation — `docs/engine-reference/unity/current-best-practices.md`, "Command Line").
-     A compile error fails the build (`Result: Failed`, non-zero exit).
+     For the Unity executable, use the one `commands.smoke` names, else the
+     editor `engine.path` records (`docs/engine-reference/unity/current-best-practices.md`,
+     "Command Line"); if none resolves, write
+     `parse NOT VERIFIED — Unity executable not found`.
    Report what you ran, its exit code, and any error lines.
 3. If the engine binary is unavailable, write **`parse NOT VERIFIED — engine
    binary not available`**. Do not infer that the code is fine because it reads
@@ -55,7 +53,7 @@ Before collecting anything:
    `Read` the image and compare it to the acceptance criteria: clipped text,
    an overflowing panel, a missing element are defects, and this is the only
    step that finds them. Procedure per engine, including how to capture
-   unattended in Godot, Unity and Unreal: `.claude/docs/run-and-observe.md`.
+   unattended in Godot and Unity: `.claude/docs/run-and-observe.md`.
    **On Unity** the capture needs the `ScreenshotOnArg.cs` script that file gives
    verbatim. If the project has none (Glob `Assets/**/ScreenshotOnArg.cs`), ask
    "May I write `Assets/Scripts/ScreenshotOnArg.cs`?" and write it exactly as

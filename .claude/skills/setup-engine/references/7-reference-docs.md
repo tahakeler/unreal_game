@@ -15,7 +15,7 @@
 ### First: does a reference set already exist for this engine?
 
 **Check before doing anything else.** The template ships
-`docs/engine-reference/unity/` **already populated** (godot/ and unreal/ removed — this repo is Unity-only), so
+`docs/engine-reference/unity/` **already populated** (other engines' reference sets were removed — this repo is Unity-only), so
 "the directory exists and pins a version" is the state of *every* fresh project,
 not an edge case. Both branches below say "create", and following either one
 literally on a pre-populated directory either overwrites curated content or

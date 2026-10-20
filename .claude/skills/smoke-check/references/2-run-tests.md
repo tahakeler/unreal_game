@@ -10,7 +10,6 @@
 - `commands.test` first
 - Godot 4
 - Unity: Edit Mode, then Play Mode as a second run
-- Unreal Engine: build first, commands per OS, macOS
 - Unknown engine / not configured
 - Test runner not available here
 - Build check (the WAIVED path only)
@@ -101,61 +100,6 @@ Report each platform on its own line — `EditMode: PASS (12/12)`,
 `PlayMode: FAIL (1 failure)`. A Play Mode run that could not be made is
 reported by name, `PlayMode: NOT RUN — [reason]`: the Edit Mode result does not
 cover those tests, so it cannot make the automated-test row a PASS.
-
-**Unreal Engine** — build the editor target first, whether you then run
-`commands.test` or the default. `Binaries/` is not committed, and without a
-built game module the editor stops with "The game module could not be found",
-exit 1, before running any test. The build is incremental — seconds when
-nothing changed; a failed build is a FAIL.
-
-**Pick the commands for this machine** with `uname -s`: `Linux` → Linux,
-`Darwin` → macOS, anything else (`MINGW*`, `MSYS*`, `CYGWIN*`) → Windows. The
-Windows forms below were run on UE 5.7; the Linux and macOS forms come from
-Epic's documentation — `docs/engine-reference/unreal/current-best-practices.md` (removed — this repo is Unity-only),
-"Command Line", has them with their sources. On Windows use
-`UnrealBuildTool.exe`, not `Build.bat`: run from bash, `Build.bat` fails on an
-engine path with spaces.
-```bash
-# Windows
-timeout 1800 "<UE root>/Engine/Binaries/DotNET/UnrealBuildTool/UnrealBuildTool.exe" <Project>Editor Win64 Development -Project="$(pwd -W 2>/dev/null || pwd)/<Project>.uproject" 2>&1
-# Linux
-timeout 1800 "<UE root>/Engine/Build/BatchFiles/Linux/Build.sh" <Project>Editor Linux Development -Project="$(pwd -W 2>/dev/null || pwd)/<Project>.uproject" 2>&1
-# macOS (timeout: see the macOS note above)
-gtimeout 1800 "<UE root>/Engine/Build/BatchFiles/Mac/Build.sh" <Project>Editor Mac Development -Project="$(pwd -W 2>/dev/null || pwd)/<Project>.uproject" 2>&1
-```
-Then the default. Keep `-stdout -FullStdOutLogOutput`; when `commands.test`
-lacks them, add them to the command for this run only: without them the editor
-prints nothing, and the lines below are only in `Saved/Logs/<Project>.log`.
-Give the project as an **absolute** path — when `commands.test` passes a
-relative one, run it with the absolute path instead: UE 5.7
-does not find a relative `<Project>.uproject` and exits 1 (`Project file not
-found`). `$(pwd -W 2>/dev/null || pwd)` gives the `C:/…` form in Git Bash and
-the plain path elsewhere; `$PWD` alone fails when `MSYS_NO_PATHCONV` is set.
-Either way, say in the report what you changed and tell the user to fix
-`commands.test` in `project.yaml` — never edit `project.yaml` without asking.
-`<Project>.` in the filter is the root the tests are named under: the project
-name, or the distinct root `/setup-engine` chose when the project's name is
-also an engine area — read one test's name string under
-`Source/*/Private/Tests/` if unsure.
-```bash
-# Windows
-timeout 1800 "<UE root>/Engine/Binaries/Win64/UnrealEditor-Cmd.exe" "$(pwd -W 2>/dev/null || pwd)/<Project>.uproject" -ExecCmds="Automation RunTests <Project>.; Quit" -unattended -nullrhi -stdout -FullStdOutLogOutput 2>&1
-# Linux
-timeout 1800 "<UE root>/Engine/Binaries/Linux/UnrealEditor" "$(pwd -W 2>/dev/null || pwd)/<Project>.uproject" -ExecCmds="Automation RunTests <Project>.; Quit" -unattended -nullrhi -stdout -FullStdOutLogOutput 2>&1
-```
-**macOS has no sourced test command.** Epic documents only the
-`UnrealEditor.app` bundle, not a command-line editor inside it. Run a
-`commands.test` the user has set and confirmed; with none, report
-`NOT ASSESSED — Unreal test command on macOS not sourced; set commands.test to the editor command you use`
-instead of guessing a path.
-Read the output, not the exit code: a failing test and a run that matched nothing both exit 255.
-- `Result={Fail}` on any line → FAIL.
-- `No automation tests matched` → `NOT ASSESSED — no tests found` (tests
-  outside `Source/<Module>/` are never built), not FAIL.
-- Exit 0 with `Result={Success}` lines → PASS.
-- Any other non-zero exit (`Project file not found`, `The game module … could
-  not be found`) → FAIL: no test ran. The exception: the editor never started (exit 126 or 127, `command not found`) — that is the runner not being
-  available, below, and `NOT ASSESSED`.
 
 **Unknown engine / not configured:**
 "Engine not configured in `project.yaml` or

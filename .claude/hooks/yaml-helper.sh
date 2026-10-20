@@ -469,7 +469,7 @@ team.size::individual|small|studio
 performance.enforce::warn|block|off
 platform.cert_tier::none|itch|steam|console
 accessibility.target::none|standard|aaa
-engine.name::Godot|Unity|Unreal
+engine.name::Godot|Unity
 project.stage::Concept|Systems Design|Technical Setup|Pre-Production|Production|Polish|Release
 testing.strict.logic::true|false
 testing.strict.integration::true|false
@@ -1194,14 +1194,14 @@ resolve_setting() {
 #
 # WHY THIS EXISTS. `.claude/docs/directory-structure.md` is explicit that the
 # code root is not a style preference but a hard toolchain constraint: Unity
-# compiles only `Assets/` and `Packages/`, and UnrealBuildTool discovers modules
-# under `Source/`. `src/` is that table's GODOT row, not a universal path.
+# compiles only `Assets/` and `Packages/`. `src/` is that table's GODOT row,
+# not a universal path.
 #
 # Every hook that filtered staged or on-disk files with a literal `^src/`
-# therefore matched NOTHING on a Unity or Unreal project — and matching nothing
+# therefore matched NOTHING on a Unity project — and matching nothing
 # is indistinguishable from scanning cleanly. That is the exact row
 # `.claude/rules/skill-authoring.md` records for `/security-audit`
-# ("Godot-only greps returned zero hits on Unity/Unreal, and zero hits read as
+# ("Godot-only greps returned zero hits on Unity, and zero hits read as
 # clean"), reproduced in four more places.
 #
 # UNSET DOES NOT DEFAULT TO `src`. Obligation 2 of skill-authoring.md: an absent
@@ -1246,7 +1246,6 @@ resolve_code_root() {
   case "$(printf '%s' "$ename" | tr '[:upper:]' '[:lower:]')" in
     godot)   root="src" ;;
     unity)   root="Assets" ;;
-    unreal*) root="Source" ;;
     *)       root="" ;;
   esac
 
@@ -1274,7 +1273,7 @@ resolve_code_root() {
   if [ -z "$root" ]; then
     for d in "$_YH_ROOT"/*/; do
       d="${d%/}"; d="${d##*/}"
-      case "$d" in src|Assets|Source) found="$d"; n=$((n + 1)) ;; esac
+      case "$d" in src|Assets) found="$d"; n=$((n + 1)) ;; esac
     done
     if [ "$n" = 1 ]; then root="$found"; src="detected"; else root=""; src=""; fi
   fi

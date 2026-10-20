@@ -3,7 +3,7 @@
 ## Skill Summary
 
 `/asset-audit` audits the engine's asset root — `assets/` (art, audio, vfx,
-shaders, data) on Godot, `Assets/` on Unity, `Content/` on Unreal — for naming
+shaders, data) on Godot, `Assets/` on Unity — for naming
 convention compliance, size budgets, format standards, orphaned assets and
 missing assets. It reads the art bible or asset standards from the design docs
 (Phase 1), resolves the engine and its code root and scans the asset root with
@@ -11,7 +11,7 @@ Glob (Phase 2), measures sizes and formats with the pre-approved read-only
 commands (`stat`, `file`, `od`, `wc`, `du`), and checks Godot names against its
 own patterns — art `[category]_[name]_[variant]_[size].[ext]`, audio
 `[category]_[context]_[name]_[variant].[ext]`, all lowercase with underscores —
-and Unity and Unreal names only against a rule the art bible states. Orphaned
+and Unity names only against a rule the art bible states. Orphaned
 and missing assets are found by searching the **code root** for asset
 references; GDD-level completeness is `/content-audit`'s job. The report lists
 violations only, in one table per category, and names every section it could
@@ -221,29 +221,28 @@ None. Asset auditing is a read-only analysis skill; no gates are invoked.
 
 ---
 
-### Case 8: Unreal Project — Assets under `Content/`
+### Case 8: Unity Project — Assets under `Assets/`
 
 **Fixture:**
-- `project.yaml`: `engine.name: unreal`, so the code root is `Source/<Module>/`
+- `project.yaml`: `engine.name: unity`, so the code root is `Assets/Scripts/`
 - `design/art/art-bible.md` asset standards: textures ≤4MB; no naming convention stated
-- `Content/Characters/Grunt/` holds `T_Grunt_D.uasset` (2.5MB) and `T_Grunt_N.uasset` (2.1MB)
-- `assets/` does not exist
-- `Source/Arena/Private/GruntCharacter.cpp` loads `/Game/Characters/Grunt/T_Grunt_D`
+- `Assets/Resources/Characters/Grunt/` holds `T_Grunt_D.png` (2.5MB), `T_Grunt_N.png` (2.1MB), their `.meta` files, and `Grunt.prefab` (40KB)
+- `Assets/Scripts/Arena/GruntCharacter.cs` calls `Resources.Load<Texture2D>("Characters/Grunt/T_Grunt_D")`
 
 **Input:** `/asset-audit`
 
 **Expected behavior:**
-1. Phase 2 globs `Content/**/*.uasset` and `Content/**/*.umap`, not `assets/`: `Total assets scanned: 2`
-2. Both sizes are measured against the 4MB texture budget; neither is over
-3. The PascalCase names are not checked against the Godot lowercase patterns; with no naming rule in the art bible, Naming is `NOT ASSESSED — no naming rule for Unreal`, and `/art-bible` is named
-4. Format is NOT ASSESSED (an Unreal asset file does not keep its source format) and Orphaned is NOT ASSESSED (Unreal assets are referenced from other assets, not only from code)
+1. Phase 2 globs `Assets/**/*`, leaving out scripts (`*.cs`, `*.asmdef`) and `*.meta` files, rather than the Godot `assets/` subfolders: `Total assets scanned: 3`
+2. All sizes are measured; both textures are within the 4MB texture budget
+3. The PascalCase names are not checked against the Godot lowercase patterns; with no naming rule in the art bible, Naming is `NOT ASSESSED — no naming rule for Unity`, and `/art-bible` is named
+4. Format is checked on the two PNG source files; `Grunt.prefab` is a serialized asset with no source format, so its Format is NOT ASSESSED. Orphaned is NOT ASSESSED (Unity assets are referenced from scenes, prefabs and other assets, not only from code)
 5. The code reference resolves to an existing asset, so Missing has no finding
-6. Verdict is NOT ASSESSED, naming Naming, Format and Orphaned
+6. Verdict is NOT ASSESSED, naming Naming, Format (for the prefab) and Orphaned
 
 **Assertions:**
-- [ ] The scan covers `Content/` and counts 2 assets, not 0
+- [ ] The scan covers `Assets/` and counts 3 assets, not 0, with no `.meta` or `.cs` file counted
 - [ ] No naming violation is raised from the Godot lowercase patterns
-- [ ] Naming, Format and Orphaned are each listed as NOT ASSESSED with a reason
+- [ ] Naming, the prefab's Format, and Orphaned are each listed as NOT ASSESSED with a reason
 - [ ] Verdict is NOT ASSESSED, never COMPLIANT and never a report of zero assets
 
 ---
@@ -252,8 +251,8 @@ None. Asset auditing is a read-only analysis skill; no gates are invoked.
 
 **Fixture:**
 - `project.yaml` has no `engine.name`; `.claude/docs/technical-preferences.md` reads `[TO BE CONFIGURED]`
-- Both `src/` and `Source/` exist, so the tree does not decide the engine
-- `design/art/art-bible.md` has asset standards; `assets/art/` holds PNG files
+- Both `src/` and `Assets/` exist, so the tree does not decide the engine
+- `design/art/art-bible.md` has asset standards; `Assets/Art/` holds PNG files
 
 **Input:** `/asset-audit`
 
@@ -272,7 +271,7 @@ None. Asset auditing is a read-only analysis skill; no gates are invoked.
 ## Protocol Compliance
 
 - [ ] Reads the art bible or asset standards design docs before scanning (Phase 1)
-- [ ] Resolves the engine and its code root, then scans that engine's asset root with Glob (`assets/` subfolders on Godot, `Assets/` on Unity, `Content/` on Unreal); an unresolved engine stops the run as NOT ASSESSED
+- [ ] Resolves the engine and its code root, then scans that engine's asset root with Glob (`assets/` subfolders on Godot, `Assets/` on Unity); an unresolved engine stops the run as NOT ASSESSED
 - [ ] Report uses one table per category: Naming (File, Expected Pattern, Issue), Size (File, Budget, Actual, Overage), Format (File, Expected Format, Actual Format), Orphaned (File, Last Modified, Size, Recommendation), Missing (Reference Location, Expected Path)
 - [ ] A size or format it cannot measure is `NOT ASSESSED`, never an estimate, and every section not assessed is named with its reason
 - [ ] Each recommendation names the change for its violation (target resolution or compression, corrected name, target format)
@@ -285,12 +284,10 @@ None. Asset auditing is a read-only analysis skill; no gates are invoked.
 ## Coverage Notes
 
 - The skill does not check import metadata (Godot `.import` files, Unity `.meta`
-  files, Unreal import settings); a missing import setting is not reported.
+  files and their import settings); a missing import setting is not reported.
 - Orphan detection on Godot (an asset no code references) is not given its own
   case; it uses the same code search as Case 4 in the other direction. On Unity
-  and Unreal it is NOT ASSESSED (Case 8).
-- Unity follows Case 8's naming and orphan rules, with Format still checked on
-  the source files under `Assets/`; it is not tested separately.
+  it is NOT ASSESSED (Case 8).
 - `/asset-audit` checks compliance against code references; `/content-audit`
   checks completeness against the GDDs. Case 4 pins that boundary.
 - An audio duration budget is not measurable with the skill's tools, so it makes

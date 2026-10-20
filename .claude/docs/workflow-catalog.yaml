@@ -38,7 +38,7 @@ paths:
         artifact:
           any_of:
             - glob: "project.yaml"
-              pattern: 'name:[[:space:]]*"?(Godot|Unity|Unreal)'
+              pattern: 'name:[[:space:]]*"?(Godot|Unity)'
             - glob: ".claude/docs/technical-preferences.md"
               pattern: '\*\*Engine\*\*: [^[]'
         description: "Configure the engine and pin its version"
@@ -101,7 +101,7 @@ phases:
         artifact:
           any_of:
             - glob: "project.yaml"
-              pattern: 'name:[[:space:]]*"?(Godot|Unity|Unreal)'
+              pattern: 'name:[[:space:]]*"?(Godot|Unity)'
             # technical-preferences.md writes "- **Engine**: Godot 4.6", so the
             # pattern must clear the bold markers. The [^[] guard rejects the
             # "[TO BE CONFIGURED]" placeholder.
@@ -357,7 +357,7 @@ phases:
         required: true
         repeatable: true
         artifact:
-          note: "Check the code root (src/, Assets/ or Source/ by engine) for active code and production/epics/**/*.md for In Progress stories"
+          note: "Check the code root (src/ or Assets/ by engine) for active code and production/epics/**/*.md for In Progress stories"
         description: "Pick the next ready story and implement it with /dev-story [story-path]. Routes to the correct programmer agent."
 
       - id: code-review

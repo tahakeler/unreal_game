@@ -175,7 +175,7 @@ fi
 # Code health quick check.
 #
 # Reads the ENGINE-SPECIFIC code root, not a literal `src/`. Hardcoding `src/`
-# made this line Godot-only: on a Unity or Unreal project the directory test
+# made this line Godot-only: on a Unity project the directory test
 # failed, the banner printed no code-health line at all, and a clean project and
 # an unreadable one looked identical. See resolve_code_root in yaml-helper.sh.
 #
@@ -218,7 +218,7 @@ if [ -f project.yaml ] && [ -f CLAUDE.md ]; then
           | sed -n 's|^@docs/engine-reference/\([a-z]*\)/VERSION\.md.*|\1|p')
     # engine.name, not the first `name:` line: `project.name: Marrow` above the
     # engine block read as engine "marrow" and warned on a correct project. The
-    # first word only, so "Unreal Engine 5" is the unreal reference folder.
+    # first word only, so "Unity 6.3" is the unity reference folder.
     CFG=$(awk '/^engine:/ { e = 1; next } e && /^[^[:space:]#]/ { exit }
                e && /^[[:space:]]+name:/ { sub(/^[[:space:]]+name:[[:space:]]*/, ""); gsub(/["'"'"']/, "");
                                            split($0, w, /[[:space:]#]/); print w[1]; exit }' \

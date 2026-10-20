@@ -313,7 +313,7 @@ and the architecture module's stated responsibilities]
 This epic is complete when:
 - All stories are implemented, reviewed, and closed via `/story-done`
 - All acceptance criteria from `design/gdd/[filename].md` are verified
-- All Logic and Integration stories have passing test files in [the test root — `tests/` on Godot, `Assets/Tests/` on Unity, `Source/<Module>/Private/Tests/` on Unreal]
+- All Logic and Integration stories have passing test files in [the test root — `tests/` on Godot, `Assets/Tests/` on Unity]
 - All Visual/Feel and UI stories have retained screenshots in `production/qa/evidence/` — each screen touched for UI, plus a lead sign-off for Visual/Feel
 
 ## Next Step

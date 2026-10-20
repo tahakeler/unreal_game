@@ -117,7 +117,7 @@ Engine-specific monitoring guidance.
 
 > **NOT SOURCEABLE — the tool, panel and counter names below are not covered by
 > `docs/engine-reference/`**: Godot's Debugger → Monitors and its memory
-> counters, Unity's Memory Profiler and its fields, Unreal's `stat memory`. Mark
+> counters, and Unity's Memory Profiler and its fields. Mark
 > them so in the protocol: they are pointers for the tester to confirm in their
 > own editor at T+0, not verified paths. If no memory tool can be found, nothing
 > was measured, and the Verdict section's NOT ASSESSED applies.
@@ -138,14 +138,6 @@ Engine-specific monitoring guidance.
   (**units as displayed**)
 - Alert threshold: GC Allocated growing monotonically across 3+ checkpoints —
   a monotonicity check, deliberately unit-free
-
-**Unreal Engine:**
-- Use `stat memory` console command at each checkpoint
-- Record: Physical Memory Used, Physical Memory Available (**units as displayed**)
-- Alert threshold: Physical Memory Used growth **> 20% over the full soak**,
-  measured against this run's T+0. The previous threshold was an absolute
-  "> 50MB", which silently assumes both the unit *and* a project scale — 50MB is
-  a rounding error for one game and a catastrophe for another
 
 ### Stability observation items (if focus = stability or all)
 
@@ -189,7 +181,6 @@ Before starting the soak:
 - [ ] Performance monitoring tool open and recording:
   - **Godot**: Debugger → Monitors tab → Memory section visible
   - **Unity**: Memory Profiler window open
-  - **Unreal**: `stat memory` ready in console
   - Tool actually used, as named in this editor: [record it — the names above
     are NOT SOURCEABLE from `docs/engine-reference/`; none found → NOT ASSESSED]
 - [ ] Soak target confirmed: [session design intent from game concept]
