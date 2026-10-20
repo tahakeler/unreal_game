@@ -85,7 +85,7 @@ namespace HarvestPanic.Customization
         /// <summary>Opens the wardrobe for the local farmer when in range. Returns true when opened.</summary>
         public bool TryOpen()
         {
-            if (!LocalInRange || WardrobeUI.IsOpen) return false;
+            if (!LocalInRange || WardrobeUI.IsOpen || InputModal.IsBlocking) return false;
             return WardrobeUI.Open(FarmerLoadoutSync.Local) != null;
         }
 

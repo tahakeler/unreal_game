@@ -105,6 +105,7 @@ namespace HarvestPanic.Tests.PlayMode.Customization
             Assert.That(ui, Is.Not.Null);
             yield return null;
             Assert.That(WardrobeUI.IsOpen);
+            Assert.That(HarvestPanic.Core.InputModal.IsBlocking, "wardrobe holds input while open");
             Assert.That(ui.Preview, Is.Not.Null);
             Assert.That(ui.Preview.Farmer.IsPreview);
             var before = ui.Working;
@@ -114,6 +115,7 @@ namespace HarvestPanic.Tests.PlayMode.Customization
             ui.Close(true);
             yield return null;
             Assert.That(WardrobeUI.IsOpen, Is.False);
+            Assert.That(HarvestPanic.Core.InputModal.IsBlocking, Is.False, "input released on close");
             Assert.That(f.Current, Is.EqualTo(chosen));
             Assert.That(LoadoutStorage.TryFromJson(PlayerPrefs.GetString(LoadoutStorage.PrefsKey), out var saved));
             Assert.That(saved, Is.EqualTo(chosen));

@@ -69,7 +69,7 @@ namespace HarvestPanic.Customization
 
         void OnKey(int slot)
         {
-            if (InputBlocked) return;
+            if (InputBlocked || InputModal.IsBlocking) return;
             TryEmote(Sync.Loadout.GetEmote(slot));
         }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using HarvestPanic.Core;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
@@ -82,6 +83,7 @@ namespace HarvestPanic.Customization
             _prevLock = UnityEngine.Cursor.lockState; _prevVisible = UnityEngine.Cursor.visible;
             UnityEngine.Cursor.lockState = CursorLockMode.None; UnityEngine.Cursor.visible = true;
             FarmerEmotes.InputBlocked = true;
+            InputModal.Push(this); // pauses player move/look/interact while the wardrobe is open
             _preview = WardrobePreview.Create(_catalog);
             _preview?.Apply(_working);
             BuildLayout();
@@ -103,10 +105,17 @@ namespace HarvestPanic.Customization
             if (confirm && _target != null) _target.RequestLoadout(_working);
             Current = null;
             FarmerEmotes.InputBlocked = false;
+            InputModal.Pop(this);
             UnityEngine.Cursor.lockState = _prevLock; UnityEngine.Cursor.visible = _prevVisible;
             if (_preview != null) Destroy(_preview.gameObject);
             Destroy(gameObject);
             Closed?.Invoke(confirm);
+        }
+
+        void OnDestroy()
+        {
+            InputModal.Pop(this); // safety: never leave input held if destroyed without Close
+            if (Current == this) { Current = null; FarmerEmotes.InputBlocked = false; }
         }
 
         /// <summary>Randomises the working loadout ("Surprise me!").</summary>
