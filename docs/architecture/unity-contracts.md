@@ -30,6 +30,8 @@ Cross-talk = register an interface in `Services` (`Services.Register<T>`, `Get<T
 | Soak | `BruiseKind`, optional `IGoodsSoakable.ApplySoak(instigator)` | Economy implements; river/rain callers check `goods is IGoodsSoakable` |
 | Input gating | `InputModal.Push/Pop(owner)`, `IsBlocking`, `Count`, `Changed` | UI (pause, crew overlay) and Customization (wardrobe) push; Player skips look/move/interact while blocking |
 | Social (optional) | `ISessionSocial` (`Kick`, `SendChat`, `OnChat`) | Networking may implement; UI checks `is`/`TryGet` |
+| Audio | `IAudioService` (`PlayAt`, `Play2D`, `ReportVoiceActivity`), `IAudioSettingsSink` (`Get/SetBusVolume`), `AudioBus` | Audio -> any team (play), Frontend UI (volumes) |
+| Day phase (read-only) | `IDayPhaseInfo` (`PhaseName`, `PhaseRemaining`) | Economy (`EconomyDayPhaseInfo` adapter) -> Audio |
 | Impact units | `ImpactUnits` | all (see below) |
 | Session | `ISessionService`, `PlayerInfo` | Networking -> Frontend UI (v0, add-only) |
 | Markers | `MarkerRole`, `MarkerTag`, `LevelMarker` | World places -> owners spawn |
@@ -50,7 +52,7 @@ Legacy `HP_CritterSpawner_Pig:3` strings parse via `MarkerTag.TryParseSpawner`.
 
 ## Networking prefab lists
 Each team owns `Assets/Resources/NetworkPrefabs/<Team>.asset` (a `NetworkPrefabsList`) and lists only its own networked prefabs
-(Player.asset, Critter.asset, Economy.asset, World.asset, Customization.asset). The Networking team's NetworkManager bootstrap loads every list via
+(Player.asset, Critter.asset, Economy.asset, World.asset, Customization.asset, Audio.asset). The Networking team's NetworkManager bootstrap loads every list via
 `Resources.LoadAll<NetworkPrefabsList>("NetworkPrefabs")` and registers them at startup, so nobody edits `DefaultNetworkPrefabs.asset`.
 
 ## Ownership
@@ -64,6 +66,7 @@ Each team owns `Assets/Resources/NetworkPrefabs/<Team>.asset` (a `NetworkPrefabs
 | World | `Scripts/World`, `Scenes/Muddlebury*`, `Prefabs/World`, `Art/World`, `NetworkPrefabs/World.asset` |
 | Customization | `Scripts/Customization`, `Prefabs/Farmer`, `Art/Cosmetics`, `NetworkPrefabs/Customization.asset` |
 | Frontend UI | `Scripts/UI`, `Scenes/MainMenu`, `Scenes/Lobby`, `Prefabs/UI`, UI Toolkit assets |
+| Audio | `Scripts/Audio`, `Assets/Audio/**`, `Prefabs/Audio`, `NetworkPrefabs/Audio.asset`, `tools/freeassets/scripts/make_audio_placeholders.py` |
 | Lead (this doc) | `Scripts/Core/**`, `docs/architecture/**` (changes via request) |
 
 Only Networking edits `Packages/manifest.json` and `ProjectSettings/**`; others send a request. Avoid two teams editing one scene: split into prefabs.
@@ -87,3 +90,19 @@ New `DayParams`: `Bridge.SafeLoadMult`, `Bridge.PlankBreakMult`, `Mud.SpeedMult`
 - `IGoods.ApplyBruise(impulse, ...)` takes DESIGN units. Callers convert raw Unity impulse with `ImpactUnits.ToDesign`. River soak (600) is already design units.
 - `IPlayerHooks.PlayEmote`: the implementer (Customization) emits the emote noise; Player does not.
 - Critters are sold via AI's `CritterGoods` (the single `IGoods` on critter prefabs); MarketPen accepts any `IGoods`.
+
+## Audio
+`HarvestPanic.Audio` (refs Core + Netcode) provides `AudioService`, auto-created after the first scene loads and
+registered as `IAudioService` and `IAudioSettingsSink`. Everything is client-local presentation; nothing here changes gameplay.
+- **Events**: folder name under `Assets/Audio/Resources/Audio/<EVENT>/` = event name (`SFX_*`, `STG_*`, `UI_*`, `MUS_*`, `AMB_*`);
+  files are random variants. The event table `AudioEvents.All` is append-only (index = relay wire id). Unknown names are ignored.
+- **Buses**: Master/Music/Sfx/UI/Voice are software gains (Master x bus x duck) on pooled AudioSources; no AudioMixer asset.
+  Frontend `UiRuntime` pushes `GameSettings` volumes into `IAudioSettingsSink` (UI bus follows the SFX slider) and leaves
+  `AudioListener.volume` at 1 while the sink exists.
+- **Noise**: Audio subscribes to `INoiseService.OnNoise` (server only), routes it (`NoiseRouting`), plays locally and forwards
+  the cue to clients through `AudioNetRelay` (`Rpc(SendTo.NotServer)`, so the host never plays twice). The relay prefab is in
+  `Resources/NetworkPrefabs/Audio.asset`; `AudioNetBootstrapper` spawns it once the server is listening.
+- **Economy**: `OnWalletTxn` / `OnDisaster` are already raised on clients by Economy's RPCs, so Audio plays them locally (no relay).
+- **Day phase**: `IDayPhaseInfo` is registered by Economy's add-only `EconomyDayPhaseInfo` (reads `EconomyDirector.Instance`).
+- **Voice ducking**: proximity voice (when it exists) calls `IAudioService.ReportVoiceActivity`; until then Shout/Voice noises
+  within 15 m of the listener duck for 0.6 s.

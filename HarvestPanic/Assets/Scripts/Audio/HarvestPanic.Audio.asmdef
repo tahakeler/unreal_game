@@ -2,7 +2,8 @@
     "name": "HarvestPanic.Audio",
     "rootNamespace": "HarvestPanic.Audio",
     "references": [
-        "HarvestPanic.Core"
+        "HarvestPanic.Core",
+        "Unity.Netcode.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
