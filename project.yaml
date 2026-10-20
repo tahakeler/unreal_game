@@ -54,12 +54,16 @@ naming:
 
 commands:
   # Unity batchmode CLI. Run from the repo root; results/logs go to gitignored Logs/.
-  # build: needs a static editor method HarvestPanic.Editor.BuildScript.BuildMac
-  # (Assets/Scripts/Editor/BuildScript.cs) — create it before relying on this.
-  # Windows target: -executeMethod HarvestPanic.Editor.BuildScript.BuildWindows64
+  # Build methods (Assets/Scripts/Editor/BuildScript.cs): BuildMacDev, BuildMacRelease,
+  # BuildWindowsDev, BuildWindowsRelease -> HarvestPanic/Builds/<macOS|macOS-dev|Windows|Windows-dev>/
   # PlayMode suite: same as `test` with -testPlatform PlayMode and
   #   -testResults "$(pwd)/Logs/playmode-results.xml" -logFile Logs/playmode.log
   build: '"/Applications/Unity/Hub/Editor/6000.3.26f1/Unity.app/Contents/MacOS/Unity" -batchmode -nographics -quit -projectPath HarvestPanic -executeMethod HarvestPanic.Editor.BuildScript.BuildMac -logFile Logs/build.log'
   test: '"/Applications/Unity/Hub/Editor/6000.3.26f1/Unity.app/Contents/MacOS/Unity" -batchmode -nographics -projectPath HarvestPanic -runTests -testPlatform EditMode -testResults "$(pwd)/Logs/editmode-results.xml" -logFile Logs/editmode.log'
-  run: 'open "HarvestPanic/Builds/Mac/HarvestPanic.app"'
+  build_mac_dev: '"/Applications/Unity/Hub/Editor/6000.3.26f1/Unity.app/Contents/MacOS/Unity" -batchmode -nographics -quit -projectPath "$(pwd)/HarvestPanic" -executeMethod HarvestPanic.Editor.BuildScript.BuildMacDev -logFile "$(pwd)/Logs/build-macdev.log"'
+  build_mac_release: '"/Applications/Unity/Hub/Editor/6000.3.26f1/Unity.app/Contents/MacOS/Unity" -batchmode -nographics -quit -projectPath "$(pwd)/HarvestPanic" -executeMethod HarvestPanic.Editor.BuildScript.BuildMacRelease -logFile "$(pwd)/Logs/build-macrelease.log"'
+  build_windows_dev: '"/Applications/Unity/Hub/Editor/6000.3.26f1/Unity.app/Contents/MacOS/Unity" -batchmode -nographics -quit -projectPath "$(pwd)/HarvestPanic" -executeMethod HarvestPanic.Editor.BuildScript.BuildWindowsDev -logFile "$(pwd)/Logs/build-windev.log"'
+  build_windows_release: '"/Applications/Unity/Hub/Editor/6000.3.26f1/Unity.app/Contents/MacOS/Unity" -batchmode -nographics -quit -projectPath "$(pwd)/HarvestPanic" -executeMethod HarvestPanic.Editor.BuildScript.BuildWindowsRelease -logFile "$(pwd)/Logs/build-winrelease.log"'
+  net_test: 'tools/net/two-process-test.sh "$(pwd)/Logs/nettest"'
+  run: 'open "HarvestPanic/Builds/macOS/HarvestPanic.app"'
   smoke: '"/Applications/Unity/Hub/Editor/6000.3.26f1/Unity.app/Contents/MacOS/Unity" -batchmode -nographics -quit -projectPath HarvestPanic -logFile Logs/smoke.log'

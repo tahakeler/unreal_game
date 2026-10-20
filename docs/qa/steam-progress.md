@@ -9,7 +9,7 @@
 - NetAutomation: -netMaxPlayers, -netFinalPlayers, -netQuitFile, -netWaitHost, -netRejoin, -netExpectReject, -netFakeVersion.
 - `tools/net/two-process-test.sh` extended (NET_EXTENDED=1 default): version reject, late join during Workday, disconnect+rejoin, cap reject, host quit -> clients get message. PASS.
 - Tests: EditMode `SteamReadinessTests` (30), PlayMode `SessionRobustnessTests` (4). All pass.
-- Builds: BuildMacDev/BuildMacRelease/BuildWindowsDev/BuildWindowsRelease. macOS-dev 402 MB, Windows-dev 252 MB (builds OK).
+- Builds: BuildMacDev/BuildMacRelease/BuildWindowsDev/BuildWindowsRelease. Built: macOS-dev 402 MB, macOS release 202 MB, Windows-dev 252 MB. Docs: unity-setup.md section 4, project.yaml commands, THIRD_PARTY_LICENSES.md networking section.
 
 ## Owner gaps
 - Real Steamworks App ID + depots; real two-account Steam test (invite overlay, relay join, rich presence).

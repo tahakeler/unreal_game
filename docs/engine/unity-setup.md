@@ -50,15 +50,35 @@ UNITY="/Applications/Unity/Hub/Editor/6000.3.26f1/Unity.app/Contents/MacOS/Unity
 "$UNITY" -batchmode -nographics -projectPath HarvestPanic -runTests \
   -testPlatform PlayMode -testResults "$(pwd)/Logs/playmode-results.xml" -logFile Logs/playmode.log
 
-# Player build via a static editor method (create Assets/Scripts/Editor/BuildScript.cs)
-"$UNITY" -batchmode -nographics -quit -projectPath HarvestPanic \
-  -executeMethod HarvestPanic.Editor.BuildScript.BuildMac -logFile Logs/build.log
+# Player builds (Mono backend; output under HarvestPanic/Builds/, gitignored)
+for M in BuildMacDev BuildMacRelease BuildWindowsDev BuildWindowsRelease; do
+  "$UNITY" -batchmode -nographics -quit -projectPath "$(pwd)/HarvestPanic" \
+    -executeMethod HarvestPanic.Editor.BuildScript.$M -logFile "$(pwd)/Logs/build-$M.log"
+done
+
+# Multiplayer smoke + robustness test (needs BuildMacDev; random UDP port; exit 0 = PASS)
+tools/net/two-process-test.sh "$(pwd)/Logs/nettest"
 ```
 
-`BuildScript` methods call `BuildPipeline.BuildPlayer` with
-`BuildTarget.StandaloneOSX` / `BuildTarget.StandaloneWindows64` and exit non-zero
-on failure (`EditorApplication.Exit(1)`). The editor must not be open on the same
-project while running batchmode.
+| Method | Output | Notes |
+|---|---|---|
+| `BuildMacDev` | `Builds/macOS-dev/HarvestPanic.app` | Development, NetTest scenes, `steam_appid.txt` beside the .app |
+| `BuildMacRelease` | `Builds/macOS/HarvestPanic.app` | Release, no test scenes, no `steam_appid.txt` |
+| `BuildWindowsDev` | `Builds/Windows-dev/HarvestPanic.exe` | Development, NetTest scenes, `steam_appid.txt` beside the exe |
+| `BuildWindowsRelease` | `Builds/Windows/HarvestPanic.exe` | Release (needs Windows Build Support (Mono)) |
+
+`BuildMac` / `BuildWindows` / `BuildWindows64` remain as aliases (release unless `-development`).
+`-buildOutput <path>` overrides the output path. Methods switch the active build target, call
+`BuildPipeline.BuildPlayer`, and exit non-zero on failure (`EditorApplication.Exit(1)`).
+The editor must not be open on the same project while running batchmode.
+
+### Steam App ID
+
+`NetworkingConfig.steamAppId` (asset `Assets/Resources/Data/Networking/NetworkingConfig.asset`) defaults to
+**480** (Valve's Spacewar test app). **TODO(owner): set the real App ID** once the Steamworks app exists.
+Without rebuilding, `steam_appid.txt` (working dir, or beside the exe / .app) or `-steamAppId N` override it.
+Steam is skipped with `-nosteam` and in batchmode; when the Steam client isn't running the game falls back to LAN
+(menu footer shows "LAN mode"). Invites: `+connect_lobby <id>` launch arg and overlay "Join Game" are handled.
 
 ## 5. Git: LFS, merges, branches
 
