@@ -30,7 +30,9 @@
 .hp-clock-time { font-size: 46px; color: #2B2118; }
 .hp-clock-urgent { color: #E5483B; }
 .hp-clock-dusk { background-color: #F2B49A; }
-.hp-clock-sub { font-size: 18px; color: #6B5A48; }
+/* Status ribbon sits beside the watch (it used to be clipped by the circle). */
+.hp-clock-sub { position: absolute; left: 150px; bottom: 18px; font-size: 22px; color: #2B2118; white-space: nowrap;
+    background-color: #F6EBD3; border-color: #2B2118; border-width: 2px; border-bottom-width: 4px; border-radius: 5px; padding: 1px 10px 1px 18px; }
 
 /* ---- order clipboard (top right) ---- */
 .hp-order { position: absolute; right: 18px; top: 14px; width: 290px; rotate: 1.5deg; }

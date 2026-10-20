@@ -61,6 +61,12 @@ namespace HarvestPanic.Gameplay
         public float ThrowCharge => _charging ? CarryMath.ThrowCharge(_throwHeldFor, CarryTuning.ThrowChargeTime) : 0f;
         /// <summary>Owner: the centre ray is on something grabbable.</summary>
         public bool AimingAtGrabbable { get; private set; }
+        /// <summary>Owner: world point the centre ray hit on the aimed grabbable (valid while <see cref="AimingAtGrabbable"/>).</summary>
+        public Vector3 AimPoint { get; private set; }
+        /// <summary>Owner: hands required by the aimed grabbable (0 when none).</summary>
+        public int AimHandsRequired { get; private set; }
+        /// <summary>Owner: hands already on the aimed grabbable (other players).</summary>
+        public int AimHandsAttached { get; private set; }
         /// <summary>Owner: revive progress 0..1 while holding E on a KO teammate.</summary>
         public float ReviveProgress => _reviveProgress;
         /// <summary>Owner: current prompt ("E: Grab (0/2 hands)", "E: Drop  LMB: Throw").</summary>
@@ -130,6 +136,7 @@ namespace HarvestPanic.Gameplay
             var input = _pc.Input;
             string prompt = string.Empty;
             AimingAtGrabbable = false;
+            AimHandsRequired = AimHandsAttached = 0;
 
             if (!_pc.HasControl)
             {
@@ -165,6 +172,9 @@ namespace HarvestPanic.Gameplay
             bool found = TryAim(out var target, out var no, out var localPoint);
             var ko = found ? target as PlayerCharacter : null;
             AimingAtGrabbable = found;
+            AimHandsRequired = found ? target.HandsRequired : 0;
+            AimHandsAttached = found ? HandsOn(no.NetworkObjectId) : 0;
+            if (found) AimPoint = target.CarryTransform.TransformPoint(localPoint);
 
             if (found)
             {

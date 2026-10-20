@@ -113,21 +113,11 @@ namespace HarvestPanic.Gameplay.Editor
             viewCam.gameObject.AddComponent<AudioListener>();
             viewCam.gameObject.SetActive(false);
 
-            // First-person arms (owner only).
+            // First-person arms (owner only): procedural rig, see FirstPersonArmsRig.
             var arms = Child(camPivot, "FirstPersonArms", Vector3.zero);
             var sleeve = Mat("Sleeve", new Color(0.72f, 0.2f, 0.16f));
             var skin = Mat("Skin", new Color(0.93f, 0.72f, 0.56f));
             var glove = Mat("Glove", new Color(0.55f, 0.38f, 0.2f));
-            Transform ArmPart(string n, PrimitiveType t, Material m, Vector3 s)
-            {
-                var g = Prim(t, n, arms, Vector3.zero, s, m);
-                g.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
-                return g.transform;
-            }
-            var sL = ArmPart("SleeveL", PrimitiveType.Capsule, sleeve, new Vector3(0.1f, 0.3f, 0.1f));
-            var hL = ArmPart("HandL", PrimitiveType.Cube, glove, new Vector3(0.09f, 0.06f, 0.12f));
-            var sR = ArmPart("SleeveR", PrimitiveType.Capsule, sleeve, new Vector3(0.1f, 0.3f, 0.1f));
-            var hR = ArmPart("HandR", PrimitiveType.Cube, glove, new Vector3(0.09f, 0.06f, 0.12f));
 
             // Customization's FarmerBody (no NetworkObject of its own) is the third-person body when present.
             var farmerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Farmer/FarmerBody.prefab");
@@ -189,11 +179,47 @@ namespace HarvestPanic.Gameplay.Editor
 
             var view = root.AddComponent<PlayerView>();
             Set(view, "vcam", vcam);
-            Set(view, "armSleeveL", sL); Set(view, "armHandL", hL); Set(view, "armSleeveR", sR); Set(view, "armHandR", hR);
             if (farmer == null) { Set(view, "bodyArmL", armL); Set(view, "bodyArmR", armR); Set(view, "bodyLegL", legL); Set(view, "bodyLegR", legR); }
             root.AddComponent<PlayerPromptOverlay>();
+            ConfigureFirstPersonPresentation(root);
 
             return Save(root, PlayerPrefabPath);
+        }
+
+        /// <summary>
+        /// Upgrades only Player.prefab in place (FP arms rig + UI Toolkit centre HUD), leaving tools/props untouched.
+        /// Batchmode: -executeMethod HarvestPanic.Gameplay.Editor.PlayerAssetBuilder.UpgradePlayerPrefab
+        /// </summary>
+        [MenuItem("Harvest Panic/Player/Upgrade Player Prefab (arms + centre HUD)")]
+        public static void UpgradePlayerPrefab()
+        {
+            var root = PrefabUtility.LoadPrefabContents(PlayerPrefabPath);
+            try
+            {
+                ConfigureFirstPersonPresentation(root);
+                PrefabUtility.SaveAsPrefabAsset(root, PlayerPrefabPath);
+            }
+            finally { PrefabUtility.UnloadPrefabContents(root); }
+            AssetDatabase.SaveAssets();
+            Debug.Log("[PlayerAssetBuilder] Player prefab upgraded.");
+        }
+
+        static void ConfigureFirstPersonPresentation(GameObject root)
+        {
+            var arms = root.GetComponent<PlayerCharacter>() != null ? (Transform)new SerializedObject(root.GetComponent<PlayerCharacter>()).FindProperty("firstPersonArms").objectReferenceValue : null;
+            if (arms == null) { Debug.LogError("[PlayerAssetBuilder] Player has no FirstPersonArms"); return; }
+            for (int i = arms.childCount - 1; i >= 0; i--) Object.DestroyImmediate(arms.GetChild(i).gameObject);
+            var rig = arms.GetComponent<FirstPersonArmsRig>();
+            if (rig == null) rig = arms.gameObject.AddComponent<FirstPersonArmsRig>();
+            Set(rig, "tuning", LoadOrCreate<ArmsTuning>(TuningDir + "/ArmsTuning.asset"));
+            Set(rig, "baseMaterial", Mat("Sleeve", new Color(0.72f, 0.2f, 0.16f)));
+
+            var overlay = root.GetComponent<PlayerPromptOverlay>();
+            if (overlay == null) overlay = root.AddComponent<PlayerPromptOverlay>();
+            Set(overlay, "panelSettings", AssetDatabase.LoadAssetAtPath<UnityEngine.UIElements.PanelSettings>("Assets/Prefabs/HUD/EconomyHudPanel.asset"));
+            Set(overlay, "styleSheet", AssetDatabase.LoadAssetAtPath<UnityEngine.UIElements.StyleSheet>(PlayerDir + "/UI/PlayerCentreHud.uss"));
+            Set(overlay, "headlineFont", AssetDatabase.LoadAssetAtPath<Font>("Assets/ThirdParty/Fonts/LilitaOne/LilitaOne-Regular.ttf"));
+            Set(overlay, "bodyFont", AssetDatabase.LoadAssetAtPath<Font>("Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"));
         }
 
         // ---- Tools and props ----------------------------------------------------------------------------------

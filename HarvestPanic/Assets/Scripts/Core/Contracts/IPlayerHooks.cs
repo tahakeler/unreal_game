@@ -34,3 +34,16 @@ namespace HarvestPanic.Core
         void Faint(bool fainted);
     }
 }
+
+namespace HarvestPanic.Core
+{
+    /// <summary>
+    /// Implemented by the first-person arms (Player team, on <see cref="IPlayerHooks.FirstPersonArms"/>).
+    /// Customization calls it after applying a loadout so the owner's arms wear their shirt and glove colours.
+    /// </summary>
+    public interface IFirstPersonArmsSkin
+    {
+        /// <summary>Shirt (sleeves), glove and skin colours.</summary>
+        void ApplyArmColors(Color shirt, Color glove, Color skin);
+    }
+}

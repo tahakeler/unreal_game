@@ -8,7 +8,7 @@ namespace HarvestPanic.Gameplay
     /// <summary>
     /// Presentation of the player (design/gdd/player-character.md "Camera and view" 5a-5e):
     /// owner sees a Cinemachine first-person camera with head bob, sprint FOV kick and impact shake, plus
-    /// procedurally posed first-person arms; the owner's own body only casts shadows (owner-no-see) until it
+    /// procedurally posed first-person arms (<see cref="FirstPersonArmsRig"/>); the owner's own body only casts shadows (owner-no-see) until it
     /// ragdolls. Everyone else sees the full third-person body, whose arms reach forward while carrying.
     /// No gameplay state lives here.
     /// </summary>
@@ -17,7 +17,6 @@ namespace HarvestPanic.Gameplay
     {
         [Header("First-person")]
         [SerializeField] CinemachineCamera vcam;
-        [SerializeField] Transform armSleeveL, armHandL, armSleeveR, armHandR;
         [Header("Third-person body pivots")]
         [SerializeField] Transform bodyArmL, bodyArmR, bodyLegL, bodyLegR;
 
@@ -29,12 +28,6 @@ namespace HarvestPanic.Gameplay
         PlayerMotor _motor;
         readonly List<Renderer> _bodyRenderers = new List<Renderer>();
         float _bobPhase, _trauma, _fov, _walkPhase, _rescanAt;
-        Vector3 _handL, _handR;
-        bool _handsInit;
-
-        static readonly Vector3 ShoulderL = new Vector3(-0.26f, -0.36f, 0.02f);
-        static readonly Vector3 ShoulderR = new Vector3(0.26f, -0.36f, 0.02f);
-        const float ArmReach = 0.85f;
 
         void Awake()
         {
@@ -78,7 +71,6 @@ namespace HarvestPanic.Gameplay
 
         void LateUpdate()
         {
-            if (LocalView && !BodyDown) PoseArms(Time.deltaTime);
             PoseBody(Time.deltaTime);
         }
 
@@ -122,72 +114,10 @@ namespace HarvestPanic.Gameplay
             }
         }
 
-        /// <summary>Poses the first-person arms immediately (also used by edit-time previews).</summary>
-        public void PoseArmsNow() { _handsInit = false; PoseArms(1f); }
-
-        void PoseArms(float dt)
+        /// <summary>Poses the first-person arms immediately (previews, QA captures).</summary>
+        public void PoseArmsNow()
         {
-            Transform pivot = _pc.CameraPivot;
-            Vector3 restL = new Vector3(-0.22f, -0.44f, 0.38f), restR = new Vector3(0.22f, -0.44f, 0.38f);
-            Vector3 tl = restL, tr = restR;
-
-            if (_carry != null && _carry.HeldObject != null)
-            {
-                if (_carry.HoldingTool)
-                {
-                    var c = _carry.CarryTuning;
-                    tr = c.ToolHoldOffset + new Vector3(-0.02f, 0.02f, -0.05f);
-                }
-                else if (TryLocalBounds(_carry.HeldObject, pivot, out var center, out var ext))
-                {
-                    float y = center.y - ext.y * 0.15f;
-                    tl = new Vector3(center.x - ext.x - 0.03f, y, center.z);
-                    tr = new Vector3(center.x + ext.x + 0.03f, y, center.z);
-                }
-                float pull = _carry.ThrowCharge * 0.18f;
-                tl.z -= pull; tr.z -= pull;
-            }
-            else if (_carry != null && _carry.AimingAtGrabbable)
-            {
-                tl = new Vector3(-0.17f, -0.2f, 0.62f);
-                tr = new Vector3(0.17f, -0.2f, 0.62f);
-            }
-
-            tl = ShoulderL + Vector3.ClampMagnitude(tl - ShoulderL, ArmReach);
-            tr = ShoulderR + Vector3.ClampMagnitude(tr - ShoulderR, ArmReach);
-            if (!_handsInit) { _handL = tl; _handR = tr; _handsInit = true; }
-            float k = 1f - Mathf.Exp(-14f * dt);
-            _handL = Vector3.Lerp(_handL, tl, k);
-            _handR = Vector3.Lerp(_handR, tr, k);
-            PlaceArm(armSleeveL, armHandL, ShoulderL, _handL);
-            PlaceArm(armSleeveR, armHandR, ShoulderR, _handR);
-        }
-
-        static void PlaceArm(Transform sleeve, Transform hand, Vector3 shoulder, Vector3 handPos)
-        {
-            if (sleeve == null || hand == null) return;
-            Vector3 d = handPos - shoulder;
-            float len = Mathf.Max(0.05f, d.magnitude);
-            sleeve.localPosition = shoulder + d * 0.5f;
-            sleeve.localRotation = Quaternion.LookRotation(d / len, Vector3.up) * Quaternion.Euler(90f, 0f, 0f);
-            sleeve.localScale = new Vector3(0.1f, len * 0.5f, 0.1f);
-            hand.localPosition = handPos;
-            hand.localRotation = Quaternion.LookRotation(d / len, Vector3.up);
-        }
-
-        static bool TryLocalBounds(Transform obj, Transform space, out Vector3 center, out Vector3 ext)
-        {
-            center = ext = Vector3.zero;
-            var rs = obj.GetComponentsInChildren<Renderer>();
-            if (rs.Length == 0) return false;
-            Bounds wb = rs[0].bounds;
-            for (int i = 1; i < rs.Length; i++) wb.Encapsulate(rs[i].bounds);
-            center = space.InverseTransformPoint(wb.center);
-            // Approximate extents in camera space using the world box projected on the camera's right axis.
-            Vector3 r = space.right;
-            float ex = Mathf.Abs(r.x) * wb.extents.x + Mathf.Abs(r.y) * wb.extents.y + Mathf.Abs(r.z) * wb.extents.z;
-            ext = new Vector3(ex, wb.extents.y, wb.extents.z);
-            return true;
+            if (_pc.FirstPersonArms != null && _pc.FirstPersonArms.TryGetComponent<FirstPersonArmsRig>(out var rig)) rig.PoseNow();
         }
 
         void PoseBody(float dt)
