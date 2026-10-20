@@ -46,6 +46,7 @@ namespace HarvestPanic.UI
         {
             SettingsService.Changed += ApplyToEngine;
             ApplyToEngine(SettingsService.Current);
+            Services.WhenAvailable<IAudioSettingsSink>(_ => ApplyToEngine(SettingsService.Current));
             EnsureEventSystem();
             gameObject.AddComponent<PauseOverlay>();
         }
@@ -80,7 +81,17 @@ namespace HarvestPanic.UI
 
         static void ApplyToEngine(GameSettings s)
         {
-            AudioListener.volume = s.MasterVolume;
+            // Audio owns bus gains when present (IAudioSettingsSink applies Master x bus in software); otherwise fall back to the listener.
+            if (Services.TryGet(out IAudioSettingsSink sink))
+            {
+                AudioListener.volume = 1f;
+                sink.SetBusVolume(AudioBus.Master, s.MasterVolume);
+                sink.SetBusVolume(AudioBus.Music, s.MusicVolume);
+                sink.SetBusVolume(AudioBus.Sfx, s.SfxVolume);
+                sink.SetBusVolume(AudioBus.UI, s.SfxVolume);
+                sink.SetBusVolume(AudioBus.Voice, s.VoiceVolume);
+            }
+            else AudioListener.volume = s.MasterVolume;
             if (Application.isEditor || Application.isBatchMode) return; // never touch window/URP asset from the editor
             switch (s.WindowMode)
             {
