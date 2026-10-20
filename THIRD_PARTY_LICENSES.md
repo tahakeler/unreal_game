@@ -71,3 +71,16 @@ Processed (decimated, rescaled, re-pivoted, basecolor downsized) with headless B
 | `Net` | lacrosse-style net | 19,228 → 2,999 | 1024 basecolor |
 | `MarketStall` | wooden market stall | 48,326 → 5,998 | 2048 basecolor |
 | `PenGate` | wooden gate | 43,209 → 2,999 | 1024 basecolor |
+
+## Audio (Unity project, `HarvestPanic/Assets/Audio/`) — added 2026-10-20
+
+Licence texts copied to `HarvestPanic/Assets/Audio/ThirdParty/Kenney-*-License.txt`. Clips live under
+`Assets/Audio/Resources/Audio/<EVENT>/` (folder = runtime event name, files = random variants).
+
+| Pack | Author | URL | Licence | Used for |
+|---|---|---|---|---|
+| RPG Audio | Kenney | https://kenney.nl/assets/rpg-audio | CC0 1.0 | footsteps, plank creak/break, tool metal |
+| Impact Sounds | Kenney | https://kenney.nl/assets/impact-sounds | CC0 1.0 | crate/wood/metal/dirt/soft impacts, bruise thuds |
+| Interface Sounds | Kenney | https://kenney.nl/assets/interface-sounds | CC0 1.0 | UI menu, pocket-watch tick |
+| Casino Audio | Kenney | https://kenney.nl/assets/casino-audio | CC0 1.0 | wallet ka-ching, coin ticks, market bell |
+| In-house placeholders (all `.wav`: music loops, stingers, splashes, wallet wah, critter barks, shout, farm ambience) | HARVEST PANIC team, `tools/freeassets/scripts/make_audio_placeholders.py` (deterministic synthesis) | — | CC0 1.0 (own work) | placeholders until final audio |

@@ -237,6 +237,66 @@ def music_loop(bpm, beats_per_bar, bars, progression, minor=False, style="banjo"
     return res
 
 
+
+# ---------------------------------------------------------------- critters / voice / ambience
+
+def pig_squeal(seed):
+    r = random.Random(seed); sec = r.uniform(0.55, 0.8)
+    f0 = r.uniform(700, 900)
+    f = lambda t: f0 * (1 + 0.6 * math.sin(math.pi * min(1, t / sec))) * (1 + 0.04 * math.sin(2 * math.pi * 31 * t))
+    x = osc(f, sec, "saw")
+    x = mix(lowpass(x, 3500), osc(lambda t: f(t) * 2.01, sec), 0, 0.3)
+    return apply(x, env_adsr(len(x), 0.02, 0.1, 0.8, 0.2))
+
+
+def chicken_panic(seed):
+    r = random.Random(seed); out = []
+    t = 0.0
+    for k in range(r.randint(4, 6)):
+        dur = r.uniform(0.07, 0.14); f0 = r.uniform(900, 1400)
+        b = osc(lambda u, f0=f0, dur=dur: f0 * (1.3 - 0.5 * u / dur), dur, "square")
+        b = apply(lowpass(b, 4000), env_adsr(len(b), 0.004, 0.03, 0.5, 0.03))
+        out = mix(out, b, int(t * SR), 0.8); t += dur + r.uniform(0.02, 0.07)
+    return out
+
+
+def bull_telegraph():
+    # 0.8 s mandatory wind-up (audio-feedback rule 4): snort + hoof scrape + rising growl.
+    sec = 0.8
+    growl = osc(lambda t: 70 + 60 * t / sec, sec, "saw")
+    growl = apply(lowpass(growl, 600), env_adsr(len(growl), 0.1, 0.1, 0.9, 0.08))
+    snort = apply(highpass(noise(0.25), 800), exp_decay(int(0.25 * SR), 0.06))
+    scrape = apply(lowpass(noise(0.3), 1500), env_adsr(int(0.3 * SR), 0.05, 0.1, 0.6, 0.1))
+    out = mix(list(growl), snort, 0, 0.7)
+    return mix(out, scrape, int(0.4 * SR), 0.6)
+
+
+def player_shout(seed):
+    r = random.Random(seed); sec = r.uniform(0.4, 0.6); f0 = r.uniform(180, 240)
+    f = lambda t: f0 * (1 + 0.25 * math.sin(math.pi * t / sec))
+    x = mix(osc(f, sec, "saw"), osc(lambda t: f(t) * 2, sec, "saw"), 0, 0.4)
+    x = lowpass(x, 1800)
+    return apply(x, env_adsr(len(x), 0.03, 0.08, 0.8, 0.15))
+
+
+def farm_day_bed(sec=8.0):
+    # Seamless loop: filtered wind + sparse birds; crossfade the tail into the head.
+    n = int(sec * SR)
+    wind = lowpass(noise(sec + 1), 400)
+    wind = [w * (0.6 + 0.4 * math.sin(2 * math.pi * i / n)) for i, w in enumerate(wind)]
+    bed = list(wind[:n])
+    xf = int(SR)
+    for i in range(xf):
+        a = i / xf
+        bed[i] = bed[i] * a + wind[n + i] * (1 - a)
+    for k in range(6):
+        f0 = rng.uniform(2500, 4000); start = rng.uniform(0.2, sec - 0.6)
+        b = osc(lambda t, f0=f0: f0 * (1 + 0.3 * math.sin(2 * math.pi * 18 * t)), 0.18)
+        b = apply(b, env_adsr(len(b), 0.01, 0.05, 0.5, 0.05))
+        mix(bed, b, int(start * SR), 0.12)
+    return bed[:n]
+
+
 def main():
     root = sys.argv[1]
     def put(evt, name, samples):
@@ -266,6 +326,14 @@ def main():
     for evt, stems in loops.items():
         for stem, x in stems.items():
             write(os.path.join(root, evt, f"{evt.lower()}_{stem}.wav"), x, peak=0.7)
+
+    # Added later: generated after the loops so earlier outputs stay byte-identical (shared rng).
+    for i in range(3):
+        put("SFX_Critter_Pig_Squeal", f"sfx_critter_pig_squeal_{i+1:02d}", pig_squeal(100 + i))
+        put("SFX_Critter_Chicken_Panic", f"sfx_critter_chicken_panic_{i+1:02d}", chicken_panic(200 + i))
+        put("SFX_Player_Shout", f"sfx_player_shout_{i+1:02d}", player_shout(300 + i))
+    put("SFX_Critter_Bull_Telegraph", "sfx_critter_bull_telegraph_01", bull_telegraph())
+    write(os.path.join(root, "AMB_Farm_Day", "amb_farm_day_loop.wav"), farm_day_bed(), peak=0.5)
 
 
 if __name__ == "__main__":
