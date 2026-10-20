@@ -41,7 +41,7 @@ namespace HarvestPanic.UI
         {
             Build();
             _open = true;
-            UiFocus.ModalCount++;
+            UiFocus.Push(this);
             bool solo = !Services.TryGet(out ISessionService s) || !s.IsConnected || s.Players.Count <= 1;
             _title.text = solo ? "Paused" : "The farm does not pause.";
             _sub.text = solo ? "Take a breath. The pigs are waiting." : "Your farmer is standing around with a 'zzz' above their head.";
@@ -59,7 +59,7 @@ namespace HarvestPanic.UI
         {
             if (!_open) return;
             _open = false;
-            UiFocus.ModalCount = Mathf.Max(0, UiFocus.ModalCount - 1);
+            UiFocus.Pop(this);
             if (Time.timeScale == 0f) Time.timeScale = _prevScale <= 0f ? 1f : _prevScale;
             Cursor.lockState = _prevLock; Cursor.visible = _prevVisible;
             _panel.Root.style.display = DisplayStyle.None;

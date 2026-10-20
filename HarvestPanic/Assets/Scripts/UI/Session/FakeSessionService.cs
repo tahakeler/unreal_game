@@ -9,7 +9,7 @@ namespace HarvestPanic.UI
     /// real provider exists. Also exposes the optional duck-typed members the UI looks for (see <see cref="SessionAccess"/>):
     /// TransportName, DiscoveredHosts, RefreshDiscovery, SendChat/OnChat, Kick.
     /// </summary>
-    public sealed class FakeSessionService : ISessionService
+    public sealed class FakeSessionService : ISessionService, ISessionSocial
     {
         readonly List<PlayerInfo> _players = new List<PlayerInfo>();
         readonly List<LanHost> _hosts = new List<LanHost>
@@ -42,7 +42,7 @@ namespace HarvestPanic.UI
 
         public event Action OnSessionChanged;
         public event Action<string> OnError;
-        public event Action<string, string> OnChat;
+        public event Action<ulong, string> OnChat;
 
         public void StartHost(string lobbyName, int maxPlayers)
         {
@@ -100,7 +100,7 @@ namespace HarvestPanic.UI
         public void SendChat(string text)
         {
             SentChat.Add(text);
-            OnChat?.Invoke(LocalName, text);
+            OnChat?.Invoke(LocalClientId, text);
         }
 
         public void Kick(ulong clientId)
