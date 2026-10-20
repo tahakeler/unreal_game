@@ -28,7 +28,8 @@ namespace HarvestPanic.Economy
         readonly List<(VisualElement el, float until)> _activeToasts = new List<(VisualElement, float)>();
         float _lastDisasterToast = -10f;
         int _shownMoney = int.MinValue;
-        string _orderKey;
+        int _orderKey; bool _orderKeySet;
+        int _calKey = int.MinValue, _clkKey = int.MinValue, _twistKey = int.MinValue; // perf: change-detection keys
 
         void OnEnable()
         {
@@ -160,11 +161,17 @@ namespace HarvestPanic.Economy
                 _money.EnableInClassList("hp-money-neg", bal < 0);
             }
             _iou.style.display = d.Iou > 0 || bal < 0 ? DisplayStyle.Flex : DisplayStyle.None;
-            _iou.text = d.Iou > 0 ? "IOU " + ReceiptBuilder.Money(d.Iou) : "IOU";
-            _dayLabel.text = $"WEEK {d.Week} · {DayNames[Mathf.Clamp(d.DayOfWeek - 1, 0, 4)]}";
             int due = d.Quota + d.Iou;
-            int dayShare = Mathf.RoundToInt(d.Quota / 5f);
-            _quotaLabel.text = $"Rent {ReceiptBuilder.Money(due)} Sunday · today's share {ReceiptBuilder.Money(dayShare)}";
+            // perf: rebuild the calendar/rent strings only when their inputs change (was ~1.2 KB GC per frame)
+            int calKey = d.Week * 1000003 ^ d.DayOfWeek * 7919 ^ d.Quota * 31 ^ d.Iou;
+            if (calKey != _calKey || _calKey == int.MinValue)
+            {
+                _calKey = calKey;
+                _iou.text = d.Iou > 0 ? "IOU " + ReceiptBuilder.Money(d.Iou) : "IOU";
+                _dayLabel.text = $"WEEK {d.Week} · {DayNames[Mathf.Clamp(d.DayOfWeek - 1, 0, 4)]}";
+                int dayShare = Mathf.RoundToInt(d.Quota / 5f);
+                _quotaLabel.text = $"Rent {ReceiptBuilder.Money(due)} Sunday · today's share {ReceiptBuilder.Money(dayShare)}";
+            }
             float frac = due > 0 ? Mathf.Clamp01(bal / (float)due) : 0f;
             _barFill.style.width = Length.Percent(frac * 100f);
             _barFill.EnableInClassList("hp-bar-fill-done", frac >= 1f);
@@ -173,18 +180,20 @@ namespace HarvestPanic.Economy
             float rem = d.PhaseRemaining;
             _clockPhase.text = PhaseName(phase);
             bool timed = d.PhaseDuration > 0f && (phase == DayPhase.Morning || phase == DayPhase.Workday || phase == DayPhase.Dusk);
-            _clockTime.text = timed ? $"{(int)rem / 60}:{(int)rem % 60:00}" : "--:--";
+            int clkKey = timed ? (int)rem : -1;
+            if (clkKey != _clkKey) { _clkKey = clkKey; _clockTime.text = timed ? $"{(int)rem / 60}:{(int)rem % 60:00}" : "--:--"; }
             _clockTime.EnableInClassList("hp-clock-urgent", timed && phase != DayPhase.Morning && rem < 60f);
             _clock.EnableInClassList("hp-clock-dusk", phase == DayPhase.Dusk);
             _clockSub.text = phase == DayPhase.Workday && rem < 30f ? "SUNDOWN!" : phase == DayPhase.Dusk ? "night market ×1.25" : phase == DayPhase.Morning ? "market opens soon" : "";
             _clockSub.style.display = string.IsNullOrEmpty(_clockSub.text) ? DisplayStyle.None : DisplayStyle.Flex;
 
             var order = d.Order;
-            string key = "";
-            foreach (var l in order) key += l.GoodsId + l.Filled + "/" + l.Quantity + ";";
-            if (key != _orderKey)
+            int key = 17 + order.Count;
+            for (int i = 0; i < order.Count; i++) { var l = order[i]; key = key * 31 + (l.GoodsId?.GetHashCode() ?? 0); key = key * 31 + l.Filled; key = key * 31 + l.Quantity; }
+            key = key * 31 + d.Week;
+            if (key != _orderKey || !_orderKeySet)
             {
-                _orderKey = key;
+                _orderKey = key; _orderKeySet = true;
                 _orderLines.Clear();
                 bool all = order.Count > 0;
                 foreach (var l in order)
@@ -197,10 +206,16 @@ namespace HarvestPanic.Economy
                 }
                 _orderBonus.text = all ? "ORDER COMPLETE! bonus at payout" : $"All lines: +{ReceiptBuilder.Money(60 * d.Week)} · items ×1.5";
             }
-            string twist = "";
-            foreach (var m in d.ActiveModifiers) if (m.Announced && !LandlordParams.IsRule(m) && !string.IsNullOrEmpty(m.CardText)) twist += (twist.Length > 0 ? "\n" : "") + m.CardText;
-            _twist.text = twist;
-            _twist.style.display = twist.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            int twKey = 17;
+            foreach (var m in d.ActiveModifiers) if (m.Announced && !LandlordParams.IsRule(m) && !string.IsNullOrEmpty(m.CardText)) twKey = twKey * 31 + m.CardText.GetHashCode();
+            if (twKey != _twistKey || !_orderKeySet || _twist.text == null)
+            {
+                _twistKey = twKey;
+                string twist = "";
+                foreach (var m in d.ActiveModifiers) if (m.Announced && !LandlordParams.IsRule(m) && !string.IsNullOrEmpty(m.CardText)) twist += (twist.Length > 0 ? "\n" : "") + m.CardText;
+                _twist.text = twist;
+                _twist.style.display = twist.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            }
         }
 
         static string PhaseName(DayPhase p)
