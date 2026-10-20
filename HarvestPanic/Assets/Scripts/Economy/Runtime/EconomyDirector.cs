@@ -15,7 +15,7 @@ namespace HarvestPanic.Economy
     /// Offline (not spawned and no listening NetworkManager) it runs locally for dev scenes and tests.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class EconomyDirector : NetworkBehaviour, IEconomyService, IDayModifierService
+    public sealed partial class EconomyDirector : NetworkBehaviour, IEconomyService, IDayModifierService
     {
         /// <summary>The live director (one per session).</summary>
         public static EconomyDirector Instance { get; private set; }
@@ -35,7 +35,7 @@ namespace HarvestPanic.Economy
         readonly NetworkVariable<int> _nvIou = new NetworkVariable<int>();
         readonly NetworkVariable<int> _nvWeekIncome = new NetworkVariable<int>();
         readonly NetworkVariable<FixedString512Bytes> _nvOrder = new NetworkVariable<FixedString512Bytes>();
-        readonly NetworkVariable<FixedString512Bytes> _nvMods = new NetworkVariable<FixedString512Bytes>();
+        readonly NetworkVariable<FixedString4096Bytes> _nvMods = new NetworkVariable<FixedString4096Bytes>();
 
         // ---- server state ----
         Wallet _wallet;
@@ -105,6 +105,7 @@ namespace HarvestPanic.Economy
             _wallet.Applied += t => { if (t.Type != WalletTxnType.Quota) _weekIncome += t.Amount; };
             _ledger.Disaster += e => RaiseDisaster(e);
             _mods.Changed += () => { PushMods(); OnModifiersChanged?.Invoke(); };
+            ShopAwake();
         }
 
         void OnEnable()
@@ -142,6 +143,7 @@ namespace HarvestPanic.Economy
                 _nvRemaining.OnValueChanged += (a, b) => _clientRemainingAt = Time.time;
                 _nvMods.OnValueChanged += (a, b) => RebuildClientMods();
                 RebuildClientMods();
+                HookClientShop();
             }
         }
 
@@ -161,6 +163,8 @@ namespace HarvestPanic.Economy
                 case DayPhase.Workday: return _mods.Resolve(DayModifierStack.Params.WorkdaySeconds, Tuning.WorkdaySeconds, DayPhase.Workday);
                 case DayPhase.Dusk: return _mods.Resolve(DayModifierStack.Params.DuskSeconds, Tuning.DuskSeconds, DayPhase.Dusk);
                 case DayPhase.Payout: return Tuning.PayoutAutoAdvanceSeconds;
+                case DayPhase.Shop: return Tuning.ShopAutoAdvanceSeconds;
+                case DayPhase.Collateral: return Tuning.CollateralSeconds;
                 default: return 0f;
             }
         }
@@ -173,6 +177,7 @@ namespace HarvestPanic.Economy
             _clock.Tick(dt);
             _mods.Tick(dt);
             if (_clock.Phase == DayPhase.Workday || _clock.Phase == DayPhase.Dusk) _dayTime += dt;
+            ShopTick(dt);
             if (IsSpawned && (_remainingPushTimer -= dt) <= 0f) { _remainingPushTimer = 0.5f; _nvRemaining.Value = _clock.Remaining; }
         }
 
@@ -183,12 +188,14 @@ namespace HarvestPanic.Economy
         {
             if (!IsEconomyAuthority) return;
             _started = true;
+            if (TryContinueRun()) return;
             _wallet.Reset();
             _ledger.StartWeek();
             _mods.Clear();
             _landlordRules.Clear();
             _clock.ResetRun();
             _weekIncome = 0;
+            ShopResetRun();
             SampleWeek();
             PushWallet();
             Go(DayPhase.Morning);
@@ -218,6 +225,7 @@ namespace HarvestPanic.Economy
             {
                 case DayPhase.Morning: EnterMorning(); break;
                 case DayPhase.Payout: EnterPayout(); break;
+                case DayPhase.Shop: EnterShop(); break;
             }
             if (IsSpawned)
             {
@@ -245,6 +253,8 @@ namespace HarvestPanic.Economy
                     Go(DayPhase.Payout);
                     break;
                 case DayPhase.Payout: NextDay(); break;
+                case DayPhase.Shop: NextDay(); break;
+                case DayPhase.Collateral: Evict(); break;
             }
         }
 
@@ -349,7 +359,9 @@ namespace HarvestPanic.Economy
             if (!IsEconomyAuthority) { if (IsSpawned) RequestNextDayRpc(); return; }
             switch (_clock.Phase)
             {
-                case DayPhase.Payout:
+                case DayPhase.Payout: Go(DayPhase.Shop); break;
+                case DayPhase.Shop:
+                    _shop.ClearQueue();
                     if (_clock.IsLastDayOfWeek) { Go(DayPhase.Sunday); ResolveSunday(); }
                     else Go(DayPhase.Morning);
                     break;
@@ -362,8 +374,9 @@ namespace HarvestPanic.Economy
                     SampleWeek();
                     DrawLandlordRule();
                     PushWallet();
+                    SaveRun(RunResumePoint.WeekStart);
                     break;
-                case DayPhase.Evicted: StartRun(); break;
+                case DayPhase.Evicted: RunSaveStore.Delete(); StartRun(); break;
             }
         }
 
@@ -371,6 +384,7 @@ namespace HarvestPanic.Economy
         public void Restart()
         {
             if (!IsEconomyAuthority) { if (IsSpawned) RequestRestartRpc(); return; }
+            RunSaveStore.Delete(); // abandon wipes the run save (save-persistence)
             StartRun();
         }
 
@@ -394,10 +408,19 @@ namespace HarvestPanic.Economy
             {
                 AddWalletTxn(new WalletTxn { Type = WalletTxnType.Quota, Amount = -due, PlayerId = PlayerIds.None });
                 r.Carryover = _wallet.Balance;
+                CountPaidWeek();
             }
             r.Balance = _wallet.Balance;
             r.SundayLine = LedgerText.Sunday(paid, r.Carryover);
-            if (!paid) Go(DayPhase.Evicted);
+            if (!paid && _shop.Owned.Count > 0)
+            {
+                r.Collateral = true;
+                r.SundayLine = LedgerText.CollateralLine(due - _wallet.Balance);
+                PublishReceipt(r);
+                Go(DayPhase.Collateral);
+                return;
+            }
+            if (!paid) { FinishEviction(r); return; }
             PublishReceipt(r);
         }
 
@@ -543,7 +566,7 @@ namespace HarvestPanic.Economy
             if (!IsSpawned || !IsServer) return;
             var sb = new StringBuilder();
             foreach (var a in _mods.ActiveList) sb.Append(a.Mod.ModifierId).Append(';');
-            _nvMods.Value = new FixedString512Bytes(sb.ToString());
+            _nvMods.Value = new FixedString4096Bytes(sb.ToString());
         }
 
         void RebuildClientMods()

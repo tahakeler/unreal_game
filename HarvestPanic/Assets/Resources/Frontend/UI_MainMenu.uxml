@@ -44,9 +44,11 @@
                     <ui:VisualElement name="host-players" class="row players-row" />
                     <ui:Button name="btn-host-transport" text="Over: LAN" class="hp-btn hp-btn--small" />
                     <ui:Label name="host-mode" text="Hosting over LAN." class="body-text" />
+                    <ui:Label name="host-continue-info" text="" class="small-text muted" />
                     <ui:Label name="host-solo" text="Solo is allowed, but the farm is tuned for 2 to 4 farmers." class="small-text muted" />
                 </ui:VisualElement>
                 <ui:VisualElement class="row buttons-row">
+                    <ui:Button name="btn-host-continue" text="Continue Farm" class="hp-btn hp-btn--primary" />
                     <ui:Button name="btn-host-go" text="Open the Gate" class="hp-btn hp-btn--primary" />
                     <ui:Button name="btn-host-back" text="Back" class="hp-btn hp-btn--small" />
                 </ui:VisualElement>

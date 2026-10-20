@@ -42,6 +42,9 @@ namespace HarvestPanic.Economy
         public int Due, Carryover;
         public string Mvd;
         public string SundayLine;
+        public bool Collateral;
+        // Run over (eviction)
+        public int WeeksPaid, DaysPlayed, TotalEarned, UpgradesBought;
     }
 
     /// <summary>
@@ -176,6 +179,10 @@ namespace HarvestPanic.Economy
             if (carry == 0) return "Paid exactly. The Landlord seems disappointed.";
             return "PAID. The Landlord counts it twice, slowly.";
         }
+
+        /// <summary>Collateral prompt line.</summary>
+        public static string CollateralLine(int shortBy) =>
+            $"SHORT BY ${shortBy:N0}. The Landlord taps his abacus. Sell upgrades back at 50% or lose the farm.";
 
         /// <summary>Order line label: "3 pigs".</summary>
         public static string OrderLabel(OrderLine l)

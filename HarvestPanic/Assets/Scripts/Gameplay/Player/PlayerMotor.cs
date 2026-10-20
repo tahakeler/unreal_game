@@ -71,6 +71,7 @@ namespace HarvestPanic.Gameplay
         void Update()
         {
             if (_pc == null || !_pc.IsOwnerSafe || _stamina == null) return;
+            _stamina.Mult = Services.TryGet(out IDayModifierService dayMods) ? dayMods.Resolve(DayParams.PlayerStaminaMult, 1f) : 1f;
             var t = _pc.Tuning;
             float dt = Time.deltaTime;
             bool control = _pc.HasControl;

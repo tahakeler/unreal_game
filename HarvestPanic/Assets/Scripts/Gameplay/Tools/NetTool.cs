@@ -14,6 +14,9 @@ namespace HarvestPanic.Gameplay
     public sealed class NetTool : CarryableProp, IUsableTool
     {
         [SerializeField] ToolTuning tuning;
+
+        /// <summary>Net reach after the Better Nets upgrade (DayParams.ToolsNetReachMult).</summary>
+        float Reach => tuning.NetReach * (Services.TryGet(out IDayModifierService day) ? day.Resolve(DayParams.ToolsNetReachMult, 1f) : 1f);
         [SerializeField] Transform bagPoint;
 
         readonly NetworkVariable<bool> _full = new NetworkVariable<bool>(false);
@@ -77,7 +80,7 @@ namespace HarvestPanic.Gameplay
             var head = _user.Character.HeadPivot;
             Vector3 origin = head.position + Vector3.down * 0.6f;
             Vector3 fwd = Vector3.ProjectOnPlane(head.forward, Vector3.up).normalized;
-            int n = Physics.OverlapSphereNonAlloc(origin + fwd * tuning.NetReach * 0.5f, tuning.NetReach, Overlaps, ~0, QueryTriggerInteraction.Ignore);
+            int n = Physics.OverlapSphereNonAlloc(origin + fwd * Reach * 0.5f, Reach, Overlaps, ~0, QueryTriggerInteraction.Ignore);
             ICarryable best = null; float bestD = float.MaxValue;
             for (int i = 0; i < n; i++)
             {
@@ -85,7 +88,7 @@ namespace HarvestPanic.Gameplay
                 if (c == null || ReferenceEquals(c, this) || c is PlayerCharacter || c.HandsRequired > tuning.NetMaxHands) continue;
                 if (c.CarryTransform.GetComponent<CarryBody>() is CarryBody cb && cb.GripCount > 0) continue;
                 Vector3 to = c.CarryTransform.position - origin; to.y = 0f;
-                if (Vector3.Angle(fwd, to) > tuning.NetArc * 0.5f || to.magnitude > tuning.NetReach + 0.5f) continue;
+                if (Vector3.Angle(fwd, to) > tuning.NetArc * 0.5f || to.magnitude > Reach + 0.5f) continue;
                 if (to.sqrMagnitude < bestD) { bestD = to.sqrMagnitude; best = c; }
             }
             if (best == null) return;

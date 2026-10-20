@@ -141,3 +141,4 @@ $RECYCLE.BIN/
 # folder elsewhere stays tracked.
 /reports/
 /test-results/
+/Logs/

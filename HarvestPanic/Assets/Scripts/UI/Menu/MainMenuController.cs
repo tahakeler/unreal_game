@@ -99,7 +99,21 @@ namespace HarvestPanic.UI
 
         public void OpenPlay() => Stack.Push(MenuScreen.Play);
 
+        /// <summary>Hosts and resumes the saved run (save-persistence; Economy loads it when the farm starts).</summary>
+        public void ContinueFarm()
+        {
+            if (!Services.TryGet(out IRunSaveService save) || !save.HasSave) { ShowMessage("No farm to continue", "Grandpa's ledger is empty. Start a new farm instead."); return; }
+            save.ContinueRequested = true;
+            StartHosting();
+        }
+
         public void HostGame()
+        {
+            if (Services.TryGet(out IRunSaveService save)) save.ContinueRequested = false;
+            StartHosting();
+        }
+
+        void StartHosting()
         {
             string name = string.IsNullOrWhiteSpace(_hostName.value) ? "Muddlebury Farm" : _hostName.value.Trim();
             BeginConnect("Opening the gate");
@@ -185,6 +199,7 @@ namespace HarvestPanic.UI
             Click("btn-host-card", () => Stack.Push(MenuScreen.Host));
             Click("btn-join-card", () => Stack.Push(MenuScreen.Join));
             Click("btn-host-go", HostGame);
+            Click("btn-host-continue", ContinueFarm);
             Click("btn-host-back", () => Stack.Pop());
             Click("btn-join-back", () => Stack.Pop());
             Click("btn-join-go", () => JoinAddress(_joinAddress.value));
@@ -250,9 +265,22 @@ namespace HarvestPanic.UI
             {
                 case MenuScreen.Title: UiFocus.FocusLater(_root.Q<Button>("btn-play")); break;
                 case MenuScreen.Play: UiFocus.FocusLater(_root.Q<Button>("btn-host-card")); break;
-                case MenuScreen.Host: UiFocus.FocusLater(_root.Q<Button>("btn-host-go")); break;
+                case MenuScreen.Host: UiFocus.FocusLater(RefreshContinue() ? _root.Q<Button>("btn-host-continue") : _root.Q<Button>("btn-host-go")); break;
                 case MenuScreen.Join: RefreshHosts(); UiFocus.FocusLater(_root.Q<Button>("btn-join-back")); break;
             }
+        }
+
+        /// <summary>Shows "Continue Farm" when a host run save exists. Returns true when shown.</summary>
+        public bool RefreshContinue()
+        {
+            bool has = Services.TryGet(out IRunSaveService save) && save.HasSave;
+            var b = _root.Q<Button>("btn-host-continue");
+            var info = _root.Q<Label>("host-continue-info");
+            if (b != null) b.style.display = has ? DisplayStyle.Flex : DisplayStyle.None;
+            if (info != null) { info.text = has ? "Saved farm: " + save.Summary : ""; info.style.display = has ? DisplayStyle.Flex : DisplayStyle.None; }
+            var go = _root.Q<Button>("btn-host-go");
+            if (go != null) go.text = has ? "New Farm" : "Open the Gate";
+            return has;
         }
 
         void RefreshHosts(bool search = true)

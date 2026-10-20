@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9aea9a603bd6046e1a721475f16a5bec, type: 3}
+  m_Name: Upgrade_MarketBell
+  m_EditorClassIdentifier: HarvestPanic.Economy::HarvestPanic.Economy.UpgradeDefinition
+  UpgradeId: Upgrade.MarketBell
+  DisplayName: Market Bell
+  Description: The buyer accepts goods in the pen twice as fast.
+  Price: 200
+  Tier: 1
+  RequiresId: 
+  Staple: 0
+  Modifier: {fileID: 11400000, guid: e14c59ec1a7774b90a75f5a1e29e1b9b, type: 2}
+  FlavorLine: Ding. Sold. Ding. Sold.

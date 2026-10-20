@@ -16,8 +16,10 @@ namespace HarvestPanic.Economy
             { DayPhase.Morning, new[] { DayPhase.Workday } },
             { DayPhase.Workday, new[] { DayPhase.Dusk, DayPhase.Payout } },
             { DayPhase.Dusk, new[] { DayPhase.Payout } },
-            { DayPhase.Payout, new[] { DayPhase.Morning, DayPhase.Sunday } },
-            { DayPhase.Sunday, new[] { DayPhase.Morning, DayPhase.Evicted } },
+            { DayPhase.Payout, new[] { DayPhase.Shop, DayPhase.Morning, DayPhase.Sunday } },
+            { DayPhase.Shop, new[] { DayPhase.Morning, DayPhase.Sunday } },
+            { DayPhase.Sunday, new[] { DayPhase.Morning, DayPhase.Evicted, DayPhase.Collateral } },
+            { DayPhase.Collateral, new[] { DayPhase.Sunday, DayPhase.Evicted } },
             { DayPhase.Evicted, new[] { DayPhase.Morning } },
         };
 
@@ -58,13 +60,22 @@ namespace HarvestPanic.Economy
         {
             if (!CanGo(to)) throw new InvalidOperationException($"Illegal day transition {Phase} -> {to}");
             var from = Phase;
-            if (to == DayPhase.Morning && from == DayPhase.Payout) { DayIndex++; DayOfWeek++; }
+            if (to == DayPhase.Morning && (from == DayPhase.Payout || from == DayPhase.Shop)) { DayIndex++; DayOfWeek++; }
             else if (to == DayPhase.Morning && from == DayPhase.Sunday) { DayIndex++; Week++; DayOfWeek = 1; }
             else if (to == DayPhase.Morning && from == DayPhase.Evicted) { DayIndex = 0; Week = 1; DayOfWeek = 1; }
             Phase = to;
             Elapsed = 0f;
             Duration = DurationOf(to) * DurationScale;
             PhaseChanged?.Invoke(from, to);
+        }
+
+        /// <summary>Save load: jumps straight to a calendar position and phase (no transition check).</summary>
+        public void Restore(DayPhase phase, int dayIndex, int week, int dayOfWeek)
+        {
+            var from = Phase;
+            Phase = phase; DayIndex = Math.Max(0, dayIndex); Week = Math.Max(1, week); DayOfWeek = Math.Max(1, dayOfWeek);
+            Elapsed = 0f; Duration = DurationOf(phase) * DurationScale;
+            PhaseChanged?.Invoke(from, phase);
         }
 
         /// <summary>True on the last working day of the week.</summary>

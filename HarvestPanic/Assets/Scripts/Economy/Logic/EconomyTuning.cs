@@ -96,6 +96,13 @@ namespace HarvestPanic.Economy
         public int DisasterScoreBonus = 15;
         public int MaxEventsPerDay = 500;
 
+        [Header("Shop / upgrades (farm-upgrades §7, week-quota §7)")]
+        [Range(0.25f, 0.75f)] public float SellBackRate = 0.5f;
+        [Range(4, 8)] public int OffersPerShop = 6;
+        [Tooltip("Sunday Collateral window when short (s).")] public float CollateralSeconds = 60f;
+        [Tooltip("0 = shop waits for the host's Done button.")] public float ShopAutoAdvanceSeconds = 0f;
+        [Tooltip("Seconds a crew proposal waits for the host before expiring.")] public float ProposalTimeoutSeconds = 20f;
+
         [Header("Landlord (landlord-events)")]
         public int MaxLandlordRules = 3;
 

@@ -116,11 +116,14 @@ namespace HarvestPanic.Tests.PlayMode.Integration
             var hudDoc = Object.FindFirstObjectByType<EconomyHud>().GetComponent<UIDocument>();
             var labels = hudDoc.rootVisualElement.Query<Label>().ToList();
             Assert.That(labels.Exists(l => l.text == "DAILY RECEIPT" && l.resolvedStyle.display != DisplayStyle.None), "receipt not on the HUD");
-            var next = hudDoc.rootVisualElement.Query<Button>().ToList().Find(b => b.text == "Next Day");
-            Assert.That(next, Is.Not.Null, "no Next Day button");
+            var next = hudDoc.rootVisualElement.Query<Button>().ToList().Find(b => b.text == "Open the Shop");
+            Assert.That(next, Is.Not.Null, "no Open the Shop button");
             using (var e = NavigationSubmitEvent.GetPooled()) { e.target = next; next.SendEvent(e); }
             yield return null;
             if (dir.Phase == DayPhase.Payout) dir.NextDay(); // fall back if the panel ignores synthetic submit in batchmode
+            yield return null;
+            Assert.AreEqual(DayPhase.Shop, dir.Phase, "shop after payout");
+            dir.NextDay(); // host: Done shopping
             yield return null;
 
             Assert.AreEqual(DayPhase.Morning, dir.Phase, "next day starts");

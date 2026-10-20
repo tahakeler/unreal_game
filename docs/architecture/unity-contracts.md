@@ -33,6 +33,7 @@ Cross-talk = register an interface in `Services` (`Services.Register<T>`, `Get<T
 | Audio | `IAudioService` (`PlayAt`, `Play2D`, `ReportVoiceActivity`), `IAudioSettingsSink` (`Get/SetBusVolume`), `AudioBus` | Audio -> any team (play), Frontend UI (volumes) |
 | Day phase (read-only) | `IDayPhaseInfo` (`PhaseName`, `PhaseRemaining`) | Economy (`EconomyDayPhaseInfo` adapter) -> Audio |
 | Impact units | `ImpactUnits` | all (see below) |
+| Run save | `IRunSaveService` (`HasSave`, `Summary`, `ContinueRequested`, `DeleteSave`) | Economy (registered at startup) -> Frontend main menu "Continue Farm" |
 | Session | `ISessionService`, `PlayerInfo` | Networking -> Frontend UI (v0, add-only) |
 | Markers | `MarkerRole`, `MarkerTag`, `LevelMarker` | World places -> owners spawn |
 | Layers | `GameLayers` | all |
@@ -84,7 +85,8 @@ All GDD impulse thresholds (bruise 400, ragdoll 900, KO 1800, plank 800, critter
 Unity collision impulse (N*s) x `ImpactUnits.ImpulseScale` (10). Always convert with
 `ImpactUnits.ToDesign(collision.impulse.magnitude)` before comparing; `IKnockable.ApplyImpulse` takes design units.
 
-New `DayParams`: `Bridge.SafeLoadMult`, `Bridge.PlankBreakMult`, `Mud.SpeedMult`.
+New `DayParams`: `Bridge.SafeLoadMult`, `Bridge.PlankBreakMult`, `Mud.SpeedMult`, `Player.StaminaMult` (Player motor), `Tools.NetReachMult` (NetTool).
+Farm upgrades: `Resources/Data/Upgrades` (`UpgradeDefinition`, Economy) each referencing a Run-duration `Upgrade` modifier in `Data/DayModifiers/Mod_Upgrade_*`.
 
 ## Integration decisions
 - `IGoods.ApplyBruise(impulse, ...)` takes DESIGN units. Callers convert raw Unity impulse with `ImpactUnits.ToDesign`. River soak (600) is already design units.

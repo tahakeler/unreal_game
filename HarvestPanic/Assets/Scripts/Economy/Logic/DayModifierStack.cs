@@ -12,8 +12,8 @@ namespace HarvestPanic.Economy
         public DayParamSpec(string name, float b, float min, float max) { Name = name; Base = b; Min = min; Max = max; }
     }
 
-    /// <summary>Day phases (day-loop). Sunday is the rent check; Evicted ends the run.</summary>
-    public enum DayPhase : byte { None, Morning, Workday, Dusk, Payout, Sunday, Evicted }
+    /// <summary>Day phases (day-loop). Shop follows Payout; Sunday is the rent check; Collateral = 60 s sell-back when short; Evicted ends the run.</summary>
+    public enum DayPhase : byte { None, Morning, Workday, Dusk, Payout, Sunday, Evicted, Shop, Collateral }
 
     /// <summary>
     /// Active Day Modifier set with the day-loop stacking rules, chaos cap queue and parameter resolution
