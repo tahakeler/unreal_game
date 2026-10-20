@@ -67,7 +67,7 @@ namespace HarvestPanic.UI
 
         static readonly Regex Link = new Regex(@"\[([^\]]+)\]\(([^)]+)\)", RegexOptions.Compiled);
         static readonly Regex MitCopyright = new Regex(@"\bMIT\s*,\s*(Copyright\s*\(c\)[^|]*)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        static readonly Regex Separator = new Regex(@"^:?-{3,}:?$", RegexOptions.Compiled);
+        static readonly Regex Separator = new Regex(@"^:?-+:?$", RegexOptions.Compiled);
 
         /// <summary>
         /// Markdown -> plain text: headings become underlined capitals, table rows become bullet lines, inline markup is
