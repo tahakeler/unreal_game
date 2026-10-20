@@ -1,0 +1,17 @@
+{
+    "name": "HarvestPanic.Integration",
+    "rootNamespace": "HarvestPanic.Integration",
+    "references": [
+        "HarvestPanic.Core", "HarvestPanic.AI", "HarvestPanic.Economy", "HarvestPanic.Customization",
+        "HarvestPanic.Networking", "Unity.Netcode.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
