@@ -32,6 +32,9 @@ Cross-talk = register an interface in `Services` (`Services.Register<T>`, `Get<T
 | Social (optional) | `ISessionSocial` (`Kick`, `SendChat`, `OnChat`) | Networking may implement; UI checks `is`/`TryGet` |
 | Audio | `IAudioService` (`PlayAt`, `Play2D`, `ReportVoiceActivity`), `IAudioSettingsSink` (`Get/SetBusVolume`), `AudioBus` | Audio -> any team (play), Frontend UI (volumes) |
 | Day phase (read-only) | `IDayPhaseInfo` (`PhaseName`, `PhaseRemaining`) | Economy (`EconomyDayPhaseInfo` adapter) -> Audio |
+| Weather | `IWeatherService` (`Current`, `ForecastText`, `Wind`, `OnWeatherChanged`), `WeatherKind` (byte, add-only) | World/Weather `WeatherDirector` -> HUD, Audio, AI (presentation only; gameplay via `Mod.Weather.Day.*`) |
+| Day modifier write | `IDayModifierWriter.ApplyModifier(mod, bypassCap)` (server) | Economy director -> Weather (and future landlord/curse sources) |
+| Day clock | `IDayClockService` (`Phase` as `DayClockPhase`, `PhaseProgress01`) | Economy director -> lighting, Audio |
 | Impact units | `ImpactUnits` | all (see below) |
 | Run save | `IRunSaveService` (`HasSave`, `Summary`, `ContinueRequested`, `DeleteSave`) | Economy (registered at startup) -> Frontend main menu "Continue Farm" |
 | Session | `ISessionService`, `PlayerInfo` | Networking -> Frontend UI (v0, add-only) |
@@ -108,3 +111,8 @@ registered as `IAudioService` and `IAudioSettingsSink`. Everything is client-loc
 - **Day phase**: `IDayPhaseInfo` is registered by Economy's add-only `EconomyDayPhaseInfo` (reads `EconomyDirector.Instance`).
 - **Voice ducking**: proximity voice (when it exists) calls `IAudioService.ReportVoiceActivity`; until then Shout/Voice noises
   within 15 m of the listener duck for 0.6 s.
+## Weather (feature/weather)
+- The WeatherDirector (prefab in `Resources/NetworkPrefabs/Weather.asset`, auto-spawned by `WeatherBootstrapper` on the server when a MarketPen/River marker exists) is the single source of truth for weather. It rolls `WeatherDeck.Roll(seed, dayIndex)` at Morning (seed replicated; `-hpWeatherSeed`, `-hpWeather <Kind>` for dev) and applies `Mod.Weather.Day.<Kind>` (ReplaceGroup `Group.Weather`, bypasses the chaos cap so sky and rules never disagree).
+- Economy's old `DrawWeather` returns early whenever an `IWeatherService` is registered (lead-approved minimal edit). The legacy `Mod.Weather.Fog/Storm/Heatwave` assets are no longer drawn while weather runs.
+- New DayParams: `River.CurrentMult` (RiverVolume sweep speed), `Weather.GroundSpeedMult` (global movement source), `Weather.SoakSeconds` (outdoor exposure before `IGoodsSoakable.ApplySoak(PlayerIds.Nature)`), `Weather.WindSpeed`, `Weather.FogDistance`.
+- Rebuild data: `-executeMethod HarvestPanic.Weather.Editor.WeatherAssetBuilder.Build`.

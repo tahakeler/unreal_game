@@ -15,7 +15,7 @@ namespace HarvestPanic.Economy
     /// Offline (not spawned and no listening NetworkManager) it runs locally for dev scenes and tests.
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed partial class EconomyDirector : NetworkBehaviour, IEconomyService, IDayModifierService
+    public sealed partial class EconomyDirector : NetworkBehaviour, IEconomyService, IDayModifierService, IDayModifierWriter, IDayClockService
     {
         /// <summary>The live director (one per session).</summary>
         public static EconomyDirector Instance { get; private set; }
@@ -113,12 +113,16 @@ namespace HarvestPanic.Economy
             Instance = this;
             Services.Register<IEconomyService>(this);
             Services.Register<IDayModifierService>(this);
+            Services.Register<IDayModifierWriter>(this);
+            Services.Register<IDayClockService>(this);
         }
 
         void OnDisable()
         {
             Services.Unregister<IEconomyService>(this);
             Services.Unregister<IDayModifierService>(this);
+            Services.Unregister<IDayModifierWriter>(this);
+            Services.Unregister<IDayClockService>(this);
             if (Instance == this) Instance = null;
         }
 
@@ -277,6 +281,8 @@ namespace HarvestPanic.Economy
 
         void DrawWeather()
         {
+            // weather-twists: the World/Weather IWeatherService owns the daily card and applies it via IDayModifierWriter.
+            if (Services.TryGet(out IWeatherService _)) return;
             if (_rng.NextDouble() >= Tuning.WeatherChancePerDay) return;
             var pool = new List<DayModifier>();
             foreach (var m in Content.DayModifiers.All) if (m.Category == DayModifierCategory.Weather) pool.Add(m);
@@ -542,6 +548,10 @@ namespace HarvestPanic.Economy
             if (ok && (_clock.Phase == DayPhase.Workday || _clock.Phase == DayPhase.Dusk)) _clock.Rescale(BaseDuration(_clock.Phase));
             return ok;
         }
+
+        DayClockPhase IDayClockService.Phase => (DayClockPhase)(byte)Phase;
+        float IDayClockService.PhaseProgress01 => PhaseDuration > 0f ? Mathf.Clamp01(1f - PhaseRemaining / PhaseDuration) : 0f;
+        bool IDayModifierWriter.ApplyModifier(DayModifier mod, bool bypassCap) => ApplyModifier(mod, bypassCap);
 
         // ---------------- replication helpers ----------------
 

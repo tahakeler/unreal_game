@@ -96,7 +96,8 @@ namespace HarvestPanic.World
             if (agent != null) agent.enabled = false;
 
             var pts = BuildPath(body.position);
-            float duration = Random.Range(sweepSeconds.x, sweepSeconds.y);
+            float current = Services.TryGet(out IDayModifierService day) ? Mathf.Max(0.25f, day.Resolve(DayParams.RiverCurrentMult, 1f)) : 1f;
+            float duration = Random.Range(sweepSeconds.x, sweepSeconds.y) / current; // weather: rain/storm raise the river
             float total = 0f;
             for (int i = 1; i < pts.Count; i++) total += Vector3.Distance(pts[i - 1], pts[i]);
             float t = 0f;
