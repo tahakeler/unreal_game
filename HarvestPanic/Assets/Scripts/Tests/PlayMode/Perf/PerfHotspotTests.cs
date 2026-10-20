@@ -34,6 +34,9 @@ namespace HarvestPanic.Tests.PlayMode.Perf
         public IEnumerator Muddlebury_Hotspots()
         {
 #if UNITY_EDITOR
+            // The profiler records no frames without a graphics device (-nographics CI runs); measure with graphics on.
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+            { Assert.Ignore("Needs a graphics device (run without -nographics)"); yield break; }
             LogAssert.ignoreFailingMessages = true;
             QualitySettings.vSyncCount = 0; Application.targetFrameRate = -1;
             yield return PerfHarness.BootMuddlebury();
