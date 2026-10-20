@@ -105,6 +105,26 @@ namespace HarvestPanic.Economy
 
         [Header("Landlord (landlord-events)")]
         public int MaxLandlordRules = 3;
+        [Tooltip("Mid-week visits in W2-3 / W4+ (0 in W1).")] public int VisitsPerWeekEarly = 1, VisitsPerWeekLate = 2;
+        public int InspectionFinePerCheck = 25;
+        [Tooltip("+20%/week from W2.")] public float InspectionFineWeeklyGrowth = 0.2f;
+        [Tooltip("Max inspection fines per week.")] public int InspectionCap = 150;
+        public int InspectionChecksPicked = 3;
+        [Tooltip("Workday fraction at which the inspector checks the farm.")] [Range(0.1f, 0.9f)] public float InspectionAtWorkday01 = 0.5f;
+        [Tooltip("Livestock farther than this from the barn respawn marker counts as loose (m).")] public float LooseLivestockRadius = 18f;
+        public int FarmWalkFinePerHit = 50, FarmWalkMaxHits = 3;
+        [Tooltip("Visit deferred past Friday by the chaos cap.")] public int MissedAppointmentFee = 50;
+
+        [Header("Landlord Sunday walk-in (presentation)")]
+        public float VisitWalkSpeed = 2.4f;
+        [Tooltip("Spawn distance from the farmhouse door (m).")] public float VisitWalkDistance = 9f;
+        public float VisitGreetSeconds = 2.2f, VisitCountSeconds = 2.4f, VisitVerdictSeconds = 3.5f;
+
+        [Header("Respawn fee player scaling (GDD ch.9 open issue 5)")]
+        [Tooltip("Fee × S_p^exp; 0.5 → solo 0.67×, 2p 0.81×, 3p 0.92×, 4p 1×. 0 disables.")] [Range(0f, 1f)] public float RespawnFeePlayerExponent = 0.5f;
+
+        [Header("Awards")]
+        [Range(0, 5)] public int DailyAwardsMax = 3;
 
         static EconomyTuning _cached;
 

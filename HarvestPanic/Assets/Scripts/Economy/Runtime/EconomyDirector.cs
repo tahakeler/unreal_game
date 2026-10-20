@@ -105,6 +105,7 @@ namespace HarvestPanic.Economy
             _wallet.Applied += t => { if (t.Type != WalletTxnType.Quota) _weekIncome += t.Amount; };
             _ledger.Disaster += e => RaiseDisaster(e);
             _mods.Changed += () => { PushMods(); OnModifiersChanged?.Invoke(); };
+            OnPhaseChanged += LandlordPhaseChanged;
             ShopAwake();
         }
 
@@ -182,6 +183,7 @@ namespace HarvestPanic.Economy
             _mods.Tick(dt);
             if (_clock.Phase == DayPhase.Workday || _clock.Phase == DayPhase.Dusk) _dayTime += dt;
             ShopTick(dt);
+            LandlordTick();
             if (IsSpawned && (_remainingPushTimer -= dt) <= 0f) { _remainingPushTimer = 0.5f; _nvRemaining.Value = _clock.Remaining; }
         }
 
@@ -201,6 +203,7 @@ namespace HarvestPanic.Economy
             _weekIncome = 0;
             ShopResetRun();
             SampleWeek();
+            LandlordPlanWeek();
             PushWallet();
             Go(DayPhase.Morning);
         }
@@ -267,6 +270,7 @@ namespace HarvestPanic.Economy
             _dayTime = 0f; _dayCosts = 0; _orderBonusToday = 0;
             _ledger.StartDay();
             foreach (var q in _mods.TakeQueued()) _mods.Apply(q, _clock.Week);
+            LandlordMorning();
             DrawWeather();
             var available = new List<string>();
             foreach (var m in LevelMarker.FindAll(MarkerRole.Goods))
@@ -293,8 +297,8 @@ namespace HarvestPanic.Economy
         {
             var pool = new List<DayModifier>();
             foreach (var m in Content.DayModifiers.All)
-                if (m.Category == DayModifierCategory.Landlord && m.Duration == DayModifierDuration.Run && !_landlordRules.Contains(m)) pool.Add(m);
-            if (pool.Count == 0) return;
+                if (LandlordParams.IsRule(m) && !_landlordRules.Contains(m)) pool.Add(m);
+            if (pool.Count == 0 || _clock.Week < 2) return;
             var pick = pool[_rng.Next(pool.Count)];
             if (_landlordRules.Count >= Tuning.MaxLandlordRules) { _mods.Remove(_landlordRules[0].ModifierId); _landlordRules.RemoveAt(0); }
             _landlordRules.Add(pick);
@@ -338,6 +342,7 @@ namespace HarvestPanic.Economy
 
         void EnterPayout()
         {
+            LandlordPayoutFees();
             _mods.ExpireAt(DayModifierDuration.Day);
             if (_market.OrderComplete)
             {
@@ -356,6 +361,7 @@ namespace HarvestPanic.Economy
             var head = _ledger.Headline();
             r.Headline = head != null ? NameOf(head.Event.PrimaryInstigator, head.Event.CauseTag) + ": " + LedgerText.Line(head.Event.Verb, LedgerText.ItemName(head.Event.ItemId, head.Event.ItemTag), head.Count) : LedgerText.NoHeadline;
             ReceiptBuilder.AddBlame(r, _ledger.Day, id => NameOf(id, null), Tuning);
+            r.Awards.AddRange(AwardPicker.Daily(_ledger.Day, id => NameOf(id, null), _players, Tuning.DailyAwardsMax));
             PublishReceipt(r);
         }
 
@@ -379,6 +385,7 @@ namespace HarvestPanic.Economy
                     Go(DayPhase.Morning);  // advances week
                     SampleWeek();
                     DrawLandlordRule();
+                    LandlordPlanWeek();
                     PushWallet();
                     SaveRun(RunResumePoint.WeekStart);
                     break;
@@ -402,6 +409,7 @@ namespace HarvestPanic.Economy
 
         void ResolveSunday()
         {
+            LandlordSundayFees();
             int due = _quota + _wallet.IouThisWeek;
             bool paid = _wallet.Balance >= due;
             var r = new ReceiptData
@@ -410,6 +418,7 @@ namespace HarvestPanic.Economy
             };
             ulong mvd = _ledger.MostValuableDisaster();
             r.Mvd = mvd == PlayerIds.None ? "The Weather" : NameOf(mvd, null);
+            r.Awards.AddRange(AwardPicker.Weekly(_ledger.Week, id => NameOf(id, null), _players));
             if (paid)
             {
                 AddWalletTxn(new WalletTxn { Type = WalletTxnType.Quota, Amount = -due, PlayerId = PlayerIds.None });
@@ -452,7 +461,7 @@ namespace HarvestPanic.Economy
         public int ChargeRespawnFee(ulong playerId, BlameVerb cause)
         {
             if (!IsEconomyAuthority) return 0;
-            int fee = EconomyMath.RespawnFee(_clock.Week, _mods.Resolve(DayParams.EconomyRespawnFeeMult, 1f, _clock.Phase), Tuning);
+            int fee = EconomyMath.RespawnFee(_clock.Week, _mods.Resolve(DayParams.EconomyRespawnFeeMult, 1f, _clock.Phase), Tuning, _players);
             int before = _wallet.Balance, iouBefore = _wallet.IouThisWeek;
             AddWalletTxn(new WalletTxn { Type = WalletTxnType.RespawnFee, Amount = -fee, PlayerId = playerId });
             int charged = before - _wallet.Balance + (_wallet.IouThisWeek - iouBefore);
@@ -523,6 +532,7 @@ namespace HarvestPanic.Economy
             float demand = _market.NextDemand(d.GoodsId, _mods.Resolve(DayModifierStack.Params.DemandMult, 1f, phase));
             float order = _market.WouldFillOrder(d.GoodsId) ? Tuning.OrderMultiplier : 1f;
             float mult = _mods.Resolve(DayModifierStack.Params.GoodsValueMult, 1f, phase);
+            if (d.Category == GoodsCategory.Livestock) mult *= _mods.Resolve(LandlordParams.HatlessLivestockValueMult, 1f, phase); // Sunday Best (no hats yet)
             if (phase == DayPhase.Dusk) mult *= _mods.Resolve(DayModifierStack.Params.DuskBonus, Tuning.DuskBonus, phase);
             int v = EconomyMath.SaleValue(d.BaseValue, d.Category, item.BruiseState, item.Freshness, demand, order, mult, Tuning);
             if (!forSale) return v;

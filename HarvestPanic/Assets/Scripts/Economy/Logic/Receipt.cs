@@ -37,6 +37,7 @@ namespace HarvestPanic.Economy
         public string Headline;
         public List<ReceiptBlock> Blocks = new List<ReceiptBlock>();
         public List<ReceiptLine> Money = new List<ReceiptLine>();
+        public List<ReceiptAward> Awards = new List<ReceiptAward>();
         // Sunday
         public bool IsSunday, Paid;
         public int Due, Carryover;

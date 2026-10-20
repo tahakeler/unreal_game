@@ -97,3 +97,15 @@
 .hp-shop-proposal { background-color: #F5C542; border-color: #2B2118; border-width: 2px; border-radius: 6px; padding: 6px 10px; margin-bottom: 6px; }
 .hp-shop-bark { font-size: 21px; color: #5B2A6E; -unity-text-align: middle-center; -unity-font-style: italic; min-height: 26px; white-space: normal; }
 .hp-toast-shop { background-color: #5B2A6E; color: #FFF4D6; }
+
+/* ---- Landlord + weather polish (landlord-events, weather-twists) ---- */
+.hp-forecast { font-size: 20px; color: #2B2118; margin-top: 6px; white-space: normal; background-color: #E7F0F8; border-color: #3A7BD5; border-left-width: 4px; padding: 2px 6px; }
+.hp-weather { position: absolute; top: -18px; right: -18px; width: 64px; height: 64px; border-radius: 32px; background-color: #F6EBD3; border-color: #2B2118; border-width: 3px; }
+.hp-rules { position: absolute; left: 18px; top: 200px; width: 300px; }
+.hp-rule-card { background-color: #FFF8E6; border-color: #5B2A6E; border-width: 2px; border-left-width: 6px; border-radius: 3px; padding: 4px 8px; margin-bottom: 8px; rotate: -1deg; }
+.hp-rule-stamp { font-size: 18px; color: #E5483B; -unity-text-align: middle-left; }
+.hp-rule-text { font-size: 18px; color: #2B2118; white-space: normal; }
+.hp-toast-landlord { background-color: #5B2A6E; color: #FFF4D6; }
+.hp-award { flex-direction: column; margin-top: 4px; padding: 2px 6px; background-color: #FFF1B8; border-radius: 4px; }
+.hp-award-title { font-size: 22px; color: #5B2A6E; }
+.hp-award-who { font-size: 18px; color: #2B2118; white-space: normal; }
