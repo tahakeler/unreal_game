@@ -122,6 +122,49 @@ namespace HarvestPanic.Tests.EditMode
             Assert.That(BruiseKind.Soaked, Is.Not.EqualTo(BruiseKind.Impact));
         }
 
+        sealed class Social : ISessionSocial
+        {
+            public ulong Kicked = PlayerIds.None;
+            public event Action<ulong, string> OnChat;
+            public void Kick(ulong clientId) => Kicked = clientId;
+            public void SendChat(string text) => OnChat?.Invoke(0, text);
+        }
+
+        [Test]
+        public void InputModal_CountsDistinctOwnersAndRaisesChanged()
+        {
+            InputModal.Clear();
+            int changes = 0;
+            Action h = () => changes++;
+            InputModal.Changed += h;
+            try
+            {
+                var pause = new object(); var wardrobe = new object();
+                Assert.That(InputModal.IsBlocking, Is.False);
+                InputModal.Push(pause); InputModal.Push(pause); InputModal.Push(wardrobe);
+                Assert.That(InputModal.Count, Is.EqualTo(2));
+                Assert.That(changes, Is.EqualTo(2));
+                InputModal.Pop(pause);
+                Assert.That(InputModal.IsBlocking, Is.True);
+                InputModal.Pop(new object());
+                InputModal.Pop(wardrobe);
+                Assert.That(InputModal.IsBlocking, Is.False);
+                Assert.That(changes, Is.EqualTo(4));
+                Assert.Throws<ArgumentNullException>(() => InputModal.Push(null));
+            }
+            finally { InputModal.Changed -= h; InputModal.Clear(); }
+        }
+
+        [Test]
+        public void SessionSocial_StubRoutesKickAndChat()
+        {
+            var s = new Social();
+            string got = null; ulong from = 99;
+            s.OnChat += (id, txt) => { from = id; got = txt; };
+            s.SendChat("moo"); s.Kick(2);
+            Assert.That((from, got, s.Kicked), Is.EqualTo((0UL, "moo", 2UL)));
+        }
+
         [TearDown] public void TearDown() => Services.Clear();
 
         [Test]
