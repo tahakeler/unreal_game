@@ -103,6 +103,20 @@ namespace HarvestPanic.Tests.EditMode.Weather
         }
 
         [Test]
+        public void Night_IsMoonlitDark_AndReachedEarlyInDusk()
+        {
+            var noon = WeatherLook.ForPhase(DayClockPhase.Workday, 0.5f);
+            var lateDusk = WeatherLook.ForPhase(DayClockPhase.Dusk, 0.6f);
+            Assert.AreEqual(1f, WeatherLook.NightBlend(0.55f), 1e-4f);
+            Assert.AreEqual(0f, WeatherLook.NightBlend(0f), 1e-4f);
+            Assert.Less(lateDusk.SunIntensity, 0.2f, "moonlight only");
+            Assert.Less(lateDusk.PostExposure, -0.5f);
+            Assert.Less(lateDusk.Ambient.maxColorComponent, 0.3f, "dark ambient so lanterns matter");
+            Assert.Greater(lateDusk.SunColor.b, lateDusk.SunColor.r, "moonlight is cool");
+            Assert.Less(lateDusk.FogEnd, noon.FogEnd);
+        }
+
+        [Test]
         public void Parse_And_Forecast()
         {
             Assert.IsTrue(WeatherDeck.TryParse("rain", out var k)); Assert.AreEqual(WeatherKind.Rain, k);

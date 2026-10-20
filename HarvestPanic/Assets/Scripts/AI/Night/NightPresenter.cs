@@ -27,7 +27,8 @@ namespace HarvestPanic.AI.Night
                 {
                     var go = new GameObject("NightHandLantern");
                     _hand = go.AddComponent<Light>();
-                    _hand.type = LightType.Point; _hand.range = 11f; _hand.intensity = 2.2f; _hand.color = new Color(1f, 0.78f, 0.45f); _hand.shadows = LightShadows.None;
+                    _hand.type = LightType.Point; _hand.range = 14f; _hand.intensity = 4.5f; // polish-2: darker night, lantern carries the scene
+                     _hand.color = new Color(1f, 0.78f, 0.45f); _hand.shadows = LightShadows.None;
                 }
                 _hand.transform.SetParent(cam.transform, false);
                 _hand.transform.localPosition = new Vector3(0.35f, -0.35f, 0.4f);

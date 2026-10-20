@@ -34,7 +34,10 @@ namespace HarvestPanic.Weather
             var noon = new WeatherLook { SunColor = Hex("FFF3DC"), SunIntensity = 2.0f, SunPitch = 52f, SkyTint = Hex("B3CCE3"), SkyExposure = 1.2f, Ambient = Color.white, FogColor = Hex("E9D9BC"), FogStart = 140f, FogEnd = 700f, Saturation = 8f, PostExposure = 0.1f };
             var afternoon = noon; afternoon.SunPitch = 32f; afternoon.SunColor = Hex("FFE9C4");
             var dusk = new WeatherLook { SunColor = Hex("FF9A6A"), SunIntensity = 1.0f, SunPitch = 8f, SkyTint = Hex("8A7AB8"), SkyExposure = 0.85f, Ambient = Hex("B9A8D0"), FogColor = Hex("E6A487"), FogStart = 60f, FogEnd = 420f, Saturation = 12f, PostExposure = -0.05f };
-            var night = new WeatherLook { SunColor = Hex("9EC4FF"), SunIntensity = 0.35f, SunPitch = 30f, SkyTint = Hex("1E3A4A"), SkyExposure = 0.35f, Ambient = Hex("4A6A80"), FogColor = Hex("1E2E3A"), FogStart = 30f, FogEnd = 260f, Saturation = -15f, PostExposure = -0.3f };
+            // Polish-2: moonlit night (was too bright to need the lantern): cold low key light, near-black ambient and fog,
+            // strong negative exposure so the hand lantern and lantern posts carry the scene. Mr. Stitches stays readable as a
+            // moonlit silhouette against the lighter sky (SkyExposure above the ground's effective brightness).
+            var night = new WeatherLook { SunColor = Hex("8FAEE6"), SunIntensity = 0.16f, SunPitch = 34f, SkyTint = Hex("142638"), SkyExposure = 0.28f, Ambient = Hex("24324A"), FogColor = Hex("0B1420"), FogStart = 14f, FogEnd = 150f, Saturation = -28f, PostExposure = -0.75f };
             float p = Mathf.Clamp01(progress01);
             switch (phase)
             {
@@ -43,13 +46,19 @@ namespace HarvestPanic.Weather
                     if (p < 0.5f) return Lerp(Lerp(morning, noon, 0.2f), noon, p / 0.5f);
                     if (p < 0.8f) return Lerp(noon, afternoon, (p - 0.5f) / 0.3f);
                     return Lerp(afternoon, dusk, (p - 0.8f) / 0.2f); // last 20% sinks to dusk (art bible)
-                case DayClockPhase.Dusk: return Lerp(dusk, night, p * 0.6f);
+                case DayClockPhase.Dusk: return Lerp(dusk, night, NightBlend(p));
                 case DayClockPhase.Payout:
                 case DayClockPhase.Sunday:
                 case DayClockPhase.Evicted: return Lerp(dusk, night, 0.4f);
                 default: return afternoon; // no clock: Muddlebury's golden afternoon
             }
         }
+
+        /// <summary>
+        /// Dusk -> night blend weight for Dusk progress (polish-2): smoothstep reaching full night at 55% of Dusk
+        /// (old curve stopped at 60% night), so most of the night phase is properly dark.
+        /// </summary>
+        public static float NightBlend(float progress01) => Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(progress01) / 0.55f);
 
         /// <summary>Applies the weather on top of a phase look.</summary>
         public static WeatherLook WithWeather(WeatherLook l, WeatherKind k, float fogDistance)

@@ -56,7 +56,8 @@ namespace HarvestPanic.Audio
                 r._targets.Add(id);
             }
             if (r._targets.Count == 0) return 0;
-            var target = r.RpcTarget.Group(r._targets, RpcTargetUse.Temp);
+            ulong[] ids = r._targets.ToArray();
+            var target = r.RpcTarget.Group(ids, RpcTargetUse.Temp);
             var loud = (byte)Mathf.Clamp(Mathf.RoundToInt(e.Loudness * 255f), 0, 255);
             if (foot) r.NoiseUnreliableRpc((byte)e.Source, loud, e.Radius, e.Location, e.InstigatorId, e.BlamedPlayerId, (int)e.Tags, target);
             else r.NoiseRpc((byte)e.Source, loud, e.Radius, e.Location, e.InstigatorId, e.BlamedPlayerId, (int)e.Tags, target);
