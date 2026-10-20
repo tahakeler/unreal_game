@@ -73,6 +73,43 @@ namespace HarvestPanic.Gameplay.Editor
             Debug.Log("[PlayerAssetBuilder] Done.");
         }
 
+        /// <summary>Rebuilds only the feed bucket + net prefabs (same paths/GUIDs; Player prefab and scene untouched).</summary>
+        [MenuItem("Harvest Panic/Player/Rebuild Tool Prefabs")]
+        public static void BuildToolPrefabs()
+        {
+            EnsureFolder(ToolsDir); EnsureFolder(MatDir);
+            var tt = LoadOrCreate<ToolTuning>(ToolsDir + "/ToolTuning.asset");
+            BuildFeedBucket(tt);
+            BuildNet(tt);
+            AssetDatabase.SaveAssets();
+            Debug.Log("[PlayerAssetBuilder] Tool prefabs rebuilt.");
+        }
+
+        /// <summary>Owner's Tripo3D mesh (real size; bucket base-centre pivot, net grip-end pivot along +Z), or null.</summary>
+        static GameObject TripoModel(string name, Transform parent, Vector3 localPos)
+        {
+            var src = AssetDatabase.LoadAssetAtPath<GameObject>($"Assets/ThirdParty/Tripo/{name}/{name}.fbx");
+            if (src == null) return null;
+            var go = (GameObject)PrefabUtility.InstantiatePrefab(src);
+            go.name = "Tripo_" + name;
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = localPos;
+            foreach (var t in go.GetComponentsInChildren<Transform>(true)) t.gameObject.layer = parent.gameObject.layer;
+            return go;
+        }
+
+        static Bounds LocalBounds(Transform space, GameObject go)
+        {
+            bool any = false; var b = new Bounds();
+            foreach (var mf in go.GetComponentsInChildren<MeshFilter>())
+                foreach (var v in mf.sharedMesh.vertices)
+                {
+                    var p = space.InverseTransformPoint(mf.transform.TransformPoint(v));
+                    if (!any) { b = new Bounds(p, Vector3.zero); any = true; } else b.Encapsulate(p);
+                }
+            return b;
+        }
+
         // ---- Player ------------------------------------------------------------------------------------------
 
         static GameObject BuildPlayer(PlayerTuning pt, CarryTuning ct)
@@ -218,6 +255,16 @@ namespace HarvestPanic.Gameplay.Editor
         {
             var root = NetProp("FeedBucket", out var v);
             var box = root.AddComponent<BoxCollider>(); box.size = new Vector3(0.32f, 0.36f, 0.32f); box.center = new Vector3(0f, 0.18f, 0f);
+            var tripo = TripoModel("FeedBucket", v, Vector3.zero);
+            if (tripo != null)
+            {
+                var b = LocalBounds(root.transform, tripo);
+                box.size = b.size; box.center = b.center;
+                var tool0 = root.AddComponent<FeedBucketTool>();
+                tool0.Configure(1, 3f, true);
+                Set(tool0, "tuning", tt);
+                return Save(root, ToolsDir + "/FeedBucket.prefab");
+            }
             var metal = Mat("BucketMetal", new Color(0.62f, 0.66f, 0.7f), 0.6f, 0.5f);
             var feed = Mat("Feed", new Color(0.93f, 0.76f, 0.25f));
             Prim(PrimitiveType.Cylinder, "Pail", v, new Vector3(0f, 0.16f, 0f), new Vector3(0.3f, 0.16f, 0.3f), metal);
@@ -235,6 +282,19 @@ namespace HarvestPanic.Gameplay.Editor
         {
             var root = NetProp("Net", out var v);
             var box = root.AddComponent<BoxCollider>(); box.size = new Vector3(0.5f, 0.5f, 1.5f); box.center = new Vector3(0f, 0f, 0.45f);
+            // Grip end sits 0.25 m behind the hold point (same reach as the placeholder pole), hoop forward on +Z.
+            var tripo = TripoModel("Net", v, new Vector3(0f, 0f, -0.25f));
+            if (tripo != null)
+            {
+                var b = LocalBounds(root.transform, tripo);
+                box.size = b.size; box.center = b.center;
+                // Bag point: hoop/pocket centre (front 30% of the length, mid-height of the pocket).
+                var bp = Child(root.transform, "BagPoint", new Vector3(b.center.x, b.center.y, b.max.z - b.size.z * 0.2f));
+                var tool0 = root.AddComponent<NetTool>();
+                tool0.Configure(1, 2f, true);
+                Set(tool0, "tuning", tt); Set(tool0, "bagPoint", bp);
+                return Save(root, ToolsDir + "/Net.prefab");
+            }
             var wood = Mat("NetPole", new Color(0.55f, 0.4f, 0.24f));
             var rope = Mat("NetRope", new Color(0.92f, 0.9f, 0.82f));
             var pole = Prim(PrimitiveType.Cylinder, "Pole", v, new Vector3(0f, 0f, 0.25f), new Vector3(0.04f, 0.55f, 0.04f), wood);
