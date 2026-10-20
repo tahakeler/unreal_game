@@ -1,0 +1,27 @@
+{
+    "name": "HarvestPanic.Tests.EditMode.Night",
+    "rootNamespace": "HarvestPanic.Tests.EditMode.Night",
+    "references": [
+        "HarvestPanic.Core",
+        "HarvestPanic.AI.Night",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "Unity.AI.Navigation",
+        "Unity.Netcode.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
