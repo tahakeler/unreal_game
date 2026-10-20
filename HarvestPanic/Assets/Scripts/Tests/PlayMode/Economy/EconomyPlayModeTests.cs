@@ -122,10 +122,10 @@ namespace HarvestPanic.Tests.PlayMode.Economy
             var director = Object.Instantiate(EconomyBootstrapper.FindDirectorPrefab()).GetComponent<EconomyDirector>();
             director.NetworkObject.Spawn(true);
             yield return WaitFor(() => director.Phase == DayPhase.Morning, 2f, "Morning");
-            director.AddWalletTxn(new WalletTxn { Type = WalletTxnType.Fine, Amount = -280 });
-            Assert.AreEqual(-180, director.Balance);
-            int charged = director.ChargeRespawnFee(0, BlameVerb.Drowned);
-            Assert.AreEqual(25, charged);
+            director.AddWalletTxn(new WalletTxn { Type = WalletTxnType.Fine, Amount = -290 });
+            Assert.AreEqual(-190, director.Balance);
+            int charged = director.ChargeRespawnFee(0, BlameVerb.Drowned); // solo host: $25 × 0.45^0.5 → $15
+            Assert.AreEqual(15, charged);
             Assert.AreEqual(-200, director.Balance);
             Assert.AreEqual(5, director.Iou);
             Assert.AreEqual(1, director.Ledger.Day.Count);

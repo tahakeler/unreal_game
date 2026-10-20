@@ -1658,6 +1658,8 @@ Fee(w) = round_to_5( 25 × (1 + 0.25 × (w − 1)) × Economy.RespawnFeeMult )
 
 **Worked example.** Week 3 under Paperwork: `25 × 1.5 × 1.2 = 45 → $45`.
 
+**Crew-size scaling (resolves Ch. 9 open issue 5, built).** `Fee(w, p) = round_to_5( 25 × (1 + 0.25(w − 1)) × RespawnFeeMult × S_p^0.5 )`, exponent tunable (`EconomyTuning.RespawnFeePlayerExponent`, 0 disables). W1: 4p $25 · 3p $25 · 2p $20 · 1p $15 (solo death ≈ 2.8% of $540 rent vs 2.1% at 4p). W3 1p: `40 × 0.671 = 26.8 → $25`. 4p values in the table above are unchanged.
+
 **Status in build:** Built.
 
 ---
@@ -1831,7 +1833,7 @@ The per-player target rises for small crews because fewer hands means more trips
 2. Per-player death surcharge on top of the weekly fee: the owner to decide.
 3. Livestock values were halved during consistency (pig $60, cow $150). Re-check the $400/day model with real order mixes.
 4. Upgrade price range: the economy doc says $25–1,100 but the catalogue's cheapest is $20 (Burlap Sack). Use $20–1,100.
-5. Solo fees are not scaled: a $25 death is 4.6% of the solo W1 rent vs 2.1% for 4p. **Proposed:** scale the fee by `S_p^0.5`.
+5. Solo fees are not scaled: a $25 death is 4.6% of the solo W1 rent vs 2.1% for 4p. **Resolved (built):** fee × `S_p^0.5` (§9.6).
 
 **Status in build:** n/a.
 

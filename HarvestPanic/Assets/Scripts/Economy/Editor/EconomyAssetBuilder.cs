@@ -198,6 +198,16 @@ namespace HarvestPanic.Economy.Editor
                     Card = "Quiet Hours: voices carry further. Whisper.", Fx = new[] { Fx(DayParams.NoiseVoiceRadiusMult, DayParamOp.Mul, 1.25f) }, Grants = new string[0] },
                 new ModSpec { Id = "Mod.Landlord.NoRunningOnBridge", Asset = "Landlord_NoRunningOnBridge", Cat = DayModifierCategory.Landlord, W = DayModifierWeight.Minor, Rule = DayModifierStackRule.Unique, Dur = DayModifierDuration.Run,
                     Card = "No Running on the Bridge: planks break 30% easier.", Fx = new[] { Fx("Bridge.PlankBreakMult", DayParamOp.Mul, 1.3f) }, Grants = new string[0] },
+                new ModSpec { Id = "Mod.Landlord.MuddyBoots", Asset = "Landlord_MuddyBoots", Cat = DayModifierCategory.Landlord, W = DayModifierWeight.Minor, Rule = DayModifierStackRule.Unique, Dur = DayModifierDuration.Run,
+                    Card = "Muddy Boots Are a Violation: inspections fine $25 per muddy farmer.", Fx = new DayParamEffect[0], Grants = new[] { LandlordParams.TagMuddyBootsRule } },
+                new ModSpec { Id = "Mod.Landlord.SundayBest", Asset = "Landlord_SundayBest", Cat = DayModifierCategory.Landlord, W = DayModifierWeight.Minor, Rule = DayModifierStackRule.Unique, Dur = DayModifierDuration.Run,
+                    Card = "Sunday Best: livestock sold without a hat is worth 10% less. \"Standards.\"", Fx = new[] { Fx(LandlordParams.HatlessLivestockValueMult, DayParamOp.Mul, 0.9f) }, Grants = new string[0] },
+                new ModSpec { Id = "Mod.Landlord.OnePumpkinPerFamily", Asset = "Landlord_OnePerFamily", Cat = DayModifierCategory.Landlord, W = DayModifierWeight.Minor, Rule = DayModifierStackRule.Unique, Dur = DayModifierDuration.Run,
+                    Card = "One Pumpkin Per Family: one of each item per order, but one more line.", Fx = new[] { Fx("Order.LineCount", DayParamOp.Add, 1f) }, Grants = new[] { LandlordParams.TagOnePerFamily } },
+                new ModSpec { Id = "Mod.Landlord.Visit.Inspection", Asset = "Landlord_Visit_Inspection", Cat = DayModifierCategory.Landlord, W = DayModifierWeight.Major, Rule = DayModifierStackRule.Unique, Dur = DayModifierDuration.Day,
+                    Card = "SURPRISE INSPECTION today. Wipe your boots. Pen the pigs.", Fx = new DayParamEffect[0], Grants = new[] { LandlordParams.TagInspection, LandlordParams.TagVisiting } },
+                new ModSpec { Id = "Mod.Landlord.Visit.HelpfulVisit", Asset = "Landlord_Visit_HelpfulVisit", Cat = DayModifierCategory.Landlord, W = DayModifierWeight.Major, Rule = DayModifierStackRule.Unique, Dur = DayModifierDuration.Day,
+                    Card = "HELPFUL VISIT: the Landlord fixed the bridge. $100 service fee at payout.", Fx = new[] { Fx("Bridge.PlankBreakMult", DayParamOp.Mul, 0.5f), Fx(LandlordParams.ServiceFee, DayParamOp.Add, 100f) }, Grants = new[] { LandlordParams.TagVisiting } },
             };
             foreach (var s in specs)
             {

@@ -45,6 +45,8 @@ namespace HarvestPanic.Economy
             { Params.IncomeTaxRate, new DayParamSpec(Params.IncomeTaxRate, 0, 0, 0.9f) },
             { Params.OrderLineCount, new DayParamSpec(Params.OrderLineCount, 3, 2, 4) },
             { DayParams.NoiseEnvMult, new DayParamSpec(DayParams.NoiseEnvMult, 1, 0.2f, 3) },
+            { LandlordParams.HatlessLivestockValueMult, new DayParamSpec(LandlordParams.HatlessLivestockValueMult, 1, 0.25f, 2) },
+            { LandlordParams.ServiceFee, new DayParamSpec(LandlordParams.ServiceFee, 0, 0, 1000) },
             { DayParams.NoiseVoiceRadiusMult, new DayParamSpec(DayParams.NoiseVoiceRadiusMult, 1, 0.2f, 3) },
         };
 
@@ -113,6 +115,14 @@ namespace HarvestPanic.Economy
 
         /// <summary>Returns and clears the queued Majors (applied next morning).</summary>
         public List<DayModifier> TakeQueued() { var q = new List<DayModifier>(_queued); _queued.Clear(); return q; }
+
+        /// <summary>Removes queued modifiers matching <paramref name="match"/> and returns them (missed Landlord visits).</summary>
+        public List<DayModifier> TakeQueued(Predicate<DayModifier> match)
+        {
+            var r = _queued.FindAll(match);
+            _queued.RemoveAll(match);
+            return r;
+        }
 
         /// <summary>Ticks Seconds-duration modifiers.</summary>
         public void Tick(float dt)

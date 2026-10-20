@@ -95,8 +95,18 @@ namespace HarvestPanic.Economy
         // ---------------- Wallet / fees / quota ----------------
 
         /// <summary>Fee(w) = round_to_5(25 × (1 + 0.25(w − 1)) × RespawnFeeMult) → 25/30/40/45/50/55.</summary>
-        public static int RespawnFee(int week, float feeMult, EconomyTuning t) =>
-            RoundTo(t.RespawnFeeBase * (1.0 + t.RespawnFeeWeeklyGrowth * (week - 1)) * feeMult, 5);
+        public static int RespawnFee(int week, float feeMult, EconomyTuning t) => RespawnFee(week, feeMult, t, 4);
+
+        /// <summary>
+        /// Player-scaled fee (GDD §9 open issue 5): <c>round_to_5(25 × (1 + 0.25(w − 1)) × RespawnFeeMult × S_p^0.5)</c>.
+        /// W1: 4p $25, 3p $25, 2p $20, 1p $15. Keeps a death a similar share of rent at every crew size.
+        /// </summary>
+        public static int RespawnFee(int week, float feeMult, EconomyTuning t, int players) =>
+            RoundTo(t.RespawnFeeBase * (1.0 + t.RespawnFeeWeeklyGrowth * (week - 1)) * feeMult * RespawnFeePlayerScale(players, t), 5);
+
+        /// <summary>S_p^exponent (1 for 4 players).</summary>
+        public static double RespawnFeePlayerScale(int players, EconomyTuning t) =>
+            t.RespawnFeePlayerExponent <= 0f ? 1.0 : Math.Pow(t.PlayerScaleFor(players), t.RespawnFeePlayerExponent);
 
         /// <summary>Q(w) = round_to_10(Q_base × G^(w−1) × S_p × R).</summary>
         public static int Quota(int week, int players, EconomyTuning t, float regionMult = -1f)

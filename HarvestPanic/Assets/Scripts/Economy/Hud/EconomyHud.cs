@@ -69,6 +69,7 @@ namespace HarvestPanic.Economy
             _orderLines = Add(order);
             _orderBonus = Text(order, "", "hp-order-bonus");
             _twist = Text(order, "", "hp-twist");
+            BuildLandlord(order);
 
             _toasts = Add(_root, "hp-toasts");
             _toasts.pickingMode = PickingMode.Ignore;
@@ -108,6 +109,7 @@ namespace HarvestPanic.Economy
             _dir.OnPhaseChanged += OnPhase;
             _dir.OnShopChanged += OnShopChanged;
             _dir.OnShopBark += OnShopBark;
+            _dir.OnLandlordBark += OnLandlordBark;
             if (_dir.IsShopOpen) ShowShop();
             else if (_dir.LastReceipt != null && (_dir.Phase == DayPhase.Payout || _dir.Phase == DayPhase.Sunday || _dir.Phase == DayPhase.Evicted)) ShowReceipt(_dir.LastReceipt);
         }
@@ -121,12 +123,14 @@ namespace HarvestPanic.Economy
             _dir.OnPhaseChanged -= OnPhase;
             _dir.OnShopChanged -= OnShopChanged;
             _dir.OnShopBark -= OnShopBark;
+            _dir.OnLandlordBark -= OnLandlordBark;
             _dir = null;
         }
 
         void OnPhase(DayPhase from, DayPhase to)
         {
-            if (to == DayPhase.Morning || to == DayPhase.Workday) { _overlay.style.display = DisplayStyle.None; _shopShown = false; }
+            if (to == DayPhase.Morning || to == DayPhase.Workday) { _overlay.style.display = DisplayStyle.None; _shopShown = false; _pendingSunday = null; }
+            if (to == DayPhase.Sunday && from != DayPhase.Collateral) { _overlay.style.display = DisplayStyle.None; _shopShown = false; ReleaseModal(); } // clear stage for the walk-in
             if (to == DayPhase.Shop || to == DayPhase.Collateral) ShowShop();
         }
 
@@ -139,6 +143,7 @@ namespace HarvestPanic.Economy
             if (_dir == null) { _root.style.display = DisplayStyle.None; return; }
             _root.style.display = DisplayStyle.Flex;
             Refresh();
+            RefreshLandlord();
             RefreshShop();
             UpdateModal();
         }
@@ -193,7 +198,7 @@ namespace HarvestPanic.Economy
                 _orderBonus.text = all ? "ORDER COMPLETE! bonus at payout" : $"All lines: +{ReceiptBuilder.Money(60 * d.Week)} · items ×1.5";
             }
             string twist = "";
-            foreach (var m in d.ActiveModifiers) if (m.Announced && !string.IsNullOrEmpty(m.CardText)) twist += (twist.Length > 0 ? "\n" : "") + m.CardText;
+            foreach (var m in d.ActiveModifiers) if (m.Announced && !LandlordParams.IsRule(m) && !string.IsNullOrEmpty(m.CardText)) twist += (twist.Length > 0 ? "\n" : "") + m.CardText;
             _twist.text = twist;
             _twist.style.display = twist.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
         }
@@ -256,6 +261,7 @@ namespace HarvestPanic.Economy
         public void ShowReceipt(ReceiptData r)
         {
             if (r.IsSunday && r.Collateral) return; // the shop panel shows Collateral
+            if (DeferSunday(r)) return;          // the Landlord walk-in plays first
             _shopShown = false;
             _overlay.Clear();
             _overlay.style.display = DisplayStyle.Flex;
@@ -279,6 +285,7 @@ namespace HarvestPanic.Economy
                 Dash(body);
                 Text(body, "MOST VALUABLE DISASTER: " + r.Mvd, "hp-r-section", true);
                 Text(body, r.SundayLine, "hp-r-headline");
+                AddAwards(body, r);
                 if (!r.Paid) AddRunOver(body, r);
             }
             else
@@ -296,6 +303,7 @@ namespace HarvestPanic.Economy
                 Row(body, "Wallet", ReceiptBuilder.Money(r.Balance), r.Balance < 0 ? "hp-r-loss" : null, true);
                 Row(body, "Rent due Sunday", ReceiptBuilder.Money(r.Quota + r.Iou), null);
                 Rule(body);
+                AddAwards(body, r);
                 Text(body, "BLAME LEDGER", "hp-r-section", true);
                 if (r.Blocks.Count == 0) Text(body, LedgerText.Spotless, "hp-r-more");
                 foreach (var b in r.Blocks)
