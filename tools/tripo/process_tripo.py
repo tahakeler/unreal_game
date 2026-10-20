@@ -22,9 +22,15 @@ SPECS = [
     ("EggBasket",    "04_EggBasket",    3000, "width",  0.35, 0,   "base",  1024),
     ("FeedBucket",   "05_FeedBucket",   2000, "width",  0.32, 0,   "base",  1024),
     ("Net",          "06_Net",          3000, "length", 1.40, 0,   "grip",  1024),
-    ("MarketStall",  "08_MarketStall",  6000, "width",  3.00, 180, "base",  2048),
+    ("MarketStall",  "08_MarketStall",  6000, "width",  3.00, 0,   "base",  2048),
     ("PenGate",      "09_PenGate",      3000, "width",  2.00, 0,   "hinge", 1024),
 ]
+
+
+# Models whose basecolor is re-baked onto a fresh UV unwrap of the decimated mesh (selected-to-active, Cycles).
+# Needed where edge-collapse drags UVs across Tripo's many small islands and leaks a neighbour's colour
+# (prize pumpkin: blue ribbon specks on the orange body).
+REBAKE = {"PrizePumpkin"}
 
 
 def tris(me):
@@ -93,6 +99,32 @@ def align_net(obj):
     obj.data.transform(Matrix.Translation(Vector((-tip[0], -ymax, -tip[2]))))
 
 
+def rebake(high, low, size, out_path):
+    """Smart-UV the low-poly mesh and bake the high-poly basecolor onto it."""
+    sc = bpy.context.scene
+    for o in bpy.data.objects: o.select_set(False)
+    bpy.context.view_layer.objects.active = low; low.select_set(True)
+    while low.data.uv_layers: low.data.uv_layers.remove(low.data.uv_layers[0])
+    low.data.uv_layers.new(name="UVMap")
+    bpy.ops.object.mode_set(mode="EDIT"); bpy.ops.mesh.select_all(action="SELECT")
+    bpy.ops.uv.smart_project(angle_limit=math.radians(60), island_margin=0.004)
+    bpy.ops.object.mode_set(mode="OBJECT")
+    img = bpy.data.images.new("baked", size, size, alpha=False)
+    mat = bpy.data.materials.new("bake_target"); mat.use_nodes = True
+    node = mat.node_tree.nodes.new("ShaderNodeTexImage"); node.image = img
+    mat.node_tree.nodes.active = node
+    low.data.materials.clear(); low.data.materials.append(mat)
+    sc.render.engine = "CYCLES"; sc.cycles.device = "CPU"; sc.cycles.samples = 1
+    sc.render.bake.use_pass_direct = False; sc.render.bake.use_pass_indirect = False; sc.render.bake.use_pass_color = True
+    sc.render.bake.use_selected_to_active = True; sc.render.bake.cage_extrusion = 0.01; sc.render.bake.margin = 8
+    high.hide_set(False); high.select_set(True); low.select_set(True); bpy.context.view_layer.objects.active = low
+    bpy.ops.object.bake(type="DIFFUSE", pass_filter={"COLOR"})
+    img.filepath_raw = out_path; img.file_format = "JPEG"
+    sc.render.image_settings.quality = 90
+    img.save()
+    return mat
+
+
 def process(src_root, out_root, spec):
     name, folder, budget, fit, metres, yaw, pivot, texsize = spec
     fbx = glob.glob(os.path.join(src_root, folder, "*.fbx"))[0]
@@ -108,7 +140,15 @@ def process(src_root, out_root, spec):
     if yaw: obj.data.transform(Matrix.Rotation(math.radians(yaw), 4, "Z"))
     if pivot == "grip": align_net(obj)
 
+    high = None
+    if name in REBAKE:
+        high = obj.copy(); high.data = obj.data.copy(); bpy.context.scene.collection.objects.link(high)
     got = decimate(obj, budget)
+    out_dir = os.path.join(out_root, name); os.makedirs(out_dir, exist_ok=True)
+    tex_name = f"{name}_BaseColor.jpg"
+    if high is not None:
+        baked_mat = rebake(high, obj, texsize, os.path.join(out_dir, tex_name))
+        bpy.data.objects.remove(high)
 
     v = verts_np(obj.data); size = v.max(0) - v.min(0)
     cur = {"length": max(size[0], size[1]) if pivot != "grip" else size[1], "height": size[2], "width": size[0]}[fit]
@@ -124,11 +164,9 @@ def process(src_root, out_root, spec):
     obj.name = obj.data.name = "SM_Tripo_" + name
     obj.data.shade_smooth() if hasattr(obj.data, "shade_smooth") else None
 
-    out_dir = os.path.join(out_root, name); os.makedirs(out_dir, exist_ok=True)
-    # texture: resize basecolor, save next to the FBX
-    img = [i for i in bpy.data.images if i.size[0] > 0]
-    tex_name = f"{name}_BaseColor.jpg"
-    if img:
+    # texture: resize basecolor, save next to the FBX (unless re-baked above)
+    img = [i for i in bpy.data.images if i.size[0] > 0 and i.name != "baked"]
+    if img and high is None:
         im = img[0]; im.scale(texsize, texsize)
         im.filepath_raw = os.path.join(out_dir, tex_name); im.file_format = "JPEG"
         bpy.context.scene.render.image_settings.quality = 90

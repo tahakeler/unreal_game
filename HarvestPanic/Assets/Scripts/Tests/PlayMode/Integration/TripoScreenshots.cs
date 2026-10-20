@@ -70,11 +70,16 @@ namespace HarvestPanic.Tests.PlayMode.Integration
             Capture(cam, Path.Combine(dir, "tripo_1_pig_chickens_pen.png"));
 
             // 2. Market square with the three stalls.
-            cam.fieldOfView = 62f;
-            cam.transform.position = new Vector3(117f, 4.2f, 2f);
-            cam.transform.LookAt(new Vector3(140f, 1.2f, 0f));
+            // Oddities stall (130, -22, faces +Z) with the bell and the Butcher stall beyond; then the Greengrocer (150, 0, faces -X).
+            cam.fieldOfView = 58f;
+            cam.transform.position = new Vector3(124.5f, 3.2f, -12.5f);
+            cam.transform.LookAt(new Vector3(130.5f, 1.3f, -21f));
             yield return null;
             Capture(cam, Path.Combine(dir, "tripo_2_market_stalls.png"));
+            cam.transform.position = new Vector3(142f, 2.8f, 5f);
+            cam.transform.LookAt(new Vector3(149.5f, 1.3f, 0f));
+            yield return null;
+            Capture(cam, Path.Combine(dir, "tripo_2b_market_greengrocer.png"));
 
             // 3. First-person holding the feed bucket.
             var bucket = Object.FindObjectsByType<FeedBucketTool>(FindObjectsSortMode.None).FirstOrDefault();
