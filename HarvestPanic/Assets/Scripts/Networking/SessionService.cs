@@ -685,9 +685,9 @@ namespace HarvestPanic.Networking
             return false;
         }
 
-        internal static bool HasArg(string name) => Array.IndexOf(Environment.GetCommandLineArgs(), name) >= 0;
+        public static bool HasArg(string name) => Array.IndexOf(Environment.GetCommandLineArgs(), name) >= 0;
 
-        internal static string Arg(string name)
+        public static string Arg(string name)
         {
             var a = Environment.GetCommandLineArgs();
             int i = Array.IndexOf(a, name);
