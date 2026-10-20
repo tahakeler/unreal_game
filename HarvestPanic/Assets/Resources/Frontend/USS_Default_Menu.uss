@@ -1,0 +1,54 @@
+.centered { align-items: center; justify-content: center; }
+
+.logo-block { position: absolute; left: 70px; top: 40px; width: 1000px; rotate: -4deg; }
+.logo { color: var(--paper); -unity-text-outline-width: 10px; -unity-text-outline-color: var(--ink); text-shadow: 0 10px 0 var(--ink); }
+.logo-1 { font-size: 150px; letter-spacing: 4px; }
+.logo-2 { font-size: 200px; color: var(--pumpkin); margin-top: -34px; margin-left: 70px; letter-spacing: 6px; }
+.tagline {
+    align-self: flex-start; margin: 22px 0 0 40px; padding: 8px 26px; font-size: 32px;
+    background-color: var(--paper); border-width: 4px; border-bottom-width: 8px; border-color: var(--ink); border-radius: 12px; rotate: 1.5deg;
+}
+
+.menu-sign { position: absolute; left: 110px; bottom: 120px; width: 520px; }
+.wide-sign { width: 1100px; }
+.cards { justify-content: space-between; margin-bottom: 20px; }
+.card-btn { flex-direction: column; flex-grow: 1; flex-basis: 0; height: 260px; margin: 0 12px; padding: 24px 28px; align-items: flex-start; justify-content: center; }
+.card-title { font-size: 56px; color: var(--ink); }
+.card-sub { font-size: 26px; white-space: normal; margin-top: 10px; -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-Regular.ttf"); }
+.players-row { margin: 6px 0 16px 0; }
+.buttons-row { margin-top: 20px; }
+.buttons-row .hp-btn { margin-bottom: 0; }
+.buttons-row .hp-btn--small { margin-left: 20px; }
+.players-row .hp-btn { min-width: 110px; margin: 0 14px 0 0; }
+
+.lan-list { height: 220px; margin: 8px 0 8px 0; background-color: var(--cream); border-width: 3px; border-color: var(--ink); border-radius: 12px; }
+.lan-row { flex-direction: row; align-items: center; height: 68px; padding: 0 18px; border-bottom-width: 2px; border-color: var(--ink-soft); }
+.lan-row .lan-name { font-size: 30px; flex-grow: 1; }
+.lan-row .lan-count { font-size: 26px; width: 150px; -unity-text-align: middle-right; }
+.lan-row .lan-addr { font-size: 22px; width: 220px; color: var(--ink-soft); }
+.lan-row--full { opacity: 0.5; }
+.unity-list-view__item:hover .lan-row { background-color: var(--paper-dark); }
+.unity-list-view__item--selected .lan-row, .unity-list-view__item:selected .lan-row { background-color: var(--sky); border-left-width: 12px; border-color: var(--ink); }
+.join-row { margin-top: 10px; align-items: flex-end; }
+.join-field { flex-grow: 1; margin-right: 20px; }
+.join-row .hp-btn { margin-bottom: 12px; }
+
+.footer-hint { font-size: 22px; color: var(--paper); -unity-text-outline-width: 3px; -unity-text-outline-color: var(--ink); }
+.footer-version { font-size: 22px; color: var(--paper); -unity-text-outline-width: 3px; -unity-text-outline-color: var(--ink); }
+
+.settings-host { width: 1280px; height: 880px; }
+
+/* ---------- Settings panel ---------- */
+.settings-card { width: 1180px; }
+.settings-tabs { margin-bottom: 16px; }
+.settings-tabs .tab-btn { min-width: 190px; margin-right: 14px; margin-bottom: 0; }
+.settings-paper { height: 520px; padding: 18px 28px; }
+.settings-scroll { flex-grow: 1; }
+.setting-row { flex-direction: row; align-items: center; min-height: 76px; border-bottom-width: 2px; border-color: rgba(43, 33, 24, 0.25); }
+.setting-label { font-size: 30px; width: 360px; }
+.setting-value { font-size: 28px; width: 110px; -unity-text-align: middle-right; }
+.toggle-btn { min-width: 150px; margin: 0; }
+.toggle-btn.toggle-on { background-color: var(--leaf); }
+.arrow-btn { min-width: 64px; padding: 0; margin: 0; }
+.choice-label { font-size: 30px; min-width: 260px; -unity-text-align: middle-center; }
+.name-field { width: 420px; margin: 8px 0; }

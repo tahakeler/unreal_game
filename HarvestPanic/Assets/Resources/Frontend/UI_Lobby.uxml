@@ -1,0 +1,43 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="root" class="hp-root" picking-mode="Ignore">
+
+        <ui:VisualElement name="yard-sign" class="sign yard-sign" picking-mode="Ignore">
+            <ui:Label text="THE YARD" class="display yard-title" />
+            <ui:Label name="yard-sub" text="Lobby" class="bold yard-sub" />
+            <ui:Label name="yard-count" text="1 / 4 farmers" class="bold yard-sub" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="toast" class="toast" picking-mode="Ignore">
+            <ui:Label name="toast-text" text="" class="bold toast-text" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="center-stack" class="center-stack" picking-mode="Ignore">
+            <ui:Label name="countdown-label" text="Dinner's up!" class="display countdown-label" />
+            <ui:Label name="countdown-number" text="3" class="display countdown-number" />
+            <ui:Label name="confirm-label" text="Start anyway? 2/3 ready.&#10;Ring the bell again!" class="bold confirm-label" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="ready-pill" class="ready-pill" picking-mode="Ignore">
+            <ui:VisualElement name="ready-box" class="ready-box" />
+            <ui:Label name="ready-text" text="Not ready" class="bold ready-text" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="prompt-bar" class="prompt-bar" picking-mode="Ignore">
+            <ui:VisualElement class="prompt"><ui:Label text="R" class="display keycap" /><ui:Label text="Ready" class="bold prompt-text" /></ui:VisualElement>
+            <ui:VisualElement class="prompt"><ui:Label text="Tab" class="display keycap" /><ui:Label text="Crew" class="bold prompt-text" /></ui:VisualElement>
+            <ui:VisualElement class="prompt"><ui:Label text="C" class="display keycap" /><ui:Label text="Wardrobe" class="bold prompt-text" /></ui:VisualElement>
+            <ui:VisualElement name="prompt-bell" class="prompt"><ui:Label text="B" class="display keycap" /><ui:Label text="Dinner bell" class="bold prompt-text" /></ui:VisualElement>
+            <ui:VisualElement class="prompt"><ui:Label text="Esc" class="display keycap" /><ui:Label text="Menu" class="bold prompt-text" /></ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="crew-panel" class="paper-card crew-panel">
+            <ui:Label text="THE CREW" class="display crew-title" />
+            <ui:VisualElement name="crew-list" class="crew-list" />
+            <ui:Label name="crew-hint" text="" class="small-text muted" />
+            <ui:Label text="CHAT" class="display chat-title" />
+            <ui:ScrollView name="chat-log" class="chat-log" />
+            <ui:TextField name="chat-input" max-length="120" class="hp-field bold chat-input" />
+            <ui:Button name="btn-crew-close" text="Close" class="hp-btn hp-btn--small" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

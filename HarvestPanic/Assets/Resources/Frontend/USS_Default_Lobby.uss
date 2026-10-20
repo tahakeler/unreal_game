@@ -1,0 +1,49 @@
+.yard-sign { position: absolute; left: 36px; top: 30px; width: 380px; padding: 18px 26px 12px 26px; }
+.yard-title { font-size: 56px; color: var(--paper); -unity-text-outline-width: 4px; -unity-text-outline-color: var(--ink); text-shadow: 0 4px 0 var(--ink); }
+.yard-sub { font-size: 24px; color: var(--paper); margin-top: 2px; }
+
+.toast { position: absolute; top: 40px; left: 0; right: 0; align-items: center; opacity: 0; transition-property: opacity; transition-duration: 0.2s; }
+.toast.is-shown { opacity: 1; }
+.toast-text { padding: 10px 34px; font-size: 30px; background-color: var(--paper); border-width: 4px; border-bottom-width: 8px; border-color: var(--ink); border-radius: 14px; }
+
+.center-stack { position: absolute; left: 0; right: 0; top: 190px; align-items: center; }
+.countdown-label { font-size: 56px; color: var(--paper); -unity-text-outline-width: 6px; -unity-text-outline-color: var(--ink); text-shadow: 0 6px 0 var(--ink); display: none; }
+.countdown-number { font-size: 230px; color: var(--pumpkin); -unity-text-outline-width: 12px; -unity-text-outline-color: var(--ink); text-shadow: 0 12px 0 var(--ink); display: none; }
+.confirm-label {
+    display: none; font-size: 36px; -unity-text-align: middle-center; white-space: normal;
+    padding: 14px 40px; background-color: var(--paper); border-width: 4px; border-bottom-width: 10px; border-color: var(--ink); border-radius: 16px; rotate: -1.5deg;
+}
+.center-stack.is-counting .countdown-label, .center-stack.is-counting .countdown-number { display: flex; }
+.center-stack.is-confirming .confirm-label { display: flex; }
+.countdown-number.tick { scale: 1.25 1.25; }
+.countdown-number { transition-property: scale; transition-duration: 0.18s; }
+
+.ready-pill { position: absolute; left: 36px; bottom: 124px; flex-direction: row; align-items: center; padding: 8px 24px 8px 14px;
+    background-color: var(--paper); border-width: 4px; border-bottom-width: 8px; border-color: var(--ink); border-radius: 30px; }
+.ready-box { width: 36px; height: 36px; border-width: 4px; border-color: var(--ink); border-radius: 8px; background-color: var(--cream); margin-right: 14px; -unity-text-align: middle-center; }
+.ready-box.is-ready { background-color: var(--leaf); }
+.ready-text { font-size: 28px; }
+
+.prompt-bar { position: absolute; bottom: 36px; left: 0; right: 0; flex-direction: row; justify-content: center; align-items: center; }
+.prompt { flex-direction: row; align-items: center; margin: 0 22px; padding: 6px 18px 6px 8px; background-color: rgba(246, 235, 211, 0.92); border-width: 3px; border-color: var(--ink); border-radius: 26px; }
+.keycap { min-width: 44px; height: 44px; padding: 0 10px; margin-right: 12px; font-size: 28px; -unity-text-align: middle-center;
+    background-color: var(--ink); color: var(--paper); border-radius: 10px; }
+.prompt-text { font-size: 24px; }
+.prompt--off { opacity: 0.4; }
+
+/* ---- Crew overlay ---- */
+.crew-panel { position: absolute; right: 36px; top: 30px; width: 600px; display: none; }
+.crew-panel.is-open { display: flex; }
+.crew-title, .chat-title { font-size: 44px; margin-bottom: 8px; }
+.chat-title { font-size: 32px; margin-top: 10px; }
+.crew-row { flex-direction: row; align-items: center; height: 76px; padding: 0 12px; margin-bottom: 8px; background-color: var(--cream); border-width: 3px; border-color: var(--ink); border-radius: 14px; }
+.crew-row--me { border-width: 5px; }
+.crew-name { font-size: 30px; flex-grow: 1; margin-left: 14px; overflow: hidden; }
+.crew-tag { font-size: 20px; padding: 2px 12px; margin-left: 8px; background-color: var(--ink); color: var(--paper); border-radius: 10px; }
+.crew-ready { font-size: 24px; margin: 0 10px; min-width: 130px; -unity-text-align: middle-right; }
+.crew-ready--yes { color: #3F5E1C; }
+.crew-kick { min-height: 44px; margin: 0 0 0 8px; font-size: 22px; padding: 0 14px; border-bottom-width: 5px; }
+.chat-log { height: 150px; background-color: var(--cream); border-width: 3px; border-color: var(--ink); border-radius: 12px; padding: 6px 12px; }
+.chat-line { font-size: 22px; white-space: normal; }
+.chat-input { margin-top: 10px; }
+.chat-input .unity-base-text-field__input { min-height: 46px; font-size: 24px; }

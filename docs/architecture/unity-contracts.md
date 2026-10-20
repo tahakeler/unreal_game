@@ -28,6 +28,8 @@ Cross-talk = register an interface in `Services` (`Services.Register<T>`, `Get<T
 | Knock/shove | `IKnockable`, `Knockables.TryGetFor` | Player root -> AI, hazards, wagons |
 | Movement zones | `IMovementModifierSource`, `MovementModifiers.Register/Unregister/Evaluate(pos)` | World zones (mud) -> Player controller multiplies speed by `Evaluate` |
 | Soak | `BruiseKind`, optional `IGoodsSoakable.ApplySoak(instigator)` | Economy implements; river/rain callers check `goods is IGoodsSoakable` |
+| Input gating | `InputModal.Push/Pop(owner)`, `IsBlocking`, `Count`, `Changed` | UI (pause, crew overlay) and Customization (wardrobe) push; Player skips look/move/interact while blocking |
+| Social (optional) | `ISessionSocial` (`Kick`, `SendChat`, `OnChat`) | Networking may implement; UI checks `is`/`TryGet` |
 | Impact units | `ImpactUnits` | all (see below) |
 | Session | `ISessionService`, `PlayerInfo` | Networking -> Frontend UI (v0, add-only) |
 | Markers | `MarkerRole`, `MarkerTag`, `LevelMarker` | World places -> owners spawn |
