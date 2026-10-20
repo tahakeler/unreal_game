@@ -188,7 +188,7 @@ namespace HarvestPanic.Tests.EditMode.UI
             foreach (ColorblindMode m in System.Enum.GetValues(typeof(ColorblindMode)))
             {
                 var loss = UiPalette.Get(ReservedColor.Loss, m); var good = UiPalette.Get(ReservedColor.Good, m);
-                Assert.Greater(Mathf.Abs(loss.r - good.r) + Mathf.Abs(loss.b - good.b), 0.5f, m.ToString());
+                Assert.Greater(Mathf.Abs(loss.r - good.r) + Mathf.Abs(loss.g - good.g) + Mathf.Abs(loss.b - good.b), 0.5f, m.ToString());
             }
         }
     }

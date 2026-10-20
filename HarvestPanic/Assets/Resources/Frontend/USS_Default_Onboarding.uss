@@ -17,21 +17,20 @@
 .tape-hint { color: var(--ink-soft); }
 
 .captions {
-    position: absolute; left: 25%; right: 25%; bottom: 150px;
-    align-items: center; padding: 8px 18px; border-radius: 10px;
-    background-color: rgba(43, 33, 24, 0.6); display: none;
+    position: absolute; left: 0; right: 0; bottom: 150px;
+    align-items: center; display: none;
 }
-.caption-line { color: var(--cream); font-size: var(--font-size-body); -unity-text-align: middle-center; white-space: normal; }
+.caption-line { padding: 4px 18px; margin-top: 4px; border-radius: 10px; background-color: rgba(43, 33, 24, 0.6); color: var(--cream); font-size: var(--font-size-body); -unity-text-align: middle-center; white-space: normal; }
 
 /* help */
 .help-card { width: 1100px; }
 .help-row { flex-direction: row; align-items: center; min-height: 52px; border-bottom-width: 2px; border-color: var(--paper-dark); }
 .help-head { border-bottom-width: 4px; border-color: var(--ink); }
-.help-cell { flex-basis: 0; flex-grow: 1; white-space: normal; padding: 4px 10px; }
+.help-cell { color: var(--ink); flex-basis: 0; flex-grow: 1; white-space: normal; padding: 4px 10px; }
 .help-cell--action { flex-grow: 1.4; }
 .keycap {
     -unity-text-align: middle-center; padding: 2px 10px; border-width: 3px; border-bottom-width: 5px;
-    border-color: var(--ink); border-radius: 8px; background-color: var(--cream); align-self: flex-start;
+    border-color: var(--ink); border-radius: 8px; background-color: var(--cream); align-self: flex-start; color: var(--ink);
 }
 .help-scroll { max-height: 600px; }
 

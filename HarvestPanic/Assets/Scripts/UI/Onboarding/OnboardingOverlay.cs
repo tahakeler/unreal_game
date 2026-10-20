@@ -65,7 +65,7 @@ namespace HarvestPanic.UI
             Rules.Enabled = s.TipsEnabled;
             if (!s.TipsEnabled) HideTip();
             if (!s.Subtitles) { _feed.Clear(); _captionsDirty = true; }
-            if (_captions != null) _captions.style.backgroundColor = new Color(0.17f, 0.13f, 0.09f, s.CaptionBackground);
+            _captionsDirty = true;
         }
 
         void Build()
@@ -161,6 +161,7 @@ namespace HarvestPanic.UI
                 if (Near(_pens, pos)) Rules.Signal(TipSignal.NearPen);
             }
 
+            if (_tip != null) _tip.style.visibility = InputModal.IsBlocking ? Visibility.Hidden : Visibility.Visible;
             if (_showing != null)
             {
                 bool skip = (Keyboard.current != null && Keyboard.current.backspaceKey.wasPressedThisFrame)
@@ -203,6 +204,7 @@ namespace HarvestPanic.UI
             {
                 var l = new Label(c.Text);
                 l.AddToClassList("caption-line"); l.AddToClassList("bold");
+                l.style.backgroundColor = new Color(0.17f, 0.13f, 0.09f, SettingsService.Current.CaptionBackground);
                 if (c.Danger) l.style.color = UiPalette.Get(ReservedColor.Danger, mode);
                 _captions.Add(l);
             }
