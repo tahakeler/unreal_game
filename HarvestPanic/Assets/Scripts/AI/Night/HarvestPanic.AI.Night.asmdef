@@ -1,0 +1,17 @@
+{
+    "name": "HarvestPanic.AI.Night",
+    "rootNamespace": "HarvestPanic.AI.Night",
+    "references": [
+        "HarvestPanic.Core",
+        "Unity.Netcode.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

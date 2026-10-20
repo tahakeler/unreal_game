@@ -25,6 +25,9 @@ MonoBehaviour:
   - ParamName: Day.DuskSeconds
     Op: 0
     Value: 60
+  - ParamName: Night.LanternPosts
+    Op: 0
+    Value: 1
   <GrantTags>k__BackingField: []
   <CardText>k__BackingField: 
   <Announced>k__BackingField: 0

@@ -1,0 +1,18 @@
+{
+    "name": "HarvestPanic.AI.Night.Editor",
+    "rootNamespace": "HarvestPanic.AI.Night.Editor",
+    "references": [
+        "HarvestPanic.Core",
+        "HarvestPanic.AI.Night",
+        "Unity.Netcode.Runtime"
+    ],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

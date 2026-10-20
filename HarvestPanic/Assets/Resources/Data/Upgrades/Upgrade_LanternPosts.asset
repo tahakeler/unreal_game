@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: HarvestPanic.Economy::HarvestPanic.Economy.UpgradeDefinition
   UpgradeId: Upgrade.LanternPosts
   DisplayName: Lantern Posts
-  Description: 'Lit path: the dusk market stays open 60 s longer.'
+  Description: 'Lit path: the dusk market stays open 60 s longer and night creatures keep out of the lantern light.'
   Price: 250
   Tier: 2
   RequiresId: 

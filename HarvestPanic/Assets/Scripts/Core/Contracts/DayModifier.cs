@@ -59,6 +59,10 @@ namespace HarvestPanic.Core
         public const string WeatherWindSpeed = "Weather.WindSpeed";
         /// <summary>Visibility in metres used by fog presentation (fog 15-30; 0 = default).</summary>
         public const string WeatherFogDistance = "Weather.FogDistance";
+        /// <summary>Lantern posts lit along the barn-bridge-market path at night (Lantern Posts upgrade adds 1). Consumer: AI/Night (safe light zones).</summary>
+        public const string NightLanternPosts = "Night.LanternPosts";
+        /// <summary>Multiplier on the Night Director threat budget (curses/landlord may raise it; default 1). Consumer: AI/Night.</summary>
+        public const string NightThreatMult = "Night.ThreatMult";
     }
 
     /// <summary>
