@@ -1,0 +1,18 @@
+{
+    "name": "HarvestPanic.Tests.PlayMode.Perf",
+    "rootNamespace": "HarvestPanic.Tests.PlayMode.Perf",
+    "references": [
+        "HarvestPanic.Core", "HarvestPanic.Gameplay", "HarvestPanic.AI", "HarvestPanic.AI.Night", "HarvestPanic.Economy",
+        "HarvestPanic.World", "HarvestPanic.Weather", "HarvestPanic.Networking",
+        "Unity.Netcode.Runtime", "UnityEngine.TestRunner", "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": ["nunit.framework.dll"],
+    "autoReferenced": false,
+    "defineConstraints": ["UNITY_INCLUDE_TESTS"],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
