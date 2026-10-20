@@ -15,6 +15,13 @@ namespace HarvestPanic.Networking
     /// Common: -netName N, -netPort P, -netLobbyScene S, -netGameScene S, -netResult /abs/file.txt, -netTimeout 90
     /// Host starts the game once ExpectPlayers are in the roster; both write "ok=1" lines once the game scene is
     /// loaded and ExpectPlayers player objects are replicated, then quit with exit code 0 (1 on timeout/failure).
+    /// Robustness options (tools/net/two-process-test.sh):
+    ///   host:   -netMaxPlayers N, -netFinalPlayers N (players required for host ok, default ExpectPlayers),
+    ///           -netQuitFile /abs/path (stay after ok until the file exists, then leave like a host quitting)
+    ///   client: -netWaitHost (after ok, stay until the host leaves; logs "hostLeft reason=..."),
+    ///           -netRejoin (after ok, leave and rejoin once; logs "rejoin ok=1"),
+    ///           -netExpectReject text (pass when the join is refused with a reason containing text),
+    ///           -netFakeVersion V (dev builds: send build version V)
     /// </summary>
     [RequireComponent(typeof(SessionService))]
     public sealed class NetAutomation : MonoBehaviour
@@ -28,6 +35,9 @@ namespace HarvestPanic.Networking
         string _lastError;
         bool _hostLoadedAll, _chatSent;
         int _chatReceived;
+        int _final, _lastRoster = -1;
+        string _quitFile, _expectReject, _joinAddr;
+        bool _waitHost, _rejoin, _rejoining, _rejoined;
 
         void Start()
         {
@@ -42,10 +52,34 @@ namespace HarvestPanic.Networking
             _expect = int.TryParse(SessionService.Arg("-netExpectPlayers"), out var e) ? e : 2;
             _deadline = Time.realtimeSinceStartup + (float.TryParse(SessionService.Arg("-netTimeout"), out var t) ? t : 90f);
             _resultPath = SessionService.Arg("-netResult");
+            _final = int.TryParse(SessionService.Arg("-netFinalPlayers"), out var f) ? f : _expect;
+            _quitFile = SessionService.Arg("-netQuitFile");
+            _expectReject = SessionService.Arg("-netExpectReject");
+            _waitHost = SessionService.HasArg("-netWaitHost");
+            _rejoin = SessionService.HasArg("-netRejoin");
+            _joinAddr = join;
+            int maxPlayers = int.TryParse(SessionService.Arg("-netMaxPlayers"), out var m) ? m : GameInfo.MaxPlayers;
             var cfg = _session.Config;
             cfg.lobbyScene = SessionService.Arg("-netLobbyScene") ?? cfg.lobbyScene;
             cfg.gameScene = SessionService.Arg("-netGameScene") ?? cfg.gameScene;
-            _session.OnError += msg => { _lastError = msg; Write("error=" + msg); };
+            _session.OnError += msg =>
+            {
+                _lastError = msg;
+                Write("error=" + msg);
+                if (_expectReject != null && !_done && msg.IndexOf(_expectReject, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    _done = true;
+                    Write("ok=1 rejected reason=" + msg.Replace(' ', '_'));
+                    ScheduleQuit(0, 0.5f);
+                }
+                if (_done && _waitHost && !_host) { Write("hostLeft reason=" + msg.Replace(' ', '_')); ScheduleQuit(0, 0.5f); }
+            };
+            _session.OnSessionChanged += () =>
+            {
+                if (_session.Players.Count == _lastRoster) return;
+                _lastRoster = _session.Players.Count;
+                Write($"roster n={_lastRoster}");
+            };
             _session.OnServerSceneLoaded += (scene, completed) =>
             {
                 if (scene == cfg.gameScene && completed.Count >= _expect) _hostLoadedAll = true;
@@ -53,7 +87,7 @@ namespace HarvestPanic.Networking
             };
             _session.OnChat += (from, text) => { _chatReceived++; Write($"chat from={from} text={text.Replace(' ', '_')}"); };
             Write($"role={(_host ? "host" : "client")} pid={System.Diagnostics.Process.GetCurrentProcess().Id}");
-            if (_host) _session.HostLan("AutoTest", GameInfo.MaxPlayers);
+            if (_host) _session.HostLan("AutoTest", maxPlayers);
             else _session.JoinLan(join);
         }
 
@@ -82,21 +116,49 @@ namespace HarvestPanic.Networking
                 _session.StartGame();
             }
 
-            if (!_done && scene == _session.Config.gameScene && _session.Players.Count >= _expect && replicatedPlayers >= _expect && (!_host || _hostLoadedAll))
+            int need = _host ? _final : _expect;
+            bool inGame = scene == _session.Config.gameScene && _session.Players.Count >= need && replicatedPlayers >= need;
+            if (!_done && _expectReject == null && inGame && (!_host || _hostLoadedAll))
             {
                 _done = true;
                 Write($"ok=1 scene={scene} players={_session.Players.Count} replicated={replicatedPlayers} playerStartMarkers={LevelMarker.FindAll(MarkerRole.PlayerStart).Count} chatReceived={_chatReceived} names={Names()}");
+                if (_rejoin && !_host)
+                {
+                    _rejoining = true;
+                    Write("rejoin leaving");
+                    _session.Leave();
+                }
                 // Host lingers so the client can observe its final state; client exits when the host leaves or after 3 s.
-                ScheduleQuit(0, _host ? 4f : 3f);
+                else if (!(_host && _quitFile != null) && !(_waitHost && !_host)) ScheduleQuit(0, _host ? 4f : 3f);
             }
 
-            if (_done && !_host && !_session.IsConnected) ScheduleQuit(0, 0.1f);
+            if (_rejoining)
+            {
+                if (!_rejoined && !_session.IsConnected && !_session.IsConnecting && !nm.IsListening && !nm.ShutdownInProgress
+                    && scene == _session.Config.menuScene)
+                {
+                    _rejoined = true;
+                    Write("rejoin joining");
+                    _session.JoinLan(_joinAddr);
+                }
+                else if (_rejoined && inGame)
+                {
+                    _rejoining = false;
+                    Write($"rejoin ok=1 players={_session.Players.Count} replicated={replicatedPlayers}");
+                    if (!_waitHost) ScheduleQuit(0, 3f);
+                }
+                if (Time.realtimeSinceStartup > _deadline) { Write("rejoin ok=0 reason=timeout"); ScheduleQuit(1, 0.1f); }
+                return;
+            }
+
+            if (_done && _host && _quitFile != null && File.Exists(_quitFile)) { Write("hostQuitting"); ScheduleQuit(0, 0.1f); }
+            if (_done && !_host && !_session.IsConnected && !_session.IsConnecting) ScheduleQuit(0, _waitHost ? 0.5f : 0.1f);
             if (!_done && _lastError != null && !_session.IsConnected && !_session.IsConnecting)
             {
                 Write("ok=0 reason=" + _lastError);
                 ScheduleQuit(1, 0.5f);
             }
-            if (!_done && Time.realtimeSinceStartup > _deadline)
+            if (Time.realtimeSinceStartup > _deadline && (!_done || _quitFile != null || _waitHost))
             {
                 Write($"ok=0 reason=timeout scene={scene} players={_session.Players.Count} replicated={replicatedPlayers}");
                 ScheduleQuit(1, 0.1f);

@@ -5,6 +5,7 @@
         "HarvestPanic.Core",
         "HarvestPanic.Networking",
         "Unity.Netcode.Runtime",
+        "Unity.Networking.Transport",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

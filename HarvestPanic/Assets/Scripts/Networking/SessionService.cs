@@ -95,7 +95,7 @@ namespace HarvestPanic.Networking
             _discovery.OnChanged += () => OnLanSessionsChanged?.Invoke();
 
             bool steamAllowed = _fp != null && !HasArg("-nosteam") && (!Application.isBatchMode || _cfg.steamInBatchmode || HasArg("-steam"));
-            _steam = new SteamPlatform(_cfg.steamAppId, steamAllowed);
+            _steam = new SteamPlatform(steamAllowed ? SteamAppId.ResolveForProcess(_cfg.steamAppId) : _cfg.steamAppId, steamAllowed);
             _steam.OnJoinRequested += OnSteamJoinRequested;
 
             _nm.ConnectionApprovalCallback = Approve;
@@ -104,7 +104,12 @@ namespace HarvestPanic.Networking
             _nm.OnClientStopped += HandleClientStopped;
             _nm.OnServerStopped += HandleServerStopped;
             _nm.OnTransportFailure += () => NetLog.Error("transport-fail", "Transport failure; session will end.");
-            SceneManager.activeSceneChanged += (_, s) => { if (_nm.IsListening) OnLocalSceneLoaded?.Invoke(s.name); };
+            SceneManager.activeSceneChanged += (_, s) =>
+            {
+                if (!_nm.IsListening) return;
+                OnLocalSceneLoaded?.Invoke(s.name);
+                UpdatePresence(s.name);
+            };
         }
 
         void OnEnable()
@@ -254,13 +259,23 @@ namespace HarvestPanic.Networking
 
 #if UNITY_EDITOR
         /// <summary>Editor: playing a gameplay scene directly hosts a solo LAN session in that scene.</summary>
-        public void HostInPlaceForEditor()
+        public void HostInPlaceForEditor(int maxPlayers = GameInfo.MaxPlayers)
         {
             _stayInScene = true;
-            HostLan("Editor", GameInfo.MaxPlayers);
+            HostLan("Editor", maxPlayers);
             _stayInScene = false;
         }
 #endif
+
+        /// <summary>Build version sent on join. Dev builds accept "-netFakeVersion V" so tests can exercise the mismatch path.</summary>
+        static string LocalBuildVersion => Debug.isDebugBuild && Arg("-netFakeVersion") != null ? Arg("-netFakeVersion") : Application.version;
+
+        void UpdatePresence(string scene)
+        {
+            if (_transport != SessionTransport.Steam) return;
+            string status = scene == _cfg.gameScene ? "Working the farm in Muddlebury" : scene == _cfg.lobbyScene ? "In the farmhouse lobby" : "Harvest Panic";
+            _steam.SetPresence(status, Mathf.Max(1, _roster.Count));
+        }
 
         bool CanStart()
         {
@@ -287,7 +302,7 @@ namespace HarvestPanic.Networking
             c.TickRate = _cfg.tickRate;
             c.ConnectionApproval = true;
             c.EnableSceneManagement = true;
-            c.ConnectionData = new ConnectionPayload { Protocol = _cfg.protocolVersion, BuildVersion = Application.version, PlayerName = LocalPlayerName }.ToBytes();
+            c.ConnectionData = new ConnectionPayload { Protocol = _cfg.protocolVersion, BuildVersion = LocalBuildVersion, PlayerName = LocalPlayerName }.ToBytes();
             _utp.ConnectTimeoutMS = _cfg.connectTimeoutMs;
             _utp.MaxConnectAttempts = _cfg.maxConnectAttempts;
             _utp.DisconnectTimeoutMS = _cfg.disconnectTimeoutMs;

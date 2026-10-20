@@ -113,10 +113,31 @@ namespace HarvestPanic.Networking
             var enter = await lobby.Join();
             if (enter != RoomEnter.Success) return new JoinResult { Error = "Couldn't join that farm (" + enter + ")." };
             _lobby = lobby;
+            SafePresence("connect", "+connect_lobby " + lobby.Id.Value); // friends of a joiner can join too
             ulong.TryParse(lobby.GetData("hp_host"), out ulong host);
             if (host == 0) host = lobby.Owner.Id.Value;
             int.TryParse(lobby.GetData("hp_protocol"), out int proto);
             return new JoinResult { Ok = true, HostSteamId = host, Version = lobby.GetData("hp_version"), Protocol = proto };
+        }
+
+        /// <summary>
+        /// Rich presence shown in the Steam friends list. "status" is free text; steam_player_group groups party members.
+        /// (steam_display localisation tokens need the real App ID's Steamworks config, so are not set here.)
+        /// </summary>
+        public void SetPresence(string status, int partySize)
+        {
+            if (!IsAvailable) return;
+            SafePresence("status", status ?? "");
+            if (_lobby.HasValue)
+            {
+                SafePresence("steam_player_group", _lobby.Value.Id.Value.ToString());
+                SafePresence("steam_player_group_size", partySize.ToString());
+            }
+        }
+
+        static void SafePresence(string key, string value)
+        {
+            try { SteamFriends.SetRichPresence(key, value); } catch (Exception e) { NetLog.Warn("steam-presence", "Rich presence: " + e.Message); }
         }
 
         public void LeaveLobby()

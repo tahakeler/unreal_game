@@ -39,6 +39,9 @@ namespace HarvestPanic.Networking
         public float discoveryExpiry = 5f;
 
         [Header("Steam (Facepunch)")]
+        // TODO(owner): replace 480 (Valve's Spacewar test app) with HARVEST PANIC's real Steam App ID once the
+        // Steamworks app exists. Overridable without a rebuild via steam_appid.txt or "-steamAppId N" (see SteamAppId).
+        [Tooltip("Steam App ID. 480 = Spacewar test app (TODO: owner's real App ID). steam_appid.txt / -steamAppId override.")]
         public uint steamAppId = 480;
         public bool preferSteam = true;
         [Tooltip("Try Steam in -batchmode (CI normally has no Steam client).")]

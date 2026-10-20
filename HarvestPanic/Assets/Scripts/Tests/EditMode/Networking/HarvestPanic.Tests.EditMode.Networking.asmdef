@@ -1,0 +1,25 @@
+{
+    "name": "HarvestPanic.Tests.EditMode.Networking",
+    "rootNamespace": "HarvestPanic.Tests.EditMode.Networking",
+    "references": [
+        "HarvestPanic.Core",
+        "HarvestPanic.Networking",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
