@@ -24,6 +24,8 @@ namespace HarvestPanic.Economy
         Vector3 _door;
         Transform _hat, _bubble, _stamp;
         TextMesh _text, _stampText;
+        Transform _bubbleBg;
+        string _shownLine;
         float _beatT, _speed;
         Vector3 _hatRest;
 
@@ -74,8 +76,12 @@ namespace HarvestPanic.Economy
 
             _bubble = new GameObject("Bubble").transform; _bubble.SetParent(root, false); _bubble.localPosition = new Vector3(0f, 3.55f, 0f);
             var bg = Prim(PrimitiveType.Cube, _bubble, new Vector3(0f, 0f, 0.03f), new Vector3(3.6f, 0.8f, 0.02f), new Color(0.97f, 0.92f, 0.83f));
-            bg.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            _text = MakeText(_bubble, new Color(0.17f, 0.13f, 0.09f), 0.05f);
+            var bgr = bg.GetComponent<Renderer>();
+            bgr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            var unlit = Shader.Find("Universal Render Pipeline/Unlit");
+            if (unlit != null) { bgr.material = new Material(unlit); bgr.material.SetColor("_BaseColor", new Color(0.99f, 0.95f, 0.86f)); }
+            _bubbleBg = bg;
+            _text = MakeText(_bubble, new Color(0.17f, 0.13f, 0.09f), 0.03f);
             _stamp = new GameObject("Stamp").transform; _stamp.SetParent(root, false); _stamp.localPosition = new Vector3(0f, 4.4f, 0f);
             _stampText = MakeText(_stamp, Color.white, 0.12f);
             _stamp.gameObject.SetActive(false);
@@ -127,7 +133,14 @@ namespace HarvestPanic.Economy
         {
             bool talking = Script.State != LandlordVisitState.Walking && !string.IsNullOrEmpty(Script.Line);
             _bubble.gameObject.SetActive(talking);
-            if (talking) _text.text = Wrap(Script.Line, 34);
+            if (talking && Script.Line != _shownLine)
+            {
+                _shownLine = Script.Line;
+                _text.text = Wrap(Script.Line, 30);
+                int lines = 1, longest = 0, cur = 0;
+                foreach (char ch in _text.text) { if (ch == '\n') { lines++; cur = 0; } else longest = Mathf.Max(longest, ++cur); }
+                _bubbleBg.localScale = new Vector3(longest * 0.135f + 0.5f, lines * 0.34f + 0.3f, 0.02f);
+            }
             bool stamp = !string.IsNullOrEmpty(Script.Stamp) && (Script.State == LandlordVisitState.Verdict || Script.State == LandlordVisitState.Done);
             _stamp.gameObject.SetActive(stamp);
             if (stamp)

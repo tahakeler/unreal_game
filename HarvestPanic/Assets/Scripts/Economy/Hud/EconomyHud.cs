@@ -130,6 +130,7 @@ namespace HarvestPanic.Economy
         void OnPhase(DayPhase from, DayPhase to)
         {
             if (to == DayPhase.Morning || to == DayPhase.Workday) { _overlay.style.display = DisplayStyle.None; _shopShown = false; _pendingSunday = null; }
+            if (to == DayPhase.Sunday && from != DayPhase.Collateral) { _overlay.style.display = DisplayStyle.None; _shopShown = false; ReleaseModal(); } // clear stage for the walk-in
             if (to == DayPhase.Shop || to == DayPhase.Collateral) ShowShop();
         }
 

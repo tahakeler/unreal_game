@@ -82,7 +82,7 @@ namespace HarvestPanic.Tests.PlayMode.Economy
 #endif
         }
 
-        static IEnumerator Capture(string path)
+        internal static IEnumerator Capture(string path)
         {
             var cam = Camera.main;
             var doc = Object.FindFirstObjectByType<UIDocument>();

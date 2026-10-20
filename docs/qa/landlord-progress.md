@@ -25,3 +25,12 @@ Tests: EditMode `LandlordTests` (11) + `EconomyFormulaTests`: 45/45.
 
 Gaps: Farm Walk and Double Down visits not built (need NPC hit detection / vote UI); hats for Sunday Best;
 real per-player mud state (rain proxy); `World.PenGateOpened` contract.
+
+## Session 2
+- PlayMode `LandlordPlayModeTests` (4): Sunday visit paid (receipt held until verdict, leaves Monday, W2 draws 1 rule),
+  short -> EVICTED, forecast on morning card + weather icon, inspection fine + bark.
+- QA `LandlordScreenshots` -> `docs/qa/screens/landlord/` (receipt-awards, visit-count, visit-verdict, sunday-receipt,
+  rule-memos). Iterated: shop panel no longer covers the walk-in; bubble is unlit and sized to the text.
+- GDD §9.6 documents the crew-size fee formula.
+- Full run: EditMode 188/188; PlayMode 40 pass / 9 skipped (Explicit QA) / 1 fail
+  (`PlayerPlayModeTests.HostPlayer_GrabsCarriesAndThrowsCrate`, Player domain).
