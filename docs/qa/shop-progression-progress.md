@@ -1,13 +1,11 @@
 # Shop / Upgrades / Week loop / Save — progress (feature/shop-progression)
 
 ## Done
-- Logic: `Economy/Shop/FarmShop.cs` (offers, buy/sell rules, 50% floor refund, proposal queue), `UpgradeDefinition` SO + `UpgradeCatalog`, `RunSave.cs` (versioned JSON, CRC32, tmp+rename, .bak).
-- Phases: `DayPhase.Shop` (Payout -> Shop -> Morning/Sunday), `DayPhase.Collateral` (Sunday short + owned upgrades, 60 s sell-back, auto-pay).
-- Director partial `EconomyDirector.Shop.cs`: propose (client RPC) / host confirm, server re-validation, modifiers applied/removed, saves on Shop entry, each purchase, paid Sunday; eviction wipes save; Continue via `IRunSaveService` (new Core contract).
-- Core add-only: `IRunSaveService`, `DayParams.PlayerStaminaMult`, `DayParams.ToolsNetReachMult` (consumed in Gameplay StaminaModel/PlayerMotor/NetTool).
-- 13 upgrade assets via `UpgradeAssetBuilder.BuildUpgrades`.
+- FarmShop logic, 13 upgrade SOs, Shop + Collateral phases, propose/host-confirm, sell-back 50%, run save (CRC, .bak, versioned), Continue Farm in main menu, run-over block on EVICTED receipt with Back to Lobby / New Run.
+- Tests: EditMode 146/146, PlayMode 29 passed / 7 skipped (Explicit QA). Shop screenshot docs/qa/screens/unity-economy-shop.png.
 
-## Next
-- Shop UI (UI Toolkit, EconomyHud style), Collateral + run-over screen, HUD week/day.
-- MainMenu "Continue Farm" button (host screen).
-- EditMode + PlayMode tests, shop screenshot, full test run, self-review, contracts doc update.
+## Gaps / next
+- Vote is host-confirm (not 10 s majority); no Sunday "Give up" vote by all players (host button only).
+- Single save slot (GDD: 3); no guest checkpoint copy; save not written on host quit outside Shop.
+- No 2-peer PlayMode test of client proposal RPC; Collateral UI not screenshotted.
+- Electric Fence / Guard Dog / Bigger Wagon not implementable yet (no consumers).
