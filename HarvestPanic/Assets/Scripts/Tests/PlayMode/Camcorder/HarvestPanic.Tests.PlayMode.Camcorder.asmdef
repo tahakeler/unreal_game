@@ -1,0 +1,17 @@
+{
+    "name": "HarvestPanic.Tests.PlayMode.Camcorder",
+    "rootNamespace": "HarvestPanic.Tests.PlayMode.Camcorder",
+    "references": [
+        "HarvestPanic.Core", "HarvestPanic.Camcorder", "HarvestPanic.Gameplay", "HarvestPanic.Economy", "HarvestPanic.Networking",
+        "Unity.Netcode.Runtime", "Unity.Networking.Transport", "Unity.InputSystem", "UnityEngine.TestRunner", "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": ["nunit.framework.dll"],
+    "autoReferenced": false,
+    "defineConstraints": ["UNITY_INCLUDE_TESTS"],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

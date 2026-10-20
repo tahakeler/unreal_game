@@ -36,6 +36,7 @@ namespace HarvestPanic.UI
             bool start = Gamepad.current != null && (Gamepad.current.startButton.wasPressedThisFrame || (_open && Gamepad.current.buttonEast.wasPressedThisFrame));
             if (!(esc || start)) return;
             if (SettingsPanel.IsListening) return; // rebinding owns Esc (cancel)
+            if (Services.TryGet(out ICamcorderService cam) && cam.IsViewing) return; // camcorder viewer/shelf owns Esc (feature/camcorder)
             if (_open) Back();
             else if (UiFocus.ModalCount == 0) Open();
         }
@@ -130,6 +131,14 @@ namespace HarvestPanic.UI
             };
             _helpLayer = r.Q("pause-help"); _confirmLayer = r.Q("pause-confirm");
             r.Q<Button>("btn-help").clicked += OpenHelp;
+            // Camcorder (feature/camcorder): "Replays" opens the tape shelf when the camcorder service exists.
+            var help = r.Q<Button>("btn-help");
+            if (help != null && help.parent != null)
+            {
+                var replays = new Button(() => { if (Services.TryGet(out ICamcorderService cc)) { Close(); cc.OpenShelf(); } }) { name = "btn-replays", text = "Replays" };
+                foreach (var c in help.GetClasses()) replays.AddToClassList(c);
+                help.parent.Insert(help.parent.IndexOf(help) + 1, replays);
+            }
             r.Q<Button>("btn-leave").clicked += () => ShowLayer(Layer.Confirm);
             r.Q<Button>("btn-confirm-stay").clicked += () => ShowLayer(Layer.Main);
             r.Q<Button>("btn-confirm-leave").clicked += ConfirmLeave;

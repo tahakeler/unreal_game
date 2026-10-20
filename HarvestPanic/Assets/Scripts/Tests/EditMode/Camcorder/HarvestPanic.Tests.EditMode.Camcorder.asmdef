@@ -1,0 +1,19 @@
+{
+    "name": "HarvestPanic.Tests.EditMode.Camcorder",
+    "rootNamespace": "HarvestPanic.Tests.EditMode.Camcorder",
+    "references": [
+        "HarvestPanic.Core",
+        "HarvestPanic.Camcorder",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": ["nunit.framework.dll"],
+    "autoReferenced": false,
+    "defineConstraints": ["UNITY_INCLUDE_TESTS"],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
