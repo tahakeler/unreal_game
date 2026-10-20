@@ -45,6 +45,16 @@ namespace HarvestPanic.Core
         public const string BridgePlankBreakMult = "Bridge.PlankBreakMult";
         /// <summary>Player speed multiplier in mud.</summary>
         public const string MudSpeedMult = "Mud.SpeedMult";
+        /// <summary>River current multiplier: sweeps are this much faster (weather: rain 1.4, storm 1.8).</summary>
+        public const string RiverCurrentMult = "River.CurrentMult";
+        /// <summary>Open-ground player speed multiplier (rain-slick grass 0.92). Weather registers it as a movement source.</summary>
+        public const string WeatherGroundSpeedMult = "Weather.GroundSpeedMult";
+        /// <summary>Seconds of rain exposure before an outdoor goods item is soaked (0 = no soak).</summary>
+        public const string WeatherSoakSeconds = "Weather.SoakSeconds";
+        /// <summary>Wind speed in m/s (gusty 4-12; 0 = calm).</summary>
+        public const string WeatherWindSpeed = "Weather.WindSpeed";
+        /// <summary>Visibility in metres used by fog presentation (fog 15-30; 0 = default).</summary>
+        public const string WeatherFogDistance = "Weather.FogDistance";
     }
 
     /// <summary>
