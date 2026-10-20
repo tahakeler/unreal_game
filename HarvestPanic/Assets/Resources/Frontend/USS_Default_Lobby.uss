@@ -18,7 +18,7 @@
 .countdown-number.tick { scale: 1.25 1.25; }
 .countdown-number { transition-property: scale; transition-duration: 0.18s; }
 
-.ready-pill { position: absolute; left: 36px; bottom: 36px; flex-direction: row; align-items: center; padding: 8px 24px 8px 14px;
+.ready-pill { position: absolute; left: 36px; bottom: 124px; flex-direction: row; align-items: center; padding: 8px 24px 8px 14px;
     background-color: var(--paper); border-width: 4px; border-bottom-width: 8px; border-color: var(--ink); border-radius: 30px; }
 .ready-box { width: 36px; height: 36px; border-width: 4px; border-color: var(--ink); border-radius: 8px; background-color: var(--cream); margin-right: 14px; -unity-text-align: middle-center; }
 .ready-box.is-ready { background-color: var(--leaf); }
