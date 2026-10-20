@@ -197,16 +197,16 @@ namespace HarvestPanic.Economy
             BlameVerb verb = BlameVerb.Bruised;
             if (!IsHeld && now - _thrownAt <= Tuning.TouchWindow) verb = BlameVerb.Threw;
             else if (!IsHeld && now - _releasedAt <= Tuning.TouchWindow) verb = BlameVerb.Dropped;
-            ApplyBruise(impulse, _touches.LastToucher(now), verb);
+            ApplyBruise(ImpactUnits.ToDesign(impulse), _touches.LastToucher(now), verb);
         }
 
-        /// <summary>Server only. <paramref name="impulse"/> in N·s; converted with ImpactUnits.ToDesign.</summary>
+        /// <summary>Server only. <paramref name="impulse"/> in DESIGN units (already <c>ImpactUnits.ToDesign</c>'d), per the IGoods contract.</summary>
         public void ApplyBruise(float impulse, ulong instigator, BlameVerb verb)
         {
             if (!IsEconomyAuthority || Definition == null || kinematicCarry) return;
             var dir = EconomyDirector.Instance;
             float bruiseMult = dir != null ? dir.ResolveParam(DayModifierStack.Params.GoodsBruiseMult, 1f) : 1f;
-            float design = ImpactUnits.ToDesign(impulse);
+            float design = impulse;
             float dbp = EconomyMath.BruiseGain(design, Definition.Fragility, bruiseMult, Tuning);
             if (dbp <= 0f) return;
             LastBruiseKind = BruiseKind.Impact;

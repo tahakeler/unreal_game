@@ -27,7 +27,7 @@ namespace HarvestPanic.Core
         /// <summary>Head bone attach point for hats and glasses.</summary>
         Transform HeadAttachPoint { get; }
 
-        /// <summary>Plays an emote by id (e.g. "wave", "shout"); also generates the matching noise.</summary>
+        /// <summary>Plays an emote by id (e.g. "wave", "shout"); the implementation (Customization) emits any matching noise itself, so Player must not emit a second one.</summary>
         void PlayEmote(string emoteId);
 
         /// <summary>Starts or ends the faint/ragdoll-collapse pose.</summary>

@@ -50,7 +50,7 @@ namespace HarvestPanic.Core
         event Action<BruiseReport> OnBruised;
 
         /// <summary>
-        /// Server only. Applies an impact (N*s) and emits the resulting blame through the economy service.
+        /// Server only. Applies an impact in DESIGN units (callers convert raw Unity N*s with <c>ImpactUnits.ToDesign</c> first) and emits the resulting blame through the economy service.
         /// </summary>
         void ApplyBruise(float impulse, ulong instigator, BlameVerb verb);
 
