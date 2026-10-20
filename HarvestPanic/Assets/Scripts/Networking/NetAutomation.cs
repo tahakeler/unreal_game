@@ -26,7 +26,8 @@ namespace HarvestPanic.Networking
         int _quitCode;
         string _resultPath;
         string _lastError;
-        bool _hostLoadedAll;
+        bool _hostLoadedAll, _chatSent;
+        int _chatReceived;
 
         void Start()
         {
@@ -50,6 +51,7 @@ namespace HarvestPanic.Networking
                 if (scene == cfg.gameScene && completed.Count >= _expect) _hostLoadedAll = true;
                 Write($"serverSceneLoaded={scene} completed={completed.Count}");
             };
+            _session.OnChat += (from, text) => { _chatReceived++; Write($"chat from={from} text={text.Replace(' ', '_')}"); };
             Write($"role={(_host ? "host" : "client")} pid={System.Diagnostics.Process.GetCurrentProcess().Id}");
             if (_host) _session.HostLan("AutoTest", GameInfo.MaxPlayers);
             else _session.JoinLan(join);
@@ -67,6 +69,12 @@ namespace HarvestPanic.Networking
             string scene = SceneManager.GetActiveScene().name;
             int replicatedPlayers = CountPlayerObjects(nm);
 
+            if (!_host && !_chatSent && _session.IsConnected && _session.Players.Count >= _expect)
+            {
+                _chatSent = true;
+                _session.SendChat("  hello <b>farm</b>\u200B  ");
+            }
+
             if (_host && !_started && _session.Players.Count >= _expect && scene == _session.Config.lobbyScene && replicatedPlayers >= _expect)
             {
                 _started = true;
@@ -77,7 +85,7 @@ namespace HarvestPanic.Networking
             if (!_done && scene == _session.Config.gameScene && _session.Players.Count >= _expect && replicatedPlayers >= _expect && (!_host || _hostLoadedAll))
             {
                 _done = true;
-                Write($"ok=1 scene={scene} players={_session.Players.Count} replicated={replicatedPlayers} playerStartMarkers={LevelMarker.FindAll(MarkerRole.PlayerStart).Count} names={Names()}");
+                Write($"ok=1 scene={scene} players={_session.Players.Count} replicated={replicatedPlayers} playerStartMarkers={LevelMarker.FindAll(MarkerRole.PlayerStart).Count} chatReceived={_chatReceived} names={Names()}");
                 // Host lingers so the client can observe its final state; client exits when the host leaves or after 3 s.
                 ScheduleQuit(0, _host ? 4f : 3f);
             }
