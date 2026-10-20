@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1c4be60a9dce4954be9004617a11ca4, type: 3}
+  m_Name: ArmsTuning
+  m_EditorClassIdentifier: HarvestPanic.Gameplay::HarvestPanic.Gameplay.ArmsTuning
+  Shoulder: {x: -0.2, y: -0.3, z: -0.05}
+  UpperLength: 0.3
+  ForeLength: 0.32
+  ElbowPole: {x: -0.7, y: -1, z: -0.25}
+  MaxStretch: 1.6
+  IdleHand: {x: -0.19, y: -0.25, z: 0.52}
+  ReachDistance: 0.52
+  ReachHalfSpread: 0.13
+  ReachDrop: 0.12
+  ReachBlend: 0.65
+  GripInset: 0.02
+  GripLow: -0.55
+  GripMaxHalfSpread: 0.42
+  ThrowPull: 0.16
+  ThrowLift: 0.06
+  SwingHand: {x: -0.12, y: -0.1, z: 0.66}
+  SwingDuration: 0.3
+  Sharpness: 16
+  BreathAmplitude: 0.004
+  BreathHz: 0.28
+  LookSway: 0.00022
+  LookSwayMax: 0.035
+  LookSwaySharpness: 10
+  WalkBob: 0.012
+  UpperRadius: 0.058
+  ElbowRadius: 0.05
+  WristRadius: 0.034
+  SleeveFraction: 0.58
+  GloveStart: 0.86
+  GauntletRadius: 0.045
+  HandScale: 1.05
+  Shirt: {r: 0.78, g: 0.33, b: 0.24, a: 1}
+  Glove: {r: 0.56, g: 0.38, b: 0.22, a: 1}
+  Skin: {r: 0.93, g: 0.72, b: 0.56, a: 1}
+  CuffShade: 0.82
+  Smoothness: 0.2

@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: HarvestPanic.Gameplay::HarvestPanic.Gameplay.CarryTuning
   GrabRange: 1.8
   GrabRangeSlack: 0.75
-  HoldDistance: 1.25
-  HoldDrop: 0.35
+  HoldDistance: 1.05
+  HoldDrop: 0.3
   ToolHoldOffset: {x: 0.32, y: -0.38, z: 0.65}
   TapVsHoldSeconds: 0.25
   HandStiffness: 1500

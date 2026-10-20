@@ -73,6 +73,43 @@ namespace HarvestPanic.Gameplay.Editor
             Debug.Log("[PlayerAssetBuilder] Done.");
         }
 
+        /// <summary>Rebuilds only the feed bucket + net prefabs (same paths/GUIDs; Player prefab and scene untouched).</summary>
+        [MenuItem("Harvest Panic/Player/Rebuild Tool Prefabs")]
+        public static void BuildToolPrefabs()
+        {
+            EnsureFolder(ToolsDir); EnsureFolder(MatDir);
+            var tt = LoadOrCreate<ToolTuning>(ToolsDir + "/ToolTuning.asset");
+            BuildFeedBucket(tt);
+            BuildNet(tt);
+            AssetDatabase.SaveAssets();
+            Debug.Log("[PlayerAssetBuilder] Tool prefabs rebuilt.");
+        }
+
+        /// <summary>Owner's Tripo3D mesh (real size; bucket base-centre pivot, net grip-end pivot along +Z), or null.</summary>
+        static GameObject TripoModel(string name, Transform parent, Vector3 localPos)
+        {
+            var src = AssetDatabase.LoadAssetAtPath<GameObject>($"Assets/ThirdParty/Tripo/{name}/{name}.fbx");
+            if (src == null) return null;
+            var go = (GameObject)PrefabUtility.InstantiatePrefab(src);
+            go.name = "Tripo_" + name;
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = localPos;
+            foreach (var t in go.GetComponentsInChildren<Transform>(true)) t.gameObject.layer = parent.gameObject.layer;
+            return go;
+        }
+
+        static Bounds LocalBounds(Transform space, GameObject go)
+        {
+            bool any = false; var b = new Bounds();
+            foreach (var mf in go.GetComponentsInChildren<MeshFilter>())
+                foreach (var v in mf.sharedMesh.vertices)
+                {
+                    var p = space.InverseTransformPoint(mf.transform.TransformPoint(v));
+                    if (!any) { b = new Bounds(p, Vector3.zero); any = true; } else b.Encapsulate(p);
+                }
+            return b;
+        }
+
         // ---- Player ------------------------------------------------------------------------------------------
 
         static GameObject BuildPlayer(PlayerTuning pt, CarryTuning ct)
@@ -113,21 +150,11 @@ namespace HarvestPanic.Gameplay.Editor
             viewCam.gameObject.AddComponent<AudioListener>();
             viewCam.gameObject.SetActive(false);
 
-            // First-person arms (owner only).
+            // First-person arms (owner only): procedural rig, see FirstPersonArmsRig.
             var arms = Child(camPivot, "FirstPersonArms", Vector3.zero);
             var sleeve = Mat("Sleeve", new Color(0.72f, 0.2f, 0.16f));
             var skin = Mat("Skin", new Color(0.93f, 0.72f, 0.56f));
             var glove = Mat("Glove", new Color(0.55f, 0.38f, 0.2f));
-            Transform ArmPart(string n, PrimitiveType t, Material m, Vector3 s)
-            {
-                var g = Prim(t, n, arms, Vector3.zero, s, m);
-                g.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
-                return g.transform;
-            }
-            var sL = ArmPart("SleeveL", PrimitiveType.Capsule, sleeve, new Vector3(0.1f, 0.3f, 0.1f));
-            var hL = ArmPart("HandL", PrimitiveType.Cube, glove, new Vector3(0.09f, 0.06f, 0.12f));
-            var sR = ArmPart("SleeveR", PrimitiveType.Capsule, sleeve, new Vector3(0.1f, 0.3f, 0.1f));
-            var hR = ArmPart("HandR", PrimitiveType.Cube, glove, new Vector3(0.09f, 0.06f, 0.12f));
 
             // Customization's FarmerBody (no NetworkObject of its own) is the third-person body when present.
             var farmerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Farmer/FarmerBody.prefab");
@@ -189,11 +216,47 @@ namespace HarvestPanic.Gameplay.Editor
 
             var view = root.AddComponent<PlayerView>();
             Set(view, "vcam", vcam);
-            Set(view, "armSleeveL", sL); Set(view, "armHandL", hL); Set(view, "armSleeveR", sR); Set(view, "armHandR", hR);
             if (farmer == null) { Set(view, "bodyArmL", armL); Set(view, "bodyArmR", armR); Set(view, "bodyLegL", legL); Set(view, "bodyLegR", legR); }
             root.AddComponent<PlayerPromptOverlay>();
+            ConfigureFirstPersonPresentation(root);
 
             return Save(root, PlayerPrefabPath);
+        }
+
+        /// <summary>
+        /// Upgrades only Player.prefab in place (FP arms rig + UI Toolkit centre HUD), leaving tools/props untouched.
+        /// Batchmode: -executeMethod HarvestPanic.Gameplay.Editor.PlayerAssetBuilder.UpgradePlayerPrefab
+        /// </summary>
+        [MenuItem("Harvest Panic/Player/Upgrade Player Prefab (arms + centre HUD)")]
+        public static void UpgradePlayerPrefab()
+        {
+            var root = PrefabUtility.LoadPrefabContents(PlayerPrefabPath);
+            try
+            {
+                ConfigureFirstPersonPresentation(root);
+                PrefabUtility.SaveAsPrefabAsset(root, PlayerPrefabPath);
+            }
+            finally { PrefabUtility.UnloadPrefabContents(root); }
+            AssetDatabase.SaveAssets();
+            Debug.Log("[PlayerAssetBuilder] Player prefab upgraded.");
+        }
+
+        static void ConfigureFirstPersonPresentation(GameObject root)
+        {
+            var arms = root.GetComponent<PlayerCharacter>() != null ? (Transform)new SerializedObject(root.GetComponent<PlayerCharacter>()).FindProperty("firstPersonArms").objectReferenceValue : null;
+            if (arms == null) { Debug.LogError("[PlayerAssetBuilder] Player has no FirstPersonArms"); return; }
+            for (int i = arms.childCount - 1; i >= 0; i--) Object.DestroyImmediate(arms.GetChild(i).gameObject);
+            var rig = arms.GetComponent<FirstPersonArmsRig>();
+            if (rig == null) rig = arms.gameObject.AddComponent<FirstPersonArmsRig>();
+            Set(rig, "tuning", LoadOrCreate<ArmsTuning>(TuningDir + "/ArmsTuning.asset"));
+            Set(rig, "baseMaterial", Mat("Sleeve", new Color(0.72f, 0.2f, 0.16f)));
+
+            var overlay = root.GetComponent<PlayerPromptOverlay>();
+            if (overlay == null) overlay = root.AddComponent<PlayerPromptOverlay>();
+            Set(overlay, "panelSettings", AssetDatabase.LoadAssetAtPath<UnityEngine.UIElements.PanelSettings>("Assets/Prefabs/HUD/EconomyHudPanel.asset"));
+            Set(overlay, "styleSheet", AssetDatabase.LoadAssetAtPath<UnityEngine.UIElements.StyleSheet>(PlayerDir + "/UI/PlayerCentreHud.uss"));
+            Set(overlay, "headlineFont", AssetDatabase.LoadAssetAtPath<Font>("Assets/ThirdParty/Fonts/LilitaOne/LilitaOne-Regular.ttf"));
+            Set(overlay, "bodyFont", AssetDatabase.LoadAssetAtPath<Font>("Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"));
         }
 
         // ---- Tools and props ----------------------------------------------------------------------------------
@@ -218,6 +281,16 @@ namespace HarvestPanic.Gameplay.Editor
         {
             var root = NetProp("FeedBucket", out var v);
             var box = root.AddComponent<BoxCollider>(); box.size = new Vector3(0.32f, 0.36f, 0.32f); box.center = new Vector3(0f, 0.18f, 0f);
+            var tripo = TripoModel("FeedBucket", v, Vector3.zero);
+            if (tripo != null)
+            {
+                var b = LocalBounds(root.transform, tripo);
+                box.size = b.size; box.center = b.center;
+                var tool0 = root.AddComponent<FeedBucketTool>();
+                tool0.Configure(1, 3f, true);
+                Set(tool0, "tuning", tt);
+                return Save(root, ToolsDir + "/FeedBucket.prefab");
+            }
             var metal = Mat("BucketMetal", new Color(0.62f, 0.66f, 0.7f), 0.6f, 0.5f);
             var feed = Mat("Feed", new Color(0.93f, 0.76f, 0.25f));
             Prim(PrimitiveType.Cylinder, "Pail", v, new Vector3(0f, 0.16f, 0f), new Vector3(0.3f, 0.16f, 0.3f), metal);
@@ -235,6 +308,19 @@ namespace HarvestPanic.Gameplay.Editor
         {
             var root = NetProp("Net", out var v);
             var box = root.AddComponent<BoxCollider>(); box.size = new Vector3(0.5f, 0.5f, 1.5f); box.center = new Vector3(0f, 0f, 0.45f);
+            // Grip end sits 0.25 m behind the hold point (same reach as the placeholder pole), hoop forward on +Z.
+            var tripo = TripoModel("Net", v, new Vector3(0f, 0f, -0.25f));
+            if (tripo != null)
+            {
+                var b = LocalBounds(root.transform, tripo);
+                box.size = b.size; box.center = b.center;
+                // Bag point: hoop/pocket centre (front 30% of the length, mid-height of the pocket).
+                var bp = Child(root.transform, "BagPoint", new Vector3(b.center.x, b.center.y, b.max.z - b.size.z * 0.2f));
+                var tool0 = root.AddComponent<NetTool>();
+                tool0.Configure(1, 2f, true);
+                Set(tool0, "tuning", tt); Set(tool0, "bagPoint", bp);
+                return Save(root, ToolsDir + "/Net.prefab");
+            }
             var wood = Mat("NetPole", new Color(0.55f, 0.4f, 0.24f));
             var rope = Mat("NetRope", new Color(0.92f, 0.9f, 0.82f));
             var pole = Prim(PrimitiveType.Cylinder, "Pole", v, new Vector3(0f, 0f, 0.25f), new Vector3(0.04f, 0.55f, 0.04f), wood);

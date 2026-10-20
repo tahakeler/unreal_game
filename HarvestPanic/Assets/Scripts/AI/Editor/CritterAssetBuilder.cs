@@ -41,14 +41,21 @@ namespace HarvestPanic.AI.Editor
             public Fit Fit; public float TargetM;
             public int BaseValue, CarryHands; public float Fragility, MassKg;
             public Color Tint = Color.white;
+            /// <summary>Preferred rig-free Tripo mesh (<c>Assets/ThirdParty/Tripo/&lt;name&gt;</c>); the Quaternius FBX is the fallback.</summary>
+            public string Tripo; public float TripoTargetM; public CritterProceduralAnim.Style AnimStyle;
         }
+
+        public const string TripoDir = "Assets/ThirdParty/Tripo";
+        public static string TripoFbx(Spec s) => string.IsNullOrEmpty(s.Tripo) ? null : $"{TripoDir}/{s.Tripo}/{s.Tripo}.fbx";
 
         public static readonly Spec[] Specs =
         {
             new Spec { Name = "Pig", Fbx = AnimalsDir + "/Pig/Pig.fbx", HeadBone = "Head", CritterId = "Critter.Pig", GoodsId = "Livestock.Pig", ShortId = "pig",
-                       Fit = Fit.Length, TargetM = 1.10f, BaseValue = 60, CarryHands = 2, Fragility = 0.8f, MassKg = 30f, Tint = new Color(0.949f, 0.639f, 0.627f) },
+                       Fit = Fit.Length, TargetM = 1.10f, BaseValue = 60, CarryHands = 2, Fragility = 0.8f, MassKg = 30f, Tint = new Color(0.949f, 0.639f, 0.627f),
+                       Tripo = "Pig_Hamlet", TripoTargetM = 1.10f, AnimStyle = CritterProceduralAnim.Style.Pig },
             new Spec { Name = "Chicken", Fbx = AnimalsDir + "/Chicken/Chicken.fbx", HeadBone = "Body_end", CritterId = "Critter.Chicken", GoodsId = "Livestock.Chicken", ShortId = "chicken",
-                       Fit = Fit.Height, TargetM = 0.33f, BaseValue = 15, CarryHands = 1, Fragility = 0.6f, MassKg = 2.5f, Tint = new Color(0.97f, 0.95f, 0.88f) },
+                       Fit = Fit.Height, TargetM = 0.33f, BaseValue = 15, CarryHands = 1, Fragility = 0.6f, MassKg = 2.5f, Tint = new Color(0.97f, 0.95f, 0.88f),
+                       Tripo = "Chicken", TripoTargetM = 0.40f, AnimStyle = CritterProceduralAnim.Style.Chicken },
         };
 
         [MenuItem("Harvest Panic/Critters/Build Critter Assets")]
@@ -239,6 +246,8 @@ namespace HarvestPanic.AI.Editor
 
         static GameObject BuildPrefab(Spec s, CritterPersonality p, CritterTuning tuning)
         {
+            var tripo = TripoFbx(s) != null ? AssetDatabase.LoadAssetAtPath<GameObject>(TripoFbx(s)) : null;
+            if (tripo != null) return BuildTripoPrefab(s, p, tuning, tripo);
             var modelAsset = AssetDatabase.LoadAssetAtPath<GameObject>(s.Fbx) ?? throw new InvalidOperationException("Missing " + s.Fbx);
             var ac = BuildController(s, p, out _);
 
@@ -306,6 +315,72 @@ namespace HarvestPanic.AI.Editor
         }
 
         /// <summary>
+        /// Rig-free variant: Tripo mesh under a "Model" pivot animated by <see cref="CritterProceduralAnim"/>
+        /// (no Animator / NetworkAnimator; animation is derived locally from replicated state + motion).
+        /// </summary>
+        static GameObject BuildTripoPrefab(Spec s, CritterPersonality p, CritterTuning tuning, GameObject tripo)
+        {
+            var root = new GameObject("Critter_" + s.Name);
+            int layer = LayerMask.NameToLayer(GameLayers.Critter);
+            try
+            {
+                var pivot = new GameObject("Model").transform;
+                pivot.SetParent(root.transform, false);
+                var mesh = (GameObject)PrefabUtility.InstantiatePrefab(tripo);
+                mesh.name = "Mesh";
+                mesh.transform.SetParent(pivot, false);
+                // Tripo export is already real-size, +Z forward, feet at 0; re-fit defensively to the spec size.
+                var fit = new Spec { Fit = s.Fit, TargetM = s.TripoTargetM > 0f ? s.TripoTargetM : s.TargetM };
+                var bounds = FitModel(mesh.transform, fit);
+                foreach (var t in root.GetComponentsInChildren<Transform>(true)) t.gameObject.layer = layer;
+                var renderer = mesh.GetComponentInChildren<Renderer>();
+                foreach (var r in mesh.GetComponentsInChildren<Renderer>(true)) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+
+                var box = root.AddComponent<BoxCollider>();
+                box.center = bounds.center;
+                box.size = bounds.size;
+
+                var rb = root.AddComponent<Rigidbody>();
+                rb.isKinematic = true;
+                rb.mass = s.MassKg;
+                rb.interpolation = RigidbodyInterpolation.None;
+                rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+
+                var agent = root.AddComponent<NavMeshAgent>();
+                agent.radius = Mathf.Clamp(Mathf.Min(bounds.size.x, bounds.size.z) * 0.5f, 0.1f, 1f);
+                agent.height = Mathf.Max(0.2f, bounds.size.y);
+                agent.speed = p.MoveSpeed; agent.acceleration = p.Acceleration; agent.angularSpeed = 720f;
+                agent.obstacleAvoidanceType = ObstacleAvoidanceType.LowQualityObstacleAvoidance;
+
+                var eye = new GameObject("Eye").transform;
+                eye.SetParent(root.transform, false);
+                eye.localPosition = new Vector3(0f, bounds.size.y * 0.8f, bounds.max.z * 0.8f);
+
+                root.AddComponent<NetworkObject>();
+                var nt = root.AddComponent<NetworkTransform>();
+                nt.SyncScaleX = nt.SyncScaleY = nt.SyncScaleZ = false;
+
+                var brain = root.AddComponent<CritterBrain>();
+                var bso = new SerializedObject(brain);
+                bso.FindProperty("personality").objectReferenceValue = p;
+                bso.FindProperty("tuning").objectReferenceValue = tuning;
+                bso.FindProperty("eye").objectReferenceValue = eye;
+                bso.ApplyModifiedPropertiesWithoutUndo();
+
+                root.AddComponent<CritterGoods>().ConfigureFallback(s.GoodsId, s.ShortId, s.BaseValue, s.Fragility, s.CarryHands, s.MassKg);
+                root.AddComponent<CritterCarryable>();
+                root.AddComponent<CritterPresentation>().Configure(null, null);   // procedural anim owns the pivot
+                root.AddComponent<CritterProceduralAnim>().Configure(pivot, s.AnimStyle, bounds.size.y * 0.45f, renderer);
+
+                string path = $"{PrefabDir}/Critter_{s.Name}.prefab";
+                var prefab = PrefabUtility.SaveAsPrefabAsset(root, path);
+                Debug.Log($"[CritterAssetBuilder] {s.Name} (Tripo): bounds size {bounds.size} (m), scale {mesh.transform.localScale.x:0.####}");
+                return prefab;
+            }
+            finally { UnityEngine.Object.DestroyImmediate(root); }
+        }
+
+        /// <summary>
         /// Rotates the model so its head points +Z, scales it to the spec (length or height), and puts the feet at y = 0.
         /// Returns the final local bounds relative to the prefab root.
         /// </summary>
@@ -313,7 +388,7 @@ namespace HarvestPanic.AI.Editor
         {
             model.localPosition = Vector3.zero; model.localRotation = Quaternion.identity; model.localScale = Vector3.one;
             var b = MeasureLocal(model.parent, model);
-            var head = model.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == s.HeadBone);
+            var head = string.IsNullOrEmpty(s.HeadBone) ? null : model.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == s.HeadBone);
             if (head != null)
             {
                 Vector3 toHead = model.parent.InverseTransformPoint(head.position) - b.center; toHead.y = 0f;

@@ -1,0 +1,51 @@
+/* HARVEST PANIC centre HUD (player-character 5f) - art-bible §7: paper #F6EBD3, ink #2B2118,
+   cream interact rim #FFF4D6. Lilita One key caps, Nunito ExtraBold labels. 1080p reference px. */
+
+.hp-centre { position: absolute; left: 0; top: 0; right: 0; bottom: 0; align-items: center; justify-content: center; }
+
+/* Reticle: 8 px dot that opens into a 30 px ring on a grabbable. Ink outline so it reads on sky and wheat. */
+.hp-reticle {
+    position: absolute; left: 50%; top: 50%;
+    width: 10px; height: 10px; translate: -50% -50%;
+    border-radius: 15px; border-width: 2px; border-color: rgba(43, 33, 24, 0.85);
+    background-color: #FFF4D6;
+    align-items: center; justify-content: center;
+    transition-property: width, height, background-color, border-width;
+    transition-duration: 0.12s; transition-timing-function: ease-out-back;
+}
+.hp-reticle-dot { width: 0; height: 0; border-radius: 4px; background-color: #FFF4D6; }
+.hp-reticle--grab {
+    width: 34px; height: 34px;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 4px; border-color: #FFF4D6;
+}
+.hp-reticle--grab > .hp-reticle-dot { width: 6px; height: 6px; border-width: 1px; border-color: rgba(43, 33, 24, 0.85); }
+.hp-reticle--holding { width: 8px; height: 8px; opacity: 0.7; }
+
+/* Stamina arc beside the reticle (drawn in code). */
+.hp-stamina {
+    position: absolute; left: 50%; top: 50%; width: 92px; height: 92px; translate: -50% -50%;
+    opacity: 1; transition-property: opacity; transition-duration: 0.35s;
+}
+.hp-stamina--hidden { opacity: 0; }
+.hp-winded {
+    position: absolute; left: 50%; top: 50%; translate: 34px -64px;
+    font-size: 18px; color: #FFF4D6; background-color: #E5483B;
+    border-color: #2B2118; border-width: 2px; border-radius: 4px; padding: 0 6px;
+}
+
+/* Prompt chip under the reticle: paper card, ink border, key caps. */
+.hp-prompt {
+    position: absolute; left: 50%; top: 50%; translate: -50% 62px;
+    flex-direction: row; align-items: center;
+    background-color: #F6EBD3; border-color: #2B2118; border-width: 2px; border-radius: 6px;
+    border-bottom-width: 4px; border-right-width: 3px;
+    padding: 4px 0 4px 6px;
+}
+.hp-prompt-action { flex-direction: row; align-items: center; margin-right: 10px; }
+.hp-key {
+    font-size: 22px; color: #F6EBD3; background-color: #2B2118;
+    border-radius: 5px; padding: 0 8px; margin-right: 6px; min-width: 30px;
+    -unity-text-align: middle-center;
+}
+.hp-prompt-text { font-size: 22px; color: #2B2118; white-space: nowrap; }

@@ -164,6 +164,7 @@ namespace HarvestPanic.Economy
             _clockTime.EnableInClassList("hp-clock-urgent", timed && phase != DayPhase.Morning && rem < 60f);
             _clock.EnableInClassList("hp-clock-dusk", phase == DayPhase.Dusk);
             _clockSub.text = phase == DayPhase.Workday && rem < 30f ? "SUNDOWN!" : phase == DayPhase.Dusk ? "night market ×1.25" : phase == DayPhase.Morning ? "market opens soon" : "";
+            _clockSub.style.display = string.IsNullOrEmpty(_clockSub.text) ? DisplayStyle.None : DisplayStyle.Flex;
 
             var order = d.Order;
             string key = "";

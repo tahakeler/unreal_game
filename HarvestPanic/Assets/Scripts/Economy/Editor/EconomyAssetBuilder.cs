@@ -30,16 +30,16 @@ namespace HarvestPanic.Economy.Editor
 
         struct GoodsSpec
         {
-            public string Id, Asset, Mesh; public GoodsCategory Cat; public int Base; public float Frag; public int Hands; public float Mass; public bool Alive;
+            public string Id, Asset, Mesh, Tripo; public GoodsCategory Cat; public int Base; public float Frag; public int Hands; public float Mass; public bool Alive;
         }
 
         static readonly GoodsSpec[] Specs =
         {
-            new GoodsSpec { Id = "Livestock.Pig", Asset = "Pig", Mesh = "SM_Pig", Cat = GoodsCategory.Livestock, Base = 60, Frag = 0.8f, Hands = 2, Mass = 40f, Alive = true },
-            new GoodsSpec { Id = "Livestock.Chicken", Asset = "Chicken", Mesh = "SM_Chicken", Cat = GoodsCategory.Livestock, Base = 15, Frag = 0.6f, Hands = 1, Mass = 5f, Alive = true },
+            new GoodsSpec { Id = "Livestock.Pig", Asset = "Pig", Mesh = "SM_Pig", Tripo = "Pig_Hamlet", Cat = GoodsCategory.Livestock, Base = 60, Frag = 0.8f, Hands = 2, Mass = 40f, Alive = true },
+            new GoodsSpec { Id = "Livestock.Chicken", Asset = "Chicken", Mesh = "SM_Chicken", Tripo = "Chicken", Cat = GoodsCategory.Livestock, Base = 15, Frag = 0.6f, Hands = 1, Mass = 5f, Alive = true },
             new GoodsSpec { Id = "Product.Egg", Asset = "Egg", Mesh = "SM_Egg", Cat = GoodsCategory.Product, Base = 5, Frag = 2f, Hands = 1, Mass = 0.06f },
-            new GoodsSpec { Id = "Product.Crate", Asset = "EggCrate", Mesh = "SM_Crate", Cat = GoodsCategory.Product, Base = 30, Frag = 1.5f, Hands = 2, Mass = 4f },
-            new GoodsSpec { Id = "Crop.PrizePumpkin", Asset = "PrizePumpkin", Mesh = "SM_PrizePumpkin", Cat = GoodsCategory.Crop, Base = 300, Frag = 1.5f, Hands = 8, Mass = 180f },
+            new GoodsSpec { Id = "Product.Crate", Asset = "EggCrate", Mesh = "SM_Crate", Tripo = "EggBasket", Cat = GoodsCategory.Product, Base = 30, Frag = 1.5f, Hands = 2, Mass = 4f },
+            new GoodsSpec { Id = "Crop.PrizePumpkin", Asset = "PrizePumpkin", Mesh = "SM_PrizePumpkin", Tripo = "PrizePumpkin", Cat = GoodsCategory.Crop, Base = 300, Frag = 1.5f, Hands = 8, Mass = 180f },
             new GoodsSpec { Id = "Crop.Turnip", Asset = "Turnip", Mesh = "SM_Turnip", Cat = GoodsCategory.Crop, Base = 10, Frag = 1f, Hands = 1, Mass = 2f },
             new GoodsSpec { Id = "Crop.Carrot", Asset = "Carrot", Mesh = "SM_Carrot", Cat = GoodsCategory.Crop, Base = 8, Frag = 0.8f, Hands = 1, Mass = 0.3f },
         };
@@ -63,6 +63,28 @@ namespace HarvestPanic.Economy.Editor
             BuildTestScene(director);
             AssetDatabase.SaveAssets();
             Debug.Log("[EconomyAssetBuilder] done");
+        }
+
+        /// <summary>Rebuilds only the goods props + definitions (keeps HUD/director/test scene untouched).</summary>
+        [MenuItem("HarvestPanic/Economy/Rebuild Goods Props")]
+        public static void RebuildGoodsProps()
+        {
+            ConfigureMeshImports();
+            foreach (var s in Specs) BuildGoods(s);
+            AssetDatabase.SaveAssets();
+            Content.Goods.Invalidate();
+            Debug.Log("[EconomyAssetBuilder] goods props rebuilt");
+        }
+
+        /// <summary>Owner's Tripo3D mesh (real size, base pivot) when present; the Quaternius mesh otherwise.</summary>
+        static GameObject GoodsModel(GoodsSpec s)
+        {
+            if (!string.IsNullOrEmpty(s.Tripo))
+            {
+                var t = AssetDatabase.LoadAssetAtPath<GameObject>($"Assets/ThirdParty/Tripo/{s.Tripo}/{s.Tripo}.fbx");
+                if (t != null) return t;
+            }
+            return AssetDatabase.LoadAssetAtPath<GameObject>($"{Meshes}/{s.Mesh}.fbx");
         }
 
         // ---------------- helpers ----------------
@@ -100,7 +122,7 @@ namespace HarvestPanic.Economy.Editor
             var def = LoadOrCreate<GoodsDefinition>($"{GoodsData}/Goods_{s.Asset}.asset");
             string prefabPath = $"{GoodsPrefabs}/GoodsProp_{s.Asset}.prefab";
 
-            var model = AssetDatabase.LoadAssetAtPath<GameObject>($"{Meshes}/{s.Mesh}.fbx");
+            var model = GoodsModel(s);
             var root = new GameObject("GoodsProp_" + s.Asset);
             int layer = LayerMask.NameToLayer(GameLayers.Carryable);
             if (model != null)
