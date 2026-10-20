@@ -20,10 +20,12 @@ namespace HarvestPanic.Economy
             var go = new GameObject("[EconomyBootstrapper]") { hideFlags = HideFlags.HideAndDontSave };
             DontDestroyOnLoad(go);
             go.AddComponent<EconomyBootstrapper>();
+            RunSaveService.Install();
         }
 
         void Update()
         {
+            if (!Services.TryGet(out IRunSaveService _)) RunSaveService.Install(); // Services.Clear (tests) drops it
             if (Time.unscaledTime < _next) return;
             _next = Time.unscaledTime + 0.5f;
             var nm = NetworkManager.Singleton;

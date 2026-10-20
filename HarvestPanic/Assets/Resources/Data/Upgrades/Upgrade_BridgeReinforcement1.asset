@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9aea9a603bd6046e1a721475f16a5bec, type: 3}
+  m_Name: Upgrade_BridgeReinforcement1
+  m_EditorClassIdentifier: HarvestPanic.Economy::HarvestPanic.Economy.UpgradeDefinition
+  UpgradeId: Upgrade.BridgeReinforcement1
+  DisplayName: Bridge Reinforcement I
+  Description: Planks break 30% less and hold 20% more weight.
+  Price: 300
+  Tier: 1
+  RequiresId: 
+  Staple: 1
+  Modifier: {fileID: 11400000, guid: c20fd4c91db74468bb33bac387d9232a, type: 2}
+  FlavorLine: Grandpa nails one more nail in.

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9aea9a603bd6046e1a721475f16a5bec, type: 3}
+  m_Name: Upgrade_StallSign
+  m_EditorClassIdentifier: HarvestPanic.Economy::HarvestPanic.Economy.UpgradeDefinition
+  UpgradeId: Upgrade.StallSign
+  DisplayName: Market Stall Sign
+  Description: Market demand +0.05 on everything.
+  Price: 350
+  Tier: 2
+  RequiresId: 
+  Staple: 0
+  Modifier: {fileID: 11400000, guid: 4851b69d4b3e04fe8bee9ffa0e08a7f8, type: 2}
+  FlavorLine: '"FRESH-ISH" in big letters.'

@@ -108,7 +108,7 @@ namespace HarvestPanic.Gameplay
 
             // Stamina arc: shown while below max; fades after staminaHideDelay at full.
             var st = _pc.Motor != null ? _pc.Motor.Stamina : null;
-            float max = Mathf.Max(1f, _pc.Tuning.StaminaMax);
+            float max = Mathf.Max(1f, st != null ? st.Max : _pc.Tuning.StaminaMax);
             float frac = st != null ? Mathf.Clamp01(st.Value / max) : 1f;
             bool exhausted = st != null && st.Exhausted;
             if (frac >= 0.999f) { if (_fullSince < 0f) _fullSince = Time.unscaledTime; }

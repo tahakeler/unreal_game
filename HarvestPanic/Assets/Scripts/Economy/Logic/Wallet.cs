@@ -37,6 +37,14 @@ namespace HarvestPanic.Economy
             _history.Clear();
         }
 
+        /// <summary>Save load: restores balance and IOU (history restarts; audit is per session).</summary>
+        public void Restore(int balance, int iou)
+        {
+            _history.Clear();
+            StartingBalance = Balance = Math.Max(_t.OverdraftFloor, Math.Min(_t.BalanceCap, balance));
+            IouThisWeek = Math.Max(0, iou);
+        }
+
         /// <summary>Sunday settled: IOU cleared.</summary>
         public void ClearIou() => IouThisWeek = 0;
 

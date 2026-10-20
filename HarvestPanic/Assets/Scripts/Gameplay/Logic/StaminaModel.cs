@@ -18,6 +18,12 @@ namespace HarvestPanic.Gameplay
         /// <summary>True after hitting 0 until stamina recovers to the resume value.</summary>
         public bool Exhausted { get; private set; }
 
+        /// <summary>Upgrade multiplier on max stamina and regen (DayParams.PlayerStaminaMult), default 1.</summary>
+        public float Mult { get; set; } = 1f;
+
+        /// <summary>Effective max stamina.</summary>
+        public float Max => _t.StaminaMax * Mathf.Max(0.1f, Mult);
+
         /// <summary>Sprinting is allowed.</summary>
         public bool CanSprint => !Exhausted && Value > 0f;
 
@@ -50,7 +56,7 @@ namespace HarvestPanic.Gameplay
             else
             {
                 _sinceDrain += dt;
-                if (_sinceDrain >= _t.StaminaRegenDelay) Value = Mathf.Min(_t.StaminaMax, Value + _t.StaminaRegen * dt);
+                if (_sinceDrain >= _t.StaminaRegenDelay) Value = Mathf.Min(Max, Value + _t.StaminaRegen * Mathf.Max(0.1f, Mult) * dt);
             }
 
             if (Value <= 0f) Exhausted = true;

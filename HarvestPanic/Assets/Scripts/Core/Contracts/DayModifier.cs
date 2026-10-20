@@ -45,6 +45,10 @@ namespace HarvestPanic.Core
         public const string BridgePlankBreakMult = "Bridge.PlankBreakMult";
         /// <summary>Player speed multiplier in mud.</summary>
         public const string MudSpeedMult = "Mud.SpeedMult";
+        /// <summary>Multiplier on max stamina and regen (Grandpa's Boots upgrade). Consumer: Player.</summary>
+        public const string PlayerStaminaMult = "Player.StaminaMult";
+        /// <summary>Multiplier on net reach (Better Nets upgrade). Consumer: Player tools.</summary>
+        public const string ToolsNetReachMult = "Tools.NetReachMult";
     }
 
     /// <summary>
