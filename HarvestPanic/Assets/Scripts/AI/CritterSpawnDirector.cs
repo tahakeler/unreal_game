@@ -49,28 +49,22 @@ namespace HarvestPanic.AI
                 return;
             }
             if (nm != null && !nm.IsServer) return;
-            // Objects spawned while the server is still loading the scene for clients are not delivered to them;
-            // wait for the NGO scene event to complete, then spawn (a solo host has no scene event and spawns now).
-            if (nm != null && nm.SceneManager != null && nm.SceneManager.IsSceneEventInProgress())
-            {
-                if (!_waitingSceneEvent)
-                {
-                    _waitingSceneEvent = true;
-                    nm.SceneManager.OnLoadEventCompleted += OnSceneEventDone;
-                }
-                return;
-            }
+            // Objects spawned while the server is still loading the scene for clients are not delivered to them:
+            // wait for the NGO scene event to complete (a solo host never loads a networked scene and spawns now).
+            HookSceneEvents(nm);
+            if (nm != null && _sceneLoading) return;
             SpawnForMarkers(LevelMarker.FindAll(MarkerRole.CritterSpawner), nm != null && nm.IsListening);
         }
 
-        bool _waitingSceneEvent;
+        bool _sceneLoading;
+        NetworkSceneManager _hookedScenes;
 
-        void OnSceneEventDone(string sceneName, LoadSceneMode mode, List<ulong> completed, List<ulong> timedOut)
+        void HookSceneEvents(NetworkManager nm)
         {
-            _waitingSceneEvent = false;
-            var nm = NetworkManager.Singleton;
-            if (nm != null && nm.SceneManager != null) nm.SceneManager.OnLoadEventCompleted -= OnSceneEventDone;
-            TrySpawnAll();
+            if (nm == null || nm.SceneManager == null || _hookedScenes == nm.SceneManager) return;
+            _hookedScenes = nm.SceneManager;
+            nm.SceneManager.OnLoad += (id, scene, mode, op) => { if (id == nm.LocalClientId) _sceneLoading = true; };
+            nm.SceneManager.OnLoadEventCompleted += (scene, mode, done, timedOut) => { _sceneLoading = false; TrySpawnAll(); };
         }
 
         void SpawnForMarkers(List<LevelMarker> markers, bool networked)

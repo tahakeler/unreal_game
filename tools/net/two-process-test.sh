@@ -23,9 +23,9 @@ echo "--- client ($CC)"; cat "$OUT/client.txt" 2>/dev/null
 # Muddlebury state seen by each peer (SessionStateProbe lines): host has critters+goods+economy, both see 2 farmers with loadouts.
 if [ "${NET_GAME_SCENE:-Muddlebury}" = "Muddlebury" ]; then
   grep -E "state role=host critters=[1-9][0-9]* goods=[1-9][0-9]* economy=1 .* farmers=2 loadouts=.*body" "$OUT/host.txt" | tail -1 | sed 's/^/host-state: /'
-  grep -E "state role=client .* farmers=2 loadouts=.*;.*body" "$OUT/client.txt" | tail -1 | sed 's/^/client-state: /'
+  grep -E "state role=client critters=[1-9][0-9]* .* farmers=2 loadouts=.*;.*body" "$OUT/client.txt" | tail -1 | sed 's/^/client-state: /'
   grep -qE "state role=host critters=[1-9][0-9]* goods=[1-9][0-9]* economy=1 .* farmers=2 loadouts=.*body" "$OUT/host.txt" || { echo "FAIL: host state"; exit 1; }
-  grep -qE "state role=client .* farmers=2 loadouts=.*;.*body" "$OUT/client.txt" || { echo "FAIL: client does not see host player + loadout"; exit 1; }
+  grep -qE "state role=client critters=[1-9][0-9]* .* farmers=2 loadouts=.*;.*body" "$OUT/client.txt" || { echo "FAIL: client does not see host player + loadout"; exit 1; }
 fi
 if [ $HC -eq 0 ] && [ $CC -eq 0 ] && grep -q "ok=1" "$OUT/host.txt" && grep -q "ok=1" "$OUT/client.txt"; then echo PASS; exit 0; fi
 echo FAIL; exit 1
