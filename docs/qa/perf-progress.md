@@ -15,3 +15,8 @@
   Written up in `docs/qa/perf/perf-baseline.md`.
 - `BotWeekSoakTests` (full week + Sunday + into week 2, night each Dusk) -> `docs/qa/playtest/raw/bot-week-log.md`.
 - Deep profiling (-deepprofiling) on Muddlebury exceeds 10 min; don't use it, use the merged hierarchy instead.
+- Soak PASS (W1 -> Sunday paid (with logged dev top-up) -> W2D2; 0 errors; NetObjs flat 24; wallet consistent).
+  Report: `docs/qa/playtest/bot-week-report.md`.
+- Full suite on this branch: EditMode 222/222 pass; PlayMode 66 total, 55 pass, 0 fail, 11 skipped (pre-existing
+  opt-in screenshot / customization / frontend skips). Perf + soak tests are tagged [Category("Perf")] / [Category("Soak")]
+  and add about 8 minutes to a full PlayMode run; filter them out of quick CI with `-testCategory "!Perf;!Soak"` if needed.
