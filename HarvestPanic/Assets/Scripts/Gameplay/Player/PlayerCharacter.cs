@@ -72,6 +72,7 @@ namespace HarvestPanic.Gameplay
         BlameVerb _respawnCause;
         int _playerLayer, _ragdollLayer;
         bool _offlineLocal;
+        IPlayerHooks _body;
         int _spawnPoseFrames;
 
         // ---- Accessors -------------------------------------------------------------------------------------
@@ -123,25 +124,28 @@ namespace HarvestPanic.Gameplay
         public ulong ClientId => IsSpawned ? OwnerClientId : 0UL;
         /// <inheritdoc />
         public bool IsLocal => IsOwnerSafe;
+        /// <summary>Customization's FarmerVisual (nested FarmerBody prefab) when present; visual members forward to it.</summary>
+        public IPlayerHooks BodyVisual => _body;
         /// <inheritdoc />
-        public Renderer BodyRenderer => bodyRenderer;
+        public Renderer BodyRenderer => _body != null ? _body.BodyRenderer : bodyRenderer;
         /// <inheritdoc />
-        public Animator BodyAnimator => bodyAnimator;
+        public Animator BodyAnimator => _body != null ? _body.BodyAnimator : bodyAnimator;
         /// <inheritdoc />
         public Transform FirstPersonArms => firstPersonArms;
         /// <inheritdoc />
-        public Transform HeadAttachPoint => headAttachPoint;
+        public Transform HeadAttachPoint => _body != null && _body.HeadAttachPoint != null ? _body.HeadAttachPoint : headAttachPoint;
 
         /// <inheritdoc />
         public void PlayEmote(string emoteId)
         {
-            if (string.Equals(emoteId, "shout", StringComparison.OrdinalIgnoreCase) || string.Equals(emoteId, "holler", StringComparison.OrdinalIgnoreCase))
-                Holler();
+            // Visual only: Customization emits emote noise server-side; the Holler key (H) is separate.
+            _body?.PlayEmote(emoteId);
         }
 
         /// <inheritdoc />
         public void Faint(bool fainted)
         {
+            _body?.Faint(fainted);
             if (!IsSpawned) return;
             if (fainted && State == PlayerState.Normal) { if (IsServer) ServerEnterRagdoll(Vector3.zero, PlayerIds.None, false); else if (IsOwner) OwnerTrip(); }
             else if (!fainted && State == PlayerState.Ragdoll && IsOwner) GetUpRpc();
@@ -182,6 +186,8 @@ namespace HarvestPanic.Gameplay
             _motor = GetComponent<PlayerMotor>();
             _input = GetComponent<PlayerInputReader>();
             Carry = GetComponent<PlayerCarry>();
+            foreach (var h in GetComponentsInChildren<IPlayerHooks>(true))
+                if (!ReferenceEquals(h, this)) { _body = h; break; }
             _playerLayer = LayerMask.NameToLayer(GameLayers.Player);
             _ragdollLayer = LayerMask.NameToLayer(GameLayers.Ragdoll);
             _koTracker = new KnockoutTracker(tuning.KoRagdollCount, tuning.KoWindow);

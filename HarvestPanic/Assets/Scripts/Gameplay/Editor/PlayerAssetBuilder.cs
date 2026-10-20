@@ -129,7 +129,19 @@ namespace HarvestPanic.Gameplay.Editor
             var sR = ArmPart("SleeveR", PrimitiveType.Capsule, sleeve, new Vector3(0.1f, 0.3f, 0.1f));
             var hR = ArmPart("HandR", PrimitiveType.Cube, glove, new Vector3(0.09f, 0.06f, 0.12f));
 
-            // Third-person placeholder farmer (others see it; owner sees only its shadow).
+            // Customization's FarmerBody (no NetworkObject of its own) is the third-person body when present.
+            var farmerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Farmer/FarmerBody.prefab");
+            Transform farmer = null;
+            if (farmerPrefab != null)
+            {
+                var inst = (GameObject)PrefabUtility.InstantiatePrefab(farmerPrefab, root.transform);
+                inst.name = "FarmerBody";
+                inst.transform.localPosition = Vector3.zero;
+                inst.transform.localRotation = Quaternion.identity;
+                farmer = inst.transform;
+            }
+
+            // Placeholder farmer: fallback body when FarmerBody is missing (others see it; owner sees only its shadow).
             var body = Child(root.transform, "Body", Vector3.zero);
             var animator = body.gameObject.AddComponent<Animator>();
             var overalls = Mat("Overalls", new Color(0.22f, 0.36f, 0.62f));
@@ -161,18 +173,24 @@ namespace HarvestPanic.Gameplay.Editor
             Prim(PrimitiveType.Cube, "BootL", legL, new Vector3(0f, -0.72f, 0.05f), new Vector3(0.17f, 0.12f, 0.28f), boot);
             Prim(PrimitiveType.Cube, "BootR", legR, new Vector3(0f, -0.72f, 0.05f), new Vector3(0.17f, 0.12f, 0.28f), boot);
 
+            if (farmer != null) Object.DestroyImmediate(body.gameObject);
             var pc = root.AddComponent<PlayerCharacter>();
             Set(pc, "tuning", pt); Set(pc, "carryTuning", ct);
             Set(pc, "headPivot", head); Set(pc, "cameraPivot", camPivot);
             Set(pc, "viewCamera", viewCam.gameObject); Set(pc, "firstPersonCamera", fpCam.gameObject);
-            Set(pc, "firstPersonArms", arms); Set(pc, "bodyRoot", body);
-            Set(pc, "bodyRenderer", torso.GetComponent<Renderer>()); Set(pc, "bodyAnimator", animator);
-            Set(pc, "headAttachPoint", headAttach); Set(pc, "ragdollCollider", rag);
+            Set(pc, "firstPersonArms", arms); Set(pc, "ragdollCollider", rag);
+            if (farmer != null) Set(pc, "bodyRoot", farmer);
+            else
+            {
+                Set(pc, "bodyRoot", body);
+                Set(pc, "bodyRenderer", torso.GetComponent<Renderer>()); Set(pc, "bodyAnimator", animator);
+                Set(pc, "headAttachPoint", headAttach);
+            }
 
             var view = root.AddComponent<PlayerView>();
             Set(view, "vcam", vcam);
             Set(view, "armSleeveL", sL); Set(view, "armHandL", hL); Set(view, "armSleeveR", sR); Set(view, "armHandR", hR);
-            Set(view, "bodyArmL", armL); Set(view, "bodyArmR", armR); Set(view, "bodyLegL", legL); Set(view, "bodyLegR", legR);
+            if (farmer == null) { Set(view, "bodyArmL", armL); Set(view, "bodyArmR", armR); Set(view, "bodyLegL", legL); Set(view, "bodyLegR", legR); }
             root.AddComponent<PlayerPromptOverlay>();
 
             return Save(root, PlayerPrefabPath);
