@@ -209,8 +209,17 @@ namespace HarvestPanic.Customization
 
             if (nameTag != null) nameTag.SetStyle(catalog.NameTag(loadout.NameTag), catalog.unlitMaterial);
             ApplyFirstPersonVisibility();
+            ApplyArmColors(tints, skin);
             if (poof && !IsPreview) HayPoof.Spawn(transform.position + Vector3.up * 1.1f, catalog.poofDuration, catalog.baseMaterial);
             Applied?.Invoke(loadout);
+        }
+
+        /// <summary>Dresses the owner's first-person arms: shirt = Secondary, gloves = Accent (boots/gloves zone).</summary>
+        void ApplyArmColors(in TintColors tints, Color skin)
+        {
+            if (IsPreview) return;
+            var arms = FirstPersonArms;
+            if (arms != null && arms.TryGetComponent<IFirstPersonArmsSkin>(out var skinHook)) skinHook.ApplyArmColors(tints.Secondary, tints.Accent, skin);
         }
 
         /// <summary>Resolved colours for recipe tints.</summary>
