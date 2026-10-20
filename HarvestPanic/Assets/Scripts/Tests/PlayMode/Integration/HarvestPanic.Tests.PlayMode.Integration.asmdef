@@ -4,7 +4,7 @@
     "references": [
         "HarvestPanic.Core", "HarvestPanic.Gameplay", "HarvestPanic.AI", "HarvestPanic.Economy",
         "HarvestPanic.Customization", "HarvestPanic.World", "HarvestPanic.Networking",
-        "Unity.Netcode.Runtime", "UnityEngine.TestRunner", "UnityEditor.TestRunner"
+        "Unity.Netcode.Runtime", "UnityEngine.UIElementsModule", "UnityEngine.TestRunner", "UnityEditor.TestRunner"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
