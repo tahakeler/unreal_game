@@ -44,7 +44,7 @@ marker on scene load on every peer, facing the marker's forward; interaction ran
 - Wardrobe UI is UI Toolkit (`WardrobeUI`, panel `Art/Cosmetics/UI/WardrobePanel.asset`), opened from the wardrobe prop or `WardrobeUI.Open(FarmerLoadoutSync.Local)`.
 
 ## Open requests (need a Core contract or another team)
-- No input-modal contract: while the wardrobe is open we unlock the cursor and block emotes, but player move/look are not paused.
+- Wardrobe holds `InputModal` (Push on open, Pop on close/destroy); emotes and the wardrobe prop also respect `InputModal.IsBlocking`.
 - No day-phase contract: "wardrobe blocked during the active day timer" is not enforced yet.
 - E for the wardrobe may overlap the Player's interact key.
 - Ownership on the server only trusts starter items + `unlockAllCosmetics` (no profile/unlock service yet).
