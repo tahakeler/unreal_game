@@ -31,7 +31,7 @@ namespace HarvestPanic.Tests.EditMode.Audio
             Assert.AreEqual(AudioEvents.StgLandlordTuba, AudioEvents.All[n - 2].Name);
             Assert.AreEqual(AudioEvents.GoatBleat, AudioEvents.All[n - 3].Name, "older ids unchanged");
             foreach (var e in new[] { AudioEvents.MusNightThreat, AudioEvents.StgLandlordTuba, AudioEvents.BruiseCrunch, AudioEvents.BruiseRegister })
-                Assert.IsNotEmpty(Directory.GetFiles("Assets/Audio/Resources/Audio/" + e, "*.wav"), e);
+                Assert.IsTrue(System.Array.Exists(Directory.GetFiles("Assets/Audio/Resources/Audio/" + e), f => f.EndsWith(".wav") || f.EndsWith(".ogg")), e);
         }
 
         [Test]
