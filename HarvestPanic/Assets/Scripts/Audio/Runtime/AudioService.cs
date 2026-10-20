@@ -89,12 +89,14 @@ namespace HarvestPanic.Audio
 
         void OnEnable()
         {
+            BruiseFeed.OnBruise += HandleBruise;
             Services.Register<IAudioService>(this);
             Services.Register<IAudioSettingsSink>(this);
         }
 
         void OnDisable()
         {
+            BruiseFeed.OnBruise -= HandleBruise;
             Services.Unregister<IAudioService>(this);
             Services.Unregister<IAudioSettingsSink>(this);
             Bind(ref _noise, null);
@@ -285,6 +287,19 @@ namespace HarvestPanic.Audio
             if (!NoiseRouting.TryRoute(e, critter, out var cue)) return;
             OnCueHeard(cue);
             PlayCue(cue);
+        }
+
+        /// <summary>Server (polish-2): bruise crunch at the item + register clunk, played here and relayed to clients.</summary>
+        public void HandleBruise(BruiseReport r)
+        {
+            string evt = BruiseCues.CueFor(r.DeltaPoints, r.DeltaDollars, out bool register);
+            if (evt == null) return;
+            Vector3 at = r.Item != null && r.Item.GoodsTransform != null ? r.Item.GoodsTransform.position : Vector3.zero;
+            var cue = new SoundCue { Event = evt, Position = at, GainDb = 0f };
+            PlayCue(cue); AudioNetRelay.Broadcast(cue);
+            if (!register) return;
+            var reg = new SoundCue { Event = AudioEvents.BruiseRegister, Position = at, GainDb = 0f };
+            PlayCue(reg); AudioNetRelay.Broadcast(reg);
         }
 
         /// <summary>Bookkeeping shared by locally routed and relayed cues (chaos estimate).</summary>

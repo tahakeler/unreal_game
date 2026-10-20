@@ -105,6 +105,27 @@ namespace HarvestPanic.Audio
         }
     }
 
+    /// <summary>Bruise feedback (polish-2): small hits thud, real damage crunches; any dollar lost rings the register.</summary>
+    public static class BruiseCues
+    {
+        public const float CrunchPoints = 8f;
+
+        /// <summary>Spatial cue for a bruise (null when nothing was added); <paramref name="register"/> = also play the 2D clunk.</summary>
+        public static string CueFor(float deltaPoints, int deltaDollars, out bool register)
+        {
+            register = deltaDollars >= 1;
+            if (deltaPoints <= 0f) { register = false; return null; }
+            return deltaPoints >= CrunchPoints ? AudioEvents.BruiseCrunch : AudioEvents.BruiseThud;
+        }
+    }
+
+    /// <summary>Night threat layer (polish-2): fades in over Dusk (night) and drops out in every other phase.</summary>
+    public static class NightLayerRules
+    {
+        public const float FadeSeconds = 4f;
+        public static float Target(string phase) => phase == "Dusk" ? 1f : 0f;
+    }
+
     /// <summary>Phase -> music cue (sound-bible §2).</summary>
     public static class MusicRules
     {

@@ -65,6 +65,11 @@ namespace HarvestPanic.Audio
         public const string MusDusk = "MUS_Night_Dusk";
         public const string MusPayout = "MUS_Payout_Market";
         public const string MusSunday = "MUS_Sunday_Landlord";
+        public const string BruiseThud = "SFX_Bruise_Thud_Small";
+        public const string BruiseCrunch = "SFX_Bruise_Crunch";
+        public const string BruiseRegister = "SFX_Bruise_RegisterClunk";
+        public const string StgLandlordTuba = "STG_Landlord_Tuba";
+        public const string MusNightThreat = "MUS_Night_Threat";
 
         static AudioEventDef D(string n, MixGroup g, AttenuationPreset a, VoiceLimit l = VoiceLimit.None, float db = 0f, float jitter = 1.5f) =>
             new AudioEventDef(n, g, a, l, db, jitter);
@@ -118,6 +123,9 @@ namespace HarvestPanic.Audio
             D(MusSunday, MixGroup.Music, AttenuationPreset.TwoD, VoiceLimit.None, -14f, 0f),
             D(CowMoo, MixGroup.Critters, AttenuationPreset.CritterLarge, VoiceLimit.None, -4f, 1f),
             D(GoatBleat, MixGroup.Critters, AttenuationPreset.CritterSmall, VoiceLimit.None, -6f, 1f),
+            // polish-2 (append only)
+            D(StgLandlordTuba, MixGroup.UIStingers, AttenuationPreset.TwoD, VoiceLimit.None, -4f, 0f),
+            D(MusNightThreat, MixGroup.Music, AttenuationPreset.TwoD, VoiceLimit.None, -14f, 0f),
         };
 
         static System.Collections.Generic.Dictionary<string, int> _index;

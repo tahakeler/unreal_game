@@ -82,8 +82,9 @@ namespace HarvestPanic.Economy
             if (unlit != null) { bgr.material = new Material(unlit); bgr.material.SetColor("_BaseColor", new Color(0.99f, 0.95f, 0.86f)); }
             _bubbleBg = bg;
             _text = MakeText(_bubble, new Color(0.17f, 0.13f, 0.09f), 0.03f);
-            _stamp = new GameObject("Stamp").transform; _stamp.SetParent(root, false); _stamp.localPosition = new Vector3(0f, 4.4f, 0f);
-            _stampText = MakeText(_stamp, Color.white, 0.12f);
+            // Polish-2: was 4.4 m above his head, where it sat under the HUD wallet card; now beside him below the bubble, tilted like a rubber stamp.
+            _stamp = new GameObject("Stamp").transform; _stamp.SetParent(root, false); _stamp.localPosition = new Vector3(2.9f, 1.7f, -0.1f); _stamp.localRotation = Quaternion.Euler(0f, 0f, 14f);
+            _stampText = MakeText(_stamp, Color.white, 0.09f);
             _stamp.gameObject.SetActive(false);
             _bubble.gameObject.SetActive(false);
         }

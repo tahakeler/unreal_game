@@ -232,7 +232,9 @@ namespace HarvestPanic.Economy
                 if (newState == BruiseState.Ruined && Definition.Category == GoodsCategory.Livestock) SetTag(GoodsTag.Grumpy, true);
                 OnStateChanged?.Invoke(oldState, newState);
             }
-            OnBruised?.Invoke(new BruiseReport { Item = this, DeltaPoints = dbp, DeltaDollars = dollars, InstigatorId = instigator, Verb = verb });
+            var report = new BruiseReport { Item = this, DeltaPoints = dbp, DeltaDollars = dollars, InstigatorId = instigator, Verb = verb };
+            OnBruised?.Invoke(report);
+            BruiseFeed.Raise(report); // polish-2: server presentation feed (Audio crunch/register)
             if (dollars >= 1) EmitLoss(-dollars, instigator, verb, causeTag);
         }
 

@@ -14,9 +14,11 @@ namespace HarvestPanic.Audio
         public const float Crossfade = 1.5f, PostDisasterPenaltySeconds = 8f, LayerFade = 2f;
 
         readonly AudioService _svc;
-        readonly AudioSource _a, _b, _lead, _amb;
+        readonly AudioSource _a, _b, _lead, _amb, _night;
         AudioSource _active;
-        float _activeFade, _otherFade, _leadFade, _ambFade;
+        float _activeFade, _otherFade, _leadFade, _ambFade, _nightFade;
+        /// <summary>Night threat layer gain 0..1 (polish-2; tests).</summary>
+        public float NightLayer => _nightFade;
         string _cue;
         string _phase = "None";
         float _cutUntil = -1f, _penaltyUntil = -1f, _nextTick;
@@ -36,7 +38,7 @@ namespace HarvestPanic.Audio
         public MusicDirector(AudioService svc, GameObject host)
         {
             _svc = svc;
-            _a = MakeLoop(host, "MusicA"); _b = MakeLoop(host, "MusicB"); _lead = MakeLoop(host, "MusicLead"); _amb = MakeLoop(host, "Ambience");
+            _a = MakeLoop(host, "MusicA"); _b = MakeLoop(host, "MusicB"); _lead = MakeLoop(host, "MusicLead"); _amb = MakeLoop(host, "Ambience"); _night = MakeLoop(host, "MusicNightThreat");
             _active = _a;
         }
 
@@ -69,6 +71,7 @@ namespace HarvestPanic.Audio
             {
                 if (_phase == "Workday" && (phase == "Dusk" || phase == "Payout")) _svc.Play2D(AudioEvents.SundownBell);
                 if (phase == "Morning") _throatCleared = false;
+                if (phase == "Sunday") _svc.Play2D(AudioEvents.StgLandlordTuba); // polish-2: landlord arrival sting
                 _phase = phase;
             }
 
@@ -94,6 +97,9 @@ namespace HarvestPanic.Audio
             other.volume = musicGain * _otherFade;
             _lead.volume = musicGain * _leadFade * _activeFade;
             if (other.isPlaying && _otherFade <= 0f) other.Stop();
+            _nightFade = Mathf.MoveTowards(_nightFade, NightLayerRules.Target(phase), dt / NightLayerRules.FadeSeconds);
+            EnsurePlaying(_night, AudioEvents.MusNightThreat, _nightFade > 0f);
+            _night.volume = musicGain * _nightFade * (IsCut ? 0f : 1f);
             EnsurePlaying(_amb, AudioEvents.AmbFarmDay, _ambFade > 0f);
             _amb.volume = _svc.GroupGain(MixGroup.Ambience) * AudioMath.DbToLinear(-18f) * 3f * _ambFade;
         }
