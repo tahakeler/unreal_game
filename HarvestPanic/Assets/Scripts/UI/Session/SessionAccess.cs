@@ -72,32 +72,41 @@ namespace HarvestPanic.UI
 
         public static void RefreshDiscovery(object svc) { var plat = Platform; if (plat != null) { plat.StartLanSearch(); return; } svc?.GetType().GetMethod("RefreshDiscovery", Type.EmptyTypes)?.Invoke(svc, null); }
 
-        public static bool SupportsChat(object svc) => svc?.GetType().GetMethod("SendChat", new[] { typeof(string) }) != null;
+        /// <summary>Core ISessionSocial (kick + chat), if the provider offers it.</summary>
+        public static ISessionSocial Social(object svc) => svc as ISessionSocial ?? (Services.TryGet(out ISessionSocial s) ? s : null);
+
+        public static bool SupportsChat(object svc) => Social(svc) != null;
 
         public static bool SendChat(object svc, string text)
         {
-            var m = svc?.GetType().GetMethod("SendChat", new[] { typeof(string) });
-            if (m == null) return false;
-            m.Invoke(svc, new object[] { text });
+            var s = Social(svc);
+            if (s == null) return false;
+            s.SendChat(text);
             return true;
         }
 
-        /// <summary>Subscribes to OnChat(sender, text). Returns an unsubscribe action or null when unsupported.</summary>
+        /// <summary>Subscribes to chat as (senderName, text). Returns an unsubscribe action or null when unsupported.</summary>
         public static Action SubscribeChat(object svc, Action<string, string> handler)
         {
-            var ev = svc?.GetType().GetEvent("OnChat", Pub);
-            if (ev == null || ev.EventHandlerType != typeof(Action<string, string>)) return null;
-            ev.AddEventHandler(svc, handler);
-            return () => ev.RemoveEventHandler(svc, handler);
+            var s = Social(svc);
+            if (s == null) return null;
+            Action<ulong, string> h = (id, text) =>
+            {
+                string name = "Farmer";
+                if (svc is ISessionService ss) foreach (var p in ss.Players) if (p.ClientId == id) name = p.Name;
+                handler(name, text);
+            };
+            s.OnChat += h;
+            return () => s.OnChat -= h;
         }
 
-        public static bool SupportsKick(object svc) => svc?.GetType().GetMethod("Kick", new[] { typeof(ulong) }) != null;
+        public static bool SupportsKick(object svc) => Social(svc) != null;
 
         public static bool Kick(object svc, ulong clientId)
         {
-            var m = svc?.GetType().GetMethod("Kick", new[] { typeof(ulong) });
-            if (m == null) return false;
-            m.Invoke(svc, new object[] { clientId });
+            var s = Social(svc);
+            if (s == null) return false;
+            s.Kick(clientId);
             return true;
         }
 

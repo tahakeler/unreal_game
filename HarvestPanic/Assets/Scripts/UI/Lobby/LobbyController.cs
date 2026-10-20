@@ -58,7 +58,7 @@ namespace HarvestPanic.UI
         {
             if (_session != null) _session.OnSessionChanged -= Refresh;
             _unsubChat?.Invoke();
-            if (CrewOpen) UiFocus.ModalCount = Mathf.Max(0, UiFocus.ModalCount - 1);
+            UiFocus.Pop(this);
         }
 
         void Start()
@@ -201,14 +201,14 @@ namespace HarvestPanic.UI
             _crewPanel.EnableInClassList("is-open", open);
             if (open)
             {
-                UiFocus.ModalCount++;
+                UiFocus.Push(this);
                 _prevLock = Cursor.lockState; _prevVisible = Cursor.visible;
                 Cursor.lockState = CursorLockMode.None; Cursor.visible = true;
                 UiFocus.FocusLater(_root.Q<Button>("btn-crew-close"));
             }
             else
             {
-                UiFocus.ModalCount = Mathf.Max(0, UiFocus.ModalCount - 1);
+                UiFocus.Pop(this);
                 Cursor.lockState = CursorLockMode.Locked; Cursor.visible = false;
                 _root.panel?.focusController?.focusedElement?.Blur();
             }
