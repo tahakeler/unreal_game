@@ -14,7 +14,9 @@ namespace HarvestPanic.UI
     public sealed class PauseOverlay : MonoBehaviour
     {
         UiPanel _panel;
-        VisualElement _main, _settingsLayer;
+        VisualElement _main, _settingsLayer, _helpLayer, _confirmLayer;
+        public enum Layer { Main, Settings, Help, Confirm }
+        public Layer Current { get; private set; }
         Label _title, _sub, _toast;
         SettingsPanel _settings;
         bool _open;
@@ -33,7 +35,8 @@ namespace HarvestPanic.UI
             bool esc = Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame;
             bool start = Gamepad.current != null && (Gamepad.current.startButton.wasPressedThisFrame || (_open && Gamepad.current.buttonEast.wasPressedThisFrame));
             if (!(esc || start)) return;
-            if (_open) { if (_settingsLayer != null && _settingsLayer.ClassListContains("is-active")) CloseSettings(); else Close(); }
+            if (SettingsPanel.IsListening) return; // rebinding owns Esc (cancel)
+            if (_open) Back();
             else if (UiFocus.ModalCount == 0) Open();
         }
 
@@ -50,9 +53,42 @@ namespace HarvestPanic.UI
             _prevLock = Cursor.lockState; _prevVisible = Cursor.visible;
             Cursor.lockState = CursorLockMode.None; Cursor.visible = true;
             _panel.Root.style.display = DisplayStyle.Flex;
-            _main.AddToClassList("is-active");
-            _settingsLayer.RemoveFromClassList("is-active");
-            UiFocus.FocusFirstButton(_main);
+            ShowLayer(Layer.Main);
+        }
+
+        /// <summary>Esc/B: sub-layer back to main, main closes.</summary>
+        public void Back()
+        {
+            if (Current == Layer.Settings) CloseSettings();
+            else if (Current != Layer.Main) ShowLayer(Layer.Main);
+            else Close();
+        }
+
+        public void ShowLayer(Layer layer)
+        {
+            Build();
+            Current = layer;
+            _main.EnableInClassList("is-active", layer == Layer.Main);
+            _settingsLayer.EnableInClassList("is-active", layer == Layer.Settings);
+            _helpLayer.EnableInClassList("is-active", layer == Layer.Help);
+            _confirmLayer.EnableInClassList("is-active", layer == Layer.Confirm);
+            if (layer == Layer.Main) UiFocus.FocusFirstButton(_main);
+            if (layer == Layer.Confirm) UiFocus.FocusFirstButton(_confirmLayer);
+        }
+
+        public void OpenHelp()
+        {
+            ShowLayer(Layer.Help);
+            var help = new HelpPanel(_helpLayer.Q("pause-help-host"));
+            help.Closed += () => ShowLayer(Layer.Main);
+            help.FocusFirst();
+        }
+
+        public void ConfirmLeave()
+        {
+            Close();
+            if (Services.TryGet(out ISessionService s)) s.Leave();
+            SceneLoader.Load(SceneLoader.MainMenu);
         }
 
         public void Close()
@@ -65,10 +101,9 @@ namespace HarvestPanic.UI
             _panel.Root.style.display = DisplayStyle.None;
         }
 
-        void OpenSettings()
+        public void OpenSettings()
         {
-            _main.RemoveFromClassList("is-active");
-            _settingsLayer.AddToClassList("is-active");
+            ShowLayer(Layer.Settings);
             _settings = new SettingsPanel(_settingsLayer.Q("pause-settings-host"));
             _settings.Closed += CloseSettings;
             _settings.FocusFirst();
@@ -77,9 +112,7 @@ namespace HarvestPanic.UI
         void CloseSettings()
         {
             SettingsService.Persist();
-            _settingsLayer.RemoveFromClassList("is-active");
-            _main.AddToClassList("is-active");
-            UiFocus.FocusFirstButton(_main);
+            ShowLayer(Layer.Main);
         }
 
         void Build()
@@ -95,12 +128,11 @@ namespace HarvestPanic.UI
             {
                 _toast.text = SessionAccess.TryOpenSteamOverlay() ? "Steam friends opened." : "Tell friends to join your address on the LAN list.";
             };
-            r.Q<Button>("btn-leave").clicked += () =>
-            {
-                Close();
-                if (Services.TryGet(out ISessionService s)) s.Leave();
-                SceneLoader.Load(SceneLoader.MainMenu);
-            };
+            _helpLayer = r.Q("pause-help"); _confirmLayer = r.Q("pause-confirm");
+            r.Q<Button>("btn-help").clicked += OpenHelp;
+            r.Q<Button>("btn-leave").clicked += () => ShowLayer(Layer.Confirm);
+            r.Q<Button>("btn-confirm-stay").clicked += () => ShowLayer(Layer.Main);
+            r.Q<Button>("btn-confirm-leave").clicked += ConfirmLeave;
         }
     }
 }

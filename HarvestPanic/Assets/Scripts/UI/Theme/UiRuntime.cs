@@ -49,6 +49,8 @@ namespace HarvestPanic.UI
             Services.WhenAvailable<IAudioSettingsSink>(_ => ApplyToEngine(SettingsService.Current));
             EnsureEventSystem();
             gameObject.AddComponent<PauseOverlay>();
+            gameObject.AddComponent<OnboardingOverlay>();
+            InputBindings.Hook();
         }
 
         void OnDestroy()
@@ -59,6 +61,7 @@ namespace HarvestPanic.UI
 
         void Update()
         {
+            InputBindings.Pump();
             if (Fake != null && Services.TryGet(out ISessionService cur) && ReferenceEquals(cur, Fake)) Fake.Tick(Time.unscaledDeltaTime);
         }
 
@@ -79,6 +82,15 @@ namespace HarvestPanic.UI
             }
         }
 
+        /// <summary>First-person motion comfort into the Core contract read by the Player camera.</summary>
+        public static void ApplyComfort(GameSettings s)
+        {
+            CameraComfort.BaseFov = s.Fov;
+            CameraComfort.BobScale = s.ReducedMotion || !s.CameraBob ? 0f : 1f;
+            CameraComfort.ShakeScale = s.ReducedMotion ? Mathf.Min(s.CameraShake, 0.25f) : s.CameraShake;
+            CameraComfort.FovKickScale = s.ReducedMotion ? 0f : 1f;
+        }
+
         static void ApplyToEngine(GameSettings s)
         {
             // Audio owns bus gains when present (IAudioSettingsSink applies Master x bus in software); otherwise fall back to the listener.
@@ -92,6 +104,7 @@ namespace HarvestPanic.UI
                 sink.SetBusVolume(AudioBus.Voice, s.VoiceVolume);
             }
             else AudioListener.volume = s.MasterVolume;
+            ApplyComfort(s);
             if (Application.isEditor || Application.isBatchMode) return; // never touch window/URP asset from the editor
             switch (s.WindowMode)
             {
