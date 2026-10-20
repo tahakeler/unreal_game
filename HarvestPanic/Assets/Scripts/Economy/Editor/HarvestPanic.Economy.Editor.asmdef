@@ -1,0 +1,23 @@
+{
+    "name": "HarvestPanic.Economy.Editor",
+    "rootNamespace": "HarvestPanic.Economy.Editor",
+    "references": [
+        "HarvestPanic.Core",
+        "HarvestPanic.Economy",
+        "Unity.Netcode.Runtime",
+        "Unity.Networking.Transport",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

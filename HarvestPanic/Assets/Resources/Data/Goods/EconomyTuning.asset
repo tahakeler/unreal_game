@@ -1,0 +1,98 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91800f172aad4422783a62b9ccfc8551, type: 3}
+  m_Name: EconomyTuning
+  m_EditorClassIdentifier: HarvestPanic.Economy::HarvestPanic.Economy.EconomyTuning
+  ImpulseMin: 400
+  ImpulseScale: 40
+  CarryReportWindow: 2
+  PerHitBruiseCap: 60
+  ImpulseSolverErrorAbove: 20000
+  ScuffedAt: 10
+  BruisedAt: 35
+  BustedAt: 65
+  RuinedAt: 100
+  MultPristine: 1
+  MultScuffed: 0.85
+  MultBruised: 0.6
+  MultBusted: 0.3
+  MultRuinedCrop: 0
+  MultRuinedLivestock: 0.25
+  CompostValue: 1
+  WaterBpsCrop: 15
+  WaterBpsLivestock: 5
+  CropGrace: 120
+  CropDecay: 480
+  ProductGrace: 180
+  ProductDecay: 600
+  FreshnessFloor: 0.5
+  MorningSeconds: 30
+  WorkdaySeconds: 540
+  DuskSeconds: 180
+  SundownWarningSeconds: 30
+  SundownGraceSeconds: 2
+  DuskEnabled: 1
+  DuskBonus: 1.25
+  MarketAcceptSeconds: 2
+  OrderMultiplier: 1.5
+  OrderLines: 3
+  OrderCompleteBonusPerWeek: 60
+  OrderWeeklyGrowth: 0.15
+  PayoutAutoAdvanceSeconds: 0
+  DaysPerWeek: 5
+  WeatherChancePerDay: 0.5
+  Orderable:
+  - GoodsId: Livestock.Pig
+    BaseQuantity: 2
+  - GoodsId: Livestock.Chicken
+    BaseQuantity: 3
+  - GoodsId: Product.Egg
+    BaseQuantity: 6
+  - GoodsId: Product.Crate
+    BaseQuantity: 2
+  - GoodsId: Crop.PrizePumpkin
+    BaseQuantity: 1
+  - GoodsId: Crop.Turnip
+    BaseQuantity: 5
+  - GoodsId: Crop.Carrot
+    BaseQuantity: 5
+  StartingBalance: 100
+  OverdraftFloor: -200
+  BalanceCap: 2000000000
+  RespawnFeeBase: 25
+  RespawnFeeWeeklyGrowth: 0.25
+  DemandDayMin: 0.8
+  DemandDayMax: 1.2
+  SaturationUnits: 6
+  SaturationDecay: 0.95
+  DemandMin: 0.6
+  DemandMax: 1.5
+  QuotaBase: 1200
+  QuotaGrowth: 1.35
+  RegionMult: 1
+  PlayerScale:
+  - 0.45
+  - 0.65
+  - 0.85
+  - 1
+  MergeWindow: 1.5
+  NoiseFloorDollars: 2
+  TouchWindow: 3
+  TouchShares:
+  - 0.6
+  - 0.3
+  - 0.1
+  DisasterSeverity: 60
+  ReceiptLinesPerPlayer: 5
+  DisasterScoreBonus: 15
+  MaxEventsPerDay: 500
+  MaxLandlordRules: 3
