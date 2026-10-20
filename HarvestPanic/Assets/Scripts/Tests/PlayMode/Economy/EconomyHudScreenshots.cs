@@ -62,6 +62,17 @@ namespace HarvestPanic.Tests.PlayMode.Economy
             yield return new WaitForSeconds(0.3f);
             yield return Capture(Path.Combine(outDir, "unity-economy-receipt.png"));
 
+            // Shop chalkboard: enough cash for a couple of upgrades, one bought, one too pricey.
+            RunSaveStore.DirectoryOverride = Path.Combine(outDir, "save");
+            dir.NextDay();
+            yield return null;
+            dir.AddWalletTxn(new WalletTxn { Type = WalletTxnType.Sale, Amount = 420, GoodsId = "Crop.PrizePumpkin" });
+            dir.ProposeBuy("Upgrade.BridgeReinforcement1");
+            yield return new WaitForSeconds(0.4f);
+            yield return Capture(Path.Combine(outDir, "unity-economy-shop.png"));
+            RunSaveStore.Delete();
+            RunSaveStore.DirectoryOverride = null;
+
             for (int i = 0; i < 60 && dir.Phase != DayPhase.Sunday && dir.Phase != DayPhase.Evicted; i++) { dir.DebugSkipPhase(); yield return null; }
             yield return new WaitForSeconds(0.3f);
             yield return Capture(Path.Combine(outDir, "unity-economy-sunday.png"));

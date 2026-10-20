@@ -25,8 +25,8 @@ namespace HarvestPanic.Economy
         void OnShopChanged() { _shopKey = null; }
         void OnShopBark(string text)
         {
+            if (ShopVisible && _shopBark != null) { _shopBark.text = text; Bounce(_shopBark); return; } // the paper covers toasts
             Toast(text, "hp-toast-shop");
-            if (_shopBark != null) _shopBark.text = text;
         }
 
         /// <summary>Builds the shop (or Collateral) panel.</summary>
@@ -82,7 +82,7 @@ namespace HarvestPanic.Economy
             if (_shopTimer != null)
             {
                 float rem = _dir.PhaseRemaining;
-                _shopTimer.text = _dir.PhaseDuration > 0f ? $"{(int)rem / 60}:{(int)rem % 60:00}" : "";
+                _shopTimer.text = _dir.PhaseDuration > 0f ? $"{(int)rem / 60}:{(int)rem % 60:00}" : $"Rent {ReceiptBuilder.Money(_dir.Quota + _dir.Iou)} on Sunday";
                 _shopTimer.EnableInClassList("hp-clock-urgent", _dir.Phase == DayPhase.Collateral && rem < 15f);
             }
         }
