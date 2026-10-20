@@ -20,10 +20,13 @@ namespace HarvestPanic.Networking
     /// </summary>
     [DefaultExecutionOrder(-900)]
     [RequireComponent(typeof(NetworkManager), typeof(NetworkBootstrap), typeof(PlayerSpawnService))]
-    public sealed class SessionService : MonoBehaviour, ISessionService, ISessionPlatform
+    public sealed class SessionService : MonoBehaviour, ISessionService, ISessionPlatform, ISessionSocial
     {
         public const string RosterMessage = "HP.Roster";
         public const string ReadyMessage = "HP.Ready";
+        public const string ChatInMessage = "HP.ChatIn";   // client -> server: [byte ver][string text]
+        public const string ChatOutMessage = "HP.ChatOut"; // server -> clients: [byte ver][u64 sender][string text]
+        public const string KickReason = "Sent home by the host";
         public const string HostLeftReason = "The host went to bed. The run was saved at the start of the day.";
         public const string ConnectionLostReason = "Lost connection to the host.";
         public const string NamePrefsKey = "hp.playerName";
@@ -35,6 +38,7 @@ namespace HarvestPanic.Networking
         NetworkBootstrap _bootstrap;
         NetworkingConfig _cfg;
         readonly SessionRoster _roster = new SessionRoster();
+        readonly ChatRules _chat = new ChatRules();
         readonly Dictionary<ulong, string> _pendingNames = new Dictionary<ulong, string>();
         LanDiscovery _discovery;
         SteamPlatform _steam;
@@ -108,12 +112,14 @@ namespace HarvestPanic.Networking
             if (NetworkBootstrap.Instance != null && NetworkBootstrap.Instance != _bootstrap) return; // duplicate being destroyed
             Services.Register<ISessionService>(this);
             Services.Register<ISessionPlatform>(this);
+            Services.Register<ISessionSocial>(this);
         }
 
         void OnDisable()
         {
             Services.Unregister<ISessionService>(this);
             Services.Unregister<ISessionPlatform>(this);
+            Services.Unregister<ISessionSocial>(this);
         }
 
         void Start()
@@ -387,6 +393,7 @@ namespace HarvestPanic.Networking
         {
             _roster.Clear();
             _pendingNames.Clear();
+            _chat.Clear();
             _transport = SessionTransport.None;
             _connecting = false;
             _wasConnected = false;
@@ -439,6 +446,7 @@ namespace HarvestPanic.Networking
             else if (e.EventType == ConnectionEvent.ClientDisconnected && nm.IsServer && e.ClientId != nm.LocalClientId)
             {
                 _pendingNames.Remove(e.ClientId);
+                _chat.Forget(e.ClientId);
                 if (_roster.Remove(e.ClientId)) { BroadcastRoster(); OnSessionChanged?.Invoke(); }
             }
         }
@@ -492,6 +500,8 @@ namespace HarvestPanic.Networking
             var cmm = _nm.CustomMessagingManager;
             cmm.RegisterNamedMessageHandler(RosterMessage, OnRosterMessage);
             cmm.RegisterNamedMessageHandler(ReadyMessage, OnReadyMessage);
+            cmm.RegisterNamedMessageHandler(ChatInMessage, OnChatIn);
+            cmm.RegisterNamedMessageHandler(ChatOutMessage, OnChatOut);
         }
 
         void BroadcastRoster()
@@ -525,6 +535,68 @@ namespace HarvestPanic.Networking
             if (ver < 1) return;
             reader.ReadValueSafe(out bool ready);
             if (_roster.SetReady(sender, ready)) { BroadcastRoster(); OnSessionChanged?.Invoke(); }
+        }
+
+        // ---------------- ISessionSocial ----------------
+        public event Action<ulong, string> OnChat;
+
+        /// <summary>Host only: disconnects <paramref name="clientId"/> with <see cref="KickReason"/>.</summary>
+        public void Kick(ulong clientId)
+        {
+            if (!IsHost) { RaiseError("Only the host can send farmhands home."); return; }
+            if (clientId == NetworkManager.ServerClientId || !_nm.ConnectedClients.ContainsKey(clientId)) return;
+            NetLog.Info($"Kicking client {clientId}.");
+            _nm.DisconnectClient(clientId, KickReason);
+        }
+
+        /// <summary>Sends a chat line; the server cleans, caps (120) and rate-limits it, then relays to every peer.</summary>
+        public void SendChat(string text)
+        {
+            if (!IsConnected || string.IsNullOrWhiteSpace(text)) return;
+            if (text.Length > ChatRules.MaxLength * 2) text = text.Substring(0, ChatRules.MaxLength * 2);
+            if (_nm.IsServer) { ServerRelayChat(_nm.LocalClientId, text); return; }
+            using var w = new FastBufferWriter(16 + text.Length * 4, Allocator.Temp);
+            w.WriteValueSafe((byte)1);
+            w.WriteValueSafe(text);
+            _nm.CustomMessagingManager.SendNamedMessage(ChatInMessage, NetworkManager.ServerClientId, w, NetworkDelivery.ReliableSequenced);
+        }
+
+        void OnChatIn(ulong sender, FastBufferReader reader)
+        {
+            if (!_nm.IsServer) return;
+            reader.ReadValueSafe(out byte ver);
+            if (ver < 1) return;
+            reader.ReadValueSafe(out string text);
+            ServerRelayChat(sender, text);
+        }
+
+        void ServerRelayChat(ulong sender, string raw)
+        {
+            string text = ChatRules.Clean(raw);
+            if (text == null) return;
+            if (!_chat.Allow(sender, Time.realtimeSinceStartup)) { NetLog.Warn("chat-rate" + sender, $"Chat from {sender} rate-limited."); return; }
+            var targets = new List<ulong>();
+            foreach (var id in _nm.ConnectedClientsIds) if (id != NetworkManager.ServerClientId) targets.Add(id);
+            if (targets.Count > 0)
+            {
+                using var w = new FastBufferWriter(24 + text.Length * 4, Allocator.Temp);
+                w.WriteValueSafe((byte)1);
+                w.WriteValueSafe(sender);
+                w.WriteValueSafe(text);
+                _nm.CustomMessagingManager.SendNamedMessage(ChatOutMessage, targets, w, NetworkDelivery.ReliableSequenced);
+            }
+            OnChat?.Invoke(sender, text);
+        }
+
+        void OnChatOut(ulong from, FastBufferReader reader)
+        {
+            if (_nm.IsServer || from != NetworkManager.ServerClientId) return;
+            reader.ReadValueSafe(out byte ver);
+            if (ver < 1) return;
+            reader.ReadValueSafe(out ulong sender);
+            reader.ReadValueSafe(out string text);
+            text = ChatRules.Clean(text);
+            if (text != null) OnChat?.Invoke(sender, text);
         }
 
         // ---------------- Names, discovery ----------------

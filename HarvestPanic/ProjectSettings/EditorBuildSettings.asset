@@ -9,6 +9,12 @@ EditorBuildSettings:
     path: Assets/Scenes/Bootstrap.unity
     guid: 3191bbaba96b04ce58525149fb1deb9d
   - enabled: 1
+    path: Assets/Scenes/MainMenu.unity
+    guid: 5703f97561a354bb9a2640833249abf6
+  - enabled: 1
+    path: Assets/Scenes/Lobby.unity
+    guid: a13461d5e8c2f4096a885ab1e02f1b53
+  - enabled: 1
     path: Assets/Scenes/Muddlebury.unity
     guid: e42f584359edf40fa912d52bb1ae09d4
   - enabled: 1
