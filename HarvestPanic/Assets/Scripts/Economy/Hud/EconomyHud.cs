@@ -256,6 +256,8 @@ namespace HarvestPanic.Economy
             {
                 Text(body, "LANDLORD SUNDAY", "hp-r-title", true);
                 Text(body, $"Week {r.Week} · rent due", "hp-r-sub");
+                var stamp = Text(body, r.Paid ? "PAID" : "EVICTED", "hp-r-stamp", true);
+                stamp.AddToClassList(r.Paid ? "hp-stamp-paid" : "hp-stamp-evicted");
                 Rule(body);
                 Row(body, "Weekly quota", ReceiptBuilder.Money(r.Quota), null);
                 if (r.Iou > 0) Row(body, "Landlord IOU (overdraft)", ReceiptBuilder.Money(r.Iou), "hp-r-loss");
@@ -264,8 +266,6 @@ namespace HarvestPanic.Economy
                 Dash(body);
                 Text(body, "MOST VALUABLE DISASTER: " + r.Mvd, "hp-r-section", true);
                 Text(body, r.SundayLine, "hp-r-headline");
-                var stamp = Text(paper, r.Paid ? "PAID" : "EVICTED", "hp-r-stamp", true);
-                stamp.AddToClassList(r.Paid ? "hp-stamp-paid" : "hp-stamp-evicted");
             }
             else
             {

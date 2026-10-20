@@ -56,15 +56,15 @@ namespace HarvestPanic.Tests.PlayMode.Economy
             dir.EmitBlame(new BlameEvent { Verb = BlameVerb.Bruised, ItemId = "Crop.Turnip", DollarDelta = -40, CauseTag = "Weather.Wind" });
             dir.ChargeRespawnFee(1, BlameVerb.Drowned);
             yield return new WaitForSeconds(2.6f);
-            yield return Capture(Path.Combine(outDir, "economy_hud_workday.png"));
+            yield return Capture(Path.Combine(outDir, "unity-economy-hud.png"));
 
             while (dir.Phase != DayPhase.Payout) { dir.DebugSkipPhase(); yield return null; }
             yield return new WaitForSeconds(0.3f);
-            yield return Capture(Path.Combine(outDir, "economy_receipt_payout.png"));
+            yield return Capture(Path.Combine(outDir, "unity-economy-receipt.png"));
 
             for (int i = 0; i < 60 && dir.Phase != DayPhase.Sunday && dir.Phase != DayPhase.Evicted; i++) { dir.DebugSkipPhase(); yield return null; }
             yield return new WaitForSeconds(0.3f);
-            yield return Capture(Path.Combine(outDir, "economy_receipt_sunday.png"));
+            yield return Capture(Path.Combine(outDir, "unity-economy-sunday.png"));
             Debug.Log("[EconomyHudScreenshots] wrote " + outDir);
 #else
             yield break;
