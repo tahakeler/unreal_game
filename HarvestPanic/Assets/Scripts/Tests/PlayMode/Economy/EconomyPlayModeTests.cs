@@ -109,6 +109,9 @@ namespace HarvestPanic.Tests.PlayMode.Economy
 
             director.NextDay();
             yield return null;
+            Assert.AreEqual(DayPhase.Shop, director.Phase, "Payout -> Shop");
+            director.NextDay();
+            yield return null;
             Assert.AreEqual(DayPhase.Morning, director.Phase);
             Assert.AreEqual(1, director.DayIndex);
         }

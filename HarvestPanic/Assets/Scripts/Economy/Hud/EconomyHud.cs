@@ -11,7 +11,7 @@ namespace HarvestPanic.Economy
     /// mutates game state except the host's Next Day / Restart buttons.
     /// </summary>
     [RequireComponent(typeof(UIDocument))]
-    public sealed class EconomyHud : MonoBehaviour
+    public sealed partial class EconomyHud : MonoBehaviour
     {
         [SerializeField] StyleSheet styleSheet;
         [SerializeField] Font headlineFont;
@@ -36,7 +36,7 @@ namespace HarvestPanic.Economy
             Build();
         }
 
-        void OnDisable() => Unbind();
+        void OnDisable() { Unbind(); ReleaseModal(); }
 
         void Build()
         {
@@ -106,7 +106,10 @@ namespace HarvestPanic.Economy
             _dir.OnDisaster += OnDisaster;
             _dir.OnReceipt += ShowReceipt;
             _dir.OnPhaseChanged += OnPhase;
-            if (_dir.LastReceipt != null && (_dir.Phase == DayPhase.Payout || _dir.Phase == DayPhase.Sunday || _dir.Phase == DayPhase.Evicted)) ShowReceipt(_dir.LastReceipt);
+            _dir.OnShopChanged += OnShopChanged;
+            _dir.OnShopBark += OnShopBark;
+            if (_dir.IsShopOpen) ShowShop();
+            else if (_dir.LastReceipt != null && (_dir.Phase == DayPhase.Payout || _dir.Phase == DayPhase.Sunday || _dir.Phase == DayPhase.Evicted)) ShowReceipt(_dir.LastReceipt);
         }
 
         void Unbind()
@@ -116,12 +119,15 @@ namespace HarvestPanic.Economy
             _dir.OnDisaster -= OnDisaster;
             _dir.OnReceipt -= ShowReceipt;
             _dir.OnPhaseChanged -= OnPhase;
+            _dir.OnShopChanged -= OnShopChanged;
+            _dir.OnShopBark -= OnShopBark;
             _dir = null;
         }
 
         void OnPhase(DayPhase from, DayPhase to)
         {
-            if (to == DayPhase.Morning || to == DayPhase.Workday) _overlay.style.display = DisplayStyle.None;
+            if (to == DayPhase.Morning || to == DayPhase.Workday) { _overlay.style.display = DisplayStyle.None; _shopShown = false; }
+            if (to == DayPhase.Shop || to == DayPhase.Collateral) ShowShop();
         }
 
         void Update()
@@ -133,6 +139,8 @@ namespace HarvestPanic.Economy
             if (_dir == null) { _root.style.display = DisplayStyle.None; return; }
             _root.style.display = DisplayStyle.Flex;
             Refresh();
+            RefreshShop();
+            UpdateModal();
         }
 
         void Refresh()
@@ -200,6 +208,8 @@ namespace HarvestPanic.Economy
                 case DayPhase.Payout: return "PAYOUT";
                 case DayPhase.Sunday: return "SUNDAY";
                 case DayPhase.Evicted: return "EVICTED";
+                case DayPhase.Shop: return "SHOP";
+                case DayPhase.Collateral: return "LANDLORD";
                 default: return "";
             }
         }
@@ -245,6 +255,8 @@ namespace HarvestPanic.Economy
         /// <summary>Shows the payout or Sunday receipt.</summary>
         public void ShowReceipt(ReceiptData r)
         {
+            if (r.IsSunday && r.Collateral) return; // the shop panel shows Collateral
+            _shopShown = false;
             _overlay.Clear();
             _overlay.style.display = DisplayStyle.Flex;
             var paper = Add(_overlay, "hp-receipt");
@@ -267,6 +279,7 @@ namespace HarvestPanic.Economy
                 Dash(body);
                 Text(body, "MOST VALUABLE DISASTER: " + r.Mvd, "hp-r-section", true);
                 Text(body, r.SundayLine, "hp-r-headline");
+                if (!r.Paid) AddRunOver(body, r);
             }
             else
             {
@@ -309,13 +322,14 @@ namespace HarvestPanic.Economy
                 bool evicted = r.IsSunday && !r.Paid;
                 if (!evicted)
                 {
-                    var next = new Button(() => _dir?.NextDay()) { text = r.IsSunday ? "Next Week" : "Next Day" };
+                    var next = new Button(() => _dir?.NextDay()) { text = r.IsSunday ? "Next Week" : "Open the Shop" };
                     next.AddToClassList("hp-btn"); Font(next); row.Add(next);
                     next.schedule.Execute(() => next.Focus()).StartingIn(50);
                 }
-                var restart = new Button(() => _dir?.Restart()) { text = evicted ? "Try Again" : "Restart" };
+                var restart = new Button(() => _dir?.Restart()) { text = evicted ? "New Run" : "Restart" };
                 restart.AddToClassList("hp-btn"); if (!evicted) restart.AddToClassList("hp-btn-secondary");
                 Font(restart); row.Add(restart);
+                if (evicted) AddRunOverButtons(row);
             }
             else Text(paper, "Waiting for the host to sign the ledger…", "hp-wait");
         }

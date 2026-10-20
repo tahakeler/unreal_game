@@ -82,3 +82,18 @@
 .hp-btn-secondary { background-color: #E3D3B0; color: #2B2118; }
 .hp-btn-secondary:hover { background-color: #EADDBF; }
 .hp-wait { font-size: 22px; color: #6B5A48; -unity-text-align: middle-center; margin-top: 8px; }
+
+/* ---- shop chalkboard / collateral ---- */
+.hp-shop { width: 760px; rotate: 0.6deg; }
+.hp-shop-wallet { font-size: 30px; color: #2B2118; }
+.hp-shop-timer { font-size: 30px; color: #5B2A6E; }
+.hp-shop-row { flex-direction: row; align-items: center; padding: 6px 4px; border-bottom-width: 1px; border-color: #C9B48C; }
+.hp-shop-owned { background-color: #FFF4D6; }
+.hp-shop-info { flex-grow: 1; flex-shrink: 1; }
+.hp-shop-name { font-size: 24px; color: #2B2118; }
+.hp-shop-desc { font-size: 19px; color: #6B5A48; white-space: normal; }
+.hp-shop-price { font-size: 26px; min-width: 100px; -unity-text-align: middle-right; margin-right: 10px; color: #2B2118; }
+.hp-btn-small { font-size: 21px; padding: 3px 14px; margin: 0; min-width: 104px; }
+.hp-shop-proposal { background-color: #F5C542; border-color: #2B2118; border-width: 2px; border-radius: 6px; padding: 6px 10px; margin-bottom: 6px; }
+.hp-shop-bark { font-size: 21px; color: #5B2A6E; -unity-text-align: middle-center; -unity-font-style: italic; min-height: 26px; white-space: normal; }
+.hp-toast-shop { background-color: #5B2A6E; color: #FFF4D6; }
