@@ -10,7 +10,7 @@ namespace HarvestPanic.World
     /// <see cref="SpeedMultiplierAt"/> once a Core movement-modifier contract exists (requested from the lead).
     /// </summary>
     [RequireComponent(typeof(Collider))]
-    public sealed class MudZone : MonoBehaviour
+    public sealed class MudZone : MonoBehaviour, IMovementModifierSource
     {
         static readonly List<MudZone> Active = new List<MudZone>();
 
@@ -30,8 +30,11 @@ namespace HarvestPanic.World
         }
 
         void Awake() { _col = GetComponent<Collider>(); _col.isTrigger = true; }
-        void OnEnable() => Active.Add(this);
-        void OnDisable() { Active.Remove(this); _inside.Clear(); }
+        void OnEnable() { Active.Add(this); MovementModifiers.Register(this); }
+        void OnDisable() { Active.Remove(this); MovementModifiers.Unregister(this); _inside.Clear(); }
+
+        /// <inheritdoc/>
+        public float GetSpeedMultiplier(Vector3 position) => _col != null && _col.bounds.Contains(position) ? SpeedMultiplier : 1f;
 
         void OnTriggerEnter(Collider o) { if (o.attachedRigidbody != null) _inside.Add(o.attachedRigidbody); }
         void OnTriggerExit(Collider o) { if (o.attachedRigidbody != null) _inside.Remove(o.attachedRigidbody); }
