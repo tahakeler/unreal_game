@@ -131,10 +131,10 @@ namespace HarvestPanic.Tests.EditMode.CritterAI
         public void MelonRoll_DownhillThenLeashThenAwayFromPlayer()
         {
             var flat = Vector3.up;
-            var slope = Quaternion.Euler(0f, 0f, 10f) * Vector3.up; // tilted toward -x: downhill is +x
+            var slope = Quaternion.Euler(0f, 0f, 10f) * Vector3.up; // normal leans toward -x: the ground falls away toward -x
             var fb = Vector3.left;
             var down = CursedCropRules.RollDirection(slope, 4f, Vector3.zero, Vector3.zero, 10f, null, fb);
-            Assert.Greater(down.x, 0.99f, "downhill on a 10 deg slope");
+            Assert.Less(down.x, -0.99f, "downhill on a 10 deg slope");
             var back = CursedCropRules.RollDirection(slope, 4f, new Vector3(0, 0, 12f), Vector3.zero, 10f, null, fb);
             Assert.Less(back.z, -0.99f, "outside the leash it rolls home even on a slope");
             var juke = CursedCropRules.RollDirection(flat, 4f, Vector3.zero, Vector3.zero, 10f, new Vector3(0f, 0f, -2f), fb);
