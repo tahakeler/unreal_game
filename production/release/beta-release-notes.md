@@ -60,8 +60,8 @@ A new **Credits** screen in the main menu lists the team and every free asset an
 - The farm renders a lot faster. Muddlebury now uses about a twelfth of the draw calls it used before.
 - Less stutter. Several per-frame hitches from the HUD, weather and night systems have been removed.
 - The night is darker and moonlit, and the lantern gives off stronger light.
-- Finding games: Steam lobbies and invites work through the Steam overlay. When Steam is not running the game uses
-  your local network, and the menu shows which one you are on.
+- Finding games: on Windows, Steam lobbies and invites work through the Steam overlay. When Steam is not available
+  the game uses your local network, and the menu shows which one you are on.
 
 ## Known issues
 
@@ -75,7 +75,8 @@ We know about these and are working on them:
 - **Voice chat is not available yet.** Use text chat, shouts and pings in the meantime.
 - **The macOS build is not yet signed by Apple.** Until it is, macOS may refuse to open the game the first time.
   Right-click the game and choose Open.
-- **Playing between Mac and Windows over Steam has not been fully tested yet.** Please report any problems you find.
+- **On macOS, Steam lobbies and invites do not work yet.** Mac players can host and join games on the same local
+  network for now. Playing between Mac and Windows over Steam will follow once this is fixed.
 - Some music and sounds are placeholders.
 
 ---

@@ -87,7 +87,10 @@ run ditto "$APP" "$STAGE/HarvestPanic/$APP_NAME"
 run cp "$LIC" "$STAGE/HarvestPanic/LICENSES.txt"
 ZIP="$OUT/HarvestPanic-$VERSION-macOS$([[ $SIGNED == NOTARISED ]] || echo "-$SIGNED").zip"
 run rm -f "$ZIP"
-run ditto -c -k --keepParent "$STAGE/HarvestPanic" "$ZIP"
+# --norsrc --noextattr: no AppleDouble "._*" entries (provenance/quarantine xattrs). Unzipped by a non-Apple tool
+# they become stray files inside the .app and break the sealed code signature. Signatures/tickets live in files.
+run ditto -c -k --norsrc --noextattr --keepParent "$STAGE/HarvestPanic" "$ZIP"
+if [[ $DRY -eq 0 ]] && unzip -l "$ZIP" | grep -q '/\._'; then die "AppleDouble ._ entries in $ZIP"; fi
 [[ $DRY -eq 0 ]] && shasum -a 256 "$ZIP"
 echo "macOS package: $ZIP ($SIGNED)"
 echo "Steam depot content root for macOS: $STAGE/HarvestPanic equivalent = folder with $APP_NAME + LICENSES.txt"
