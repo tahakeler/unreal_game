@@ -461,8 +461,10 @@ namespace HarvestPanic.Voice
             EmitVoiceNoise(speaker, sHead, VoiceMath.DequantizeLoudness(h.Loudness));
 
             _targets.Clear();
-            foreach (ulong id in _nm.ConnectedClientsIds)
+            var ids = _nm.ConnectedClientsIds;
+            for (int i = 0; i < ids.Count; i++) // indexed: no boxed enumerator per relayed frame
             {
+                ulong id = ids[i];
                 if (id == _nm.LocalClientId) continue; // the host's own ears are handled below without a send
                 Count(Route(speaker, id, sHead, range), id);
             }

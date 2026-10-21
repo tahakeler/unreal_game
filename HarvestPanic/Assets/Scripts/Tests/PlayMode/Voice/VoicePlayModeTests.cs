@@ -23,6 +23,7 @@ namespace HarvestPanic.Tests.PlayMode.Voice
         NetworkManager _host, _client;
         VoiceChatService _hostVoice, _clientVoice;
         Transform _hostHead, _clientHead;
+        GameObject _listener;
         ulong _hostId, _clientId;
         VoiceConfig _cfg;
         readonly List<Action> _restore = new List<Action>();
@@ -56,6 +57,10 @@ namespace HarvestPanic.Tests.PlayMode.Voice
             var utp = go.AddComponent<UnityTransport>();
             var nm = go.AddComponent<NetworkManager>();
             nm.NetworkConfig = new NetworkConfig { NetworkTransport = utp, ConnectionApproval = false, EnableSceneManagement = false };
+            // Same prefab tables as NetworkBootstrap: other teams' bootstrappers (e.g. Audio's relay) spawn on any listening server.
+            var lists = Resources.LoadAll<NetworkPrefabsList>("NetworkPrefabs");
+            Array.Sort(lists, (a, b) => string.CompareOrdinal(a.name, b.name));
+            foreach (var list in lists) if (list != null) nm.NetworkConfig.Prefabs.NetworkPrefabsLists.Add(list);
             go.SetActive(true);
             utp.SetConnectionData("127.0.0.1", port);
             return nm;
@@ -92,6 +97,11 @@ namespace HarvestPanic.Tests.PlayMode.Voice
             _hostHead.position = new Vector3(0f, 1.6f, 0f);
             _clientHead = new GameObject("ClientHead").transform;
             _clientHead.position = new Vector3(6f, 1.6f, 0f);
+            if (Object.FindAnyObjectByType<AudioListener>() == null)
+            {
+                _listener = new GameObject("VoiceTestListener", typeof(AudioListener));
+                _listener.transform.SetParent(_hostHead, false); // the host's ears: 3D gain of the client voice at 6 m = 0.5
+            }
 
             _hostVoice = MakeVoice(_host, "HostVoice", _hostHead);
             _clientVoice = MakeVoice(_client, "ClientVoice", _clientHead);
@@ -145,6 +155,7 @@ namespace HarvestPanic.Tests.PlayMode.Voice
             yield return null;
             if (_client != null) Object.Destroy(_client.gameObject);
             if (_host != null) Object.Destroy(_host.gameObject);
+            if (_listener != null) Object.Destroy(_listener);
             if (_hostHead != null) Object.Destroy(_hostHead.gameObject);
             if (_clientHead != null) Object.Destroy(_clientHead.gameObject);
             Object.Destroy(_cfg);
@@ -179,7 +190,15 @@ namespace HarvestPanic.Tests.PlayMode.Voice
             float expected = 0.3f / Mathf.Sqrt(2f);
             Assert.That(stream.LastFrameRms, Is.EqualTo(expected).Within(expected * 0.3f), "decoded tone keeps its level");
             Assert.That(stream.SamplesQueued, Is.GreaterThan(15 * 640), "decoded audio queued for the audio thread");
-            TestContext.WriteLine($"isPlaying={src.isPlaying} filterReads={playback.FilterReads} outputRate={AudioSettings.outputSampleRate} lost={stream.FramesLost} late={stream.Late}");
+            yield return Wait(0.3f);
+            TestContext.WriteLine($"isPlaying={src.isPlaying} filterReads={playback.FilterReads} peak={playback.OutputPeak:0.000} outputRate={AudioSettings.outputSampleRate} lost={stream.FramesLost} late={stream.Late}");
+            if (playback.FilterReads > 0 && _listener != null)
+            {
+                // The audio thread really mixes the voice through the 3D source (0.3 tone x ~0.5 distance gain at 6 m).
+                Assert.IsTrue(src.isPlaying);
+                Assert.That(playback.OutputPeak, Is.GreaterThan(0.02f), "voice reaches the audio output");
+            }
+            else Debug.LogWarning("[VoiceTest] no audio device: audio-thread output not asserted");
 
             Assert.IsTrue(_hostVoice.IsSpeaking(_clientId));
             CollectionAssert.Contains(events, (_clientId, true));

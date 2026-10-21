@@ -7,6 +7,9 @@
 #   - a late joiner ("Lou") joins during the Workday, spawns (3 replicated players), disconnects and rejoins
 #   - with the host capped at 3, a 4th client is refused with "farm is full"
 #   - the host quits; the remaining clients get the "host went to bed" message and return to the menu
+# Proximity voice (always): "Client Cora" runs with -hpVoiceSynth (a 330 Hz tone, never the microphone); the host must
+#   receive her uplink over UDP and play it (PlayerStarts are 2 m apart), and with NET_EXTENDED=1 "Late Lou" must hear
+#   her through the host relay (HP_VoiceDown).
 # Usage: tools/net/two-process-test.sh [/abs/out-dir]   (exit 0 = pass). NET_PORT overrides the (random) port.
 set -u
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -30,7 +33,7 @@ wait_for() { local i=0; while [ $i -lt "$3" ]; do grep -qE "$2" "$1" 2>/dev/null
 "$APP" "${COMMON[@]}" "${HOSTX[@]}" -netHost -netListen 127.0.0.1 -netNoDiscovery -netName "Host Hank" -netResult "$OUT/host.txt" -logFile "$OUT/host.log" &
 HOST=$!
 sleep 3
-"$APP" "${COMMON[@]}" "${CLIX[@]}" "${JOIN[@]}" -netName "Client Cora" -netResult "$OUT/client.txt" -logFile "$OUT/client.log" &
+"$APP" "${COMMON[@]}" "${CLIX[@]}" "${JOIN[@]}" -hpVoiceSynth -netName "Client Cora" -netResult "$OUT/client.txt" -logFile "$OUT/client.log" &
 CLIENT=$!
 EC=0
 if [ "$EXT" = 1 ]; then
@@ -53,6 +56,14 @@ fi
 wait $HOST; HC=$?
 wait $CLIENT; CC=$?
 [ "$EXT" = 1 ] && { grep -q "hostLeft reason=The_host_went_to_bed" "$OUT/client.txt" || { echo "FAIL: client did not get host-quit message"; EC=1; }; }
+# Proximity voice over real UDP between player processes (feature/voice-chat).
+grep -E "\[Voice\] (uplink|heard) speaker=" "$OUT/host.log" | head -2 | sed 's/^/voice-host: /'
+grep -qE "\[Voice\] uplink speaker=[1-9][0-9]* frames=25 bytes=131 codec=Adpcm3" "$OUT/host.log" || { echo "FAIL: host did not receive client voice"; EC=1; }
+grep -qE "\[Voice\] heard speaker=[1-9][0-9]* " "$OUT/host.log" || { echo "FAIL: host did not play client voice"; EC=1; }
+if [ "$EXT" = 1 ]; then
+  grep -E "\[Voice\] heard speaker=" "$OUT/late.log" | head -1 | sed 's/^/voice-late: /'
+  grep -qE "\[Voice\] heard speaker=[1-9][0-9]* " "$OUT/late.log" || { echo "FAIL: late joiner did not hear relayed voice"; EC=1; }
+fi
 echo "--- host ($HC)";   cat "$OUT/host.txt" 2>/dev/null
 echo "--- client ($CC)"; cat "$OUT/client.txt" 2>/dev/null
 # Muddlebury state seen by each peer (SessionStateProbe lines): host has critters+goods+economy, both see 2 farmers with loadouts.

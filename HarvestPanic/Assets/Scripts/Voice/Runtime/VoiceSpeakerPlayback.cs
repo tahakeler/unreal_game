@@ -29,6 +29,9 @@ namespace HarvestPanic.Voice
         public float Range => _range;
         /// <summary>Audio-thread callbacks so far (0 when there is no audio device, e.g. batchmode).</summary>
         public int FilterReads => Volatile.Read(ref _filterReads);
+        /// <summary>Peak absolute sample of the last audio-thread buffer after 3D gain and voice (diagnostics/tests).</summary>
+        public float OutputPeak => Volatile.Read(ref _peak);
+        float _peak;
         /// <summary>True when the head of the speaker was known last frame (3D); false = 2D fallback.</summary>
         public bool Spatial { get; private set; } = true;
 
@@ -80,6 +83,9 @@ namespace HarvestPanic.Voice
             var s = _stream;
             if (s == null) { System.Array.Clear(data, 0, data.Length); return; }
             s.Ring.ReadMultiply(data, channels, _step);
+            float peak = 0f;
+            for (int i = 0; i < data.Length; i++) { float a = data[i] < 0f ? -data[i] : data[i]; if (a > peak) peak = a; }
+            Volatile.Write(ref _peak, peak);
             Interlocked.Increment(ref _filterReads);
         }
 
