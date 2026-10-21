@@ -38,7 +38,7 @@ namespace HarvestPanic.Tests.PlayMode.UI
             Assert.IsFalse(menu.Panel.Root.Q("title-screen").ClassListContains("is-active"));
             Assert.Greater(credits.Paragraphs.Count, 10);
             Assert.IsTrue(credits.Contains("TEAM"));
-            Assert.IsTrue(credits.Contains("Copyright (c) 2020 Facepunch Studios LTD"));
+            Assert.IsTrue(credits.Contains("Copyright (c) 2016 Facepunch Studios LTD"));
             Assert.IsTrue(credits.Contains("Permission is hereby granted, free of charge"));
             Assert.IsTrue(credits.Contains("Quaternius"));
             foreach (var p in credits.Paragraphs) Assert.Less(p.text.Length, 8000, "paragraph labels stay small");

@@ -20,7 +20,7 @@ namespace HarvestPanic.Tests.EditMode.UI
             foreach (var must in new[]
                      {
                          "TEAM", "Quaternius", "Kenney", "Kay Lousberg", "Lilita One", "Nunito", "Tripo",
-                         "Facepunch.Steamworks", "MIT LICENCE - Facepunch.Steamworks", "Copyright (c) 2020 Facepunch Studios LTD",
+                         "Facepunch.Steamworks", "MIT LICENCE - Facepunch.Steamworks", "Copyright (c) 2016 Facepunch Studios LTD",
                          "Copyright (c) 2021 Unity Technologies", "Permission is hereby granted, free of charge",
                          "THE SOFTWARE IS PROVIDED \"AS IS\"", "SIL OPEN FONT LICENSE", "https://poly.pizza/m/u35l6uP5vj",
                      })
