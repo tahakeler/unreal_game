@@ -71,20 +71,27 @@ namespace HarvestPanic.Voice
         }
 
         /// <summary>Custom rolloff curve for an AudioSource whose maxDistance = <paramref name="range"/> (x axis is distance / range).</summary>
-        public static AnimationCurve BuildRolloffCurve(float full, float range, float fadeBand, int keys = 24)
+        public static AnimationCurve BuildRolloffCurve(float full, float range, float fadeBand, int keys = 40)
         {
-            var curve = new AnimationCurve();
-            if (range <= 0f) { curve.AddKey(0f, 0f); curve.AddKey(1f, 0f); return curve; }
+            if (range <= 0f) return new AnimationCurve(new Keyframe(0f, 0f), new Keyframe(1f, 0f));
             keys = Mathf.Max(4, keys);
-            for (int i = 0; i <= keys; i++)
+            var xs = new System.Collections.Generic.List<float>(keys + 4);
+            for (int i = 0; i <= keys; i++) { float t = (float)i / keys; xs.Add(t * t); } // denser near the source where 1/d bends most
+            xs.Add(Mathf.Clamp01(full / range));                                               // the full-volume knee
+            xs.Add(Mathf.Clamp01((range - Mathf.Max(0f, fadeBand)) / range));                  // start of the fade to silence
+            xs.Sort();
+            var frames = new System.Collections.Generic.List<Keyframe>(xs.Count);
+            foreach (float x in xs)
+                if (frames.Count == 0 || x - frames[frames.Count - 1].time > 1e-4f) frames.Add(new Keyframe(x, Gain(x * range, full, range, fadeBand)));
+            // Linear tangents: piecewise-linear between dense keys, no overshoot at the knee.
+            for (int i = 0; i < frames.Count; i++)
             {
-                float t = (float)i / keys;
-                // denser sampling near the source where the 1/d curve bends most
-                float x = t * t;
-                curve.AddKey(new Keyframe(x, Gain(x * range, full, range, fadeBand)));
+                var k = frames[i];
+                k.inTangent = i > 0 ? (k.value - frames[i - 1].value) / (k.time - frames[i - 1].time) : 0f;
+                k.outTangent = i < frames.Count - 1 ? (frames[i + 1].value - k.value) / (frames[i + 1].time - k.time) : 0f;
+                frames[i] = k;
             }
-            for (int i = 0; i < curve.length; i++) curve.SmoothTangents(i, 0f);
-            return curve;
+            return new AnimationCurve(frames.ToArray());
         }
 
         /// <summary>Codec payload bytes for one frame of <paramref name="frameMs"/> at <paramref name="codecRate"/> (ADPCM only; Steam is variable).</summary>

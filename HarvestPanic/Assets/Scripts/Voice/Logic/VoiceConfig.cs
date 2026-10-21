@@ -18,8 +18,9 @@ namespace HarvestPanic.Voice
         [Tooltip("Capture and playback rate (Hz).")] public int SampleRate = 16000;
         [Tooltip("ADPCM codec rate (Hz); capture is decimated 2:1 to this.")] public int CodecRate = 8000;
         [Tooltip("Frame length (ms). 40 ms = 25 packets/s while talking.")] public int FrameMs = 40;
-        [Tooltip("Codec on LAN / Unity Transport.")] public VoiceCodec LanCodec = VoiceCodec.Adpcm4;
-        [Tooltip("PCM codec over the Steam transport when Steam voice is unavailable (internet budget).")] public VoiceCodec InternetFallbackCodec = VoiceCodec.Adpcm3;
+        [Tooltip("Codec of the PCM (Microphone) backend. Adpcm3 = 26.2 kbps up / 28.0 kbps down per talker (inside the 32 kbps budget); Adpcm4 is LAN-only (34-36 kbps).")]
+        public VoiceCodec PcmCodec = VoiceCodec.Adpcm3;
+        [Tooltip("Max audio queued for playback per speaker (ms); older samples are dropped to bound latency.")] public int PlayoutRingMs = 240;
 
         [Header("Transmit")]
         [Tooltip("Input System path of the push-to-talk key.")] public string PushToTalkBinding = "<Keyboard>/v";
@@ -40,12 +41,14 @@ namespace HarvestPanic.Voice
         public int MaxOccludingWalls = 2;
         [Tooltip("Occlusion re-cast rate (Hz).")] public float OcclusionHz = 10f;
         [Tooltip("Layers that occlude voice.")] public LayerMask OcclusionMask = 1; // Default
+        [Tooltip("Cast occlusion rays (GDD proximity-voice rule 2).")] public bool UseOcclusion = true;
 
         [Header("Jitter / loss")]
         public int JitterSlots = 16;
         [Tooltip("Frames buffered before a talk spurt starts playing.")] public int JitterPrefillFrames = 2;
         [Tooltip("Consecutive empty pulls before the spurt ends and the buffer re-prefills.")] public int MaxUnderruns = 3;
-        [Tooltip("Speaker considered silent after this long without packets (s).")] public float SpeakerTimeout = 0.5f;
+        [Tooltip("Speaker considered silent after this long without packets (s).")] public float SpeakerTimeout = 0.4f;
+        [Tooltip("Speaker playback objects are destroyed after this long without packets (s).")] public float SpeakerIdleDestroy = 20f;
         [Tooltip("Gain of the repeated frame used to conceal one lost packet.")] public float ConcealGain = 0.5f;
 
         [Header("Server enforcement")]
@@ -58,7 +61,9 @@ namespace HarvestPanic.Voice
         [Tooltip("Voice loudness that becomes a Noise Event (GDD 0.35).")] public float VoiceNoiseThreshold = 0.35f;
         [Tooltip("Min seconds between voice Noise Events per player.")] public float VoiceNoiseInterval = 0.5f;
         [Tooltip("Host option 'Voice draws critters'.")] public bool VoiceDrawsCritters = true;
-        [Tooltip("Speaking icon height above the head pivot (m).")] public float IndicatorHeight = 0.75f;
+        [Tooltip("Speaking icon height above the head pivot when the player has no NameTag (m).")] public float IndicatorHeight = 0.75f;
+        [Tooltip("Speaking icon offset above the NameTag (m).")] public float IndicatorAboveNameTag = 0.42f;
+        [Tooltip("Steam backend: keep recording this long after push-to-talk is released so the last syllable is sent (s).")] public float SteamPttTail = 0.25f;
 
         public int FrameSamples => SampleRate * FrameMs / 1000;
 

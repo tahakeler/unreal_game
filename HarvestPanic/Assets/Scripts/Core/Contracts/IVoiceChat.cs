@@ -12,10 +12,10 @@ namespace HarvestPanic.Core
     /// </summary>
     public interface IVoiceChat
     {
-        /// <summary>Open mic (voice-activity threshold) or push-to-talk (default key V).</summary>
+        /// <summary>Open mic (voice-activity threshold) or push-to-talk (default key V). Default push-to-talk; Frontend settings persist and apply it.</summary>
         VoiceTransmitMode Mode { get; set; }
 
-        /// <summary>Open-mic voice-activity threshold as loudness 0..1 (0 = always on). Persisted per machine.</summary>
+        /// <summary>Open-mic voice-activity threshold as loudness 0..1 (0 = always on). Frontend settings persist and apply it.</summary>
         float OpenMicThreshold { get; set; }
 
         /// <summary>Local mic mute: nothing is captured or sent while true.</summary>

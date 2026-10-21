@@ -38,6 +38,7 @@ Cross-talk = register an interface in `Services` (`Services.Register<T>`, `Get<T
 | Impact units | `ImpactUnits` | all (see below) |
 | Run save | `IRunSaveService` (`HasSave`, `Summary`, `ContinueRequested`, `DeleteSave`) | Economy (registered at startup) -> Frontend main menu "Continue Farm" |
 | Session | `ISessionService`, `PlayerInfo` | Networking -> Frontend UI (v0, add-only) |
+| Voice chat | `IVoiceChat` (`Mode`, `OpenMicThreshold`, `MicMuted`, `IsTransmitting`, `LocalLoudness`, `BackendName`, `IsSpeaking`, `IsMuted`, `SetMuted`, `OnSpeakingChanged`), `VoiceTransmitMode` | Voice (`HarvestPanic.Voice`) -> Frontend UI (settings, crew list, pause menu) |
 | Markers | `MarkerRole`, `MarkerTag`, `LevelMarker` | World places -> owners spawn |
 | Layers | `GameLayers` | all |
 | Data lookup | `Content.Goods/Critters/DayModifiers` (`ContentCatalog<T>`), `PlayerIds` | all |
@@ -63,7 +64,7 @@ Each team owns `Assets/Resources/NetworkPrefabs/<Team>.asset` (a `NetworkPrefabs
 
 | Team | Owns (folders / scenes / prefabs / data) |
 |---|---|
-| Networking | `Scripts/Networking`, `Scripts/Editor`, `Packages/manifest.json`, `ProjectSettings/**`, `Scenes/Bootstrap`, `Prefabs/Networking`, NetworkManager, `Resources/NetworkPrefabs` loader |
+| Networking | `Scripts/Networking`, `Scripts/Voice`, `Scripts/Editor`, `Packages/manifest.json`, `ProjectSettings/**`, `Scenes/Bootstrap`, `Prefabs/Networking`, NetworkManager, `Resources/NetworkPrefabs` loader |
 | Player | `Scripts/Gameplay`, `Prefabs/Player`, `Prefabs/Tools`, input actions, `Resources/NetworkPrefabs/Player.asset` |
 | Critter AI | `Scripts/AI`, `Prefabs/Critters`, `Resources/Data/Critters`, `NetworkPrefabs/Critter.asset` |
 | Economy+HUD | `Scripts/Economy`, `Prefabs/Goods`, `Prefabs/HUD`, `Resources/Data/Goods`, `Data/DayModifiers`, `NetworkPrefabs/Economy.asset` |
@@ -123,3 +124,11 @@ registered as `IAudioService` and `IAudioSettingsSink`. Everything is client-loc
 - Weeping-angel rule: server checks every connected player's `HeadPivot` child (pitch replicated by Player) as a frustum (camera FOV, 16:9) within 40 m (15 m when `Weather.FogDistance` > 0) with `Physics.Linecast` LOS, >= 15% of 9 bounds samples; downed and AFK (60 s) players don't count. Tests/bots add `INightViewerSource`s via `NightObservers.Register`.
 - Creature KO: `IKnockable.ApplyImpulse(yank toward the field, PlayerIds.Nature, BlameVerb.KnockedOut)` (2400 design units = KO). Stitches/foxes move carryables by `ICarryable.OnGrabbed/OnReleased(PlayerIds.Nature)` + kinematic follow.
 - Core add-only: `DayParams.NightLanternPosts`, `DayParams.NightThreatMult`. Economy minimal hook: the Lantern Posts upgrade modifier also adds `Night.LanternPosts +1` (asset + `UpgradeAssetBuilder`); each lit post is a 6 m safe circle (barn 10 m, market 14 m, bridge planks 3.5 m are always safe).
+## Proximity voice (feature/voice-chat)
+- New Networking-owned asmdef `HarvestPanic.Voice` (`Scripts/Voice`, refs Core + Netcode + Collections + Input System + Facepunch transport; no team assembly). Decision record: `docs/architecture/adr-voice-chat.md`.
+- `VoiceChatService` auto-creates after the first scene loads (skipped in the test runner's InitTestScene and with `-hpVoiceOff`), follows `NetworkManager.Singleton` and registers `IVoiceChat`. Messages: `HP_VoiceUp` (client->host, unreliable), `HP_VoiceDown` (host->clients, unreliable), `HP_VoiceMute` (client->host, reliable), versioned byte layouts in `VoicePacket`.
+- Steam voice on the Steam transport, else Unity Microphone -> IMA ADPCM 3-bit 8 kHz (26.2 kbps up / 28.0 kbps down per talker). The real microphone is never opened in batchmode unless `-hpVoiceMic`; `-hpVoiceSynth` sends a test tone.
+- Range 25 m x `DayParams.NoiseVoiceRadiusMult` (Megaphone upgrade x2), resolved by the host. Heads: player object child `HeadPivot`. The host emits `NoiseSource.Voice` events (loudness >= 0.35, 1 per 0.5 s per player) through `INoiseService`.
+- Ducking: the primary service calls `IAudioService.ReportVoiceActivity` while a speaker within 15 m (or the local talker) is speaking.
+- Minimal Frontend edits (scoped by the feature brief): `GameSettings.OpenMicThreshold` + `PushToTalk` default true, "Open mic sensitivity" slider, `UiRuntime` applies both to `IVoiceChat`, Lobby crew rows get Mute + TALKING, pause menu gets per-player Mute buttons. Speaking marker is parented at runtime under the farmer's `NameTag` (no Customization edit).
+- ProjectSettings: `microphoneUsageDescription` set (macOS permission prompt).

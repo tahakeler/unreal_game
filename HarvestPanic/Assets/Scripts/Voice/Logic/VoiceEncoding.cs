@@ -126,14 +126,20 @@ namespace HarvestPanic.Voice
         }
     }
 
-    /// <summary>Decodes any wire codec to 16 kHz float PCM. Steam decoding is injected by the runtime (needs SteamClient).</summary>
+    /// <summary>Decodes a Steam voice payload (u16-length blocks) into 16 kHz float PCM; returns samples, or -1 when unavailable.</summary>
+    public delegate int SteamVoiceDecodeFn(byte[] src, int offset, int length, float[] dst16k);
+
+    /// <summary>
+    /// Decodes any wire codec to 16 kHz float PCM. One instance per remote speaker (the 8 -> 16 kHz upsampler keeps one
+    /// sample of history). Steam decoding is injected by the runtime because it needs a live SteamClient.
+    /// </summary>
     public sealed class VoiceDecoder
     {
-        /// <summary>(payload, offset, length, dst16k) -> samples; null when Steam is unavailable on this machine.</summary>
-        public static Func<byte[], int, int, float[], int> SteamDecode;
-
+        readonly SteamVoiceDecodeFn _steam;
         readonly Upsampler2 _up = new Upsampler2();
-        float[] _tmp = new float[4096];
+        readonly float[] _tmp = new float[4096];
+
+        public VoiceDecoder(SteamVoiceDecodeFn steamDecode = null) { _steam = steamDecode; }
 
         public void Reset() => _up.Reset();
 
@@ -146,8 +152,37 @@ namespace HarvestPanic.Voice
                 int n = AdpcmCodec.Decode(src, offset, length, bits, _tmp, 0, Math.Min(_tmp.Length, dst.Length / 2));
                 return _up.Process(_tmp, 0, n, dst, 0);
             }
-            if (codec == VoiceCodec.Steam && SteamDecode != null) return SteamDecode(src, offset, length, dst);
+            if (codec == VoiceCodec.Steam && _steam != null) return _steam(src, offset, length, dst);
             return -1;
+        }
+    }
+
+    /// <summary>
+    /// Steam voice payload framing: each <c>SteamUser.ReadVoiceData</c> result inside one 40 ms frame is stored as
+    /// <c>u16 length (LE) + bytes</c>, so receivers can call <c>DecompressVoice</c> per block.
+    /// </summary>
+    public static class SteamVoiceBlocks
+    {
+        /// <summary>Appends one block at <paramref name="pos"/>; returns false (nothing written) if it would exceed <paramref name="capacity"/>.</summary>
+        public static bool TryAppend(byte[] dst, ref int pos, int capacity, byte[] block, int offset, int length)
+        {
+            if (length <= 0 || length > ushort.MaxValue || pos + 2 + length > Math.Min(capacity, dst.Length)) return false;
+            dst[pos] = (byte)length; dst[pos + 1] = (byte)(length >> 8);
+            Buffer.BlockCopy(block, offset, dst, pos + 2, length);
+            pos += 2 + length;
+            return true;
+        }
+
+        /// <summary>Iterates blocks: returns false at the end or on a malformed length.</summary>
+        public static bool TryNext(byte[] src, ref int pos, int end, out int blockOffset, out int blockLength)
+        {
+            blockOffset = 0; blockLength = 0;
+            if (pos + 2 > end) return false;
+            int len = src[pos] | (src[pos + 1] << 8);
+            if (len <= 0 || pos + 2 + len > end) return false;
+            blockOffset = pos + 2; blockLength = len;
+            pos += 2 + len;
+            return true;
         }
     }
 }
