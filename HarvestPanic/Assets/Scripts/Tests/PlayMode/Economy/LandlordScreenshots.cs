@@ -12,7 +12,7 @@ namespace HarvestPanic.Tests.PlayMode.Economy
     /// QA capture (Explicit): receipt with awards, Landlord rule memos, and the Landlord Sunday walk-in. Writes PNGs to
     /// $HP_QA_DIR (or $HP_QA_OUT, default Logs/qa). Run batchmode WITHOUT -nographics, -testFilter LandlordScreenshots.
     /// </summary>
-    [Explicit, Category("QA")]
+    [Explicit("QA screenshot capture; run by name with a GPU (no -nographics)"), Category("QA")]
     public class LandlordScreenshots
     {
         [UnityTest]
