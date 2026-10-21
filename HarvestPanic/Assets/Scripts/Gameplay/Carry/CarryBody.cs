@@ -33,7 +33,7 @@ namespace HarvestPanic.Gameplay
         float _savedAngularDamping;
         bool _savedKinematic, _stored, _selfSimulated;
         Vector2 _wobbleSeed;
-        float _struggle;
+        float _struggle, _struggleHoldUntil;
         ICarryableEvents _events;
 
         /// <summary>The carried object.</summary>
@@ -97,6 +97,45 @@ namespace HarvestPanic.Gameplay
             if (_rb != null && !_rb.isKinematic) _rb.AddForce(ImpactUnits.ToUnity(mag) * Random.onUnitSphere, ForceMode.Impulse);
         }
 
+        /// <summary>
+        /// Server: a scare (whistle, farm-tools section 5 "+50% struggle for 2 s") makes the held body wobble harder:
+        /// struggle becomes <c>max(struggle, 1) * (1 + boost)</c> and holds there for <paramref name="seconds"/>
+        /// before decaying. Each holder also feels a small jolt.
+        /// </summary>
+        public void BoostStruggle(float boost, float seconds)
+        {
+            _struggle = WhistleMath.BoostedStruggle(Mathf.Max(_struggle, 1f), boost);
+            _struggleHoldUntil = Time.time + Mathf.Max(0f, seconds);
+        }
+
+        /// <summary>Current struggle level (wobble multiplier input; tests).</summary>
+        public float Struggle => _struggle;
+
+        /// <summary>Server: client ids of the current holders.</summary>
+        public void GetHolderIds(List<ulong> into)
+        {
+            into.Clear();
+            foreach (var g in _grips) if (g.Carrier != null) into.Add(g.Carrier.OwnerClientId);
+        }
+
+        /// <summary>One grip as seen by self-simulated bodies (the wagon applies its own handle forces).</summary>
+        public struct GripInfo
+        {
+            /// <summary>The holding player.</summary>
+            public PlayerCarry Carrier;
+            /// <summary>Grab point in the body's local space.</summary>
+            public Vector3 LocalPoint;
+            /// <summary>Hands this player has on it.</summary>
+            public int Hands;
+        }
+
+        /// <summary>Server: copies the current grips into <paramref name="into"/> (cleared first).</summary>
+        public void GetGrips(List<GripInfo> into)
+        {
+            into.Clear();
+            foreach (var g in _grips) if (g.Carrier != null) into.Add(new GripInfo { Carrier = g.Carrier, LocalPoint = g.LocalPoint, Hands = g.Hands });
+        }
+
         /// <summary>Adds a grip; rejects a second player on a 1-hand item and joins beyond what is needed.</summary>
         public bool TryAddGrip(PlayerCarry carrier, Vector3 localPoint, out int hands)
         {
@@ -104,6 +143,8 @@ namespace HarvestPanic.Gameplay
             foreach (var g in _grips) if (g.Carrier == carrier) return false;
             int required = Mathf.Max(1, Carryable.HandsRequired);
             if (HandsAttached >= required) return false; // "no item held by two 1-hand grips"; crews are capped
+            // Wagon slots / lasso yanks let go first so the physics state saved below is the free-body state.
+            if (_grips.Count == 0) CarryHooks.RaiseClaiming(NetObject, carrier);
             hands = CarryMath.HandsContributed(required, HandsAttached);
             _t = carrier.CarryTuning;
             _grips.Add(new Grip { Carrier = carrier, LocalPoint = localPoint, Hands = hands, Slip = new SlipTracker(_t.SlipDistance, _t.SlipTime) });
@@ -161,6 +202,12 @@ namespace HarvestPanic.Gameplay
 
         void PushLoad()
         {
+            if (Carryable is ICarryLoadOverride over)
+            {
+                float m = over.CarrierSpeedMultiplier(_grips.Count);
+                foreach (var g in _grips) g.Carrier.ServerSetLoad(m, 0f, g.Hands);
+                return;
+            }
             float mass = Carryable.MassKg;
             int required = Mathf.Max(1, Carryable.HandsRequired);
             float speed = CarryMath.SpeedMultiplier(mass, HandsAttached, required, _t.KgPerHand, _t.CarrySpeedFloor);
@@ -181,7 +228,7 @@ namespace HarvestPanic.Gameplay
             if (NetObject == null || !NetObject.IsSpawned) { DropAll(); return; }
 
             float now = Time.time, dt = Time.fixedDeltaTime;
-            _struggle = Mathf.MoveTowards(_struggle, 0f, dt);
+            if (now >= _struggleHoldUntil) _struggle = Mathf.MoveTowards(_struggle, 0f, dt);
             foreach (var g in _grips)
                 if (now >= g.NextTouch) { g.NextTouch = now + _t.HoldTouchRefresh; _log.Touch(g.Carrier.OwnerClientId, now); _goods?.RecordTouch(g.Carrier.OwnerClientId); }
 
@@ -239,7 +286,8 @@ namespace HarvestPanic.Gameplay
 
         void OnCollisionEnter(Collision c)
         {
-            if (NetObject == null || NetworkManager.Singleton == null || !NetworkManager.Singleton.IsServer) return;
+            // Self-simulated bodies (players, the wagon) report their own impacts.
+            if (_selfSimulated || NetObject == null || NetworkManager.Singleton == null || !NetworkManager.Singleton.IsServer) return;
             float now = Time.time;
             if (!_log.IsReporting(now)) return;
             float design = ImpactUnits.ToDesign(c.impulse.magnitude);

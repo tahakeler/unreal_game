@@ -125,6 +125,6 @@ namespace HarvestPanic.Gameplay
             c.OnReleased(_user != null ? _user.OwnerClientId : PlayerIds.None);
         }
 
-        public override void OnNetworkDespawn() { if (IsServer) Release(transform.forward); }
+        public override void OnNetworkDespawn() { base.OnNetworkDespawn(); if (IsServer) Release(transform.forward); }
     }
 }

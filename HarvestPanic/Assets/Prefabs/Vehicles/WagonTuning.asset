@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df1b531f49521435f88ac085ae68c721, type: 3}
+  m_Name: WagonTuning
+  m_EditorClassIdentifier: HarvestPanic.Gameplay::HarvestPanic.Gameplay.WagonTuning
+  WagonMassKg: 120
+  CargoSoftCapKg: 400
+  CargoSlots: 6
+  CargoColumns: 2
+  WallHeight: 0.4
+  BedWidth: 1.2
+  BedLength: 2
+  PushForcePerPlayer: 900
+  VMax: 6
+  RollingKDirt: 1.5
+  RollingKMud: 3
+  RollingKPlank: 1.2
+  HandleStiffness: 1800
+  HandleDamping: 300
+  HandleRest: {x: 0.75, y: 1.15}
+  HandleSlipDistance: 2.8
+  LateralGrip: 10
+  IdleRollDrag: 3
+  ParkSpeed: 0.6
+  TipAngle: 50
+  TipConfirmSeconds: 0.15
+  RightingSeconds: 2
+  RightingPlayers: 2
+  SpillSpeed: 3
+  AutoLoad: 1
+  LoadScanInterval: 0.2
+  MaxLoadSpeed: 3.5
+  BumpSpillChance: 0.35
+  BumpCooldown: 0.6
+  BumpMinSpeed: 2
+  CargoCushion: 0.5
+  CargoHitMin: 600
+  KnockSpeed: 3

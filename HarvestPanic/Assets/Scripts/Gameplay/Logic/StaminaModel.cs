@@ -44,10 +44,13 @@ namespace HarvestPanic.Gameplay
             return true;
         }
 
-        /// <summary>Advances the model by <paramref name="dt"/>.</summary>
-        public void Tick(float dt, bool sprinting, float loadRatio)
+        /// <summary>
+        /// Advances the model by <paramref name="dt"/>. <paramref name="extraDrain"/> is any other drain per second
+        /// (lasso tug-of-war, farm-tools rule 3: 10/s while pulling).
+        /// </summary>
+        public void Tick(float dt, bool sprinting, float loadRatio, float extraDrain = 0f)
         {
-            float drain = (sprinting && CanSprint ? _t.SprintDrain : 0f) + _t.CarryDrainPerLoad * Mathf.Clamp01(loadRatio);
+            float drain = (sprinting && CanSprint ? _t.SprintDrain : 0f) + _t.CarryDrainPerLoad * Mathf.Clamp01(loadRatio) + Mathf.Max(0f, extraDrain);
             if (drain > 0f)
             {
                 Value = Mathf.Max(0f, Value - drain * dt);

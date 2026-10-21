@@ -26,8 +26,10 @@ namespace HarvestPanic.Gameplay
         readonly NetworkVariable<float> _speedMult = new NetworkVariable<float>(1f);
         readonly NetworkVariable<float> _loadRatio = new NetworkVariable<float>(0f);
         readonly NetworkVariable<bool> _heldIsTool = new NetworkVariable<bool>(false);
+        readonly NetworkVariable<float> _extraDrain = new NetworkVariable<float>(0f);
 
         PlayerCharacter _pc;
+        PlayerToolbelt _belt;
         CarryBody _serverBody;
         float _throwHeldFor;
         bool _charging;
@@ -47,6 +49,8 @@ namespace HarvestPanic.Gameplay
         public float SpeedMultiplier => _speedMult.Value;
         /// <summary>Server-computed load ratio 0..1.</summary>
         public float LoadRatio => _loadRatio.Value;
+        /// <summary>Extra stamina drain per second set by the server (lasso tug-of-war, farm-tools rule 3: 10/s).</summary>
+        public float ExtraStaminaDrain => _extraDrain.Value;
         /// <summary>NetworkObjectId of the held object or <see cref="NoObject"/>.</summary>
         public ulong HeldId => _heldId.Value;
         /// <summary>Hands this player has on the held object.</summary>
@@ -79,6 +83,7 @@ namespace HarvestPanic.Gameplay
         void Awake()
         {
             _pc = GetComponent<PlayerCharacter>();
+            _belt = GetComponent<PlayerToolbelt>();
             _mask = ~(LayerMask.GetMask(GameLayers.Water, "Ignore Raycast", "UI"));
         }
 
@@ -151,17 +156,39 @@ namespace HarvestPanic.Gameplay
 
             if (IsHoldingReplicated)
             {
-                if (input.InteractPressed) RequestRelease();
+                bool pocketTool = _belt != null && _belt.HeldIsPocketTool;
+                var heldT = HeldObject;
+                var toolInteract = heldT != null ? heldT.GetComponent<IToolInteract>() : null;
+                string toolE = toolInteract != null ? toolInteract.InteractPrompt : null;
+                // A pocket tool in hand and something grabbable under the reticle: E puts the tool away and grabs it
+                // (farm-tools rule 1: carries auto-holster the tool).
+                ICarryable swapTarget = null; NetworkObject swapNo = null; Vector3 swapLocal = Vector3.zero;
+                bool swapAim = pocketTool && string.IsNullOrEmpty(toolE) && TryAim(out swapTarget, out swapNo, out swapLocal);
+                if (input.InteractPressed)
+                {
+                    if (!string.IsNullOrEmpty(toolE)) ToolInteractRpc();
+                    else if (swapAim) SwapGrabRpc(swapNo.NetworkObjectId, swapLocal);
+                    else if (pocketTool) _belt.RequestSelect(0);
+                    else RequestRelease();
+                }
                 if (input.ThrowHeld) { _charging = true; _throwHeldFor += Time.deltaTime; }
                 if (input.ThrowReleased && _charging) { RequestThrow(ThrowCharge); _charging = false; _throwHeldFor = 0f; }
                 if (input.UsePressed) UseToolRpc(true);
                 if (input.UseReleased) UseToolRpc(false);
 
-                prompt = "E: Drop  LMB: Throw";
-                if (HoldingTool && HeldObject != null && HeldObject.TryGetComponent<IUsableTool>(out var tool)) prompt += "  " + tool.UsePrompt;
-                int need = HeldObject != null && HeldObject.TryGetComponent<ICarryable>(out var held) ? held.HandsRequired : 0;
-                int have = HandsOn(_heldId.Value);
-                if (need > have) prompt += $"  (dragging {have}/{need} hands)";
+                string eText = !string.IsNullOrEmpty(toolE) ? toolE
+                    : swapAim ? (swapTarget is ICustomGrabPrompt sg ? sg.GrabPrompt : $"E: Grab ({HandsOn(swapNo.NetworkObjectId)}/{swapTarget.HandsRequired} hands)")
+                    : pocketTool ? "E: Put away" : "E: Drop";
+                prompt = eText + "  LMB: Throw";
+                if (HoldingTool && heldT != null && heldT.TryGetComponent<IUsableTool>(out var tool)) prompt += "  " + tool.UsePrompt;
+                var heldC = heldT != null ? heldT.GetComponent<ICarryable>() : null;
+                if (heldC is ICustomGrabPrompt custom) prompt = custom.HoldPrompt;
+                else
+                {
+                    int need = heldC != null ? heldC.HandsRequired : 0;
+                    int have = HandsOn(_heldId.Value);
+                    if (need > have) prompt += $"  (dragging {have}/{need} hands)";
+                }
                 if (_charging) prompt += $"  [{Mathf.RoundToInt(ThrowCharge * 100f)}%]";
                 SetPrompt(prompt);
                 return;
@@ -179,7 +206,7 @@ namespace HarvestPanic.Gameplay
             if (found)
             {
                 int have = HandsOn(no.NetworkObjectId);
-                prompt = $"E: Grab ({have}/{target.HandsRequired} hands)";
+                prompt = target is ICustomGrabPrompt cg ? cg.GrabPrompt : $"E: Grab ({have}/{target.HandsRequired} hands)";
                 if (ko != null) prompt = $"Tap E: Carry  Hold E: Revive";
             }
 
@@ -224,14 +251,17 @@ namespace HarvestPanic.Gameplay
             var head = _pc.CameraPivot;
             int n = Physics.RaycastNonAlloc(head.position, head.forward, Hits, CarryTuning.GrabRange, _mask, QueryTriggerInteraction.Ignore);
             float best = float.MaxValue;
+            var heldT = IsHoldingReplicated ? HeldObject : null;
             for (int i = 0; i < n; i++)
             {
                 var h = Hits[i];
                 if (h.collider.transform.IsChildOf(transform) || h.distance >= best) continue;
+                if (heldT != null && h.collider.transform.IsChildOf(heldT)) continue; // our own held tool
                 best = h.distance;
                 var c = h.collider.GetComponentInParent<ICarryable>();
                 var no = c is Component comp ? comp.GetComponentInParent<NetworkObject>() : null;
-                if (c == null || no == null || !no.IsSpawned || (c is IGrabGate g && !g.CanBeGrabbedBy(OwnerClientId)))
+                if (c == null || no == null || !no.IsSpawned || (c is IGrabGate g && !g.CanBeGrabbedBy(OwnerClientId))
+                    || (c is CarryableProp hp && hp.IsHolstered))
                 { target = null; netObj = null; continue; }
                 target = c; netObj = no;
                 localPoint = c.CarryTransform.InverseTransformPoint(h.point);
@@ -258,24 +288,36 @@ namespace HarvestPanic.Gameplay
         [Rpc(SendTo.Server)]
         void RequestGrabRpc(ulong objectId, Vector3 localPoint)
         {
-            if (_serverBody != null || !_pc.HasControlServer || !TryGetSpawned(objectId, out var no)) return;
+            if (!TryGetSpawned(objectId, out var no)) return;
+            ServerGrab(no, localPoint, true);
+        }
+
+        /// <summary>
+        /// Server: grabs <paramref name="no"/> at <paramref name="localPoint"/> (object space). Range-checked for client
+        /// requests; tools taken out of the toolbelt and lasso auto-grabs skip the range check.
+        /// </summary>
+        public bool ServerGrab(NetworkObject no, Vector3 localPoint, bool checkRange)
+        {
+            if (!IsServer || _serverBody != null || !_pc.HasControlServer || no == null || !no.IsSpawned) return false;
             var carryable = no.GetComponentInChildren<ICarryable>();
-            if (carryable == null || ReferenceEquals(carryable, _pc)) return;
-            if (carryable is IGrabGate gate && !gate.CanBeGrabbedBy(OwnerClientId)) return;
+            if (carryable == null || ReferenceEquals(carryable, _pc)) return false;
+            if (carryable is IGrabGate gate && !gate.CanBeGrabbedBy(OwnerClientId)) return false;
+            if (carryable is CarryableProp prop && prop.IsHolstered && prop.HolsteredBy != OwnerClientId) return false;
             Vector3 grabWorld = carryable.CarryTransform.TransformPoint(localPoint);
             float reach = CarryTuning.GrabRange + CarryTuning.GrabRangeSlack;
-            if ((grabWorld - _pc.HeadPivot.position).sqrMagnitude > reach * reach)
+            if (checkRange && (grabWorld - _pc.HeadPivot.position).sqrMagnitude > reach * reach)
             {
                 // Bounds-based fallback for big bodies whose grab point drifted.
                 var col = no.GetComponentInChildren<Collider>();
-                if (col == null || (col.ClosestPoint(_pc.HeadPivot.position) - _pc.HeadPivot.position).sqrMagnitude > reach * reach) return;
+                if (col == null || (col.ClosestPoint(_pc.HeadPivot.position) - _pc.HeadPivot.position).sqrMagnitude > reach * reach) return false;
             }
             var body = CarryBody.GetOrAdd(no, carryable);
-            if (!body.TryAddGrip(this, localPoint, out int hands)) return;
+            if (!body.TryAddGrip(this, localPoint, out int hands)) return false;
             _serverBody = body;
             _heldIsTool.Value = carryable.IsKinematicCarry;
             _hands.Value = (byte)hands;
-            _heldId.Value = objectId;
+            _heldId.Value = no.NetworkObjectId;
+            return true;
         }
 
         [Rpc(SendTo.Server)]
@@ -296,6 +338,27 @@ namespace HarvestPanic.Gameplay
             Vector3 dir = (_pc.HeadPivot.forward + Vector3.up * 0.08f).normalized;
             ClearServerHold();
             body.ThrowFrom(this, dir * speed + _pc.Velocity);
+            if (_belt != null) _belt.ServerOnThrown(body);
+        }
+
+        [Rpc(SendTo.Server)]
+        void ToolInteractRpc()
+        {
+            if (_serverBody == null) return;
+            if (_serverBody.TryGetComponent<IToolInteract>(out var t) && t.ServerInteract(this)) return;
+            // Fallback: the default E action.
+            if (_belt != null && _serverBody.NetObject != null && _belt.SlotOf(_serverBody.NetObject.NetworkObjectId) > 0) _belt.ServerSelect(0);
+            else ServerRelease(HandlingMode.Dropped);
+        }
+
+        [Rpc(SendTo.Server)]
+        void SwapGrabRpc(ulong objectId, Vector3 localPoint)
+        {
+            if (!TryGetSpawned(objectId, out var no) || _serverBody == null || _belt == null) return;
+            if (_serverBody.NetObject == null || _belt.SlotOf(_serverBody.NetObject.NetworkObjectId) <= 0) return; // only pocket tools auto-holster
+            ServerRelease(HandlingMode.Dropped); // holsters it (ServerOnReleased)
+            _belt.ServerSelect(0);
+            ServerGrab(no, localPoint, true);
         }
 
         [Rpc(SendTo.Server)]
@@ -319,7 +382,17 @@ namespace HarvestPanic.Gameplay
             if (!IsServer) return;
             var body = _serverBody;
             ClearServerHold();
-            if (body != null) body.RemoveGrip(this, mode);
+            if (body == null) return;
+            body.RemoveGrip(this, mode);
+            if (_belt != null) _belt.ServerOnReleased(body, mode); // pocket tools go back on the belt
+        }
+
+        /// <summary>Server: extra stamina drain per second for this player (0 clears it). Lasso tug-of-war uses 10/s.</summary>
+        public void ServerSetExtraDrain(float perSecond)
+        {
+            if (!IsServer || !IsSpawned) return;
+            perSecond = Mathf.Max(0f, perSecond);
+            if (Mathf.Abs(_extraDrain.Value - perSecond) > 0.01f) _extraDrain.Value = perSecond;
         }
 
         void ClearServerHold()

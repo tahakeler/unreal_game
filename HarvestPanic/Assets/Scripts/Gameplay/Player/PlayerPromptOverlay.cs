@@ -23,6 +23,11 @@ namespace HarvestPanic.Gameplay
 
         PlayerCharacter _pc;
         PlayerCarry _carry;
+        PlayerToolbelt _belt;
+        VisualElement _hotbar;
+        readonly VisualElement[] _slots = new VisualElement[PlayerToolbelt.SlotCount];
+        readonly Label[] _slotKeys = new Label[PlayerToolbelt.SlotCount];
+        int _shownSel = -1, _shownAvail = -1;
         UIDocument _doc;
         VisualElement _root, _reticle, _chip;
         StaminaArc _arc;
@@ -39,8 +44,10 @@ namespace HarvestPanic.Gameplay
         public string ChipText { get; private set; } = string.Empty;
         /// <summary>Stamina arc visibility 0..1 (tests).</summary>
         public float ArcOpacity => _arc != null ? _arc.resolvedStyle.opacity : 0f;
+        /// <summary>Hotbar slot shown as selected (tests), -1 without a toolbelt.</summary>
+        public int HotbarSelected => _shownSel;
 
-        void Awake() { _pc = GetComponent<PlayerCharacter>(); _carry = GetComponent<PlayerCarry>(); }
+        void Awake() { _pc = GetComponent<PlayerCharacter>(); _carry = GetComponent<PlayerCarry>(); _belt = GetComponent<PlayerToolbelt>(); }
 
         void OnDisable() { if (_doc != null) _doc.gameObject.SetActive(false); }
 
@@ -88,6 +95,44 @@ namespace HarvestPanic.Gameplay
             _chip = new VisualElement { name = "hp-prompt", pickingMode = PickingMode.Ignore };
             _chip.AddToClassList("hp-prompt");
             _root.Add(_chip);
+
+            // Tool hotbar (farm-tools rule 1, GDD 4.8): Hands / Net / Bucket / Lasso / Whistle along the bottom.
+            if (_belt != null)
+            {
+                _hotbar = new VisualElement { name = "hp-hotbar", pickingMode = PickingMode.Ignore };
+                _hotbar.AddToClassList("hp-hotbar");
+                root.Add(_hotbar);
+                for (int i = 0; i < PlayerToolbelt.SlotCount; i++)
+                {
+                    var slot = new VisualElement { pickingMode = PickingMode.Ignore };
+                    slot.AddToClassList("hp-slot");
+                    var key = new Label(_belt.SlotKey(i)) { pickingMode = PickingMode.Ignore };
+                    key.AddToClassList("hp-slot-key");
+                    Headline(key);
+                    var name = new Label(PlayerToolbelt.SlotName(i)) { pickingMode = PickingMode.Ignore };
+                    name.AddToClassList("hp-slot-name");
+                    slot.Add(key); slot.Add(name);
+                    _hotbar.Add(slot);
+                    _slots[i] = slot; _slotKeys[i] = key;
+                }
+            }
+        }
+
+        void UpdateHotbar(bool show)
+        {
+            if (_hotbar == null) return;
+            _hotbar.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
+            if (!show) return;
+            int sel = _belt.Selected, avail = 0;
+            for (int i = 0; i < PlayerToolbelt.SlotCount; i++) if (_belt.SlotAvailable(i)) avail |= 1 << i;
+            if (sel == _shownSel && avail == _shownAvail) return;
+            _shownSel = sel; _shownAvail = avail;
+            for (int i = 0; i < PlayerToolbelt.SlotCount; i++)
+            {
+                _slots[i].EnableInClassList("hp-slot--active", i == sel);
+                _slots[i].EnableInClassList("hp-slot--missing", (avail & (1 << i)) == 0);
+                _slotKeys[i].text = _belt.SlotKey(i);
+            }
         }
 
         void Headline(VisualElement v) { if (headlineFont != null) v.style.unityFontDefinition = FontDefinition.FromFont(headlineFont); }
@@ -99,6 +144,7 @@ namespace HarvestPanic.Gameplay
             if (_doc == null) Build();
             bool visible = !InputModal.IsBlocking;
             _root.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            if (_hotbar != null && !visible) _hotbar.style.display = DisplayStyle.None;
             if (!visible) return;
 
             bool down = _pc.State != PlayerState.Normal;
@@ -119,6 +165,7 @@ namespace HarvestPanic.Gameplay
             _arc.SetValue(frac, exhausted);
             _winded.style.display = exhausted && showArc ? DisplayStyle.Flex : DisplayStyle.None;
 
+            UpdateHotbar(!down);
             SetPrompt(_carry.Prompt);
         }
 

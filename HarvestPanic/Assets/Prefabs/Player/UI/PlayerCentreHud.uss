@@ -49,3 +49,23 @@
     -unity-text-align: middle-center;
 }
 .hp-prompt-text { font-size: 22px; color: #2B2118; white-space: nowrap; }
+
+/* Tool hotbar (farm-tools rule 1): five paper tabs bottom-centre; the active tool is lifted and inked. */
+.hp-hotbar {
+    position: absolute; left: 50%; bottom: 26px; translate: -50% 0;
+    flex-direction: row; align-items: flex-end;
+}
+.hp-slot {
+    flex-direction: row; align-items: center; margin: 0 4px; padding: 3px 10px 3px 4px;
+    background-color: rgba(246, 235, 211, 0.82); border-color: #2B2118; border-width: 2px; border-radius: 6px;
+    border-bottom-width: 3px; opacity: 0.85;
+    transition-property: translate, opacity, background-color; transition-duration: 0.12s;
+}
+.hp-slot--active { background-color: #FFF4D6; opacity: 1; translate: 0 -6px; border-bottom-width: 5px; }
+.hp-slot--missing { opacity: 0.4; }
+.hp-slot-key {
+    font-size: 18px; color: #F6EBD3; background-color: #2B2118; border-radius: 4px;
+    padding: 0 6px; margin-right: 6px; min-width: 24px; -unity-text-align: middle-center;
+}
+.hp-slot-name { font-size: 18px; color: #2B2118; white-space: nowrap; }
+.hp-slot--active > .hp-slot-key { background-color: #E5483B; }

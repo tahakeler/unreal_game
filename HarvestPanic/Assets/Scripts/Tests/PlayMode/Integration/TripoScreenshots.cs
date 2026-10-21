@@ -82,7 +82,7 @@ namespace HarvestPanic.Tests.PlayMode.Integration
             Capture(cam, Path.Combine(dir, "tripo_2b_market_greengrocer.png"));
 
             // 3. First-person holding the feed bucket.
-            var bucket = Object.FindObjectsByType<FeedBucketTool>(FindObjectsSortMode.None).FirstOrDefault();
+            var bucket = Object.FindObjectsByType<FeedBucketTool>(FindObjectsSortMode.None).FirstOrDefault(b => !b.IsHolstered); // not a toolbelt pocket
 #if UNITY_EDITOR
             if (bucket == null)
             {
