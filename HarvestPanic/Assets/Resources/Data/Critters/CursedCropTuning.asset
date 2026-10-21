@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5beb1c7731a44a54bb9091efbf52958, type: 3}
+  m_Name: CursedCropTuning
+  m_EditorClassIdentifier: HarvestPanic.AI::HarvestPanic.AI.Crops.CursedCropTuning
+  Rules:
+  - GoodsId: Crop.Mandrake
+    UnlockDayIndex: 2
+  - GoodsId: Crop.TumbleMelon
+    UnlockDayIndex: 3
+  ScreamLoudness: 0.9
+  ScreamSeconds: 3
+  ScreamCooldown: 8
+  JostleAccel: 8
+  JostleImpact: 200
+  AccelSmoothing: 0.08
+  StunRadius: 3
+  StunImpulse: 450
+  SackMult: 0.3
+  WagonMult: 0.8
+  PlantDepth: 0.22
+  SettleSeconds: 0.6
+  WobbleSeconds: 0.6
+  RollSpeed: 3.2
+  SpookRadius: 3
+  SpookCooldown: 5
+  DownhillSlopeDeg: 4
+  LeashRadius: 10
+  PlayerAwareness: 7
+  RestSpeed: 0.25

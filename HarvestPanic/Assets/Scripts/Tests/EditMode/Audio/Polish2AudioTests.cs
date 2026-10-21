@@ -26,11 +26,12 @@ namespace HarvestPanic.Tests.EditMode.Audio
         [Test]
         public void NewEvents_AreAppendedAndHaveClips()
         {
-            int n = AudioEvents.All.Length;
-            Assert.AreEqual(AudioEvents.MusNightThreat, AudioEvents.All[n - 1].Name);
-            Assert.AreEqual(AudioEvents.StgLandlordTuba, AudioEvents.All[n - 2].Name);
-            Assert.AreEqual(AudioEvents.GoatBleat, AudioEvents.All[n - 3].Name, "older ids unchanged");
-            foreach (var e in new[] { AudioEvents.MusNightThreat, AudioEvents.StgLandlordTuba, AudioEvents.BruiseCrunch, AudioEvents.BruiseRegister })
+            int i = AudioEvents.IndexOf(AudioEvents.MusNightThreat);
+            Assert.AreEqual(AudioEvents.StgLandlordTuba, AudioEvents.All[i - 1].Name);
+            Assert.AreEqual(AudioEvents.GoatBleat, AudioEvents.All[i - 2].Name, "older ids unchanged");
+            Assert.AreEqual(AudioEvents.SheepBaa, AudioEvents.All[i + 1].Name, "sheep/mandrake appended after polish-2");
+            Assert.AreEqual(AudioEvents.MandrakeScream, AudioEvents.All[i + 2].Name);
+            foreach (var e in new[] { AudioEvents.MusNightThreat, AudioEvents.StgLandlordTuba, AudioEvents.BruiseCrunch, AudioEvents.BruiseRegister, AudioEvents.SheepBaa, AudioEvents.MandrakeScream })
                 Assert.IsTrue(System.Array.Exists(Directory.GetFiles("Assets/Audio/Resources/Audio/" + e), f => f.EndsWith(".wav") || f.EndsWith(".ogg")), e);
         }
 
