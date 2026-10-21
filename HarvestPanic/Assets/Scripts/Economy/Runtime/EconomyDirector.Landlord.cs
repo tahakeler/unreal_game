@@ -45,7 +45,7 @@ namespace HarvestPanic.Economy
             foreach (var v in _visitPlan)
             {
                 if (v.dayOfWeek != _clock.DayOfWeek || !Content.DayModifiers.TryGet(v.visitId, out var mod)) continue;
-                if (_mods.Apply(mod, _clock.Week)) LandlordBark(mod.ModifierId.EndsWith("Inspection") ? LandlordText.InspectionArrive : LandlordText.HelpfulArrive);
+                if (_mods.Apply(mod, _clock.Week)) LandlordBark(LandlordText.VisitArrive(mod));
             }
         }
 

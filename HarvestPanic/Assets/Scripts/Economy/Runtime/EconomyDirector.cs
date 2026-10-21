@@ -271,8 +271,7 @@ namespace HarvestPanic.Economy
             _dayTime = 0f; _dayCosts = 0; _orderBonusToday = 0;
             _ledger.StartDay();
             foreach (var q in _mods.TakeQueued())
-                if (_mods.Apply(q, _clock.Week) && LandlordParams.IsVisit(q))
-                    LandlordBark(q.ModifierId.EndsWith("Inspection") ? LandlordText.InspectionArrive : LandlordText.HelpfulArrive); // deferred visit arrives
+                if (_mods.Apply(q, _clock.Week) && LandlordParams.IsVisit(q)) LandlordBark(LandlordText.VisitArrive(q)); // deferred visit arrives
             LandlordMorning();
             DrawWeather();
             var available = new List<string>();
@@ -454,7 +453,9 @@ namespace HarvestPanic.Economy
         static void MoveTo(GameObject go, Vector3 pos)
         {
             go.transform.position = pos;
-            if (go.TryGetComponent(out Rigidbody rb)) { rb.position = pos; rb.linearVelocity = Vector3.zero; rb.angularVelocity = Vector3.zero; }
+            if (!go.TryGetComponent(out Rigidbody rb)) return;
+            rb.position = pos;
+            if (!rb.isKinematic) { rb.linearVelocity = Vector3.zero; rb.angularVelocity = Vector3.zero; } // NetworkRigidbody may hold it kinematic until spawned
         }
 
         /// <summary>World geometry for spawn checks: everything except carryables, critters, players and ragdolls.</summary>

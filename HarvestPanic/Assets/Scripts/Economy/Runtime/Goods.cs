@@ -108,14 +108,9 @@ namespace HarvestPanic.Economy
         void OnDisable() { All.Remove(this); }
 
         /// <summary>
-        /// True during the spawn settle window: less than <see cref="EconomyTuning.SpawnGraceSeconds"/> since spawning and
-        /// nobody (player or creature) has grabbed, thrown or touched it yet (bot-week-report #3, fix/beta-bugs-1).
-        /// </summary>
-        public bool IsSettling => IgnoreSettleImpact(_handled, Time.time - _spawnedAt, Tuning.SpawnGraceSeconds);
-
-        /// <summary>
-        /// Pure rule for <see cref="OnCollisionEnter"/>: impacts are ignored while an untouched item settles after spawning.
-        /// The first grab/throw/touch ends the window early, so a player who slams a fresh item is still blamed.
+        /// Pure rule for <see cref="OnCollisionEnter"/> (bot-week-report #3, fix/beta-bugs-1): impacts are ignored while an
+        /// untouched item settles, for <see cref="EconomyTuning.SpawnGraceSeconds"/> after spawning. The first
+        /// grab/throw/touch (player or creature) ends the window early, so a player who slams a fresh item is still blamed.
         /// </summary>
         public static bool IgnoreSettleImpact(bool handled, float sinceSpawn, float grace) => !handled && sinceSpawn < grace;
 
