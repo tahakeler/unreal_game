@@ -112,8 +112,7 @@ namespace HarvestPanic.Tests.EditMode.Economy
         // ---- quota ----
         [Test] public void QuotaTable()
         {
-            int[,] table = { { 1020, 870, 660, 460 }, // W1 x QuotaWeekOneMult 0.85 (tuned 2026-10-21)
-                            { 1620, 1380, 1050, 730 }, { 2190, 1860, 1420, 980 }, { 2950, 2510, 1920, 1330 }, { 3990, 3390, 2590, 1790 } };
+            int[,] table = { { 1200, 1020, 780, 540 }, { 1620, 1380, 1050, 730 }, { 2190, 1860, 1420, 980 }, { 2950, 2510, 1920, 1330 }, { 3990, 3390, 2590, 1790 } };
             for (int w = 1; w <= 5; w++)
                 for (int p = 4; p >= 1; p--)
                     Assert.AreEqual(table[w - 1, 4 - p], EconomyMath.Quota(w, p, _t), $"w{w} {p}p");

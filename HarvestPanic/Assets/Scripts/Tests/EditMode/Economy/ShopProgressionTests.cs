@@ -224,9 +224,9 @@ namespace HarvestPanic.Tests.EditMode.Economy
         // ---- week loop ----
         [Test] public void Quota_Week1To2_Escalates()
         {
-            Assert.AreEqual(1020, EconomyMath.Quota(1, 4, _t)); // W1 learning-week relief 0.85 (tuned 2026-10-21)
+            Assert.AreEqual(1200, EconomyMath.Quota(1, 4, _t));
             Assert.AreEqual(1620, EconomyMath.Quota(2, 4, _t));
-            Assert.AreEqual(660, EconomyMath.Quota(1, 2, _t));
+            Assert.AreEqual(780, EconomyMath.Quota(1, 2, _t));
             Assert.AreEqual(1050, EconomyMath.Quota(2, 2, _t));
         }
 

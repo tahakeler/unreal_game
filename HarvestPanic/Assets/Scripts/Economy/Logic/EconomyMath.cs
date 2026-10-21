@@ -112,11 +112,13 @@ namespace HarvestPanic.Economy
         public static int Quota(int week, int players, EconomyTuning t, float regionMult = -1f)
         {
             float r = regionMult > 0f ? regionMult : t.RegionMult;
-            double w1 = week <= 1 ? t.QuotaWeekOneMult : 1.0; // learning week (tuned 2026-10-21)
-            return RoundTo(t.QuotaBase * Math.Pow(t.QuotaGrowth, week - 1) * t.PlayerScaleFor(players) * r * w1, 10);
+            return RoundTo(t.QuotaBase * Math.Pow(t.QuotaGrowth, week - 1) * t.PlayerScaleFor(players) * r, 10);
         }
 
-        /// <summary>Extra daily units of <paramref name="goodsId"/> for a crew of <paramref name="players"/> (0 for solo or unlisted goods).</summary>
+        /// <summary>
+        /// Extra Morning units of <paramref name="goodsId"/> for a crew of <paramref name="players"/> (1–4): PerExtraPlayer × (players − 1).
+        /// 0 for solo or unlisted goods (GDD 9.3, tuned 2026-10-21).
+        /// </summary>
         public static int ExtraDailyGoods(string goodsId, int players, EconomyTuning t)
         {
             if (t.ExtraDailyGoodsPerExtraPlayer == null || string.IsNullOrEmpty(goodsId)) return 0;

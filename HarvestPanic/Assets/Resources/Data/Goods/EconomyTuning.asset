@@ -85,10 +85,10 @@ MonoBehaviour:
   - 0.65
   - 0.85
   - 1
-  QuotaWeekOneMult: 0.85
   ExtraDailyGoodsPerExtraPlayer:
   - GoodsId: Product.Crate
-    PerExtraPlayer: 1
+    PerExtraPlayer: 2
+  SpawnSpacing: 0.25
   MergeWindow: 1.5
   NoiseFloorDollars: 2
   TouchWindow: 3

@@ -330,63 +330,138 @@ namespace HarvestPanic.Economy
                 if (no != null && no.IsSpawned) no.Despawn(true); else Destroy(go);
             }
             _spawned.Clear();
-            // Extra loose goods for bigger crews (tuned 2026-10-21), dealt round-robin over that goods' markers.
+            // Every marker's own units first (the level's spots), then the crew-size extras (GDD 9.3, tuned 2026-10-21)
+            // dealt round-robin over that goods' markers and laid out in the free space around them.
             var markers = LevelMarker.FindAll(MarkerRole.Goods);
+            var jobs = new List<(LevelMarker marker, GoodsDefinition def)>();
+            foreach (var m in markers)
+                if (GoodsResolver.TryResolve(m.Key, out var def) && def.WorldPrefab != null)
+                    for (int i = 0; i < m.Count; i++) jobs.Add((m, def));
+            foreach (var kv in ExtraGoodsPerMarker(markers, _players, Tuning))
+                if (GoodsResolver.TryResolve(kv.Key.Key, out var def) && def.WorldPrefab != null)
+                    for (int i = 0; i < kv.Value; i++) jobs.Add((kv.Key, def));
+            var placed = new List<Bounds>();
+            foreach (var (m, def) in jobs)
+            {
+                var go = Instantiate(def.WorldPrefab, m.transform.position, m.transform.rotation);
+                PlaceResting(go, m.transform.position, placed, Tuning.SpawnSpacing);
+                var no = go.GetComponent<NetworkObject>();
+                if (no != null && IsSpawned) no.Spawn(true);
+                _spawned.Add(go);
+            }
+            Physics.SyncTransforms();
+        }
+
+        /// <summary>Crew-size extras per marker: each goods' <see cref="EconomyMath.ExtraDailyGoods"/> dealt round-robin over its markers.</summary>
+        public static Dictionary<LevelMarker, int> ExtraGoodsPerMarker(List<LevelMarker> markers, int players, EconomyTuning t)
+        {
             var extra = new Dictionary<LevelMarker, int>();
             var dealt = new HashSet<string>();
             foreach (var m in markers)
             {
                 if (!GoodsResolver.TryResolve(m.Key, out var def) || !dealt.Add(def.GoodsId)) continue;
-                int n = EconomyMath.ExtraDailyGoods(def.GoodsId, _players, Tuning);
+                int n = EconomyMath.ExtraDailyGoods(def.GoodsId, players, t);
                 var same = markers.FindAll(x => GoodsResolver.TryResolve(x.Key, out var d2) && d2.GoodsId == def.GoodsId);
-                for (int k = 0; k < n && same.Count > 0; k++) { var t = same[k % same.Count]; extra.TryGetValue(t, out int c); extra[t] = c + 1; }
+                for (int k = 0; k < n; k++) { var at = same[k % same.Count]; extra.TryGetValue(at, out int c); extra[at] = c + 1; }
             }
-            foreach (var m in markers)
-            {
-                if (!GoodsResolver.TryResolve(m.Key, out var def) || def.WorldPrefab == null) continue;
-                extra.TryGetValue(m, out int more);
-                int count = m.Count + more;
-                for (int i = 0; i < count; i++)
-                {
-                    var pos = m.transform.position + m.transform.rotation * new Vector3((i % 3) * 0.8f, 0f, (i / 3) * 0.8f);
-                    var go = Instantiate(def.WorldPrefab, pos, m.transform.rotation);
-                    PlaceOnGround(go);
-                    var no = go.GetComponent<NetworkObject>();
-                    if (no != null && IsSpawned) no.Spawn(true);
-                    _spawned.Add(go);
-                }
-            }
+            return extra;
         }
 
-        static readonly RaycastHit[] GroundHits = new RaycastHit[8];
+        const int SpawnCandidates = 32;
+        const float GroundProbeUp = 0.5f, GroundProbeDown = 4f, SpawnLift = 0.005f;
+        static readonly Collider[] OverlapScratch = new Collider[16];
 
         /// <summary>
-        /// Spawns goods resting on the highest surface under the marker (collider bottom 1 cm above it; surfaces more than
-        /// 2.2 m above the marker, e.g. roofs, are skipped; a cart bed over the marker is used, as physics would push the
-        /// item there anyway), so heavy goods
-        /// don't drop and bruise themselves at Morning (bot-week-report #3).
+        /// Candidate offset <paramref name="k"/> around a Goods marker (golden-angle spiral, k = 0 is the marker itself).
+        /// <paramref name="step"/> is one footprint plus the spacing, so neighbouring candidates don't overlap.
         /// </summary>
-        public static void PlaceOnGround(GameObject go)
+        public static Vector3 SpawnCandidateOffset(int k, float step)
         {
-            var cols = go.GetComponentsInChildren<Collider>();
-            if (cols.Length == 0) return;
-            Physics.SyncTransforms();
-            float bottom = float.MaxValue;
-            foreach (var c in cols) if (!c.isTrigger) bottom = Mathf.Min(bottom, c.bounds.min.y);
-            if (bottom == float.MaxValue) return;
-            var p = go.transform.position;
-            int mask = ~((1 << GameLayerIndex(GameLayers.Carryable)) | (1 << GameLayerIndex(GameLayers.Critter)) | (1 << GameLayerIndex(GameLayers.Player)) | (1 << GameLayerIndex(GameLayers.Ragdoll)));
-            int n = Physics.RaycastNonAlloc(new Vector3(p.x, p.y + 2.5f, p.z), Vector3.down, GroundHits, 12f, mask, QueryTriggerInteraction.Ignore);
-            float best = float.MinValue;
-            for (int i = 0; i < n; i++) if (!GroundHits[i].collider.transform.IsChildOf(go.transform) && GroundHits[i].point.y <= p.y + 2.2f && GroundHits[i].point.y > best) best = GroundHits[i].point.y;
-            if (best == float.MinValue) return;
-            p.y += best + 0.01f - bottom;
-            go.transform.position = p;
-            if (go.TryGetComponent(out Rigidbody rb)) { rb.position = p; rb.linearVelocity = Vector3.zero; rb.angularVelocity = Vector3.zero; }
-            Physics.SyncTransforms();
+            if (k <= 0) return Vector3.zero;
+            float a = k * 137.508f * Mathf.Deg2Rad, r = step * (0.8f + 0.5f * Mathf.Sqrt(k));
+            return new Vector3(Mathf.Cos(a) * r, 0f, Mathf.Sin(a) * r);
         }
 
-        static int GameLayerIndex(string name) { int l = LayerMask.NameToLayer(name); return l < 0 ? 31 : l; }
+        /// <summary>
+        /// Moves a freshly instantiated goods item so it rests on the ground at (or next to) <paramref name="anchor"/>
+        /// (fix/beta-bugs-1, bot-week-report #3). The ground is the nearest surface below a probe 0.5 m above the anchor,
+        /// so props that overhang the marker (cart, eaves) are never used as a shelf; the item's collider bottom sits
+        /// 5 mm above it, so a 180 kg pumpkin no longer drops and bruises itself at Morning. A spot is free when the
+        /// footprint clears every item placed this Morning (+<paramref name="spacing"/>) and all static geometry;
+        /// the first free spot on <see cref="SpawnCandidateOffset"/>'s spiral wins (the marker itself when free).
+        /// Returns false when no candidate was free (the item is then grounded at the anchor, as before).
+        /// </summary>
+        public static bool PlaceResting(GameObject go, Vector3 anchor, List<Bounds> placed, float spacing)
+        {
+            Physics.SyncTransforms();
+            bool any = false; var b = new Bounds();
+            foreach (var c in go.GetComponentsInChildren<Collider>())
+            {
+                if (c.isTrigger) continue;
+                if (!any) { b = c.bounds; any = true; } else b.Encapsulate(c.bounds);
+            }
+            if (!any) return false;
+            Vector3 centreOffset = b.center - go.transform.position;
+            float bottomOffset = b.min.y - go.transform.position.y;
+            float step = Mathf.Max(b.size.x, b.size.z) + spacing;
+            int mask = EnvironmentMask();
+            Vector3 fallback = go.transform.position; bool haveFallback = false;
+            for (int k = 0; k < SpawnCandidates; k++)
+            {
+                Vector3 c = anchor + SpawnCandidateOffset(k, step);
+                if (!GroundBelow(c, go.transform, mask, out float groundY)) continue;
+                var pos = new Vector3(c.x, groundY - bottomOffset + SpawnLift, c.z);
+                if (!haveFallback) { fallback = pos; haveFallback = true; }
+                var foot = new Bounds(pos + centreOffset, b.size);
+                if (Overlaps(foot, placed, spacing) || BlockedByWorld(foot, go.transform, mask)) continue;
+                placed.Add(foot);
+                MoveTo(go, pos);
+                return true;
+            }
+            if (haveFallback) { placed.Add(new Bounds(fallback + centreOffset, b.size)); MoveTo(go, fallback); }
+            return false;
+        }
+
+        static bool GroundBelow(Vector3 at, Transform self, int mask, out float y)
+        {
+            y = 0f;
+            var hits = Physics.RaycastAll(at + Vector3.up * GroundProbeUp, Vector3.down, GroundProbeUp + GroundProbeDown, mask, QueryTriggerInteraction.Ignore);
+            float best = float.MaxValue;
+            foreach (var h in hits)
+                if (!h.collider.transform.IsChildOf(self) && h.distance < best) { best = h.distance; y = h.point.y; }
+            return best < float.MaxValue;
+        }
+
+        static bool Overlaps(Bounds foot, List<Bounds> placed, float spacing)
+        {
+            foreach (var p in placed)
+            {
+                var grown = p; grown.Expand(new Vector3(spacing, 0f, spacing));
+                if (grown.Intersects(foot)) return true;
+            }
+            return false;
+        }
+
+        /// <summary>True when the footprint (lifted 5 cm off the ground it rests on) intersects static/world geometry.</summary>
+        static bool BlockedByWorld(Bounds foot, Transform self, int mask)
+        {
+            var ext = foot.extents; ext.y = Mathf.Max(0.01f, ext.y - 0.05f);
+            int n = Physics.OverlapBoxNonAlloc(foot.center + Vector3.up * 0.05f, ext, OverlapScratch, Quaternion.identity, mask, QueryTriggerInteraction.Ignore);
+            for (int i = 0; i < n; i++) if (!OverlapScratch[i].transform.IsChildOf(self)) return true;
+            return false;
+        }
+
+        static void MoveTo(GameObject go, Vector3 pos)
+        {
+            go.transform.position = pos;
+            if (go.TryGetComponent(out Rigidbody rb)) { rb.position = pos; rb.linearVelocity = Vector3.zero; rb.angularVelocity = Vector3.zero; }
+        }
+
+        /// <summary>World geometry for spawn checks: everything except carryables, critters, players and ragdolls.</summary>
+        static int EnvironmentMask() =>
+            ~(LayerBit(GameLayers.Carryable) | LayerBit(GameLayers.Critter) | LayerBit(GameLayers.Player) | LayerBit(GameLayers.Ragdoll));
+
+        static int LayerBit(string name) { int l = LayerMask.NameToLayer(name); return l < 0 ? 0 : 1 << l; }
 
         void EnterPayout()
         {
@@ -431,6 +506,7 @@ namespace HarvestPanic.Economy
                     _weekIncome = 0;
                     _ledger.StartWeek();
                     _visitPlan.Clear(); // last week's plan must not fire on the new Monday
+                    _players = CountPlayers(); // Monday's goods/order use this week's crew (SampleWeek runs after the week advances)
                     Go(DayPhase.Morning);  // advances week
                     SampleWeek();
                     DrawLandlordRule();

@@ -63,7 +63,7 @@ namespace HarvestPanic.Tests.PlayMode.Perf
                     if (Time.time >= _idleUntil) State = Step.Seek;
                     break;
                 case Step.Seek:
-                    if (Target == null || !Target.IsSpawned || Target.IsHeld) { Release(); Target = FindNearest(); }
+                    if (Target == null || !Target.IsSpawned || Target.IsHeld) { Release(); Target = FindNearest(penCentre); }
                     if (Target == null) { Wander(dt); break; }
                     if (MoveTowards(Target.transform.position, dt) < 1.4f) State = Step.Carry;
                     break;
@@ -84,12 +84,24 @@ namespace HarvestPanic.Tests.PlayMode.Perf
 
         void Release() { if (Target != null) Claimed.Remove(Target); Target = null; }
 
-        Goods FindNearest()
+        /// <summary>XZ radius around the pen drop point treated as "already delivered" (the Sale Pen is 8 x 8 m).</summary>
+        public const float PenRadius = 4.5f;
+
+        /// <summary>True when <paramref name="g"/> is resting in the Sale Pen (waiting to be accepted).</summary>
+        public static bool InPen(Goods g, Vector3 penCentre)
+        {
+            var d = g.transform.position - penCentre; d.y = 0f;
+            return d.magnitude < PenRadius;
+        }
+
+        Goods FindNearest(Vector3 penCentre)
         {
             Goods best = null; float bestD = float.MaxValue; var p = Position;
             foreach (var g in Goods.All)
             {
-                if (g == null || !g.IsSpawned || g.IsHeld || Claimed.Contains(g)) continue;
+                // beta-bugs-1: bots used to re-grab goods resting in the pen (their own drop was the nearest), re-dropping
+                // them every 0.5 s and inflating "deliveries"; delivered goods are left alone now.
+                if (g == null || !g.IsSpawned || g.IsHeld || Claimed.Contains(g) || InPen(g, penCentre)) continue;
                 float d = (g.transform.position - p).sqrMagnitude;
                 if (d < bestD) { bestD = d; best = g; }
             }

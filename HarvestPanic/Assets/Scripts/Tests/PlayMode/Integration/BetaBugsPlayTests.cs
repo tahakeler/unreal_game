@@ -15,8 +15,9 @@ namespace HarvestPanic.Tests.PlayMode.Integration
 {
     /// <summary>
     /// Regression tests for the bot full-week playtest findings (docs/qa/playtest/bot-week-report.md, fix/beta-bugs-1):
-    /// every daily goods type sells when dropped in the Sale Pen, and spawned goods are not bruised by "Nobody"
-    /// while they settle. Muddlebury solo host at day scale 0.05.
+    /// every daily goods type sells when dropped in the Sale Pen; Morning goods rest on the ground without "Nobody"
+    /// bruises (solo and 4p supply); the Landlord speaks in week 1 and when a rule is drawn; a continued run plans its
+    /// visits. Muddlebury host at day scale 0.05.
     /// </summary>
     public class BetaBugsPlayTests
     {
@@ -113,30 +114,100 @@ namespace HarvestPanic.Tests.PlayMode.Integration
             Assert.IsTrue(dir.IsMarketOpen);
         }
 
-        /// <summary>Bug 3 (S3): goods spawned at Morning settle without bruises or "Nobody" blame events.</summary>
+        /// <summary>
+        /// Checks the Morning spawn: every daily good rests on the ground next to its marker (not on top of the cart that
+        /// overhangs two crate markers), no two overlap, none is bruised once the settle grace has expired, and the ledger
+        /// has no "Nobody" event. Waits 5 s, past <see cref="EconomyTuning.SpawnGraceSeconds"/>.
+        /// </summary>
+        static IEnumerator AssertMorningSpawnClean(EconomyDirector dir, int expectedGoods, string label)
+        {
+            float end = Time.time + 5f;
+            while (Time.time < end) yield return null;
+            var goods = DailyGoods();
+            var markers = LevelMarker.FindAll(MarkerRole.Goods);
+            var report = new StringBuilder();
+            foreach (var g in goods)
+            {
+                var col = g.GetComponent<Collider>();
+                LevelMarker home = null; float best = float.MaxValue;
+                foreach (var m in markers)
+                {
+                    if (!GoodsResolver.TryResolve(m.Key, out var def) || def.GoodsId != g.GoodsId) continue;
+                    var d = m.transform.position - g.transform.position; d.y = 0f;
+                    if (d.magnitude < best) { best = d.magnitude; home = m; }
+                }
+                report.AppendLine($"{g.GoodsId}: bp={g.BruisePoints:0.0} bottom={col.bounds.min.y:0.00} marker={(home != null ? home.name : "none")} dXZ={best:0.00} v={g.GetComponent<Rigidbody>().linearVelocity.magnitude:0.00}");
+            }
+            Debug.Log($"[BetaBugs] settle ({label}):\n" + report);
+            Assert.AreEqual(expectedGoods, goods.Count, "daily goods spawned\n" + report);
+            for (int i = 0; i < goods.Count; i++)
+            {
+                var g = goods[i];
+                var b = g.GetComponent<Collider>().bounds;
+                Assert.AreEqual(0f, g.BruisePoints, 0.001f, "spawn/settle bruised " + g.GoodsId + "\n" + report);
+                Assert.Less(g.GetComponent<Rigidbody>().linearVelocity.magnitude, 0.2f, g.GoodsId + " still moving after 5 s\n" + report);
+                Assert.Less(b.min.y, 0.5f, g.GoodsId + " is resting on a prop, not the ground\n" + report);
+                for (int j = i + 1; j < goods.Count; j++)
+                {
+                    var o = goods[j].GetComponent<Collider>().bounds; o.Expand(-0.02f);
+                    Assert.IsFalse(b.Intersects(o), $"{g.GoodsId} overlaps {goods[j].GoodsId}\n" + report);
+                }
+            }
+            foreach (var g in goods)
+            {
+                float near = float.MaxValue;
+                foreach (var m in markers)
+                {
+                    if (!GoodsResolver.TryResolve(m.Key, out var def) || def.GoodsId != g.GoodsId) continue;
+                    var d = m.transform.position - g.transform.position; d.y = 0f; near = Mathf.Min(near, d.magnitude);
+                }
+                Assert.Less(near, 3f, g.GoodsId + " spawned far from its markers\n" + report);
+            }
+            foreach (var e in dir.Ledger.Day)
+                Assert.AreNotEqual("Nobody", e.Event.CauseTag, "Nobody blame at spawn: " + e.Event.Verb + " " + e.Event.ItemId);
+        }
+
+        /// <summary>Bug 3 (S3): goods spawned at Morning rest on the ground and are not bruised by "Nobody" (solo: 4 crates + pumpkin).</summary>
         [UnityTest, Timeout(120000)]
         public IEnumerator SpawnedGoods_SettleWithoutBruises()
         {
             yield return Boot();
             var dir = EconomyDirector.Instance;
-            var blames = new List<BlameEvent>();
             dir.Restart();
             yield return null;
             Assert.AreEqual(DayPhase.Morning, dir.Phase);
-            float end = Time.time + 3f;
-            while (Time.time < end) yield return null;
-            var report = new StringBuilder();
-            foreach (var g in DailyGoods())
-            {
-                report.AppendLine($"{g.GoodsId}: bp={g.BruisePoints:0.0} y={g.transform.position.y:0.00} v={g.GetComponent<Rigidbody>().linearVelocity.magnitude:0.00}");
-                Assert.AreEqual(0f, g.BruisePoints, 0.001f, "spawn/settle bruised " + g.GoodsId + "\n" + report);
-                Assert.Less(g.GetComponent<Rigidbody>().linearVelocity.magnitude, 0.2f, g.GoodsId + " still moving after 3 s");
-            }
-            Debug.Log("[BetaBugs] settle:\n" + report);
-            foreach (var e in dir.Ledger.Day)
-                Assert.AreNotEqual("Nobody", e.Event.CauseTag, "Nobody blame at spawn: " + e.Event.Verb + " " + e.Event.ItemId);
+            yield return AssertMorningSpawnClean(dir, 5, "solo");
         }
-            /// <summary>Bug 2 (S3) variant: all daily goods dumped on one spot at once (pile-up, still settling) all sell.</summary>
+
+        /// <summary>Bug 4 (S2) supply: a 4-player week starts with 4 + 6 crates and the pumpkin, laid out without overlap.</summary>
+        [UnityTest, Timeout(120000)]
+        public IEnumerator CrewOfFour_MorningSpawnsTenCrates_OnTheGround()
+        {
+            yield return Boot();
+            var dir = EconomyDirector.Instance;
+            dir.ApplySave(new RunSaveData { Resume = RunResumePoint.WeekStart, Week = 1, DayOfWeek = 1, DayIndex = 0, Balance = 100, Players = 4 });
+            yield return null;
+            Assert.AreEqual(DayPhase.Morning, dir.Phase);
+            Assert.AreEqual(1200, dir.Quota);
+            int crates = 0;
+            foreach (var g in DailyGoods()) if (g.GoodsId == "Product.Crate") crates++;
+            Assert.AreEqual(10, crates, "4 crate markers + 2 per extra player");
+            yield return AssertMorningSpawnClean(dir, 11, "4p");
+        }
+
+        /// <summary>Bug 3 (S3, Landlord): a continued run plans its week's visits (it used to resume with none, so no visit barks).</summary>
+        [UnityTest, Timeout(120000)]
+        public IEnumerator ContinuedRun_PlansTheWeeksLandlordVisit()
+        {
+            yield return Boot();
+            var dir = EconomyDirector.Instance;
+            dir.ApplySave(new RunSaveData { Resume = RunResumePoint.WeekStart, Week = 2, DayOfWeek = 1, DayIndex = 5, Balance = 300, Players = 1 });
+            yield return null;
+            Assert.AreEqual(2, dir.Week);
+            Assert.AreEqual(1, dir.VisitPlan.Count, "week 2 has one Landlord visit (Tue-Thu)");
+            Assert.That(dir.VisitPlan[0].dayOfWeek, Is.InRange(2, 4));
+        }
+        /// <summary>Bug 2 (S3) variant: all daily goods dumped on one spot at once (pile-up, still settling) all sell.</summary>
         [UnityTest, Timeout(180000)]
         public IEnumerator AllDailyGoods_DumpedTogether_AllSell()
         {

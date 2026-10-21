@@ -105,18 +105,19 @@ namespace HarvestPanic.Economy
         }
 
         void OnEnable() { All.Add(this); _spawnedAt = Time.time; _handled = false; }
+        void OnDisable() { All.Remove(this); }
 
         /// <summary>
-        /// True while impacts against the world are ignored: within <see cref="EconomyTuning.SpawnGraceSeconds"/> of spawning,
-        /// or before anyone has handled it (settling on the ground / nudged against static geometry). Fixes the daily
-        /// "prize pumpkin bruised by Nobody" settle hit (bot-week-report #3).
+        /// True during the spawn settle window: less than <see cref="EconomyTuning.SpawnGraceSeconds"/> since spawning and
+        /// nobody (player or creature) has grabbed, thrown or touched it yet (bot-week-report #3, fix/beta-bugs-1).
         /// </summary>
-        public bool IsSettling => !_handled;
+        public bool IsSettling => IgnoreSettleImpact(_handled, Time.time - _spawnedAt, Tuning.SpawnGraceSeconds);
 
-        /// <summary>Pure rule for <see cref="OnCollisionEnter"/>: should this impact be ignored as spawn settle?</summary>
-        public static bool IgnoreSettleImpact(bool handled, float sinceSpawn, float grace, bool otherIsDynamicBody) =>
-            !handled && (sinceSpawn < grace || !otherIsDynamicBody);
-        void OnDisable() { All.Remove(this); }
+        /// <summary>
+        /// Pure rule for <see cref="OnCollisionEnter"/>: impacts are ignored while an untouched item settles after spawning.
+        /// The first grab/throw/touch ends the window early, so a player who slams a fresh item is still blamed.
+        /// </summary>
+        public static bool IgnoreSettleImpact(bool handled, float sinceSpawn, float grace) => !handled && sinceSpawn < grace;
 
         public override void OnNetworkSpawn()
         {
@@ -208,8 +209,7 @@ namespace HarvestPanic.Economy
             float impulse = c.impulse.magnitude;
             if (impulse <= 0f) return;
             float now = Time.time;
-            bool dynamicOther = c.rigidbody != null && !c.rigidbody.isKinematic;
-            if (IgnoreSettleImpact(_handled, now - _spawnedAt, Tuning.SpawnGraceSeconds, dynamicOther)) return; // spawn settle
+            if (IgnoreSettleImpact(_handled, now - _spawnedAt, Tuning.SpawnGraceSeconds)) return; // spawn settle
             // Player carry reports bruises itself while held and for CarryReportWindow after release (no double count).
             if (IsHeld || now - _releasedAt < Tuning.CarryReportWindow) return;
             foreach (var h in _holders) _touches.Record(h, now);

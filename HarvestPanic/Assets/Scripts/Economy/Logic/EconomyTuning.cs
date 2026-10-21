@@ -42,8 +42,8 @@ namespace HarvestPanic.Economy
         public int CompostValue = 1;
         public float WaterBpsCrop = 15f, WaterBpsLivestock = 5f;
         [Tooltip("IGoodsSoakable.ApplySoak = this many seconds of submersion.")] public float SoakSeconds = 1f;
-        [Tooltip("Seconds after a goods item spawns during which impacts never bruise it (spawn settle). Until the first " +
-                 "handler touches it, impacts against static/kinematic bodies are also ignored (beta-bugs-1).")]
+        [Tooltip("Seconds after a goods item spawns during which impacts don't bruise it while nobody has touched it yet " +
+                 "(spawn settle, fix/beta-bugs-1). The first grab/throw/touch ends the window early.")]
         public float SpawnGraceSeconds = 3f;
 
         [Header("Freshness (goods-value §4)")]
@@ -96,14 +96,15 @@ namespace HarvestPanic.Economy
         public float QuotaGrowth = 1.35f;
         public float RegionMult = 1f;
         public float[] PlayerScale = { 0.45f, 0.65f, 0.85f, 1f };
-        [Tooltip("Week-1 learning-week relief on Q(1) (GDD 9.7, tuned 2026-10-21). 1 = off.")] [Range(0.5f, 1f)] public float QuotaWeekOneMult = 0.85f;
 
-        [Header("Daily loose goods by crew size (GDD 9.11, tuned 2026-10-21)")]
-        [Tooltip("Extra goods spawned at the matching Goods markers each Morning, per player beyond the first.")]
+        [Header("Daily loose goods by crew size (GDD 9.3 / 9.11, tuned 2026-10-21)")]
+        [Tooltip("Extra goods spawned around the matching Goods markers each Morning, per player beyond the first " +
+                 "(the level's markers are the solo supply). docs/economy/week1-income-model.md has the math.")]
         public ExtraDailyGoods[] ExtraDailyGoodsPerExtraPlayer =
         {
-            new ExtraDailyGoods { GoodsId = "Product.Crate", PerExtraPlayer = 1 },
+            new ExtraDailyGoods { GoodsId = "Product.Crate", PerExtraPlayer = 2 },
         };
+        [Tooltip("Minimum gap between spawned goods footprints, m (Morning spawn layout).")] public float SpawnSpacing = 0.25f;
 
         [Header("Blame ledger")]
         public float MergeWindow = 1.5f;
