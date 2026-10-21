@@ -70,6 +70,16 @@ namespace HarvestPanic.AI
         /// <summary>Server: while Time.time is below this, Idle/Wander do not pick new wander targets (signature tasks such as a goat headbutt telegraph or perch).</summary>
         public float ExternalHoldUntil { get; set; }
 
+        /// <summary>Follow herd: the current bell-wether of this critter's flock (null when none / re-electing).</summary>
+        public CritterBrain FlockLeader => Flock != null && Flock.Mode == HerdMode.Follow ? Flock.Leader(Time.time, Tuning.LeaderReelectSeconds) : null;
+        /// <summary>Follow herd: true when this critter is the bell-wether.</summary>
+        public bool IsFlockLeader => ReferenceEquals(FlockLeader, this);
+        /// <summary>Follow herd: true when this critter follows a leader that is being carried (it trails the carrier).</summary>
+        public bool FollowingCarriedLeader
+        {
+            get { var l = FlockLeader; return l != null && l != this && l.State == CritterState.Carried; }
+        }
+
         /// <summary>Raised on every peer when the state changes (old, new).</summary>
         public event Action<CritterState, CritterState> StateChanged;
 
@@ -94,7 +104,7 @@ namespace HarvestPanic.AI
         void OnEnable()
         {
             CritterRegistry.Add(this);
-            if (personality != null && personality.HerdMode == HerdMode.Flock && Flock == null)
+            if (personality != null && (personality.HerdMode == HerdMode.Flock || personality.HerdMode == HerdMode.Follow) && Flock == null)
                 Flock = CritterFlock.Join(this, Tuning.FlockJoinRadius);
         }
 
@@ -185,7 +195,9 @@ namespace HarvestPanic.AI
             float perceived = CritterMath.PerceivedNoise(e, d, personality, _t.GlobalNoiseMult);
             float falloff = e.Radius > 0f ? Mathf.Clamp01(1f - d / e.Radius) : 0f;
             if (falloff <= 0f) return;
-            if (personality.TryGetNoiseResponse(e.Tags, out var resp))
+            if ((e.Tags & NoiseTag.Mandrake) != 0 && d <= _t.MandrakeSpookRadius)
+                perceived = Mathf.Max(perceived, CritterMath.MandrakeSpook(personality.FleeThreshold)); // cursed-crops AC 2: livestock within 20 m flee
+            else if (personality.TryGetNoiseResponse(e.Tags, out var resp))
             {
                 switch (resp.Reaction)
                 {
@@ -194,6 +206,8 @@ namespace HarvestPanic.AI
                         SetLure(e.Location, aff);
                         return;
                     case NoiseReaction.Rally:
+                        if (resp.Strength > 0f) SetLure(e.Location, resp.Strength * falloff); // sheep long whistle: come to the whistler
+                        return;
                     case NoiseReaction.Ignore:
                         return;
                     case NoiseReaction.Flee:
@@ -234,6 +248,7 @@ namespace HarvestPanic.AI
         void Think()
         {
             float T = _threats.Total;
+            if (FollowingCarriedLeader) T *= _t.FollowCarriedThreatScale; // sheep trail whoever carries the bell-wether
             if (_hasLure && _now > _lureUntil) _hasLure = false;
             switch (_state)
             {
@@ -338,11 +353,12 @@ namespace HarvestPanic.AI
         void TickIdleWander()
         {
             if (!AgentReady) return;
+            if (TickFollowLeader()) return;
             if (_state == CritterState.Idle)
             {
                 if (_now < _idleUntil) return;
                 Vector3 centre = _home;
-                if (Flock != null && Flock.ShouldRegroup(_now, _t.FlockRegroupSeconds)) centre = Flock.Centre();
+                if (Flock != null && Flock.Mode == HerdMode.Flock && Flock.ShouldRegroup(_now, _t.FlockRegroupSeconds)) centre = Flock.Centre();
                 Vector3 rnd = Random.insideUnitSphere * _t.WanderRadius; rnd.y = 0f;
                 if (Flock != null) rnd *= 0.4f;
                 if (NavMesh.SamplePosition(centre + rnd, out var hit, 2f, _agent.areaMask))
@@ -354,6 +370,30 @@ namespace HarvestPanic.AI
             }
             else if (!_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance + 0.1f)
                 Enter(CritterState.Idle);
+        }
+
+        float _followRepathAt;
+
+        /// <summary>Follow herd: walk to 2-4 m from the bell-wether when it is further than FollowMaxDistance. True = handled.</summary>
+        bool TickFollowLeader()
+        {
+            var leader = FlockLeader;
+            if (leader == null || leader == this) return false;
+            Vector3 lp = leader.transform.position;
+            bool carried = leader.State == CritterState.Carried;
+            if (!FlockRules.NeedsToFollow(lp, transform.position, _t.FollowMaxDistance))
+            {
+                if (_state == CritterState.Wander && !_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance + 0.1f) Enter(CritterState.Idle);
+                return true; // close enough: graze beside the leader instead of wandering off home
+            }
+            if (_now < _followRepathAt && _state == CritterState.Wander) return true;
+            _followRepathAt = _now + 0.5f;
+            float spread = ((GetInstanceID() & 0xff) / 255f - 0.5f) * 120f;
+            Vector3 p = FlockRules.FollowPoint(lp, transform.position, _t.FollowMinDistance, _t.FollowMaxDistance, Random.value, spread);
+            if (!NavMesh.SamplePosition(p, out var hit, 2.5f, _agent.areaMask)) return false;
+            MoveTo(hit.position, FlockRules.FollowSpeed(personality.MoveSpeed, personality.SprintSpeed * _t.GlobalSpeedMult, carried, _t.FollowCarriedSpeedMult));
+            if (_state != CritterState.Wander) Enter(CritterState.Wander);
+            return true;
         }
 
         void TickLured(float threat)
@@ -387,6 +427,7 @@ namespace HarvestPanic.AI
             Vector3 pos = transform.position;
             Vector3 dir = CritterMath.FleeDirection(pos, _threatPos, _threatW, transform.forward);
             if (Flock != null && _now < _scatterUntil) dir = _scatterDir;
+            else if (Flock != null && Flock.Mode == HerdMode.Follow) dir = Flock.ShareStampede(dir, _now, _t.StampedeShareSeconds); // stampede together
             if (!needNew && Vector3.Dot(dir, _fleeDir) < 0.5f) needNew = true;
             if (!needNew && _now - _lastFleeQuery < 1f) return;
             _lastFleeQuery = _now;
@@ -449,6 +490,15 @@ namespace HarvestPanic.AI
             Vector3 pos = transform.position;
             _threats.Collect(_threatPos, _threatW);
             Vector3 away = CritterMath.FleeDirection(pos, _threatPos, _threatW, transform.forward);
+            if (Flock.Mode == HerdMode.Follow)
+            {
+                // Sheep: one shared heading for the whole flock (they panic together, not apart).
+                Vector3 h = Flock.ShareStampede(away, _now, _t.StampedeShareSeconds);
+                _scatterDir = Quaternion.Euler(0f, Random.Range(-_t.StampedeJitterDegrees, _t.StampedeJitterDegrees), 0f) * h;
+                _scatterUntil = _now + _t.StampedeShareSeconds;
+                Flock.Scatter(this, CritterMath.ThreatCentroid(_threatPos, _threatW, pos), _now, personality.FleeThreshold + 0.1f);
+                return;
+            }
             Vector3 outward = pos - Flock.Centre(); outward.y = 0f;
             outward = outward.sqrMagnitude > 0.01f ? outward.normalized : Random.insideUnitSphere;
             outward.y = 0f;

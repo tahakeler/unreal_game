@@ -1145,6 +1145,7 @@ namespace HarvestPanic.World.Editor
             // Livestock (feature/cow-goat): keep in sync with HarvestPanic.AI.Editor.LivestockSceneHook.Markers.
             AddMarker(Marker("CritterSpawner_Cow", PigPen + new Vector3(-14f, 0.1f, -12f), g), MarkerRole.CritterSpawner, "Critter.Cow", 1);
             AddMarker(Marker("CritterSpawner_Goat", PigPen + new Vector3(-11f, 0.1f, -4f), g), MarkerRole.CritterSpawner, "Critter.Goat", 1);
+            AddMarker(Marker("CritterSpawner_Sheep", new Vector3(-6f, 0.1f, 20f), g), MarkerRole.CritterSpawner, "Critter.Sheep", 5); // feature/sheep-cursed-crops
             AddMarker(Marker("Goods_PrizePumpkin", Pumpkins + new Vector3(0, 0.1f, 0), g), MarkerRole.Goods, "Crop.PrizePumpkin");
             for (int i = 0; i < 4; i++)
                 AddMarker(Marker($"Goods_Crate_{i}", new Vector3(-12.5f + (i % 2) * 1.4f, 0.1f, 6.5f + (i / 2) * 1.4f), g), MarkerRole.Goods, "Product.Crate", 1, i);

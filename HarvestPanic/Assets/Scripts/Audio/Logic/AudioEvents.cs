@@ -38,6 +38,8 @@ namespace HarvestPanic.Audio
         public const string BullTelegraph = "SFX_Critter_Bull_Telegraph";
         public const string CowMoo = "SFX_Critter_Cow_Moo";
         public const string GoatBleat = "SFX_Critter_Goat_Bleat";
+        public const string SheepBaa = "SFX_Critter_Sheep_Baa";
+        public const string MandrakeScream = "SFX_Crop_Mandrake_Scream";
         public const string PlankCreak = "SFX_Bridge_Plank_Creak";
         public const string PlankBreak = "SFX_Bridge_Plank_Break";
         public const string SplashBig = "SFX_Water_Splash_Big";
@@ -126,6 +128,9 @@ namespace HarvestPanic.Audio
             // polish-2 (append only)
             D(StgLandlordTuba, MixGroup.UIStingers, AttenuationPreset.TwoD, VoiceLimit.None, -4f, 0f),
             D(MusNightThreat, MixGroup.Music, AttenuationPreset.TwoD, VoiceLimit.None, -14f, 0f),
+            // feature/sheep-cursed-crops (append only)
+            D(SheepBaa, MixGroup.Critters, AttenuationPreset.CritterSmall, VoiceLimit.None, -6f, 1f),
+            D(MandrakeScream, MixGroup.Critters, AttenuationPreset.HazardLoud, VoiceLimit.None, -2f, 0.5f),
         };
 
         static System.Collections.Generic.Dictionary<string, int> _index;

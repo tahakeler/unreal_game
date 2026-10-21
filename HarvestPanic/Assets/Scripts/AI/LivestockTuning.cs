@@ -44,6 +44,13 @@ namespace HarvestPanic.AI
         [Min(0.1f)] public float BiteInterval = 1.5f;
         [Tooltip("Design impulse fed to IGoods.ApplyBruise per bite (bruise = (I-400)/40 x fragility).")] [Min(0)] public float BiteImpulse = 1400f;
 
+        [Header("Sheep (flock)")]
+        [Tooltip("Seconds between idle baas.")] [Min(1)] public float BaaInterval = 14f;
+        [Tooltip("Random +/- jitter on the baa interval (s).")] [Min(0)] public float BaaJitter = 5f;
+        [Tooltip("Idle baa loudness (Critter source).")] [Range(0, 1)] public float BaaLoudness = 0.35f;
+        [Tooltip("Panic baa loudness when the flock stampedes.")] [Range(0, 1)] public float PanicBaaLoudness = 0.55f;
+        [Tooltip("Min seconds between baas from one sheep.")] [Min(0)] public float BaaCooldown = 2.5f;
+
         [Header("Shared")]
         [Tooltip("Signature task check rate (Hz).")] [Range(1, 20)] public float CheckHz = 4f;
 

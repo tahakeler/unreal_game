@@ -65,7 +65,7 @@ namespace HarvestPanic.Tests.EditMode.World
         {
             Assert.AreEqual(4, Count(MarkerRole.PlayerStart));
             Assert.AreEqual(1, Count(MarkerRole.MarketPen));
-            Assert.AreEqual(4, Count(MarkerRole.CritterSpawner)); // pig, chicken, cow, goat (feature/cow-goat)
+            Assert.AreEqual(5, Count(MarkerRole.CritterSpawner)); // pig, chicken, cow, goat (feature/cow-goat), sheep x5 (feature/sheep-cursed-crops)
             Assert.AreEqual(5, Count(MarkerRole.Goods));
             Assert.AreEqual(20, Count(MarkerRole.BridgePlank));
             Assert.AreEqual(1, Count(MarkerRole.River));
@@ -80,6 +80,7 @@ namespace HarvestPanic.Tests.EditMode.World
             Assert.IsTrue(sp.Any(m => m.Key == "Critter.Pig" && m.Count == 3));
             Assert.IsTrue(sp.Any(m => m.Key == "Critter.Chicken" && m.Count == 8));
             Assert.IsTrue(sp.Any(m => m.Key == "Critter.Cow") && sp.Any(m => m.Key == "Critter.Goat"));
+            Assert.IsTrue(sp.Any(m => m.Key == "Critter.Sheep" && m.Count == 5), "sheep flock");
             var goods = LevelMarker.FindAll(MarkerRole.Goods);
             Assert.AreEqual(1, goods.Count(m => m.Key == "Crop.PrizePumpkin"));
             Assert.AreEqual(4, goods.Count(m => m.Key == "Product.Crate"));

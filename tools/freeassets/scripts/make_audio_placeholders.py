@@ -358,7 +358,39 @@ def main():
     # Polish-2: appended last (no shared rng use).
     put("STG_Landlord_Tuba", "stg_landlord_tuba_01", landlord_tuba())
     write(os.path.join(root, "MUS_Night_Threat", "mus_night_threat_loop.wav"), night_threat_loop(), peak=0.6)
+    # feature/sheep-cursed-crops: appended last (per-call seeds, no shared rng use).
+    for i in range(3):
+        put("SFX_Critter_Sheep_Baa", f"sfx_critter_sheep_baa_{i+1:02d}", sheep_baa(600 + i))
+    for i in range(2):
+        put("SFX_Crop_Mandrake_Scream", f"sfx_crop_mandrake_scream_{i+1:02d}", mandrake_scream(700 + i))
 
+
+
+def sheep_baa(seed):
+    """Soft, bleating 'baa-aa': lower and rounder than the goat, slow tremolo, vowel lowpass opening then closing."""
+    r = random.Random(seed); sec = r.uniform(0.7, 0.95); f0 = r.uniform(210, 260)
+    f = lambda t: f0 * (1.05 - 0.1 * t / sec) * (1 + 0.035 * math.sin(2 * math.pi * 7 * t))
+    x = mix(osc(f, sec, "saw"), osc(lambda t: f(t) * 2, sec), 0, 0.25)
+    x = lowpass(x, 1400)
+    trem = [0.75 + 0.25 * math.sin(2 * math.pi * 6.5 * i / SR) for i in range(len(x))]
+    x = [a * b for a, b in zip(x, trem)]
+    return apply(x, env_adsr(len(x), 0.04, 0.1, 0.8, 0.25))
+
+
+def mandrake_scream(seed):
+    """Shrill, ear-splitting 3 s shriek: two detuned rising squares + hiss, with a gargled vibrato and a ragged tail."""
+    r = random.Random(seed); sec = 3.0; f0 = r.uniform(820, 980)
+    f = lambda t: f0 * (1 + 0.35 * min(1.0, t / 0.25)) * (1 + 0.06 * math.sin(2 * math.pi * 13 * t))
+    a = osc(f, sec, "square")
+    b = osc(lambda t: f(t) * 1.51, sec, "saw")
+    x = mix(a, b, 0, 0.5)
+    hiss = highpass(noise(sec), 3000)
+    x = mix(x, hiss, 0, 0.35)
+    x = lowpass(x, 6000)
+    rr = random.Random(seed + 1)
+    gate = [1.0 if (i // 400) % 7 else 0.55 + 0.4 * rr.random() for i in range(len(x))]
+    x = [s * g for s, g in zip(x, gate)]
+    return apply(x, env_adsr(len(x), 0.02, 0.2, 0.85, 0.6))
 
 
 def landlord_tuba():

@@ -103,6 +103,8 @@ namespace HarvestPanic.Tests.EditMode.Audio
             Assert.AreEqual(AudioEvents.ToolMetal, Route(NoiseSource.Tool, NoiseTag.Food));
             Assert.AreEqual(AudioEvents.ImpactCrate, Route(NoiseSource.Impact));
             Assert.IsNull(Route(NoiseSource.Voice));
+            Assert.AreEqual(AudioEvents.MandrakeScream, Route(NoiseSource.Crop, NoiseTag.Mandrake, 0.9f));
+            Assert.AreEqual(AudioEvents.SheepBaa, NoiseRouting.CritterEvent("Livestock.Sheep"));
             Assert.IsNull(Route(NoiseSource.Scripted));
         }
 
