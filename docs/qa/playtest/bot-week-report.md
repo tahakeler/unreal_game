@@ -59,8 +59,8 @@ No crashes, exceptions, NetworkObject leaks or wallet desyncs were found.
 | 5 (S4) | Matches design: budget `10 + 4·DayIndex + 3·PlayersOutside` buys +1 fox/day (cost 4) until the weekly cap (2, +1/week, max 5) binds | none | EditMode `NightFoxEscalationTests` |
 
 Soak re-run on the fix (raw log regenerated): 0 errors, NetObjs flat 24; bot deliveries 3/day, 3 sales/day; no Morning
-spawn bruises (W1 D1–D3 "A quiet day"); Landlord barks fire (W2 rule, W2D2 inspection). Rent without the top-up: the bots
-were **$292 short**, but only because the evening shop bought $550 of upgrades (Market Bell, Stall Sign); their week-1
-income was $698 + $100 start = $798 vs $540 (1.48). The bot crew counts as solo for rent and supply (bots are not
+spawn bruises (W1 D1–D3 "A quiet day"); Landlord barks fire (W2 rule, W2D2 inspection). Rent without the top-up: in two runs the bots
+were **$292 / $374 short**, but only because the random evening shop bought $550 / $600 of upgrades; without those buys
+they end week 1 at **$798 / $766 vs $540 rent (1.48 / 1.42)**, so they can pay on their own when they don't shop. The bot crew counts as solo for rent and supply (bots are not
 session players), and the "Nobody" pumpkin bruises left are bot teleport-carries (bots never register as handlers).
 The dev top-up stays: the random shop policy can still leave the bots short.
