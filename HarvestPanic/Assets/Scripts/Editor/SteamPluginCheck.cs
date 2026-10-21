@@ -145,7 +145,7 @@ namespace HarvestPanic.Editor
             }
             if (Directory.Exists(plugIns))
                 foreach (var f in Directory.GetFileSystemEntries(plugIns).Select(Path.GetFileName))
-                    if (IsSteamPluginFile(f) && !f.StartsWith("libsteam_api.", StringComparison.OrdinalIgnoreCase))
+                    if (IsSteamPluginFile(f) && f != MacNativeFile && f != "libsteam_api.bundle")
                         errors.Add($"Contents/PlugIns contains a non-macOS Steam library: {f}.");
 
             // Mono players carry managed assemblies; IL2CPP players have none (compiled into GameAssembly).

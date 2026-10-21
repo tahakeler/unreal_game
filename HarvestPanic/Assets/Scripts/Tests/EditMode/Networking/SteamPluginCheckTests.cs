@@ -232,6 +232,15 @@ namespace HarvestPanic.Tests.EditMode.Networking
         }
 
         [Test]
+        public void MacPlayer_LinuxNativeInPlugIns_Fails()
+        {
+            string app = MacApp(new Dictionary<string, byte[]> { ["libsteam_api.dylib"] = Universal, ["libsteam_api.so"] = new byte[] { 0x7F, 0x45, 0x4C, 0x46 } },
+                SteamPluginCheck.MacManagedFile);
+
+            AssertMentions(CheckMac(app), "non-macOS Steam library: libsteam_api.so");
+        }
+
+        [Test]
         public void MacPlayer_MissingApp_Fails() => AssertMentions(CheckMac(Path.Combine(_root, "Nope.app")), "not found");
 
         // ---------------------------------------------------------------- Windows player
