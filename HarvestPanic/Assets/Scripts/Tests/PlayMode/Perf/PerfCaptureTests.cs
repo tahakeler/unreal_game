@@ -56,6 +56,10 @@ namespace HarvestPanic.Tests.PlayMode.Perf
         [UnityTest, Timeout(600000)]
         public IEnumerator Muddlebury_4Farmers_RainNight_60s()
         {
+            // Offscreen frame capture needs a graphics device: under -nographics every RenderTexture.Create fails and a
+            // 60 s capture yields ~26 frames. Same rule as PerfHotspotTests; measure with graphics on.
+            if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+            { Assert.Ignore("Needs a graphics device (run without -nographics)"); yield break; }
             LogAssert.ignoreFailingMessages = true; // perf capture records errors, it doesn't judge them
             int errors = 0;
             Application.LogCallback onLog = (c, s, t) => { if (t == LogType.Error || t == LogType.Exception) errors++; };
