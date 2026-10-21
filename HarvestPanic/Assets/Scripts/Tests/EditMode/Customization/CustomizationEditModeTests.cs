@@ -84,7 +84,8 @@ namespace HarvestPanic.Tests.EditMode.Customization
                 Assert.That(items.Select(i => i.key).Distinct().Count(), Is.EqualTo(items.Count), slot + ": duplicate keys");
                 foreach (var i in items)
                 {
-                    Assert.That(i.parts.Count, Is.GreaterThan(0), i.key);
+                    bool wearable = slot == CosmeticSlot.Hat || slot == CosmeticSlot.Face || slot == CosmeticSlot.Back || slot == CosmeticSlot.Hair && !i.hideBaseHair;
+                    if (wearable) Assert.That(i.parts.Count, Is.GreaterThan(0), i.key);
                     Assert.That(i.flavour, Is.Not.Empty, i.key);
                 }
             }
@@ -99,7 +100,9 @@ namespace HarvestPanic.Tests.EditMode.Customization
             Assert.That(_cat.nameTags.Count, Is.EqualTo(8));
             Assert.That(_cat.nameTags.Select(t => t.shape).Distinct().Count(), Is.EqualTo(8), "each tag colour has its own shape");
             Assert.That(ColorUtility.ToHtmlStringRGB(_cat.palette[0].color), Is.EqualTo("3B6FD1"), "P1 Denim Blue");
-            Assert.That(_cat.bodies.Count, Is.EqualTo(2));
+            Assert.That(_cat.bodies.Count, Is.GreaterThanOrEqualTo(2), "GDD: 2 at VS, 4 at EA");
+            Assert.That(_cat.bodies[0].name, Is.EqualTo("Sturdy"));
+            Assert.That(_cat.bodies[1].name, Is.EqualTo("Lanky"));
         }
 
         [Test]

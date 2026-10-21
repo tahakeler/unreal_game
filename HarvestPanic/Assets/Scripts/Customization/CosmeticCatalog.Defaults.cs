@@ -4,33 +4,90 @@ using UnityEngine;
 namespace HarvestPanic.Customization
 {
     /// <summary>
-    /// Default VS content: 24-swatch palette, 12+2 skin tones, 8 name tags, 2 bodies, 10 hats, 4 face, 3 back items, 4 emotes.
-    /// Sources: design/gdd/character-customization.md and design/art/character-style.md (names + flavour text).
-    /// Attach spaces (metres): Hat = crown top centre; Face = face front at eye level; Back = back surface at chest height.
-    /// In every space +Y is up and +Z is the farmer's forward.
+    /// Default content (procedural placeholders until authored/Tripo meshes replace them through <see cref="CosmeticEntry"/>):
+    /// 24-swatch palette, 12+2 skin tones, 8 name tags, 4 bodies, 10 hats, 4 face, 3 back items, 6 heads, 8 hairstyles,
+    /// 8 outfits, 7 emotes. Sources: design/gdd/character-customization.md, design/art/character-style.md and
+    /// design/art/asset-specs/tripo-batch-02-character.md (names + flavour text).
+    /// Attach spaces (metres): Head/Hat = crown top centre; Face = face front at eye level; Back = back surface at chest
+    /// height; Chest = chest bone; Hips = hips bone. In every space +Y is up and +Z is the farmer's forward.
     /// </summary>
     public partial class CosmeticCatalog
     {
         /// <summary>Hat id of the starter Straw Hat.</summary>
         public const ushort StrawHatId = 1;
 
-        /// <summary>Rebuilds every list with the shipped VS defaults (editor builder and tests).</summary>
+        /// <summary>Version of the built-in defaults; <see cref="EnsureDefaults"/> merges anything newer into an existing asset.</summary>
+        public const int DefaultsVersion = 2;
+
+        /// <summary>Rebuilds every list with the shipped defaults (editor builder "Reset" and tests). Entries are kept.</summary>
         public void ResetToDefaults()
         {
             unlockAllCosmetics = true;
             palette = DefaultPalette();
             skinTones = DefaultSkins();
             nameTags = DefaultNameTags();
-            bodies = new List<BodyVariant>
-            {
-                new BodyVariant { name = "Sturdy", flavour = "Built like a hay bale. Falls like one too.", bodyScale = new Vector3(1.12f, 0.96f, 1.12f), headScale = 1.18f },
-                new BodyVariant { name = "Lanky", flavour = "Can reach the top shelf. Cannot reach a decision.", bodyScale = new Vector3(0.9f, 1.08f, 0.9f), headScale = 1.1f },
-            };
+            bodies = DefaultBodies();
             hats = DefaultHats();
             faces = DefaultFaces();
             backs = DefaultBacks();
+            heads = DefaultHeads();
+            hairs = DefaultHairs();
+            outfits = DefaultOutfits();
             emotes = DefaultEmotes();
+            dataVersion = DefaultsVersion;
+            MarkItemsDirty();
         }
+
+        /// <summary>
+        /// Adds every default body, item and emote whose name/key is missing (existing edits are kept). Returns how many
+        /// were added. Run by the editor builder so content added in code reaches the shipped catalog asset.
+        /// </summary>
+        public int EnsureDefaults()
+        {
+            int added = 0;
+            if (palette.Count == 0) palette = DefaultPalette();
+            if (skinTones.Count == 0) skinTones = DefaultSkins();
+            if (nameTags.Count == 0) nameTags = DefaultNameTags();
+            foreach (var b in DefaultBodies())
+                if (!bodies.Exists(x => x.name == b.name)) { bodies.Add(b); added++; }
+            void Merge(List<CosmeticItem> into, List<CosmeticItem> defaults)
+            {
+                foreach (var d in defaults)
+                {
+                    var have = into.Find(x => x.key == d.key);
+                    if (have == null) { into.Add(d); added++; continue; }
+                    // Fields that did not exist in older assets.
+                    if (string.IsNullOrEmpty(have.unlockHint)) have.unlockHint = d.unlockHint;
+                    if (have.randomWeight <= 0f && d.randomWeight > 0f) have.randomWeight = d.randomWeight;
+                    if (have.scale <= 0f) have.scale = 1f;
+                    if (have.headShape == Vector3.zero) have.headShape = Vector3.one;
+                    have.hidesHair |= d.hidesHair;
+                }
+            }
+            Merge(hats, DefaultHats());
+            Merge(faces, DefaultFaces());
+            Merge(backs, DefaultBacks());
+            Merge(heads, DefaultHeads());
+            Merge(hairs, DefaultHairs());
+            Merge(outfits, DefaultOutfits());
+            foreach (var e in DefaultEmotes())
+            {
+                var have = emotes.Find(x => x.key == e.key);
+                if (have == null) { emotes.Add(e); added++; }
+                else { if (string.IsNullOrEmpty(have.flavour)) have.flavour = e.flavour; if (string.IsNullOrEmpty(have.unlockHint)) have.unlockHint = e.unlockHint; }
+            }
+            dataVersion = DefaultsVersion;
+            MarkItemsDirty();
+            return added;
+        }
+
+        static List<BodyVariant> DefaultBodies() => new List<BodyVariant>
+        {
+            new BodyVariant { name = "Sturdy", flavour = "Built like a hay bale. Falls like one too.", bodyScale = new Vector3(1.12f, 0.96f, 1.12f), headScale = 1.18f },
+            new BodyVariant { name = "Lanky", flavour = "Can reach the top shelf. Cannot reach a decision.", bodyScale = new Vector3(0.9f, 1.08f, 0.9f), headScale = 1.1f },
+            new BodyVariant { name = "Stout", flavour = "Low centre of gravity. High centre of snacks.", bodyScale = new Vector3(1.24f, 0.88f, 1.2f), headScale = 1.22f },
+            new BodyVariant { name = "Tiny", flavour = "Fits in a wheelbarrow. Has been, twice.", bodyScale = new Vector3(0.86f, 0.8f, 0.86f), headScale = 1.34f },
+        };
 
         static List<Swatch> DefaultPalette() => new List<Swatch>
         {
@@ -64,13 +121,44 @@ namespace HarvestPanic.Customization
 
         static Color C(string hex) { ColorUtility.TryParseHtmlString(hex, out var c); return c; }
 
-        static CosmeticPart P(PartShape s, Vector3 pos, Vector3 size, Color col, Vector3 euler = default, PartTint tint = PartTint.Fixed, float taper = 0f) =>
-            new CosmeticPart { shape = s, position = pos, size = size, color = col, euler = euler, tint = tint, taper = taper };
+        static CosmeticPart P(PartShape s, Vector3 pos, Vector3 size, Color col, Vector3 euler = default, PartTint tint = PartTint.Fixed, float taper = 0f,
+            bool hideUnderHat = false, AttachPoint attach = AttachPoint.Auto) =>
+            new CosmeticPart { shape = s, position = pos, size = size, color = col, euler = euler, tint = tint, taper = taper, hideUnderHat = hideUnderHat, attach = attach };
+
+        const string TrunkCommon = "Grandpa's Trunk: Common, 60 Farm Memories";
+        const string TrunkRare = "Grandpa's Trunk: Rare, 120 Farm Memories";
+        const string TrunkLegend = "Grandpa's Trunk: Legendary, 240 Farm Memories";
+
+        /// <summary>Unlock hints (GDD "Unlock sources") and Randomize weights (silly items come up a bit more often).</summary>
+        static readonly Dictionary<string, (string hint, float weight)> Meta = new Dictionary<string, (string, float)>
+        {
+            { "hat.straw", ("", 1.2f) }, { "hat.trucker", ("", 1f) }, { "hat.cowboy", ("", 1f) },
+            { "hat.bucket", ("Grandpa's Letter: fall in the river 10 times", 1.3f) },
+            { "hat.pumpkin", ("Clear Region 1", 1.3f) },
+            { "hat.chef", (TrunkCommon, 1.3f) }, { "hat.flowercrown", (TrunkCommon, 1.1f) },
+            { "hat.cone", ("Grandpa's Letter: get blamed for $1,000 in one day", 1.6f) },
+            { "hat.viking", (TrunkRare, 1.3f) },
+            { "hat.fedora", ("Grandpa's Letter: finish Day 1", 1f) },
+            { "face.moustache", (TrunkCommon, 1.2f) }, { "face.goggles", (TrunkCommon, 1f) },
+            { "face.sunglasses", (TrunkCommon, 1f) }, { "face.clownnose", (TrunkCommon, 1.2f) },
+            { "back.basket", (TrunkRare, 1f) }, { "back.cape", (TrunkRare, 1.2f) }, { "back.pitchfork", (TrunkCommon, 1f) },
+        };
+
+        static List<CosmeticItem> Finish(List<CosmeticItem> list)
+        {
+            foreach (var it in list)
+                if (Meta.TryGetValue(it.key, out var m)) { if (string.IsNullOrEmpty(it.unlockHint)) it.unlockHint = m.hint; it.randomWeight = m.weight; }
+            return list;
+        }
+
+        static List<CosmeticItem> DefaultHats() => Finish(DefaultHatsRaw());
+        static List<CosmeticItem> DefaultFaces() => Finish(DefaultFacesRaw());
+        static List<CosmeticItem> DefaultBacks() => Finish(DefaultBacksRaw());
 
         static CosmeticItem I(ushort id, string key, string name, string flavour, UnlockSource unlock, params CosmeticPart[] parts) =>
             new CosmeticItem { id = id, key = key, displayName = name, flavour = flavour, unlock = unlock, parts = new List<CosmeticPart>(parts) };
 
-        static List<CosmeticItem> DefaultHats()
+        static List<CosmeticItem> DefaultHatsRaw()
         {
             Color straw = C("#E8C872"), strawDark = C("#C9A24E"), white = C("#F7F7F2"), black = C("#26221F");
             var list = new List<CosmeticItem>
@@ -129,6 +217,8 @@ namespace HarvestPanic.Customization
             };
             list[3].blocksFirstPersonView = true; // Pumpkin Head
             list[2].blocksFirstPersonView = true; // Bucket Helmet
+            list[3].hidesHair = true;
+            list[2].hidesHair = true;
             return list;
         }
 
@@ -148,7 +238,7 @@ namespace HarvestPanic.Customization
             return item;
         }
 
-        static List<CosmeticItem> DefaultFaces()
+        static List<CosmeticItem> DefaultFacesRaw()
         {
             Color brown = C("#5A3725"), black = C("#1E1B19");
             return new List<CosmeticItem>
@@ -175,7 +265,7 @@ namespace HarvestPanic.Customization
             };
         }
 
-        static List<CosmeticItem> DefaultBacks()
+        static List<CosmeticItem> DefaultBacksRaw()
         {
             Color wicker = C("#B88A4A"), wood = C("#8A6040"), metal = C("#9AA3AD");
             return new List<CosmeticItem>
@@ -203,10 +293,20 @@ namespace HarvestPanic.Customization
 
         static List<EmoteDefinition> DefaultEmotes() => new List<EmoteDefinition>
         {
-            new EmoteDefinition { id = 1, key = "wave", displayName = "Wave", animState = "Wave", duration = 1.5f, cooldown = 1.5f, noiseLoudness = 0.6f, unlock = UnlockSource.Starter },
-            new EmoteDefinition { id = 2, key = "point", displayName = "Point", animState = "Point", duration = 1.2f, cooldown = 1.2f, placesPing = true, unlock = UnlockSource.Starter },
-            new EmoteDefinition { id = 3, key = "dance", displayName = "Dance", animState = "Dance", duration = 0f, cooldown = 1f, loopsUntilMove = true, unlock = UnlockSource.Starter },
-            new EmoteDefinition { id = 4, key = "faint", displayName = "Faint", animState = "Faint", kind = EmoteKind.Faint, duration = 2f, cooldown = 5f, unlock = UnlockSource.Starter },
+            new EmoteDefinition { id = 1, key = "wave", displayName = "Wave", animState = "Wave", duration = 1.5f, cooldown = 1.5f, noiseLoudness = 0.6f, unlock = UnlockSource.Starter,
+                flavour = "Also a shout for farmers without a mic." },
+            new EmoteDefinition { id = 2, key = "point", displayName = "Point", animState = "Point", duration = 1.2f, cooldown = 1.2f, placesPing = true, unlock = UnlockSource.Starter,
+                flavour = "Drops a ping everyone can see. Usually on a pig." },
+            new EmoteDefinition { id = 3, key = "dance", displayName = "Dance", animState = "Dance", duration = 0f, cooldown = 1f, loopsUntilMove = true, unlock = UnlockSource.Starter,
+                flavour = "Loops until you move. Nobody asked you to stop." },
+            new EmoteDefinition { id = 4, key = "faint", displayName = "Faint", animState = "Faint", kind = EmoteKind.Faint, duration = 2f, cooldown = 5f, unlock = UnlockSource.Starter,
+                flavour = "Drops whatever you're carrying. The Ledger still blames you." },
+            new EmoteDefinition { id = 5, key = "shrug", displayName = "Shrug", animState = "Shrug", duration = 1.4f, cooldown = 1.4f, unlock = UnlockSource.Trunk,
+                flavour = "The pig was like that when I found it.", unlockHint = TrunkCommon },
+            new EmoteDefinition { id = 6, key = "chickendance", displayName = "Chicken Dance", animState = "ChickenDance", duration = 0f, cooldown = 1f, loopsUntilMove = true, unlock = UnlockSource.Trunk,
+                flavour = "The chickens find it deeply offensive.", unlockHint = TrunkRare },
+            new EmoteDefinition { id = 7, key = "salute", displayName = "Salute", animState = "Salute", duration = 1.6f, cooldown = 1.6f, unlock = UnlockSource.Trunk,
+                flavour = "For the fallen. Mostly the fallen bridge plank.", unlockHint = TrunkCommon },
         };
     }
 }

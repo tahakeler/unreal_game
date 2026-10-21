@@ -131,6 +131,7 @@ namespace HarvestPanic.UI
         /// <summary>Opens the Customization team's wardrobe if a Core interface named IWardrobeUI is registered. False otherwise.</summary>
         public static bool TryOpenWardrobe()
         {
+            if (Services.TryGet(out ICharacterCreator creator) && creator.Open(CharacterCreatorContext.Wardrobe)) return true;
             try
             {
                 // Customization team: static WardrobeUI.Open(FarmerLoadoutSync) for the local farmer (exists once spawned, e.g. in the Lobby).

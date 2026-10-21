@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace HarvestPanic.Customization
 {
@@ -14,19 +16,32 @@ namespace HarvestPanic.Customization
         public Color Accent;
         /// <summary>Name-tag colour.</summary>
         public Color NameTag;
+        /// <summary>Skin tone.</summary>
+        public Color Skin;
+        /// <summary>Hair colour.</summary>
+        public Color Hair;
 
-        /// <summary>Colour for <paramref name="part"/>.</summary>
-        public Color Resolve(in CosmeticPart part)
+        /// <summary>Colour for <paramref name="tint"/> (<paramref name="fixedColor"/> when Fixed).</summary>
+        public Color Resolve(PartTint tint, Color fixedColor)
         {
-            switch (part.tint)
+            switch (tint)
             {
                 case PartTint.Primary: return Primary;
                 case PartTint.Secondary: return Secondary;
                 case PartTint.Accent: return Accent;
                 case PartTint.NameTag: return NameTag;
-                default: return part.color;
+                case PartTint.Skin: return Skin;
+                case PartTint.Hair: return Hair;
+                case PartTint.SkinShade: return SkinShade(Skin);
+                default: return fixedColor;
             }
         }
+
+        /// <summary>Colour for <paramref name="part"/>.</summary>
+        public Color Resolve(in CosmeticPart part) => Resolve(part.tint, part.color);
+
+        /// <summary>Slightly darker, warmer skin (noses, ears in shadow).</summary>
+        public static Color SkinShade(Color skin) => new Color(skin.r * 0.9f, skin.g * 0.78f, skin.b * 0.74f, 1f);
     }
 
     /// <summary>
@@ -38,27 +53,112 @@ namespace HarvestPanic.Customization
     {
         static readonly Dictionary<PartShape, Mesh> Builtins = new Dictionary<PartShape, Mesh>();
         static readonly Dictionary<int, Mesh> Cones = new Dictionary<int, Mesh>();
-        static readonly Dictionary<(Material, Color), Material> Materials = new Dictionary<(Material, Color), Material>();
+        static readonly Dictionary<(Material, Color, OutfitPattern), Material> Materials = new Dictionary<(Material, Color, OutfitPattern), Material>();
         static Material _fallbackBase;
+        static MaterialPropertyBlock _mpb;
 
-        /// <summary>Creates the accessory under <paramref name="parent"/> (local identity) or returns null for None.</summary>
+        static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
+        static readonly int ColorId = Shader.PropertyToID("_Color");
+        static readonly int PrimaryId = Shader.PropertyToID("_PrimaryColor");
+        static readonly int SecondaryId = Shader.PropertyToID("_SecondaryColor");
+        static readonly int AccentId = Shader.PropertyToID("_AccentColor");
+        static readonly int SkinId = Shader.PropertyToID("_SkinColor");
+
+        /// <summary>Creates the accessory under <paramref name="parent"/> (single attach point) or returns null for None.</summary>
         public static GameObject Build(CosmeticItem item, Transform parent, Material baseMaterial, in TintColors tints)
         {
             if (item == null || parent == null) return null;
-            GameObject root;
+            var roots = new List<GameObject>(1);
+            var p = parent;
+            Build(item, _ => p, AttachPoint.Head, baseMaterial, tints, false, roots);
+            return roots.Count > 0 ? roots[0] : null;
+        }
+
+        /// <summary>
+        /// Builds <paramref name="item"/> at its attach point(s) and adds one root per attach point used to <paramref name="roots"/>.
+        /// <paramref name="attachFor"/> maps an attach point to the farmer transform (null = skip); <paramref name="hatWorn"/>
+        /// drops hair parts flagged <see cref="CosmeticPart.hideUnderHat"/>.
+        /// </summary>
+        public static void Build(CosmeticItem item, Func<AttachPoint, Transform> attachFor, AttachPoint slotDefault, Material baseMaterial,
+            in TintColors tints, bool hatWorn, List<GameObject> roots)
+        {
+            if (item == null || attachFor == null) return;
+            AttachPoint main = item.attach == AttachPoint.Auto ? slotDefault : item.attach;
             if (item.prefab != null)
             {
-                root = Object.Instantiate(item.prefab, parent, false);
+                var parent = attachFor(main);
+                if (parent == null) return;
+                var root = Object.Instantiate(item.prefab, parent, false);
+                Place(root.transform, item);
+                ApplyPrefabTint(root, item, tints);
+                Finish(root, item, parent, roots);
+                return;
             }
-            else
+
+            var byAttach = new Dictionary<AttachPoint, GameObject>();
+            foreach (var part in item.parts)
             {
-                root = new GameObject(item.key);
-                root.transform.SetParent(parent, false);
-                foreach (var part in item.parts) BuildPart(part, root.transform, baseMaterial, tints);
+                if (hatWorn && part.hideUnderHat) continue;
+                AttachPoint ap = part.attach == AttachPoint.Auto ? main : part.attach;
+                if (!byAttach.TryGetValue(ap, out var root))
+                {
+                    var parent = attachFor(ap);
+                    if (parent == null) continue;
+                    root = new GameObject(item.key);
+                    root.transform.SetParent(parent, false);
+                    Place(root.transform, item);
+                    byAttach[ap] = root;
+                    Finish(root, item, parent, roots);
+                }
+                BuildPart(part, root.transform, baseMaterial, tints);
             }
+        }
+
+        static void Place(Transform t, CosmeticItem item)
+        {
+            t.localPosition = item.offset;
+            t.localRotation = Quaternion.Euler(item.rotation);
+            float s = item.scale > 0f ? item.scale : 1f;
+            t.localScale = Vector3.one * s;
+        }
+
+        static void Finish(GameObject root, CosmeticItem item, Transform parent, List<GameObject> roots)
+        {
             root.name = "Cosmetic_" + item.key;
             SetLayerRecursive(root, parent.gameObject.layer);
-            return root;
+            foreach (var c in root.GetComponentsInChildren<Collider>(true)) { if (Application.isPlaying) Object.Destroy(c); else Object.DestroyImmediate(c); }
+            roots.Add(root);
+        }
+
+        /// <summary>Colours an authored prefab instance with property blocks (materials stay shared).</summary>
+        public static void ApplyPrefabTint(GameObject root, CosmeticItem item, in TintColors tints)
+        {
+            if (item.tintMode == TintMode.None) return;
+            if (_mpb == null) _mpb = new MaterialPropertyBlock();
+            foreach (var r in root.GetComponentsInChildren<Renderer>(true))
+            {
+                var mats = r.sharedMaterials;
+                for (int m = 0; m < mats.Length; m++)
+                {
+                    _mpb.Clear();
+                    if (item.tintMode == TintMode.MaskTexture)
+                    {
+                        _mpb.SetColor(PrimaryId, tints.Primary);
+                        _mpb.SetColor(SecondaryId, tints.Secondary);
+                        _mpb.SetColor(AccentId, tints.Accent);
+                        _mpb.SetColor(SkinId, tints.Skin);
+                    }
+                    else
+                    {
+                        var tint = m < item.materialTints.Count ? item.materialTints[m] : PartTint.Fixed;
+                        if (tint == PartTint.Fixed) continue;
+                        var c = tints.Resolve(tint, Color.white);
+                        _mpb.SetColor(BaseColorId, c);
+                        _mpb.SetColor(ColorId, c);
+                    }
+                    r.SetPropertyBlock(_mpb, m);
+                }
+            }
         }
 
         /// <summary>Creates one primitive part (also used for wardrobe furniture and pings).</summary>
@@ -102,25 +202,34 @@ namespace HarvestPanic.Customization
         }
 
         /// <summary>Shared lit material of <paramref name="color"/> cloned from <paramref name="baseMaterial"/>.</summary>
-        public static Material MaterialFor(Material baseMaterial, Color color)
+        public static Material MaterialFor(Material baseMaterial, Color color) => MaterialFor(baseMaterial, color, OutfitPattern.Plain);
+
+        /// <summary>Shared lit material of <paramref name="color"/> with a procedural cloth <paramref name="pattern"/> (needs mesh UVs).</summary>
+        public static Material MaterialFor(Material baseMaterial, Color color, OutfitPattern pattern)
         {
             if (baseMaterial == null)
             {
                 if (_fallbackBase == null) _fallbackBase = new Material(Shader.Find("Universal Render Pipeline/Lit")) { name = "HP_CosmeticFallback" };
                 baseMaterial = _fallbackBase;
             }
-            if (Materials.TryGetValue((baseMaterial, color), out var mat) && mat != null) return mat;
-            mat = new Material(baseMaterial) { name = baseMaterial.name + "_" + ColorUtility.ToHtmlStringRGB(color) };
+            var key = (baseMaterial, color, pattern);
+            if (Materials.TryGetValue(key, out var mat) && mat != null) return mat;
+            mat = new Material(baseMaterial) { name = baseMaterial.name + "_" + ColorUtility.ToHtmlStringRGB(color) + (pattern == OutfitPattern.Plain ? "" : "_" + pattern) };
             SetColor(mat, color);
-            Materials[(baseMaterial, color)] = mat;
+            if (pattern != OutfitPattern.Plain && mat.HasProperty("_BaseMap"))
+            {
+                mat.SetTexture("_BaseMap", OutfitPatterns.Texture(pattern));
+                mat.SetTextureScale("_BaseMap", OutfitPatterns.Tiling(pattern));
+            }
+            Materials[key] = mat;
             return mat;
         }
 
         /// <summary>Sets the URP base colour (and legacy _Color) on <paramref name="mat"/>.</summary>
         public static void SetColor(Material mat, Color c)
         {
-            if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", c);
-            if (mat.HasProperty("_Color")) mat.SetColor("_Color", c);
+            if (mat.HasProperty(BaseColorId)) mat.SetColor(BaseColorId, c);
+            if (mat.HasProperty(ColorId)) mat.SetColor(ColorId, c);
         }
 
         /// <summary>Unit cone: base radius 0.5 at y=0, top radius 0.5*taper at y=1, capped. Cached by taper.</summary>

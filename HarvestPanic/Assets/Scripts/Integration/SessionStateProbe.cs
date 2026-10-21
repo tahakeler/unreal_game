@@ -48,7 +48,7 @@ namespace HarvestPanic.Integration
             foreach (var l in FarmerLoadoutSync.Active)
             {
                 var v = l.Loadout;
-                players.Append(players.Length > 0 ? ";" : "").Append($"owner{l.OwnerClientId}:body{v.Body}/hat{v.Hat}/face{v.Face}/back{v.Back}");
+                players.Append(players.Length > 0 ? ";" : "").Append($"owner{l.OwnerClientId}:body{v.Body}/hat{v.Hat}/face{v.Face}/back{v.Back}/head{v.Head}/hair{v.Hair}c{v.HairColor}/outfit{v.Outfit}");
             }
             sb.Append($" farmers={FarmerLoadoutSync.Active.Count} loadouts={players}");
             try { File.AppendAllText(_path, $"[{Time.realtimeSinceStartup:F2}] {sb}\n"); } catch { /* best effort */ }

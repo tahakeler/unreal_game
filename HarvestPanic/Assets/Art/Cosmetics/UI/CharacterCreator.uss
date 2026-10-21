@@ -1,0 +1,285 @@
+/* HARVEST PANIC - "Create your farmer" (Customization). Grandpa's scrapbook on the workbench: a taped-in polaroid
+   turntable on the left, a ledger page with sticky-note index tabs on the right. Fonts and ink/paper match the Frontend
+   theme (Resources/Frontend/USS_Default_Theme.uss). Reserved colours (Good/Loss/Landlord) are set from code so they follow
+   the colour-blind mode (CreatorTheme == UiPalette). Layout reference: 1920x1080. */
+
+.cc-root {
+    --ink: #2B2118;
+    --ink-soft: rgba(43, 33, 24, 0.6);
+    --paper: #F6EBD3;
+    --paper-dark: #E3D3AA;
+    --cream: #FFF4D6;
+    --pumpkin: #E8782A;
+    --sky: #9ED0E6;
+    --cc-body: 24px;
+    --cc-small: 21px;
+    --cc-card-name: 21px;
+    --cc-button: 34px;
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-Regular.ttf");
+    font-size: var(--cc-body);
+    color: var(--ink);
+    background-color: #3A281B;
+    -unity-background-scale-mode: stretch-to-fill;
+}
+.cc-root--text-large { --cc-body: 28px; --cc-small: 24px; --cc-card-name: 24px; --cc-button: 38px; }
+.cc-root--text-small { --cc-body: 22px; --cc-small: 19px; --cc-card-name: 19px; --cc-button: 30px; }
+.cc-root--wardrobe { background-color: rgba(30, 20, 13, 0.88); }
+
+.cc-display { -unity-font-definition: url("project:///Assets/Art/UI/Fonts/LilitaOne-Regular.ttf"); }
+.cc-bold { -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"); }
+
+/* ---------- Header ---------- */
+.cc-header { position: absolute; left: 70px; top: 18px; flex-direction: row; align-items: center; }
+.cc-title {
+    font-size: 72px; color: var(--paper); letter-spacing: 2px;
+    -unity-font-definition: url("project:///Assets/Art/UI/Fonts/LilitaOne-Regular.ttf");
+    -unity-text-outline-width: 5px; -unity-text-outline-color: var(--ink);
+    text-shadow: 0 6px 0 var(--ink);
+    rotate: -2deg;
+}
+.cc-subtitle {
+    margin-left: 26px; padding: 6px 20px; font-size: 24px; rotate: 1.5deg;
+    background-color: var(--paper); border-width: 3px; border-bottom-width: 6px; border-color: var(--ink); border-radius: 10px;
+    -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf");
+}
+
+/* ---------- Body columns ---------- */
+.cc-body { position: absolute; left: 56px; right: 56px; top: 146px; bottom: 128px; flex-direction: row; }
+.cc-left { width: 650px; align-items: center; }
+.cc-right { flex-grow: 1; margin-left: 34px; }
+
+/* ---------- Polaroid turntable ---------- */
+.cc-polaroid {
+    width: 600px; height: 746px; padding: 22px 22px 100px 22px;
+    background-color: #FBF8F0; border-width: 2px; border-color: #CDBF9F; border-radius: 6px;
+    rotate: -1.5deg;
+}
+.cc-polaroid-shadow {
+    position: absolute; left: 30px; top: 14px; width: 600px; height: 746px;
+    background-color: rgba(0, 0, 0, 0.35); border-radius: 8px; rotate: -0.5deg;
+}
+.cc-photo { flex-grow: 1; border-width: 2px; border-color: rgba(43, 33, 24, 0.45); background-color: #E9D9B4; }
+.cc-tape { position: absolute; width: 170px; height: 46px; -unity-background-scale-mode: stretch-to-fill; }
+.cc-tape--l { left: -30px; top: -6px; rotate: -32deg; width: 150px; height: 40px; }
+.cc-tape--r { right: -30px; top: -6px; rotate: 30deg; width: 150px; height: 40px; }
+.cc-caption { position: absolute; left: 22px; right: 22px; bottom: 14px; height: 80px; align-items: center; justify-content: center; }
+.cc-caption-name { font-size: 44px; color: var(--ink); -unity-font-definition: url("project:///Assets/Art/UI/Fonts/LilitaOne-Regular.ttf"); rotate: -1deg; }
+.cc-caption-sub { font-size: 20px; color: var(--ink-soft); -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"); }
+.cc-photo-hint {
+    position: absolute; right: 40px; top: 40px; padding: 4px 14px; font-size: 19px;
+    background-color: rgba(251, 248, 240, 0.86); border-radius: 14px; color: var(--ink);
+    -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf");
+}
+.cc-photo-hint--hidden { opacity: 0; transition-property: opacity; transition-duration: 0.6s; }
+.cc-emote-bar { flex-direction: row; align-items: center; margin-top: 22px; }
+.cc-emote-bar-label { font-size: 24px; color: var(--paper); margin-right: 12px; -unity-font-definition: url("project:///Assets/Art/UI/Fonts/LilitaOne-Regular.ttf"); }
+
+/* ---------- Chips (small buttons) ---------- */
+.cc-chip {
+    flex-direction: row; align-items: center; height: 50px; margin: 0 10px 0 0; padding: 0 16px 0 10px;
+    background-color: var(--paper); border-width: 3px; border-bottom-width: 6px; border-color: var(--ink); border-radius: 25px;
+    font-size: 21px; color: var(--ink);
+    -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf");
+    transition-property: scale, translate, background-color; transition-duration: 0.1s;
+}
+.cc-chip:hover, .cc-chip:focus { background-color: var(--cream); translate: 0 -3px; }
+.cc-chip:active { scale: 0.95 0.95; border-bottom-width: 3px; }
+.cc-chip .cc-icon { width: 22px; height: 22px; margin-right: 6px; }
+
+/* ---------- Sticky-note tabs ---------- */
+.cc-tabs { flex-direction: row; height: 72px; align-items: flex-end; padding-left: 14px; }
+.cc-tab {
+    height: 56px; min-width: 0; flex-grow: 1; flex-basis: 0; margin: 0 4px -4px 0; padding: 0 4px;
+    border-width: 3px; border-bottom-width: 0; border-color: var(--ink);
+    border-top-left-radius: 14px; border-top-right-radius: 14px; border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+    font-size: 23px; color: var(--ink); -unity-text-align: middle-center;
+    -unity-font-definition: url("project:///Assets/Art/UI/Fonts/LilitaOne-Regular.ttf");
+    transition-property: height, translate, background-color; transition-duration: 0.12s;
+}
+.cc-tab:hover { height: 62px; }
+.cc-tab:focus { height: 64px; border-width: 4px; border-bottom-width: 0; }
+.cc-tab--active { height: 70px; background-color: var(--paper); font-size: 25px; }
+.cc-tab--active:hover, .cc-tab--active:focus { height: 70px; }
+
+/* ---------- Ledger page ---------- */
+.cc-page {
+    flex-grow: 1; padding: 22px 30px 16px 70px;
+    border-width: 4px; border-bottom-width: 10px; border-color: var(--ink); border-radius: 18px; border-top-left-radius: 6px;
+    background-color: var(--paper);
+    -unity-background-scale-mode: scale-and-crop;
+}
+.cc-page-head { flex-direction: row; align-items: center; height: 58px; }
+.cc-section-title { font-size: 42px; color: var(--ink); -unity-font-definition: url("project:///Assets/Art/UI/Fonts/LilitaOne-Regular.ttf"); }
+.cc-section-note { font-size: var(--cc-small); color: var(--ink-soft); margin-left: 16px; margin-top: 10px; -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"); }
+.cc-spacer { flex-grow: 1; }
+.cc-count {
+    padding: 3px 14px; font-size: 20px; border-radius: 14px; border-width: 2px; border-color: var(--ink);
+    background-color: var(--cream); -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf");
+}
+.cc-scroll { flex-grow: 1; flex-shrink: 1; flex-basis: 0; min-height: 0; margin-top: 8px; }
+.cc-scroll .unity-scroll-view__content-container { padding-top: 12px; }
+.cc-grid { flex-direction: row; flex-wrap: wrap; transition-property: opacity, translate; transition-duration: 0.18s; }
+.cc-grid--enter { opacity: 0; translate: 0 14px; }
+.cc-subhead { font-size: 28px; margin: 6px 0 10px 0; color: var(--ink); -unity-font-definition: url("project:///Assets/Art/UI/Fonts/LilitaOne-Regular.ttf"); }
+.cc-subhead-note { font-size: var(--cc-small); color: var(--ink-soft); }
+
+/* ---------- Item cards ---------- */
+.cc-card {
+    width: 150px; height: 196px; margin: 0 14px 16px 0; padding: 6px 6px 4px 6px;
+    background-color: #FFFBEF; border-width: 3px; border-bottom-width: 7px; border-color: var(--ink); border-radius: 14px;
+    align-items: center; flex-direction: column;
+    transition-property: scale, translate, rotate, background-color; transition-duration: 0.12s;
+}
+.cc-card:hover { scale: 1.04 1.04; translate: 0 -3px; }
+.cc-card:focus { border-width: 5px; border-bottom-width: 9px; scale: 1.06 1.06; translate: 0 -4px; }
+.cc-card:active { scale: 0.97 0.97; }
+.cc-card--selected { background-color: #FFF1C2; border-width: 5px; border-bottom-width: 9px; rotate: -1.5deg; }
+.cc-card-thumb {
+    width: 132px; height: 132px; border-radius: 10px; background-color: #EFE3C4; flex-shrink: 0;
+    border-width: 2px; border-color: rgba(43, 33, 24, 0.25);
+    -unity-background-scale-mode: scale-and-crop;
+}
+.cc-card-name {
+    margin-top: 4px; height: 44px; font-size: var(--cc-card-name); -unity-text-align: middle-center; white-space: normal;
+    color: var(--ink); -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf");
+}
+.cc-card-placeholder { font-size: 54px; color: rgba(43, 33, 24, 0.35); -unity-text-align: middle-center; flex-grow: 1; -unity-font-definition: url("project:///Assets/Art/UI/Fonts/LilitaOne-Regular.ttf"); }
+.cc-badge {
+    position: absolute; right: -12px; top: -12px; width: 44px; height: 44px; border-radius: 22px;
+    border-width: 3px; border-color: var(--ink); align-items: center; justify-content: center;
+    scale: 0 0; transition-property: scale; transition-duration: 0.16s; transition-timing-function: ease-out-back;
+}
+.cc-card--selected .cc-badge, .cc-swatch--selected .cc-badge, .cc-tagcard--selected .cc-badge { scale: 1 1; }
+.cc-badge .cc-icon { width: 28px; height: 28px; }
+.cc-lock {
+    position: absolute; left: 10px; top: 10px; width: 40px; height: 40px; border-radius: 10px;
+    align-items: center; justify-content: center; border-width: 2px; border-color: var(--ink);
+}
+.cc-lock .cc-icon { width: 26px; height: 26px; }
+.cc-card--locked { background-color: #EADFC6; }
+.cc-card--locked .cc-card-thumb { opacity: 0.45; }
+.cc-card--locked .cc-card-name { color: var(--ink-soft); }
+.cc-card--wide { width: 212px; height: 300px; }
+.cc-card--wide .cc-card-thumb { width: 194px; height: 236px; }
+.cc-card--emote { height: 150px; justify-content: center; }
+.cc-card--emote .cc-icon { width: 54px; height: 54px; margin-top: 18px; }
+
+/* ---------- Swatches ---------- */
+.cc-swatch-row { flex-direction: row; flex-wrap: wrap; margin-bottom: 10px; }
+.cc-swatch {
+    width: 54px; height: 54px; margin: 0 10px 10px 0; border-radius: 27px; border-width: 3px; border-color: var(--ink);
+    padding: 0; transition-property: scale; transition-duration: 0.1s;
+}
+.cc-swatch:hover { scale: 1.1 1.1; }
+.cc-swatch:focus { border-width: 5px; scale: 1.16 1.16; }
+.cc-swatch--selected { border-width: 6px; scale: 1.12 1.12; }
+.cc-swatch .cc-badge { right: -10px; top: -10px; width: 30px; height: 30px; border-radius: 15px; border-width: 2px; }
+.cc-swatch .cc-badge .cc-icon { width: 18px; height: 18px; }
+.cc-icon { flex-shrink: 0; }
+.cc-swatch-row--compact .cc-swatch { width: 44px; height: 44px; border-radius: 22px; margin: 0 8px 8px 0; }
+.cc-colorblind .cc-swatch-row--compact .cc-swatch { width: 150px; height: 40px; border-radius: 10px; }
+.cc-swatch--big { width: 76px; height: 76px; border-radius: 38px; margin: 0 16px 16px 0; }
+.cc-swatch--locked { opacity: 0.4; }
+.cc-swatch-name { display: none; }
+/* Colour-blind modes: swatches become named pills (colour is never the only cue). */
+.cc-colorblind .cc-swatch { width: 176px; height: 46px; border-radius: 12px; flex-direction: row; align-items: center; padding-left: 8px; }
+.cc-colorblind .cc-icon { flex-shrink: 0; }
+.cc-swatch-row--compact .cc-swatch { width: 44px; height: 44px; border-radius: 22px; margin: 0 8px 8px 0; }
+.cc-colorblind .cc-swatch-row--compact .cc-swatch { width: 150px; height: 40px; border-radius: 10px; }
+.cc-swatch--big { width: 210px; height: 58px; }
+.cc-colorblind .cc-swatch-name {
+    display: flex; font-size: 19px; padding: 0 8px; border-radius: 8px; background-color: rgba(251, 248, 240, 0.92);
+    -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"); color: var(--ink);
+}
+
+/* ---------- Name tab ---------- */
+.cc-name-row { flex-direction: row; align-items: center; margin-bottom: 6px; }
+.cc-name-field { width: 560px; margin: 0 16px 0 0; }
+.cc-name-field .unity-base-text-field__input {
+    background-color: #FFFDF6; color: var(--ink); border-width: 4px; border-color: var(--ink); border-radius: 14px;
+    padding: 6px 18px; font-size: 40px; min-height: 72px; -unity-text-align: middle-left;
+    -unity-font-definition: url("project:///Assets/Art/UI/Fonts/LilitaOne-Regular.ttf");
+}
+.cc-name-field:focus .unity-base-text-field__input { border-width: 6px; }
+.cc-name-status { font-size: var(--cc-body); margin: 4px 0 18px 4px; min-height: 34px; -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"); white-space: normal; }
+.cc-plaque {
+    flex-direction: row; align-items: center; align-self: flex-start; padding: 10px 26px; margin-bottom: 18px;
+    background-color: #5E3F27; border-width: 4px; border-bottom-width: 8px; border-color: var(--ink); border-radius: 16px;
+}
+.cc-plaque .cc-icon { width: 40px; height: 40px; margin-right: 14px; }
+.cc-plaque-name { font-size: 38px; -unity-font-definition: url("project:///Assets/Art/UI/Fonts/LilitaOne-Regular.ttf"); -unity-text-outline-width: 3px; -unity-text-outline-color: var(--ink); }
+.cc-tagcard {
+    width: 226px; height: 72px; margin: 0 14px 14px 0; padding: 0 12px; flex-direction: row; align-items: center;
+    background-color: #FFFBEF; border-width: 3px; border-bottom-width: 7px; border-color: var(--ink); border-radius: 14px;
+    transition-property: scale; transition-duration: 0.1s;
+}
+.cc-tagcard:hover { scale: 1.04 1.04; }
+.cc-tagcard:focus { border-width: 5px; scale: 1.05 1.05; }
+.cc-tagcard--selected { background-color: #FFF1C2; border-width: 5px; border-bottom-width: 9px; }
+.cc-tagcard .cc-icon { width: 36px; height: 36px; margin-right: 12px; flex-shrink: 0; }
+.cc-tagcard-text { flex-direction: column; flex-shrink: 1; }
+.cc-tagcard-name { font-size: 21px; -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"); }
+.cc-tagcard-shape { font-size: 18px; color: var(--ink-soft); margin-top: -4px; }
+.cc-tagcard .cc-badge { right: -10px; top: -10px; width: 32px; height: 32px; border-radius: 16px; }
+.cc-tagcard .cc-badge .cc-icon { width: 20px; height: 20px; margin: 0; }
+
+/* ---------- Emote slots ---------- */
+.cc-slots { flex-direction: row; margin-bottom: 18px; }
+.cc-slot {
+    width: 214px; height: 112px; margin: 0 14px 0 0; padding: 8px 12px; flex-direction: row; align-items: center;
+    background-color: #FFFBEF; border-width: 3px; border-bottom-width: 7px; border-color: var(--ink); border-radius: 14px;
+    transition-property: scale, translate; transition-duration: 0.1s;
+}
+.cc-slot:hover { translate: 0 -3px; }
+.cc-slot:focus { border-width: 5px; }
+.cc-slot--active { background-color: var(--sky); border-width: 5px; border-bottom-width: 9px; translate: 0 -5px; }
+.cc-keycap {
+    width: 56px; height: 56px; margin-right: 12px; border-radius: 10px; border-width: 3px; border-bottom-width: 7px; border-color: var(--ink);
+    background-color: var(--paper); font-size: 32px; -unity-text-align: middle-center;
+    -unity-font-definition: url("project:///Assets/Art/UI/Fonts/LilitaOne-Regular.ttf");
+}
+.cc-slot-name { font-size: 24px; white-space: normal; flex-shrink: 1; -unity-font-definition: url("project:///Assets/Art/UI/Fonts/LilitaOne-Regular.ttf"); }
+
+/* ---------- Info strip ---------- */
+.cc-info {
+    height: 118px; flex-shrink: 0; margin-top: 6px; padding: 10px 16px; flex-direction: column;
+    background-color: rgba(255, 251, 239, 0.9); border-width: 2px; border-color: rgba(43, 33, 24, 0.35); border-radius: 12px;
+}
+.cc-info-name { font-size: 32px; -unity-font-definition: url("project:///Assets/Art/UI/Fonts/LilitaOne-Regular.ttf"); }
+.cc-info-flavour { font-size: var(--cc-body); white-space: normal; color: #4A3A2C; }
+.cc-info-lock { flex-direction: row; align-items: center; margin-top: 2px; }
+.cc-info-lock .cc-icon { width: 24px; height: 24px; margin-right: 8px; }
+.cc-info-hint { font-size: var(--cc-small); -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"); }
+
+/* ---------- Footer buttons ---------- */
+.cc-footer { position: absolute; left: 56px; right: 56px; bottom: 22px; height: 96px; flex-direction: row; align-items: center; }
+.cc-btn {
+    flex-direction: row; align-items: center; justify-content: center; height: 80px; min-width: 210px; margin: 0 18px 0 0; padding: 0 28px;
+    background-color: var(--paper); border-width: 4px; border-bottom-width: 9px; border-color: var(--ink); border-radius: 18px;
+    font-size: var(--cc-button); color: var(--ink);
+    -unity-font-definition: url("project:///Assets/Art/UI/Fonts/LilitaOne-Regular.ttf");
+    transition-property: scale, translate, rotate, background-color; transition-duration: 0.12s;
+}
+.cc-btn:hover { background-color: var(--cream); translate: 0 -3px; }
+.cc-btn:focus { border-width: 6px; border-bottom-width: 11px; scale: 1.04 1.04; }
+.cc-btn:active { scale: 0.96 0.96; border-bottom-width: 4px; translate: 0 3px; }
+.cc-btn .cc-icon { width: 38px; height: 38px; margin-right: 12px; }
+.cc-btn--random { background-color: var(--pumpkin); }
+.cc-btn--random:hover, .cc-btn--random:focus { background-color: #F39A50; }
+.cc-btn--wobble { rotate: -6deg; scale: 1.08 1.08; }
+.cc-btn--confirm { min-width: 300px; margin-right: 0; }
+.cc-btn-key { font-size: 17px; color: var(--ink-soft); margin-left: 10px; -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"); }
+.cc-keys { font-size: 20px; color: rgba(246, 235, 211, 0.85); margin-right: 22px; -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"); }
+
+/* ---------- Toast ---------- */
+.cc-toast {
+    position: absolute; left: 700px; right: 700px; top: 120px; height: 62px; align-items: center; justify-content: center;
+    background-color: var(--paper); border-width: 3px; border-bottom-width: 7px; border-color: var(--ink); border-radius: 16px;
+    font-size: 26px; opacity: 0; translate: 0 -20px; transition-property: opacity, translate; transition-duration: 0.2s;
+    -unity-font-definition: url("project:///Assets/Art/UI/Fonts/LilitaOne-Regular.ttf");
+}
+.cc-toast--shown { opacity: 1; translate: 0 0; }
+
+.cc-root--reduced-motion * { transition-duration: 0s; }
+.cc-root--reduced-motion .cc-card--selected { rotate: 0deg; }

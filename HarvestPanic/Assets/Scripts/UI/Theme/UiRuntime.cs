@@ -44,6 +44,7 @@ namespace HarvestPanic.UI
 
         void Awake()
         {
+            Services.Register<IPlayerNameService>(PlayerNameFromSettings.Instance);
             SettingsService.Changed += ApplyToEngine;
             ApplyToEngine(SettingsService.Current);
             Services.WhenAvailable<IAudioSettingsSink>(_ => ApplyToEngine(SettingsService.Current));
@@ -61,6 +62,7 @@ namespace HarvestPanic.UI
 
         void Update()
         {
+            if (!Services.TryGet(out IPlayerNameService _)) Services.Register<IPlayerNameService>(PlayerNameFromSettings.Instance);
             InputBindings.Pump();
             if (Fake != null && Services.TryGet(out ISessionService cur) && ReferenceEquals(cur, Fake)) Fake.Tick(Time.unscaledDeltaTime);
         }
@@ -93,6 +95,7 @@ namespace HarvestPanic.UI
 
         static void ApplyToEngine(GameSettings s)
         {
+            UiAccessibility.Set((UiColorblind)(int)s.Colorblind, s.ReducedMotion, s.UiScale, s.TextSize); // Core snapshot for non-Frontend screens
             // Audio owns bus gains when present (IAudioSettingsSink applies Master x bus in software); otherwise fall back to the listener.
             if (Services.TryGet(out IAudioSettingsSink sink))
             {
@@ -113,6 +116,26 @@ namespace HarvestPanic.UI
                 default: Screen.fullScreenMode = FullScreenMode.Windowed; break;
             }
             if (GraphicsSettings.currentRenderPipeline is UniversalRenderPipelineAsset urp) urp.renderScale = s.ResolutionScale;
+        }
+    }
+
+    /// <summary>
+    /// Core <see cref="IPlayerNameService"/> backed by <see cref="GameSettings.PlayerName"/> (the Settings name field) and the
+    /// session platform, so the character creator's Farm Name and Settings never disagree.
+    /// </summary>
+    public sealed class PlayerNameFromSettings : IPlayerNameService
+    {
+        public static readonly PlayerNameFromSettings Instance = new PlayerNameFromSettings();
+
+        public string PlayerName => SettingsService.Current.PlayerName ?? "";
+
+        public void SetPlayerName(string name)
+        {
+            var next = SettingsService.Current.Copy();
+            next.PlayerName = name ?? "";
+            SettingsService.Apply(next);
+            var platform = SessionAccess.Platform;
+            if (platform != null && !string.IsNullOrEmpty(next.PlayerName)) platform.SetLocalPlayerName(next.PlayerName);
         }
     }
 }

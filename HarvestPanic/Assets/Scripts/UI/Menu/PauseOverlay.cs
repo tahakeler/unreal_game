@@ -37,6 +37,7 @@ namespace HarvestPanic.UI
             if (!(esc || start)) return;
             if (SettingsPanel.IsListening) return; // rebinding owns Esc (cancel)
             if (Services.TryGet(out ICamcorderService cam) && cam.IsViewing) return; // camcorder viewer/shelf owns Esc (feature/camcorder)
+            if (Services.TryGet(out ICharacterCreator creator) && creator.IsOpen) return; // wardrobe / character creator owns Esc
             if (_open) Back();
             else if (UiFocus.ModalCount == 0) Open();
         }

@@ -60,7 +60,23 @@ namespace HarvestPanic.UI
                 ShowMessage("Back at the farmhouse", _platform.LastEndReason);
                 _platform.ClearLastEndReason();
             }
+            else StartCoroutine(OpenCreatorOnFirstRun());
         }
+
+        /// <summary>
+        /// First launch: open Customization's "Create your farmer" once (Core ICharacterCreator). Skipped in automated
+        /// player builds (batchmode) so headless test runs never wait on it.
+        /// </summary>
+        System.Collections.IEnumerator OpenCreatorOnFirstRun()
+        {
+            yield return null; yield return null; // after the title focus settles
+            if (Application.isBatchMode && !Application.isEditor) yield break;
+            if (Services.TryGet(out ICharacterCreator creator) && creator.NeedsFirstRun && !creator.IsOpen && Stack.Current == MenuScreen.Title)
+                creator.Open(CharacterCreatorContext.FirstRun);
+        }
+
+        /// <summary>True while the character creator owns input on top of the menu.</summary>
+        static bool CreatorOpen => Services.TryGet(out ICharacterCreator c) && c.IsOpen;
 
         void OnLanChanged() { if (Stack.Current == MenuScreen.Join) RefreshHosts(false); }
         void OnSettingsChanged(GameSettings g) { if (_platform != null && !string.IsNullOrEmpty(g.PlayerName)) _platform.SetLocalPlayerName(g.PlayerName); }
@@ -85,7 +101,7 @@ namespace HarvestPanic.UI
 
             bool back = (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
                         || (Gamepad.current != null && Gamepad.current.buttonEast.wasPressedThisFrame);
-            if (back) GoBack();
+            if (back && !CreatorOpen) GoBack();
         }
 
         // ------------------------------------------------------------------ public API (also used by tests)
@@ -310,6 +326,7 @@ namespace HarvestPanic.UI
 
         void OnCustomize()
         {
+            if (Services.TryGet(out ICharacterCreator creator) && creator.Open(CharacterCreatorContext.MainMenu)) return;
             if (!SessionAccess.TryOpenWardrobe())
                 ShowMessage("Customize", "Pick your outfit at the wardrobe in the Lobby yard (press C there). Your farmer is wearing the default overalls until then.");
         }

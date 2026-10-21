@@ -92,16 +92,17 @@ namespace HarvestPanic.UI
             if (_graceLeft > 0f) _graceLeft -= dt;
             else if (!_session.IsConnected) { SceneLoader.Load(SceneLoader.MainMenu); enabled = false; return; }
 
-            bool typing = _root.panel?.focusController?.focusedElement is TextField;
+            bool typing = _root.panel?.focusController?.focusedElement is TextField
+                          || Services.TryGet(out ICharacterCreator creator) && creator.IsOpen; // the wardrobe owns the keyboard
             var kb = Keyboard.current; var pad = Gamepad.current;
             if (!typing)
             {
                 if (kb != null && kb.tabKey.wasPressedThisFrame || pad != null && pad.selectButton.wasPressedThisFrame) ToggleCrew();
                 if (kb != null && kb.rKey.wasPressedThisFrame || pad != null && pad.buttonNorth.wasPressedThisFrame) ToggleReady();
-                if (kb != null && kb.cKey.wasPressedThisFrame && !CrewOpen && !SessionAccess.TryOpenWardrobe()) Toast("The wardrobe is still being stitched. Try again in a moment.");
+                if (kb != null && kb.cKey.wasPressedThisFrame && !CrewOpen && !OpenWardrobe()) Toast("The wardrobe is still being stitched. Try again in a moment.");
                 if (kb != null && kb.bKey.wasPressedThisFrame || pad != null && pad.leftShoulder.wasPressedThisFrame) RingBell();
             }
-            else if (kb != null && kb.enterKey.wasPressedThisFrame) SendChat();
+            else if (kb != null && kb.enterKey.wasPressedThisFrame && !(Services.TryGet(out ICharacterCreator cc) && cc.IsOpen)) SendChat();
             if (CrewOpen && kb != null && kb.escapeKey.wasPressedThisFrame && !typing) SetCrewOpen(false);
 
             TickPorch(dt);
@@ -193,6 +194,13 @@ namespace HarvestPanic.UI
 
         // ------------------------------------------------------------------ crew
         void ToggleCrew() => SetCrewOpen(!CrewOpen);
+
+        /// <summary>C: Customization's wardrobe (Core ICharacterCreator), else the reflection bridge.</summary>
+        static bool OpenWardrobe()
+        {
+            if (Services.TryGet(out ICharacterCreator creator) && creator.Open(CharacterCreatorContext.Wardrobe)) return true;
+            return SessionAccess.TryOpenWardrobe();
+        }
 
         public void SetCrewOpen(bool open)
         {

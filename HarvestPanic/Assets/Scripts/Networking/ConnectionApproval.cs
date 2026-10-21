@@ -35,15 +35,22 @@ namespace HarvestPanic.Networking
         {
             bool parsed = ConnectionPayload.TryParse(payloadBytes, out var p);
             if (isHostSelf)
-                return new ApprovalDecision { Approved = true, PlayerName = PlayerNameSanitizer.Sanitize(parsed ? p.PlayerName : null) };
+                return new ApprovalDecision { Approved = true, PlayerName = Clean(parsed ? p.PlayerName : null, 1) };
             if (!parsed) return Reject(MalformedReason);
             if (p.Protocol != hostProtocol || (p.BuildVersion ?? "") != (hostBuild ?? ""))
                 return Reject(VersionReason(p.BuildVersion, p.Protocol, hostBuild, hostProtocol));
             if (locked) return Reject(LockedReason);
             int cap = maxPlayers < 1 ? 1 : (maxPlayers > HarvestPanic.Core.GameInfo.MaxPlayers ? HarvestPanic.Core.GameInfo.MaxPlayers : maxPlayers);
             if (connectedCount >= cap) return Reject(FullReason(cap));
-            string name = PlayerNameSanitizer.MakeUnique(PlayerNameSanitizer.Sanitize(p.PlayerName), takenNames);
+            string name = PlayerNameSanitizer.MakeUnique(Clean(p.PlayerName, connectedCount + 1), takenNames);
             return new ApprovalDecision { Approved = true, PlayerName = name };
+        }
+
+        /// <summary>Sanitised name; a profane one becomes "Farmhand #N" (GDD Anti-abuse: names, Core <see cref="HarvestPanic.Core.NameFilter"/>).</summary>
+        static string Clean(string raw, int n)
+        {
+            string s = PlayerNameSanitizer.Sanitize(raw);
+            return HarvestPanic.Core.NameFilter.ContainsProfanity(s) ? HarvestPanic.Core.NameFilter.Fallback(n) : s;
         }
 
         /// <summary>"The farm is full (4/4)."</summary>

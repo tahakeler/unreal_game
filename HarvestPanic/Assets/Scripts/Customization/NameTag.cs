@@ -58,6 +58,26 @@ namespace HarvestPanic.Customization
         public static Mesh ShapeMesh(TagShape shape)
         {
             if (ShapeMeshes.TryGetValue(shape, out var m) && m != null) return m;
+            var outlinePts = ShapeOutline(shape);
+            var v = new List<Vector3> { Vector3.zero };
+            foreach (var p in outlinePts) v.Add(p);
+            var tri = new List<int>();
+            int n = outlinePts.Count;
+            for (int i = 0; i < n; i++)
+            {
+                int a = 1 + i, b = 1 + (i + 1) % n;
+                tri.Add(0); tri.Add(a); tri.Add(b);
+                tri.Add(0); tri.Add(b); tri.Add(a);
+            }
+            m = new Mesh { name = "HP_TagShape_" + shape };
+            m.SetVertices(v); m.SetTriangles(tri, 0); m.RecalculateNormals(); m.RecalculateBounds();
+            ShapeMeshes[shape] = m;
+            return m;
+        }
+
+        /// <summary>Outline of <paramref name="shape"/> (XY, centred, about 1 unit wide, +Y up); also drawn by the creator UI.</summary>
+        public static List<Vector2> ShapeOutline(TagShape shape)
+        {
             var outlinePts = new List<Vector2>();
             switch (shape)
             {
@@ -88,20 +108,7 @@ namespace HarvestPanic.Customization
                         new Vector2(-w, -l), new Vector2(-w, -w), new Vector2(-l, -w), new Vector2(-l, w), new Vector2(-w, w), new Vector2(-w, l) });
                     break;
             }
-            var v = new List<Vector3> { Vector3.zero };
-            foreach (var p in outlinePts) v.Add(p);
-            var tri = new List<int>();
-            int n = outlinePts.Count;
-            for (int i = 0; i < n; i++)
-            {
-                int a = 1 + i, b = 1 + (i + 1) % n;
-                tri.Add(0); tri.Add(a); tri.Add(b);
-                tri.Add(0); tri.Add(b); tri.Add(a);
-            }
-            m = new Mesh { name = "HP_TagShape_" + shape };
-            m.SetVertices(v); m.SetTriangles(tri, 0); m.RecalculateNormals(); m.RecalculateBounds();
-            ShapeMeshes[shape] = m;
-            return m;
+            return outlinePts;
         }
 
         static void Poly(List<Vector2> pts, int sides, float r, float startDeg)

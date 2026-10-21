@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: CosmeticCatalog
   m_EditorClassIdentifier: HarvestPanic.Customization::HarvestPanic.Customization.CosmeticCatalog
   unlockAllCosmetics: 1
+  dataVersion: 2
   palette:
   - name: Denim Blue
     color: {r: 0.23137255, g: 0.43529412, b: 0.81960785, a: 1}
@@ -159,18 +160,40 @@ MonoBehaviour:
     flavour: Built like a hay bale. Falls like one too.
     bodyScale: {x: 1.12, y: 0.96, z: 1.12}
     headScale: 1.18
+    icon: {fileID: 0}
   - name: Lanky
     flavour: Can reach the top shelf. Cannot reach a decision.
     bodyScale: {x: 0.9, y: 1.08, z: 0.9}
     headScale: 1.1
+    icon: {fileID: 0}
+  - name: Stout
+    flavour: Low centre of gravity. High centre of snacks.
+    bodyScale: {x: 1.24, y: 0.88, z: 1.2}
+    headScale: 1.22
+    icon: {fileID: 0}
+  - name: Tiny
+    flavour: Fits in a wheelbarrow. Has been, twice.
+    bodyScale: {x: 0.86, y: 0.8, z: 0.86}
+    headScale: 1.34
+    icon: {fileID: 0}
   hats:
   - id: 1
     key: hat.straw
     displayName: Straw Hat
     flavour: Smells like Grandpa. Smells like regret.
     unlock: 0
+    unlockHint: 
     blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
     prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
     parts:
     - shape: 2
       position: {x: 0, y: -0.07, z: 0}
@@ -179,6 +202,8 @@ MonoBehaviour:
       color: {r: 0.9098039, g: 0.78431374, b: 0.44705883, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 2
       position: {x: 0, y: -0.01, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -186,6 +211,8 @@ MonoBehaviour:
       color: {r: 0.9098039, g: 0.78431374, b: 0.44705883, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 2
       position: {x: 0, y: -0.045, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -193,6 +220,8 @@ MonoBehaviour:
       color: {r: 0.7529412, g: 0.26666668, b: 0.22745098, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: 0, y: 0.045, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -200,13 +229,32 @@ MonoBehaviour:
       color: {r: 0.7882353, g: 0.63529414, b: 0.30588236, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
   - id: 2
     key: hat.trucker
     displayName: Trucker Cap
     flavour: Free with any purchase of 400 lb of feed.
     unlock: 0
+    unlockHint: 
     blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
     prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
     parts:
     - shape: 1
       position: {x: 0, y: -0.04, z: 0}
@@ -215,6 +263,8 @@ MonoBehaviour:
       color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
       tint: 1
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 0
       position: {x: 0, y: -0.075, z: 0.16}
       euler: {x: -8, y: 0, z: 0}
@@ -222,6 +272,8 @@ MonoBehaviour:
       color: {r: 0, g: 0, b: 0, a: 0}
       tint: 1
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 0
       position: {x: 0, y: -0.035, z: 0.11}
       euler: {x: -20, y: 0, z: 0}
@@ -229,6 +281,8 @@ MonoBehaviour:
       color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: 0, y: 0.06, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -236,13 +290,32 @@ MonoBehaviour:
       color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
   - id: 3
     key: hat.bucket
     displayName: Bucket Helmet
     flavour: Holds water. Doesn't hold dignity.
     unlock: 2
+    unlockHint: 'Grandpa''s Letter: fall in the river 10 times'
     blocksFirstPersonView: 1
+    hidesHair: 1
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
     prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
     parts:
     - shape: 4
       position: {x: 0, y: -0.2, z: 0}
@@ -251,6 +324,8 @@ MonoBehaviour:
       color: {r: 0.6039216, g: 0.6392157, b: 0.6784314, a: 1}
       tint: 0
       taper: 0.78
+      hideUnderHat: 0
+      attach: 0
     - shape: 2
       position: {x: 0, y: -0.19, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -258,6 +333,8 @@ MonoBehaviour:
       color: {r: 0.49019608, g: 0.52156866, b: 0.56078434, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 0
       position: {x: 0, y: 0.11, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -265,6 +342,8 @@ MonoBehaviour:
       color: {r: 0.3529412, g: 0.3764706, b: 0.40784314, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 0
       position: {x: 0, y: -0.12, z: 0.17}
       euler: {x: 0, y: 0, z: 0}
@@ -272,13 +351,32 @@ MonoBehaviour:
       color: {r: 0.14901961, g: 0.13333334, b: 0.12156863, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
   - id: 4
     key: hat.pumpkin
     displayName: Pumpkin Head
     flavour: The Scarecrow thinks you're cute.
     unlock: 3
+    unlockHint: Clear Region 1
     blocksFirstPersonView: 1
+    hidesHair: 1
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
     prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
     parts:
     - shape: 1
       position: {x: 0, y: -0.14, z: 0}
@@ -287,6 +385,8 @@ MonoBehaviour:
       color: {r: 0.9411765, g: 0.5411765, b: 0.14117648, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: 0.1, y: -0.14, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -294,6 +394,8 @@ MonoBehaviour:
       color: {r: 0.8784314, g: 0.47843137, b: 0.11764706, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: -0.1, y: -0.14, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -301,6 +403,8 @@ MonoBehaviour:
       color: {r: 0.8784314, g: 0.47843137, b: 0.11764706, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 2
       position: {x: 0, y: 0.1, z: 0}
       euler: {x: 0, y: 0, z: 12}
@@ -308,6 +412,8 @@ MonoBehaviour:
       color: {r: 0.30980393, g: 0.47843137, b: 0.16470589, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 4
       position: {x: -0.07, y: -0.08, z: 0.205}
       euler: {x: 90, y: 0, z: 0}
@@ -315,6 +421,8 @@ MonoBehaviour:
       color: {r: 0.14901961, g: 0.13333334, b: 0.12156863, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 4
       position: {x: 0.07, y: -0.08, z: 0.205}
       euler: {x: 90, y: 0, z: 0}
@@ -322,6 +430,8 @@ MonoBehaviour:
       color: {r: 0.14901961, g: 0.13333334, b: 0.12156863, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 0
       position: {x: 0, y: -0.2, z: 0.2}
       euler: {x: 0, y: 0, z: 0}
@@ -329,13 +439,32 @@ MonoBehaviour:
       color: {r: 0.14901961, g: 0.13333334, b: 0.12156863, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
   - id: 5
     key: hat.cowboy
     displayName: Cowboy Hat
     flavour: The bull has opinions.
     unlock: 0
+    unlockHint: 
     blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
     prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
     parts:
     - shape: 1
       position: {x: 0, y: -0.07, z: 0}
@@ -344,6 +473,8 @@ MonoBehaviour:
       color: {r: 0.5411765, g: 0.3529412, b: 0.20392157, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 2
       position: {x: 0, y: 0, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -351,6 +482,8 @@ MonoBehaviour:
       color: {r: 0.5411765, g: 0.3529412, b: 0.20392157, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 0
       position: {x: 0, y: 0.07, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -358,6 +491,8 @@ MonoBehaviour:
       color: {r: 0.43137255, g: 0.27058825, b: 0.15294118, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 2
       position: {x: 0, y: -0.045, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -365,13 +500,32 @@ MonoBehaviour:
       color: {r: 0.14901961, g: 0.13333334, b: 0.12156863, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
   - id: 6
     key: hat.chef
     displayName: Chef Toque
     flavour: Yes, chef. No, chef. Where's the pig, chef?
     unlock: 1
+    unlockHint: 'Grandpa''s Trunk: Common, 60 Farm Memories'
     blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
     prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
     parts:
     - shape: 2
       position: {x: 0, y: 0.02, z: 0}
@@ -380,6 +534,8 @@ MonoBehaviour:
       color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: 0, y: 0.2, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -387,6 +543,8 @@ MonoBehaviour:
       color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: 0.09, y: 0.25, z: 0.04}
       euler: {x: 0, y: 0, z: 0}
@@ -394,6 +552,8 @@ MonoBehaviour:
       color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: -0.08, y: 0.27, z: -0.05}
       euler: {x: 0, y: 0, z: 0}
@@ -401,13 +561,32 @@ MonoBehaviour:
       color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
   - id: 7
     key: hat.flowercrown
     displayName: Flower Crown
     flavour: Picked from the cursed patch. Probably fine.
     unlock: 1
+    unlockHint: 'Grandpa''s Trunk: Common, 60 Farm Memories'
     blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
     prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
     parts:
     - shape: 2
       position: {x: 0, y: -0.07, z: 0}
@@ -416,6 +595,8 @@ MonoBehaviour:
       color: {r: 0.30980393, g: 0.5411765, b: 0.22745098, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: 0, y: -0.06, z: 0.13}
       euler: {x: 0, y: 0, z: 0}
@@ -423,6 +604,8 @@ MonoBehaviour:
       color: {r: 0.9490196, g: 0.5529412, b: 0.69803923, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: 0, y: -0.034999996, z: 0.13}
       euler: {x: 0, y: 0, z: 0}
@@ -430,6 +613,8 @@ MonoBehaviour:
       color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: 0.080348454, y: -0.06, z: 0.09958577}
       euler: {x: 0, y: 0, z: 0}
@@ -437,6 +622,8 @@ MonoBehaviour:
       color: {r: 0.9607843, g: 0.9019608, b: 0.3882353, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: 0.080348454, y: -0.034999996, z: 0.09958577}
       euler: {x: 0, y: 0, z: 0}
@@ -444,6 +631,8 @@ MonoBehaviour:
       color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: 0.12310097, y: -0.06, z: 0.022574253}
       euler: {x: 0, y: 0, z: 0}
@@ -451,6 +640,8 @@ MonoBehaviour:
       color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: 0.12310097, y: -0.034999996, z: 0.022574253}
       euler: {x: 0, y: 0, z: 0}
@@ -458,6 +649,8 @@ MonoBehaviour:
       color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: 0.10825317, y: -0.06, z: -0.065000005}
       euler: {x: 0, y: 0, z: 0}
@@ -465,6 +658,8 @@ MonoBehaviour:
       color: {r: 0.654902, g: 0.48235294, b: 0.8784314, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: 0.10825317, y: -0.034999996, z: -0.065000005}
       euler: {x: 0, y: 0, z: 0}
@@ -472,6 +667,8 @@ MonoBehaviour:
       color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: 0.0427525, y: -0.06, z: -0.12216004}
       euler: {x: 0, y: 0, z: 0}
@@ -479,6 +676,8 @@ MonoBehaviour:
       color: {r: 0.9490196, g: 0.5529412, b: 0.69803923, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: 0.0427525, y: -0.034999996, z: -0.12216004}
       euler: {x: 0, y: 0, z: 0}
@@ -486,6 +685,8 @@ MonoBehaviour:
       color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: -0.04275252, y: -0.06, z: -0.12216003}
       euler: {x: 0, y: 0, z: 0}
@@ -493,6 +694,8 @@ MonoBehaviour:
       color: {r: 0.9607843, g: 0.9019608, b: 0.3882353, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: -0.04275252, y: -0.034999996, z: -0.12216003}
       euler: {x: 0, y: 0, z: 0}
@@ -500,6 +703,8 @@ MonoBehaviour:
       color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: -0.10825318, y: -0.06, z: -0.06499998}
       euler: {x: 0, y: 0, z: 0}
@@ -507,6 +712,8 @@ MonoBehaviour:
       color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: -0.10825318, y: -0.034999996, z: -0.06499998}
       euler: {x: 0, y: 0, z: 0}
@@ -514,6 +721,8 @@ MonoBehaviour:
       color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: -0.123100966, y: -0.06, z: 0.022574259}
       euler: {x: 0, y: 0, z: 0}
@@ -521,6 +730,8 @@ MonoBehaviour:
       color: {r: 0.654902, g: 0.48235294, b: 0.8784314, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: -0.123100966, y: -0.034999996, z: 0.022574259}
       euler: {x: 0, y: 0, z: 0}
@@ -528,6 +739,8 @@ MonoBehaviour:
       color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: -0.080348425, y: -0.06, z: 0.099585794}
       euler: {x: 0, y: 0, z: 0}
@@ -535,6 +748,8 @@ MonoBehaviour:
       color: {r: 0.9490196, g: 0.5529412, b: 0.69803923, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: -0.080348425, y: -0.034999996, z: 0.099585794}
       euler: {x: 0, y: 0, z: 0}
@@ -542,13 +757,32 @@ MonoBehaviour:
       color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
   - id: 8
     key: hat.cone
     displayName: Traffic Cone
     flavour: Road works ahead. The road is you.
     unlock: 2
+    unlockHint: 'Grandpa''s Letter: get blamed for $1,000 in one day'
     blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
     prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
     parts:
     - shape: 4
       position: {x: 0, y: -0.06, z: 0}
@@ -557,6 +791,8 @@ MonoBehaviour:
       color: {r: 1, g: 0.41568628, b: 0.07450981, a: 1}
       tint: 0
       taper: 0.12
+      hideUnderHat: 0
+      attach: 0
     - shape: 4
       position: {x: 0, y: 0.12, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -564,6 +800,8 @@ MonoBehaviour:
       color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
       tint: 0
       taper: 0.8
+      hideUnderHat: 0
+      attach: 0
     - shape: 4
       position: {x: 0, y: 0.3, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -571,6 +809,8 @@ MonoBehaviour:
       color: {r: 0.96862745, g: 0.96862745, b: 0.9490196, a: 1}
       tint: 0
       taper: 0.75
+      hideUnderHat: 0
+      attach: 0
     - shape: 0
       position: {x: 0, y: -0.07, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -578,13 +818,32 @@ MonoBehaviour:
       color: {r: 0.9098039, g: 0.3529412, b: 0.047058824, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
   - id: 9
     key: hat.viking
     displayName: Viking Horns
     flavour: Raids barns. Only his own.
     unlock: 1
+    unlockHint: 'Grandpa''s Trunk: Rare, 120 Farm Memories'
     blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
     prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
     parts:
     - shape: 1
       position: {x: 0, y: -0.07, z: 0}
@@ -593,6 +852,8 @@ MonoBehaviour:
       color: {r: 0.5568628, g: 0.5882353, b: 0.61960787, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 2
       position: {x: 0, y: -0.1, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -600,6 +861,8 @@ MonoBehaviour:
       color: {r: 0.6901961, g: 0.5411765, b: 0.22745098, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 0
       position: {x: 0, y: -0.05, z: 0.12}
       euler: {x: 0, y: 0, z: 0}
@@ -607,6 +870,8 @@ MonoBehaviour:
       color: {r: 0.6901961, g: 0.5411765, b: 0.22745098, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 4
       position: {x: 0.12, y: -0.03, z: 0}
       euler: {x: 0, y: 0, z: -62}
@@ -614,6 +879,8 @@ MonoBehaviour:
       color: {r: 0.9490196, g: 0.9019608, b: 0.78431374, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 4
       position: {x: -0.12, y: -0.03, z: 0}
       euler: {x: 0, y: 0, z: 62}
@@ -621,13 +888,32 @@ MonoBehaviour:
       color: {r: 0.9490196, g: 0.9019608, b: 0.78431374, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
   - id: 10
     key: hat.fedora
     displayName: Grandpa's Fedora
     flavour: He wore it to every bank meeting. It never helped.
     unlock: 2
+    unlockHint: 'Grandpa''s Letter: finish Day 1'
     blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
     prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
     parts:
     - shape: 2
       position: {x: 0, y: -0.06, z: 0}
@@ -636,6 +922,8 @@ MonoBehaviour:
       color: {r: 0.2901961, g: 0.2509804, b: 0.21960784, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 2
       position: {x: 0, y: 0, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -643,6 +931,8 @@ MonoBehaviour:
       color: {r: 0.2901961, g: 0.2509804, b: 0.21960784, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 0
       position: {x: 0, y: 0.06, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -650,6 +940,8 @@ MonoBehaviour:
       color: {r: 0.22745098, g: 0.19607843, b: 0.17254902, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 2
       position: {x: 0, y: -0.035, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -657,6 +949,8 @@ MonoBehaviour:
       color: {r: 0.14901961, g: 0.13333334, b: 0.12156863, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 3
       position: {x: 0.12, y: 0.02, z: -0.02}
       euler: {x: 0, y: 0, z: -35}
@@ -664,14 +958,33 @@ MonoBehaviour:
       color: {r: 0.9607843, g: 0.81960785, b: 0.25882354, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
   faces:
   - id: 1
     key: face.moustache
     displayName: Grandpa Moustache
     flavour: Inherited. Like the debt.
     unlock: 1
+    unlockHint: 'Grandpa''s Trunk: Common, 60 Farm Memories'
     blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
     prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
     parts:
     - shape: 1
       position: {x: 0.045, y: -0.085, z: 0}
@@ -680,6 +993,8 @@ MonoBehaviour:
       color: {r: 0.3529412, g: 0.21568628, b: 0.14509805, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: -0.045, y: -0.085, z: 0}
       euler: {x: 0, y: 0, z: -18}
@@ -687,6 +1002,8 @@ MonoBehaviour:
       color: {r: 0.3529412, g: 0.21568628, b: 0.14509805, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: 0.1, y: -0.07, z: -0.01}
       euler: {x: 0, y: 0, z: 0}
@@ -694,6 +1011,8 @@ MonoBehaviour:
       color: {r: 0.3529412, g: 0.21568628, b: 0.14509805, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: -0.1, y: -0.07, z: -0.01}
       euler: {x: 0, y: 0, z: 0}
@@ -701,13 +1020,32 @@ MonoBehaviour:
       color: {r: 0.3529412, g: 0.21568628, b: 0.14509805, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
   - id: 2
     key: face.goggles
     displayName: Safety Goggles
     flavour: Mandatory around llamas.
     unlock: 1
+    unlockHint: 'Grandpa''s Trunk: Common, 60 Farm Memories'
     blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
     prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
     parts:
     - shape: 2
       position: {x: 0.048, y: 0, z: 0.012}
@@ -716,6 +1054,8 @@ MonoBehaviour:
       color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 2
       position: {x: -0.048, y: 0, z: 0.012}
       euler: {x: 90, y: 0, z: 0}
@@ -723,6 +1063,8 @@ MonoBehaviour:
       color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 2
       position: {x: 0.048, y: 0, z: 0.028}
       euler: {x: 90, y: 0, z: 0}
@@ -730,6 +1072,8 @@ MonoBehaviour:
       color: {r: 0.49411765, g: 0.78431374, b: 0.9098039, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 2
       position: {x: -0.048, y: 0, z: 0.028}
       euler: {x: 90, y: 0, z: 0}
@@ -737,6 +1081,8 @@ MonoBehaviour:
       color: {r: 0.49411765, g: 0.78431374, b: 0.9098039, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 2
       position: {x: 0, y: 0, z: -0.1}
       euler: {x: 0, y: 0, z: 0}
@@ -744,13 +1090,32 @@ MonoBehaviour:
       color: {r: 0.22745098, g: 0.22745098, b: 0.2509804, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
   - id: 3
     key: face.sunglasses
     displayName: Sunglasses
     flavour: Too cool for the coop.
     unlock: 1
+    unlockHint: 'Grandpa''s Trunk: Common, 60 Farm Memories'
     blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
     prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
     parts:
     - shape: 0
       position: {x: 0.045, y: 0, z: 0.012}
@@ -759,6 +1124,8 @@ MonoBehaviour:
       color: {r: 0.11764706, g: 0.105882354, b: 0.09803922, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 0
       position: {x: -0.045, y: 0, z: 0.012}
       euler: {x: 0, y: 0, z: 0}
@@ -766,6 +1133,8 @@ MonoBehaviour:
       color: {r: 0.11764706, g: 0.105882354, b: 0.09803922, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 0
       position: {x: 0, y: 0.012, z: 0.012}
       euler: {x: 0, y: 0, z: 0}
@@ -773,6 +1142,8 @@ MonoBehaviour:
       color: {r: 0.11764706, g: 0.105882354, b: 0.09803922, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 0
       position: {x: 0.088, y: 0.01, z: -0.04}
       euler: {x: 0, y: 0, z: 0}
@@ -780,6 +1151,8 @@ MonoBehaviour:
       color: {r: 0.11764706, g: 0.105882354, b: 0.09803922, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 0
       position: {x: -0.088, y: 0.01, z: -0.04}
       euler: {x: 0, y: 0, z: 0}
@@ -787,13 +1160,32 @@ MonoBehaviour:
       color: {r: 0.11764706, g: 0.105882354, b: 0.09803922, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
   - id: 4
     key: face.clownnose
     displayName: Clown Nose
     flavour: Honk. The chickens respect you less now.
     unlock: 1
+    unlockHint: 'Grandpa''s Trunk: Common, 60 Farm Memories'
     blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
     prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
     parts:
     - shape: 1
       position: {x: 0, y: -0.04, z: 0.03}
@@ -802,14 +1194,33 @@ MonoBehaviour:
       color: {r: 0.8980392, g: 0.28235295, b: 0.23137255, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
   backs:
   - id: 1
     key: back.basket
     displayName: Harvest Basket Backpack
     flavour: Holds nothing. The physics team was very clear.
     unlock: 1
+    unlockHint: 'Grandpa''s Trunk: Rare, 120 Farm Memories'
     blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
     prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
     parts:
     - shape: 4
       position: {x: 0, y: -0.2, z: -0.15}
@@ -818,6 +1229,8 @@ MonoBehaviour:
       color: {r: 0.72156864, g: 0.5411765, b: 0.2901961, a: 1}
       tint: 0
       taper: 1.25
+      hideUnderHat: 0
+      attach: 0
     - shape: 2
       position: {x: 0, y: 0.16, z: -0.15}
       euler: {x: 0, y: 0, z: 0}
@@ -825,6 +1238,8 @@ MonoBehaviour:
       color: {r: 0.6117647, g: 0.4392157, b: 0.21960784, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 4
       position: {x: 0.06, y: 0.15, z: -0.15}
       euler: {x: 0, y: 0, z: -12}
@@ -832,6 +1247,8 @@ MonoBehaviour:
       color: {r: 0.9411765, g: 0.5411765, b: 0.14117648, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: -0.07, y: 0.2, z: -0.13}
       euler: {x: 0, y: 0, z: 0}
@@ -839,6 +1256,8 @@ MonoBehaviour:
       color: {r: 0.24705882, g: 0.68235296, b: 0.3529412, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 1
       position: {x: 0, y: 0.19, z: -0.2}
       euler: {x: 0, y: 0, z: 0}
@@ -846,6 +1265,8 @@ MonoBehaviour:
       color: {r: 0.7019608, g: 0.6392157, b: 0.9019608, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 0
       position: {x: 0.1, y: 0, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -853,6 +1274,8 @@ MonoBehaviour:
       color: {r: 0.41960785, g: 0.2901961, b: 0.18039216, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 0
       position: {x: -0.1, y: 0, z: 0}
       euler: {x: 0, y: 0, z: 0}
@@ -860,13 +1283,32 @@ MonoBehaviour:
       color: {r: 0.41960785, g: 0.2901961, b: 0.18039216, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
   - id: 2
     key: back.cape
     displayName: Cape
     flavour: Every hero needs one. You are not a hero.
     unlock: 1
+    unlockHint: 'Grandpa''s Trunk: Rare, 120 Farm Memories'
     blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
     prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
     parts:
     - shape: 0
       position: {x: 0, y: -0.28, z: -0.07}
@@ -875,6 +1317,8 @@ MonoBehaviour:
       color: {r: 0, g: 0, b: 0, a: 0}
       tint: 2
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 2
       position: {x: 0, y: 0.03, z: -0.02}
       euler: {x: 0, y: 0, z: 0}
@@ -882,13 +1326,32 @@ MonoBehaviour:
       color: {r: 0.9607843, g: 0.77254903, b: 0.25882354, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
   - id: 3
     key: back.pitchfork
     displayName: Pitchfork Holster
     flavour: For decoration. Allegedly.
     unlock: 1
+    unlockHint: 'Grandpa''s Trunk: Common, 60 Farm Memories'
     blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
     prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
     parts:
     - shape: 2
       position: {x: 0, y: -0.05, z: -0.09}
@@ -897,6 +1360,8 @@ MonoBehaviour:
       color: {r: 0.5411765, g: 0.3764706, b: 0.2509804, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 0
       position: {x: -0.27, y: 0.42, z: -0.09}
       euler: {x: 0, y: 0, z: 30}
@@ -904,6 +1369,8 @@ MonoBehaviour:
       color: {r: 0.6039216, g: 0.6392157, b: 0.6784314, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 4
       position: {x: -0.27, y: 0.55, z: -0.09}
       euler: {x: 0, y: 0, z: 30}
@@ -911,6 +1378,8 @@ MonoBehaviour:
       color: {r: 0.6039216, g: 0.6392157, b: 0.6784314, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 4
       position: {x: -0.19, y: 0.5, z: -0.09}
       euler: {x: 0, y: 0, z: 30}
@@ -918,6 +1387,8 @@ MonoBehaviour:
       color: {r: 0.6039216, g: 0.6392157, b: 0.6784314, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 4
       position: {x: -0.35, y: 0.6, z: -0.09}
       euler: {x: 0, y: 0, z: 30}
@@ -925,6 +1396,8 @@ MonoBehaviour:
       color: {r: 0.6039216, g: 0.6392157, b: 0.6784314, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
     - shape: 0
       position: {x: 0, y: 0, z: -0.03}
       euler: {x: 0, y: 0, z: 30}
@@ -932,6 +1405,1129 @@ MonoBehaviour:
       color: {r: 0.41960785, g: 0.2901961, b: 0.18039216, a: 1}
       tint: 0
       taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  heads:
+  - id: 1
+    key: head.long
+    displayName: Long Face
+    flavour: Tall, long, worried. Mostly worried.
+    unlock: 0
+    unlockHint: 
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts: []
+    headShape: {x: 0.93, y: 1.13, z: 0.97}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 2
+    key: head.potatonose
+    displayName: Potato Nose
+    flavour: Smells the harvest before it's ripe.
+    unlock: 0
+    unlockHint: 
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1.2
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts:
+    - shape: 1
+      position: {x: 0, y: -0.04, z: 0.012}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.075, y: 0.065, z: 0.07}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 7
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 3
+    key: head.freckles
+    displayName: Freckles
+    flavour: Sun-kissed. Sun-bullied, really.
+    unlock: 0
+    unlockHint: 
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts:
+    - shape: 1
+      position: {x: 0.05, y: -0.045, z: -0.012}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.014, y: 0.014, z: 0.014}
+      color: {r: 0.54901963, g: 0.3529412, b: 0.23529412, a: 1}
+      tint: 0
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: -0.05, y: -0.045, z: -0.012}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.014, y: 0.014, z: 0.014}
+      color: {r: 0.54901963, g: 0.3529412, b: 0.23529412, a: 1}
+      tint: 0
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: 0.068, y: -0.034, z: -0.02}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.012, y: 0.012, z: 0.012}
+      color: {r: 0.54901963, g: 0.3529412, b: 0.23529412, a: 1}
+      tint: 0
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: -0.068, y: -0.034, z: -0.02}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.012, y: 0.012, z: 0.012}
+      color: {r: 0.54901963, g: 0.3529412, b: 0.23529412, a: 1}
+      tint: 0
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: 0.062, y: -0.058, z: -0.018}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.012, y: 0.012, z: 0.012}
+      color: {r: 0.54901963, g: 0.3529412, b: 0.23529412, a: 1}
+      tint: 0
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: -0.062, y: -0.058, z: -0.018}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.012, y: 0.012, z: 0.012}
+      color: {r: 0.54901963, g: 0.3529412, b: 0.23529412, a: 1}
+      tint: 0
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: 0.012, y: -0.03, z: 0.008}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.01, y: 0.01, z: 0.01}
+      color: {r: 0.54901963, g: 0.3529412, b: 0.23529412, a: 1}
+      tint: 0
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: -0.012, y: -0.03, z: 0.008}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.01, y: 0.01, z: 0.01}
+      color: {r: 0.54901963, g: 0.3529412, b: 0.23529412, a: 1}
+      tint: 0
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 4
+    key: head.rosy
+    displayName: Rosy Cheeks
+    flavour: Healthy farm glow. Or a fever. Hard to say.
+    unlock: 0
+    unlockHint: 
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts:
+    - shape: 1
+      position: {x: 0.064, y: -0.05, z: -0.022}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.048, y: 0.032, z: 0.02}
+      color: {r: 0.9490196, g: 0.52156866, b: 0.49803922, a: 1}
+      tint: 0
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: -0.064, y: -0.05, z: -0.022}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.048, y: 0.032, z: 0.02}
+      color: {r: 0.9490196, g: 0.52156866, b: 0.49803922, a: 1}
+      tint: 0
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 5
+    key: head.bigears
+    displayName: Big Ears
+    flavour: Hears the landlord coming. Can't do anything about it.
+    unlock: 0
+    unlockHint: 
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1.2
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts:
+    - shape: 1
+      position: {x: 0.118, y: -0.025, z: -0.11}
+      euler: {x: 0, y: -15, z: 0}
+      size: {x: 0.035, y: 0.085, z: 0.06}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 5
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: -0.118, y: -0.025, z: -0.11}
+      euler: {x: 0, y: 15, z: 0}
+      size: {x: 0.035, y: 0.085, z: 0.06}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 5
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 6
+    key: head.square
+    displayName: Square Jaw
+    flavour: Chiselled by hard work. And a hay bale.
+    unlock: 0
+    unlockHint: 
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts: []
+    headShape: {x: 1.1, y: 0.97, z: 1.04}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 7
+    key: head.unibrow
+    displayName: Unibrow
+    flavour: One brow. Twice the judgement.
+    unlock: 1
+    unlockHint: 'Grandpa''s Trunk: Common, 60 Farm Memories'
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1.2
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts:
+    - shape: 0
+      position: {x: 0, y: 0.035, z: 0}
+      euler: {x: -8, y: 0, z: 0}
+      size: {x: 0.14, y: 0.026, z: 0.03}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  hairs:
+  - id: 1
+    key: hair.mop
+    displayName: Mop Top
+    flavour: Cut with a bowl. The bowl was also used for slop.
+    unlock: 0
+    unlockHint: 
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts:
+    - shape: 1
+      position: {x: 0, y: -0.03, z: -0.015}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.265, y: 0.15, z: 0.295}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 1
+      attach: 0
+    - shape: 1
+      position: {x: -0.08, y: -0.075, z: 0.105}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.075, y: 0.07, z: 0.06}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: -0.04, y: -0.08, z: 0.115}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.075, y: 0.07, z: 0.06}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: 0, y: -0.082, z: 0.118}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.075, y: 0.07, z: 0.06}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: 0.04, y: -0.08, z: 0.115}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.075, y: 0.07, z: 0.06}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: 0.08, y: -0.075, z: 0.105}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.075, y: 0.07, z: 0.06}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: 0.115, y: -0.095, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.06, y: 0.12, z: 0.13}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: -0.115, y: -0.095, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.06, y: 0.12, z: 0.13}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: 0, y: -0.1, z: -0.12}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.23, y: 0.15, z: 0.08}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 2
+    key: hair.ponytail
+    displayName: Ponytail
+    flavour: Aerodynamic. Pigs grab it anyway.
+    unlock: 0
+    unlockHint: 
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts:
+    - shape: 1
+      position: {x: 0, y: -0.035, z: -0.02}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.25, y: 0.135, z: 0.285}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 1
+      attach: 0
+    - shape: 1
+      position: {x: 0, y: -0.09, z: -0.155}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.05, y: 0.05, z: 0.05}
+      color: {r: 0.7529412, g: 0.26666668, b: 0.22745098, a: 1}
+      tint: 0
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 3
+      position: {x: 0, y: -0.19, z: -0.2}
+      euler: {x: 25, y: 0, z: 0}
+      size: {x: 0.075, y: 0.2, z: 0.075}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: 0, y: -0.28, z: -0.235}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.085, y: 0.1, z: 0.085}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 3
+    key: hair.afro
+    displayName: Big Afro
+    flavour: Hat-resistant. Wind-resistant. Bee-attractive.
+    unlock: 0
+    unlockHint: 
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1.3
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts:
+    - shape: 1
+      position: {x: 0, y: -0.02, z: -0.025}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.37, y: 0.29, z: 0.37}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 1
+      attach: 0
+    - shape: 1
+      position: {x: 0.125, y: -0.1, z: -0.03}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.13, y: 0.16, z: 0.17}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: -0.125, y: -0.1, z: -0.03}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.13, y: 0.16, z: 0.17}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 4
+    key: hair.mohawk
+    displayName: Mohawk
+    flavour: Punk rock. Pig rock.
+    unlock: 1
+    unlockHint: 'Grandpa''s Trunk: Common, 60 Farm Memories'
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1.3
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts:
+    - shape: 4
+      position: {x: 0, y: -0.015, z: 0.08}
+      euler: {x: -12, y: 0, z: 0}
+      size: {x: 0.05, y: 0.12, z: 0.085}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 1
+      attach: 0
+    - shape: 4
+      position: {x: 0, y: -0.009, z: 0.029999997}
+      euler: {x: -18, y: 0, z: 0}
+      size: {x: 0.05, y: 0.14999999, z: 0.085}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 1
+      attach: 0
+    - shape: 4
+      position: {x: 0, y: -0.009, z: -0.020000003}
+      euler: {x: -24, y: 0, z: 0}
+      size: {x: 0.05, y: 0.14999999, z: 0.085}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 1
+      attach: 0
+    - shape: 4
+      position: {x: 0, y: -0.015, z: -0.07000001}
+      euler: {x: -30, y: 0, z: 0}
+      size: {x: 0.05, y: 0.12, z: 0.085}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 1
+      attach: 0
+    - shape: 4
+      position: {x: 0, y: -0.015, z: -0.120000005}
+      euler: {x: -36, y: 0, z: 0}
+      size: {x: 0.05, y: 0.12, z: 0.085}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 1
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 5
+    key: hair.bun
+    displayName: Top Bun
+    flavour: Holds a pencil, two seeds and a secret.
+    unlock: 0
+    unlockHint: 
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts:
+    - shape: 1
+      position: {x: 0, y: -0.035, z: -0.02}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.25, y: 0.135, z: 0.285}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 1
+      attach: 0
+    - shape: 1
+      position: {x: 0, y: 0.025, z: -0.075}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.125, y: 0.115, z: 0.125}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 1
+      attach: 0
+    - shape: 2
+      position: {x: 0, y: -0.02, z: -0.075}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.085, y: 0.03, z: 0.085}
+      color: {r: 0.7529412, g: 0.26666668, b: 0.22745098, a: 1}
+      tint: 0
+      taper: 0
+      hideUnderHat: 1
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 6
+    key: hair.pigtails
+    displayName: Pigtails
+    flavour: Double the tails, double the trouble.
+    unlock: 0
+    unlockHint: 
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1.1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts:
+    - shape: 1
+      position: {x: 0, y: -0.035, z: -0.02}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.25, y: 0.135, z: 0.285}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 1
+      attach: 0
+    - shape: 1
+      position: {x: 0.13, y: -0.1, z: -0.06}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.05, y: 0.05, z: 0.05}
+      color: {r: 0.7529412, g: 0.26666668, b: 0.22745098, a: 1}
+      tint: 0
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: -0.13, y: -0.1, z: -0.06}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.05, y: 0.05, z: 0.05}
+      color: {r: 0.7529412, g: 0.26666668, b: 0.22745098, a: 1}
+      tint: 0
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 3
+      position: {x: 0.165, y: -0.18, z: -0.06}
+      euler: {x: 0, y: 0, z: 22}
+      size: {x: 0.07, y: 0.19, z: 0.07}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 3
+      position: {x: -0.165, y: -0.18, z: -0.06}
+      euler: {x: 0, y: 0, z: -22}
+      size: {x: 0.07, y: 0.19, z: 0.07}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 7
+    key: hair.beard
+    displayName: Bushy Beard
+    flavour: Itchy. Majestic. Home to at least one sparrow.
+    unlock: 0
+    unlockHint: 
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1.2
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts:
+    - shape: 1
+      position: {x: 0, y: -0.125, z: -0.03}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.2, y: 0.16, z: 0.13}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 2
+    - shape: 1
+      position: {x: 0.078, y: -0.075, z: -0.065}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.08, y: 0.13, z: 0.11}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 2
+    - shape: 1
+      position: {x: -0.078, y: -0.075, z: -0.065}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.08, y: 0.13, z: 0.11}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 2
+    - shape: 1
+      position: {x: 0, y: -0.068, z: 0.004}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.12, y: 0.035, z: 0.04}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 2
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 8
+    key: hair.bald
+    displayName: Bald & Proud
+    flavour: Aerodynamic. Shiny in the sun.
+    unlock: 0
+    unlockHint: 
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 0.8
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts: []
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 1
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 9
+    key: hair.tufts
+    displayName: Grandpa Tufts
+    flavour: Business on the sides. Sunburn on top.
+    unlock: 2
+    unlockHint: 'Grandpa''s Letter: survive your first Landlord Sunday'
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1.2
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts:
+    - shape: 1
+      position: {x: 0.118, y: -0.085, z: -0.02}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.07, y: 0.09, z: 0.13}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: -0.118, y: -0.085, z: -0.02}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.07, y: 0.09, z: 0.13}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    - shape: 1
+      position: {x: 0, y: -0.11, z: -0.12}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.2, y: 0.07, z: 0.06}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 6
+      taper: 0
+      hideUnderHat: 0
+      attach: 0
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 1
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  outfits:
+  - id: 1
+    key: outfit.gingham
+    displayName: Gingham Gamble
+    flavour: Picnic-ready. Not pig-ready.
+    unlock: 1
+    unlockHint: 'Grandpa''s Trunk: Common, 60 Farm Memories'
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts: []
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 1
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 2
+    key: outfit.patched
+    displayName: Patched Up
+    flavour: Every patch is a story. Most are about the goat.
+    unlock: 1
+    unlockHint: 'Grandpa''s Trunk: Common, 60 Farm Memories'
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1.1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts: []
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 3
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 3
+    key: outfit.mud
+    displayName: Mud Season
+    flavour: Pre-muddied for your convenience.
+    unlock: 1
+    unlockHint: 'Grandpa''s Trunk: Common, 60 Farm Memories'
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1.1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts: []
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 4
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 4
+    key: outfit.pinstripe
+    displayName: Debt Collector Pinstripe
+    flavour: Dress for the job you owe.
+    unlock: 1
+    unlockHint: 'Grandpa''s Trunk: Rare, 120 Farm Memories'
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts: []
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 2
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 5
+    key: outfit.flannel
+    displayName: Flannel & Jeans
+    flavour: Lumberjack chic. No lumber was jacked.
+    unlock: 0
+    unlockHint: 
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1.2
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts: []
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 6
+      shirtPattern: 5
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 6
+    key: outfit.raincoat
+    displayName: Rain Slicker
+    flavour: Puddle-proof. Pig-proof? No.
+    unlock: 1
+    unlockHint: 'Grandpa''s Trunk: Rare, 120 Farm Memories'
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1.1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts:
+    - shape: 1
+      position: {x: 0, y: 0.2, z: -0.035}
+      euler: {x: -10, y: 0, z: 0}
+      size: {x: 0.28, y: 0.13, z: 0.17}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 1
+      taper: 0
+      hideUnderHat: 0
+      attach: 3
+    - shape: 4
+      position: {x: 0, y: -0.34, z: 0}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.46, y: 0.36, z: 0.36}
+      color: {r: 0, g: 0, b: 0, a: 0}
+      tint: 1
+      taper: 0.8
+      hideUnderHat: 0
+      attach: 5
+    - shape: 0
+      position: {x: 0, y: 0.06, z: 0.125}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.025, y: 0.05, z: 0.02}
+      color: {r: 0.9490196, g: 0.9019608, b: 0.78431374, a: 1}
+      tint: 0
+      taper: 0
+      hideUnderHat: 0
+      attach: 4
+    - shape: 0
+      position: {x: 0, y: -0.04, z: 0.13}
+      euler: {x: 0, y: 0, z: 0}
+      size: {x: 0.025, y: 0.05, z: 0.02}
+      color: {r: 0.9490196, g: 0.9019608, b: 0.78431374, a: 1}
+      tint: 0
+      taper: 0
+      hideUnderHat: 0
+      attach: 4
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 1
+      sleeveTint: 1
+  - id: 7
+    key: outfit.polka
+    displayName: Polka Party
+    flavour: Spotted from space. Spotted by crows.
+    unlock: 1
+    unlockHint: 'Grandpa''s Trunk: Common, 60 Farm Memories'
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1.1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts: []
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 7
+      shirtPattern: 0
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 8
+    key: outfit.sailor
+    displayName: Sailor Stripes
+    flavour: Seaworthy. Barn-worthy? Debatable.
+    unlock: 0
+    unlockHint: 
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts: []
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 8
+      shirtTint: 2
+      sleeveTint: 2
+  - id: 9
+    key: outfit.tank
+    displayName: Muscle Tank
+    flavour: Sleeves are for people who've never lifted a pig.
+    unlock: 0
+    unlockHint: 
+    blocksFirstPersonView: 0
+    hidesHair: 0
+    randomWeight: 1.1
+    icon: {fileID: 0}
+    attach: 0
+    offset: {x: 0, y: 0, z: 0}
+    rotation: {x: 0, y: 0, z: 0}
+    scale: 1
+    prefab: {fileID: 0}
+    tintMode: 0
+    materialTints: 
+    parts: []
+    headShape: {x: 1, y: 1, z: 1}
+    hideBaseHair: 0
+    outfit:
+      overallsPattern: 0
+      shirtPattern: 0
+      shirtTint: 5
+      sleeveTint: 5
   emotes:
   - id: 1
     key: wave
@@ -944,6 +2540,8 @@ MonoBehaviour:
     noiseLoudness: 0.6
     placesPing: 0
     unlock: 0
+    flavour: Also a shout for farmers without a mic.
+    unlockHint: 
   - id: 2
     key: point
     displayName: Point
@@ -955,6 +2553,8 @@ MonoBehaviour:
     noiseLoudness: 0
     placesPing: 1
     unlock: 0
+    flavour: Drops a ping everyone can see. Usually on a pig.
+    unlockHint: 
   - id: 3
     key: dance
     displayName: Dance
@@ -966,6 +2566,8 @@ MonoBehaviour:
     noiseLoudness: 0
     placesPing: 0
     unlock: 0
+    flavour: Loops until you move. Nobody asked you to stop.
+    unlockHint: 
   - id: 4
     key: faint
     displayName: Faint
@@ -977,6 +2579,48 @@ MonoBehaviour:
     noiseLoudness: 0
     placesPing: 0
     unlock: 0
+    flavour: Drops whatever you're carrying. The Ledger still blames you.
+    unlockHint: 
+  - id: 5
+    key: shrug
+    displayName: Shrug
+    animState: Shrug
+    kind: 0
+    duration: 1.4
+    cooldown: 1.4
+    loopsUntilMove: 0
+    noiseLoudness: 0
+    placesPing: 0
+    unlock: 1
+    flavour: The pig was like that when I found it.
+    unlockHint: 'Grandpa''s Trunk: Common, 60 Farm Memories'
+  - id: 6
+    key: chickendance
+    displayName: Chicken Dance
+    animState: ChickenDance
+    kind: 0
+    duration: 0
+    cooldown: 1
+    loopsUntilMove: 1
+    noiseLoudness: 0
+    placesPing: 0
+    unlock: 1
+    flavour: The chickens find it deeply offensive.
+    unlockHint: 'Grandpa''s Trunk: Rare, 120 Farm Memories'
+  - id: 7
+    key: salute
+    displayName: Salute
+    animState: Salute
+    kind: 0
+    duration: 1.6
+    cooldown: 1.6
+    loopsUntilMove: 0
+    noiseLoudness: 0
+    placesPing: 0
+    unlock: 1
+    flavour: For the fallen. Mostly the fallen bridge plank.
+    unlockHint: 'Grandpa''s Trunk: Common, 60 Farm Memories'
+  entries: []
   emoteRateLimit: 2
   pingLifetime: 3
   pingMaxDistance: 60
@@ -989,3 +2633,4 @@ MonoBehaviour:
   unlitMaterial: {fileID: 2100000, guid: 57179d85b7cc94f43ba95a94b1432514, type: 2}
   farmerPrefab: {fileID: 2725604790473067528, guid: 075cf37c1748d470b8bdb6528a420eaa, type: 3}
   wardrobePanel: {fileID: 11400000, guid: 70dbc01d8b0764afabab01b90269f174, type: 2}
+  creatorStyle: {fileID: 7433441132597879392, guid: ce7a834deb19644db8faee4f03b48963, type: 3}

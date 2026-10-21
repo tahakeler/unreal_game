@@ -11,9 +11,11 @@ namespace HarvestPanic.Customization
     /// </summary>
     public static class LoadoutValidator
     {
+        static readonly CosmeticSlot[] Slots = { CosmeticSlot.Hat, CosmeticSlot.Face, CosmeticSlot.Back, CosmeticSlot.Head, CosmeticSlot.Hair, CosmeticSlot.Outfit };
+
         /// <summary>
         /// Returns a copy of <paramref name="input"/> where every out-of-range index, unknown id and unowned item is
-        /// replaced by the slot default. <paramref name="report"/> lists what changed (empty when nothing did).
+        /// replaced by the slot default (hat: Straw Hat; face/back: None; head/hair/outfit: the base look). <paramref name="report"/> lists what changed (empty when nothing did).
         /// </summary>
         /// <param name="ownedKeys">Unlocked item keys of this player, or null when the server only trusts starter items.</param>
         public static FarmerLoadout Sanitize(FarmerLoadout input, CosmeticCatalog catalog, ICollection<string> ownedKeys, out string report)
@@ -33,8 +35,9 @@ namespace HarvestPanic.Customization
                 (catalog.skinTones[o.Skin].fantasy && !catalog.IsOwned(UnlockSource.Letter, "skin." + o.Skin, ownedKeys)))
             { Fix("skin", o.Skin, d.Skin); o.Skin = d.Skin; }
             if (o.NameTag >= catalog.nameTags.Count) { Fix("tag", o.NameTag, d.NameTag); o.NameTag = d.NameTag; }
+            if (o.HairColor >= catalog.palette.Count) { Fix("hairColour", o.HairColor, d.HairColor); o.HairColor = d.HairColor; }
 
-            foreach (CosmeticSlot slot in new[] { CosmeticSlot.Hat, CosmeticSlot.Face, CosmeticSlot.Back })
+            foreach (CosmeticSlot slot in Slots)
             {
                 ushort id = o.GetItem(slot);
                 if (id == 0) continue;
