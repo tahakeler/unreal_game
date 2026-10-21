@@ -1,0 +1,20 @@
+{
+    "name": "HarvestPanic.Voice",
+    "rootNamespace": "HarvestPanic.Voice",
+    "references": [
+        "HarvestPanic.Core",
+        "Unity.Netcode.Runtime",
+        "Unity.Collections",
+        "Unity.InputSystem",
+        "Facepunch Transport for Netcode for GameObjects"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
