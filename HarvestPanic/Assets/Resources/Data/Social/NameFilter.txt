@@ -1,0 +1,61 @@
+# DT_NameFilter: Farm Name profanity list (design/gdd/character-customization.md "Anti-abuse: names").
+# Read by HarvestPanic.Core.NameFilter. One entry per line, lower case.
+#   word   banned anywhere in the name (separators ignored, repeated letters ignored, leetspeak folded)
+#   =word  banned only as a whole word (short words that hide inside innocent ones)
+#   !word  always allowed (Scunthorpe cases that contain a banned substring)
+fuck
+shit
+cunt
+bitch
+whore
+slut
+nigger
+nigga
+faggot
+retard
+wank
+twat
+dildo
+penis
+vagina
+pussy
+bastard
+asshole
+porn
+nazi
+hitler
+rapist
+piss
+jizz
+wetback
+=ass
+=arse
+=asses
+=cock
+=cocks
+=dick
+=dicks
+=tits
+=titties
+=boob
+=boobs
+=sex
+=sexy
+=anal
+=rape
+=cum
+=semen
+=fag
+=fags
+=homo
+=spic
+=chink
+=kike
+=gook
+=tranny
+=kkk
+!scunthorpe
+!therapist
+!shiitake
+!shitake
+!penistone
