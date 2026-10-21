@@ -22,7 +22,10 @@ namespace HarvestPanic.UI
         public float MusicVolume = 0.8f;
         public float SfxVolume = 1f;
         public float VoiceVolume = 1f;
-        public bool PushToTalk;
+        /// <summary>Push-to-talk (default key V). On by default so nobody transmits by surprise (adr-voice-chat 7).</summary>
+        public bool PushToTalk = true;
+        /// <summary>Open-mic voice-activity threshold as loudness 0..1 (the settings slider shows 1 - this as "sensitivity").</summary>
+        public float OpenMicThreshold = 0.2f;
         public WindowModeSetting WindowMode = WindowModeSetting.Fullscreen;
         public float ResolutionScale = 1f;
         public float UiScale = 1f;
@@ -51,6 +54,7 @@ namespace HarvestPanic.UI
             MusicVolume = ClampF(MusicVolume, 0f, 1f, 0.8f);
             SfxVolume = ClampF(SfxVolume, 0f, 1f, 1f);
             VoiceVolume = ClampF(VoiceVolume, 0f, 1f, 1f);
+            OpenMicThreshold = ClampF(OpenMicThreshold, 0f, 1f, 0.2f);
             ResolutionScale = ClampF(ResolutionScale, MinResolutionScale, MaxResolutionScale, 1f);
             UiScale = ClampF(UiScale, MinUiScale, MaxUiScale, 1f);
             if (!Enum.IsDefined(typeof(WindowModeSetting), WindowMode)) WindowMode = WindowModeSetting.Fullscreen;

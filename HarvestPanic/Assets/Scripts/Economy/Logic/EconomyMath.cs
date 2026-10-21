@@ -115,6 +115,18 @@ namespace HarvestPanic.Economy
             return RoundTo(t.QuotaBase * Math.Pow(t.QuotaGrowth, week - 1) * t.PlayerScaleFor(players) * r, 10);
         }
 
+        /// <summary>
+        /// Extra Morning units of <paramref name="goodsId"/> for a crew of <paramref name="players"/> (1–4): PerExtraPlayer × (players − 1).
+        /// 0 for solo or unlisted goods (GDD 9.3, tuned 2026-10-21).
+        /// </summary>
+        public static int ExtraDailyGoods(string goodsId, int players, EconomyTuning t)
+        {
+            if (t.ExtraDailyGoodsPerExtraPlayer == null || string.IsNullOrEmpty(goodsId)) return 0;
+            int extraPlayers = Math.Max(0, Math.Min(players, 4) - 1), n = 0;
+            foreach (var e in t.ExtraDailyGoodsPerExtraPlayer) if (e.GoodsId == goodsId) n += e.PerExtraPlayer * extraPlayers;
+            return n;
+        }
+
         /// <summary>Mid-week leaver re-scale: Q' = Q × (d_done + d_left × S_new/S_old) / days.</summary>
         public static int ProratedQuota(int quota, int daysDone, int days, int oldPlayers, int newPlayers, EconomyTuning t)
         {

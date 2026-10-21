@@ -293,6 +293,7 @@ namespace HarvestPanic.Economy
             _clock.DurationScale = EconomyDevCvars.DayScale;
             var phase = d.Resume == RunResumePoint.Shop ? DayPhase.Shop : DayPhase.Morning;
             _clock.Restore(phase, d.DayIndex, d.Week, d.DayOfWeek);
+            LandlordPlanWeek(); // fix/beta-bugs-1: a continued run never planned its week's visits (no visits, no barks)
             if (phase == DayPhase.Morning) EnterMorning();
             else if (_shop.Offers.Count == 0) _shop.RollOffers(_clock.Week, new System.Random(_runSeed ^ (_clock.DayIndex * 7919)));
             PushWallet();

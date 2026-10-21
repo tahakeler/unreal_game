@@ -51,7 +51,7 @@ namespace HarvestPanic.Tests.PlayMode.Perf
             public int Week, Dow, DayIndex;
             public int StartBalance, EndBalance, Sales, SaleUnits, Disasters, Deliveries, Shouts, NetObjsAtMorning, Goods, Critters;
             public long MemMB, MonoMB;
-            public string Weather, Mods = "", Notes = ""; public int Quota; public float WorkdaySec;
+            public string Weather, Mods = "", Notes = "", Unsold; public int Quota; public float WorkdaySec;
             public readonly List<string> DisasterNames = new List<string>();
             public bool NightSeen; public int StitchesMax, FoxesMax;
             public ReceiptData Receipt;
@@ -148,6 +148,10 @@ namespace HarvestPanic.Tests.PlayMode.Perf
                 switch (ph)
                 {
                     case DayPhase.Payout:
+                        // beta-bugs-1: what never reached the pen, and how far it was (per-day sale gaps are visible).
+                        if (cur != null && cur.Unsold == null)
+                            cur.Unsold = string.Join(", ", Goods.All.Where(g => g != null && g.IsSpawned && g.Definition != null)
+                                .Select(g => $"{g.GoodsId}@{Vector3.Distance(g.transform.position, pen):0}m{(BotFarmer.InPen(g, pen) ? " (in pen)" : "")}"));
                         yield return new WaitForSeconds(0.5f);
                         if (cur != null) EndDay(cur);
                         dir.NextDay();
@@ -242,6 +246,8 @@ namespace HarvestPanic.Tests.PlayMode.Perf
                 sb.AppendLine($"| W{d.Week}D{d.Dow} | {d.Quota} | {d.WorkdaySec:0} | {d.Weather} | {d.StartBalance} | {d.EndBalance} | {d.Sales} ({d.SaleUnits}) | {d.Deliveries} | {d.Shouts} | {d.Disasters} {string.Join(" ", d.DisasterNames)} | {(d.NightSeen ? $"yes ({d.StitchesMax}/{d.FoxesMax})" : "no")} | {d.NetObjsAtMorning} | {d.Goods} | {d.Critters} | {d.MemMB} | {d.MonoMB} | {d.Mods} |");
             sb.AppendLine(); sb.AppendLine("## Receipts");
             foreach (var d in days) if (d.Receipt != null) sb.AppendLine($"- W{d.Week}D{d.Dow}: units {d.Receipt.UnitsSold}, sales {d.Receipt.Sales}, headline \"{d.Receipt.Headline}\"");
+            sb.AppendLine(); sb.AppendLine("## Goods unsold at market close");
+            foreach (var d in days) if (d.Unsold != null) sb.AppendLine($"- W{d.Week}D{d.Dow}: {(d.Unsold.Length > 0 ? d.Unsold : "none")}");
             sb.AppendLine(); sb.AppendLine("## Rent shortfalls (bots alone)"); foreach (var l in rentShortfalls) sb.AppendLine("- " + l);
             sb.AppendLine(); sb.AppendLine("## Shop / Sunday"); foreach (var l in shopLog) sb.AppendLine("- " + l);
             sb.AppendLine(); sb.AppendLine("## Landlord barks"); foreach (var l in landlordBarks.Take(40)) sb.AppendLine("- " + l);

@@ -1,0 +1,45 @@
+// HARVEST PANIC - Steam app build script TEMPLATE (steamcmd +run_app_build).
+// Placeholders (filled by tools/release/steam-upload.sh from env vars; never commit real values you don't want public):
+//   __APP_ID__      Steamworks App ID (owner action; NOT 480 Spacewar)
+//   __DEPOT_WIN__   Windows depot ID (usually App ID + 1)
+//   __DEPOT_MAC__   macOS depot ID (usually App ID + 2)
+//   __DESC__        build description shown in Steamworks > Builds
+//   __CONTENT__     content root containing windows/ and macos/ (staged by steam-upload.sh)
+//   __OUTPUT__      local folder for steamcmd logs/cache (gitignored location)
+//   __SET_LIVE__    branch to set live after upload: "" (none) or "beta". Steam refuses SetLive on "default".
+//   __PREVIEW__     "1" = dry run (no upload), "0" = upload
+"AppBuild"
+{
+	"AppID"       "__APP_ID__"
+	"Desc"        "__DESC__"
+	"ContentRoot" "__CONTENT__"
+	"BuildOutput" "__OUTPUT__"
+	"SetLive"     "__SET_LIVE__"
+	"Preview"     "__PREVIEW__"
+	"Depots"
+	{
+		"__DEPOT_WIN__"
+		{
+			"FileMapping"
+			{
+				"LocalPath" "windows/*"
+				"DepotPath" "."
+				"recursive" "1"
+			}
+			"FileExclusion" "*.pdb"
+			"FileExclusion" "*_BurstDebugInformation_DoNotShip*"
+			"FileExclusion" "steam_appid.txt"
+		}
+		"__DEPOT_MAC__"
+		{
+			"FileMapping"
+			{
+				"LocalPath" "macos/*"
+				"DepotPath" "."
+				"recursive" "1"
+			}
+			"FileExclusion" "*_BurstDebugInformation_DoNotShip*"
+			"FileExclusion" "steam_appid.txt"
+		}
+	}
+}

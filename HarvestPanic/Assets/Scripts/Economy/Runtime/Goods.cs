@@ -35,6 +35,8 @@ namespace HarvestPanic.Economy
         TouchHistory _touches;
         readonly HashSet<ulong> _holders = new HashSet<ulong>();
         float _releasedAt = -100f, _thrownAt = -100f;
+        float _spawnedAt;
+        bool _handled; // any grab/throw/release/player touch since spawn (beta-bugs-1 spawn settle)
         ulong _thrower = PlayerIds.None;
         float _waterAccumBp, _waterAccumTimer;
         Rigidbody _rb;
@@ -102,8 +104,15 @@ namespace HarvestPanic.Economy
             if (def.Category == GoodsCategory.Product) _freshElapsed = 0f; // laid/produced at spawn
         }
 
-        void OnEnable() { All.Add(this); }
+        void OnEnable() { All.Add(this); _spawnedAt = Time.time; _handled = false; }
         void OnDisable() { All.Remove(this); }
+
+        /// <summary>
+        /// Pure rule for <see cref="OnCollisionEnter"/> (bot-week-report #3, fix/beta-bugs-1): impacts are ignored while an
+        /// untouched item settles, for <see cref="EconomyTuning.SpawnGraceSeconds"/> after spawning. The first
+        /// grab/throw/touch (player or creature) ends the window early, so a player who slams a fresh item is still blamed.
+        /// </summary>
+        public static bool IgnoreSettleImpact(bool handled, float sinceSpawn, float grace) => !handled && sinceSpawn < grace;
 
         public override void OnNetworkSpawn()
         {
@@ -144,6 +153,7 @@ namespace HarvestPanic.Economy
         public void RecordTouch(ulong clientId)
         {
             if (!IsEconomyAuthority || !PlayerIds.IsPlayer(clientId)) return;
+            _handled = true;
             _touches.Record(clientId, Time.time);
             _lastHandler = clientId;
             if (IsSpawned) _nvLastHandler.Value = clientId;
@@ -152,6 +162,7 @@ namespace HarvestPanic.Economy
         public void OnGrabbed(ulong clientId)
         {
             if (!IsEconomyAuthority) return;
+            _handled = true;
             _holders.Add(clientId);
             RecordTouch(clientId);
             if (Definition != null && Definition.Category == GoodsCategory.Crop && _freshElapsed < 0f) _freshElapsed = 0f; // harvested
@@ -160,6 +171,7 @@ namespace HarvestPanic.Economy
         public void OnReleased(ulong clientId)
         {
             if (!IsEconomyAuthority) return;
+            _handled = true;
             _holders.Remove(clientId);
             RecordTouch(clientId);
             _releasedAt = Time.time;
@@ -168,6 +180,7 @@ namespace HarvestPanic.Economy
         public void ApplyThrow(Vector3 velocity, ulong thrower)
         {
             if (!IsEconomyAuthority) return;
+            _handled = true;
             _holders.Clear();
             RecordTouch(thrower);
             _thrower = thrower;
@@ -191,6 +204,7 @@ namespace HarvestPanic.Economy
             float impulse = c.impulse.magnitude;
             if (impulse <= 0f) return;
             float now = Time.time;
+            if (IgnoreSettleImpact(_handled, now - _spawnedAt, Tuning.SpawnGraceSeconds)) return; // spawn settle
             // Player carry reports bruises itself while held and for CarryReportWindow after release (no double count).
             if (IsHeld || now - _releasedAt < Tuning.CarryReportWindow) return;
             foreach (var h in _holders) _touches.Record(h, now);

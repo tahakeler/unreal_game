@@ -155,6 +155,20 @@ namespace HarvestPanic.Economy
         public const string SundayShort = "Hmm. Short. Let's talk about collateral.";
         public const string SundayEvicted = "Oh dear. Oh dear, oh dear. Pack light.";
 
+        /// <summary>Arrival line for a visit modifier (on its planned morning, or the morning after a chaos-cap deferral).</summary>
+        public static string VisitArrive(DayModifier visit) =>
+            visit != null && visit.ModifierId.EndsWith("Inspection", StringComparison.Ordinal) ? InspectionArrive : HelpfulArrive;
+
+        /// <summary>Run start (Week 1 Monday Morning).</summary>
+        public static string WeekOneWelcome(int quota) => $"Welcome to the farm! Rent is ${quota}, due Sunday. I'll be counting.";
+
+        /// <summary>A weekly rule was drawn (Monday Morning, Week 2+).</summary>
+        public static string NewRule(string cardText, string modifierId)
+        {
+            string rule = !string.IsNullOrEmpty(cardText) ? cardText : (modifierId ?? "").Substring(Math.Max(0, (modifierId ?? "").LastIndexOf('.') + 1));
+            return "New house rule this week. " + rule;
+        }
+
         /// <summary>One line per failed check, voiced.</summary>
         public static string CheckLine(InspectionCheck c, int perCheck)
         {
