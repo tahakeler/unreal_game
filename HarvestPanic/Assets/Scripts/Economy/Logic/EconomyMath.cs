@@ -112,7 +112,17 @@ namespace HarvestPanic.Economy
         public static int Quota(int week, int players, EconomyTuning t, float regionMult = -1f)
         {
             float r = regionMult > 0f ? regionMult : t.RegionMult;
-            return RoundTo(t.QuotaBase * Math.Pow(t.QuotaGrowth, week - 1) * t.PlayerScaleFor(players) * r, 10);
+            double w1 = week <= 1 ? t.QuotaWeekOneMult : 1.0; // learning week (tuned 2026-10-21)
+            return RoundTo(t.QuotaBase * Math.Pow(t.QuotaGrowth, week - 1) * t.PlayerScaleFor(players) * r * w1, 10);
+        }
+
+        /// <summary>Extra daily units of <paramref name="goodsId"/> for a crew of <paramref name="players"/> (0 for solo or unlisted goods).</summary>
+        public static int ExtraDailyGoods(string goodsId, int players, EconomyTuning t)
+        {
+            if (t.ExtraDailyGoodsPerExtraPlayer == null || string.IsNullOrEmpty(goodsId)) return 0;
+            int extraPlayers = Math.Max(0, Math.Min(players, 4) - 1), n = 0;
+            foreach (var e in t.ExtraDailyGoodsPerExtraPlayer) if (e.GoodsId == goodsId) n += e.PerExtraPlayer * extraPlayers;
+            return n;
         }
 
         /// <summary>Mid-week leaver re-scale: Q' = Q × (d_done + d_left × S_new/S_old) / days.</summary>

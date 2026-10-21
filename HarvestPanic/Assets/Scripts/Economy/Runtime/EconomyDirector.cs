@@ -206,6 +206,7 @@ namespace HarvestPanic.Economy
             LandlordPlanWeek();
             PushWallet();
             Go(DayPhase.Morning);
+            LandlordBark(LandlordText.WeekOneWelcome(_quota)); // bot-week-report #4: week 1 had no Landlord line at all
         }
 
         void SampleWeek()
@@ -269,7 +270,9 @@ namespace HarvestPanic.Economy
         {
             _dayTime = 0f; _dayCosts = 0; _orderBonusToday = 0;
             _ledger.StartDay();
-            foreach (var q in _mods.TakeQueued()) _mods.Apply(q, _clock.Week);
+            foreach (var q in _mods.TakeQueued())
+                if (_mods.Apply(q, _clock.Week) && LandlordParams.IsVisit(q))
+                    LandlordBark(q.ModifierId.EndsWith("Inspection") ? LandlordText.InspectionArrive : LandlordText.HelpfulArrive); // deferred visit arrives
             LandlordMorning();
             DrawWeather();
             var available = new List<string>();
@@ -303,6 +306,7 @@ namespace HarvestPanic.Economy
             if (_landlordRules.Count >= Tuning.MaxLandlordRules) { _mods.Remove(_landlordRules[0].ModifierId); _landlordRules.RemoveAt(0); }
             _landlordRules.Add(pick);
             _mods.Apply(pick, _clock.Week, bypassCap: true);
+            LandlordBark(LandlordText.NewRule(pick.CardText, pick.ModifierId)); // bot-week-report #4: rules were silent
         }
 
         void SetupPens()
@@ -326,19 +330,63 @@ namespace HarvestPanic.Economy
                 if (no != null && no.IsSpawned) no.Despawn(true); else Destroy(go);
             }
             _spawned.Clear();
-            foreach (var m in LevelMarker.FindAll(MarkerRole.Goods))
+            // Extra loose goods for bigger crews (tuned 2026-10-21), dealt round-robin over that goods' markers.
+            var markers = LevelMarker.FindAll(MarkerRole.Goods);
+            var extra = new Dictionary<LevelMarker, int>();
+            var dealt = new HashSet<string>();
+            foreach (var m in markers)
+            {
+                if (!GoodsResolver.TryResolve(m.Key, out var def) || !dealt.Add(def.GoodsId)) continue;
+                int n = EconomyMath.ExtraDailyGoods(def.GoodsId, _players, Tuning);
+                var same = markers.FindAll(x => GoodsResolver.TryResolve(x.Key, out var d2) && d2.GoodsId == def.GoodsId);
+                for (int k = 0; k < n && same.Count > 0; k++) { var t = same[k % same.Count]; extra.TryGetValue(t, out int c); extra[t] = c + 1; }
+            }
+            foreach (var m in markers)
             {
                 if (!GoodsResolver.TryResolve(m.Key, out var def) || def.WorldPrefab == null) continue;
-                for (int i = 0; i < m.Count; i++)
+                extra.TryGetValue(m, out int more);
+                int count = m.Count + more;
+                for (int i = 0; i < count; i++)
                 {
-                    var pos = m.transform.position + new Vector3((i % 3) * 0.8f, 0.05f + (i / 3) * 0.6f, 0f);
+                    var pos = m.transform.position + m.transform.rotation * new Vector3((i % 3) * 0.8f, 0f, (i / 3) * 0.8f);
                     var go = Instantiate(def.WorldPrefab, pos, m.transform.rotation);
+                    PlaceOnGround(go);
                     var no = go.GetComponent<NetworkObject>();
                     if (no != null && IsSpawned) no.Spawn(true);
                     _spawned.Add(go);
                 }
             }
         }
+
+        static readonly RaycastHit[] GroundHits = new RaycastHit[8];
+
+        /// <summary>
+        /// Spawns goods resting on the highest surface under the marker (collider bottom 1 cm above it; surfaces more than
+        /// 2.2 m above the marker, e.g. roofs, are skipped; a cart bed over the marker is used, as physics would push the
+        /// item there anyway), so heavy goods
+        /// don't drop and bruise themselves at Morning (bot-week-report #3).
+        /// </summary>
+        public static void PlaceOnGround(GameObject go)
+        {
+            var cols = go.GetComponentsInChildren<Collider>();
+            if (cols.Length == 0) return;
+            Physics.SyncTransforms();
+            float bottom = float.MaxValue;
+            foreach (var c in cols) if (!c.isTrigger) bottom = Mathf.Min(bottom, c.bounds.min.y);
+            if (bottom == float.MaxValue) return;
+            var p = go.transform.position;
+            int mask = ~((1 << GameLayerIndex(GameLayers.Carryable)) | (1 << GameLayerIndex(GameLayers.Critter)) | (1 << GameLayerIndex(GameLayers.Player)) | (1 << GameLayerIndex(GameLayers.Ragdoll)));
+            int n = Physics.RaycastNonAlloc(new Vector3(p.x, p.y + 2.5f, p.z), Vector3.down, GroundHits, 12f, mask, QueryTriggerInteraction.Ignore);
+            float best = float.MinValue;
+            for (int i = 0; i < n; i++) if (!GroundHits[i].collider.transform.IsChildOf(go.transform) && GroundHits[i].point.y <= p.y + 2.2f && GroundHits[i].point.y > best) best = GroundHits[i].point.y;
+            if (best == float.MinValue) return;
+            p.y += best + 0.01f - bottom;
+            go.transform.position = p;
+            if (go.TryGetComponent(out Rigidbody rb)) { rb.position = p; rb.linearVelocity = Vector3.zero; rb.angularVelocity = Vector3.zero; }
+            Physics.SyncTransforms();
+        }
+
+        static int GameLayerIndex(string name) { int l = LayerMask.NameToLayer(name); return l < 0 ? 31 : l; }
 
         void EnterPayout()
         {
@@ -382,10 +430,12 @@ namespace HarvestPanic.Economy
                     _wallet.ClearIou();
                     _weekIncome = 0;
                     _ledger.StartWeek();
+                    _visitPlan.Clear(); // last week's plan must not fire on the new Monday
                     Go(DayPhase.Morning);  // advances week
                     SampleWeek();
                     DrawLandlordRule();
                     LandlordPlanWeek();
+                    LandlordMorning(); // today's visit from the NEW plan (Morning ran before the plan existed)
                     PushWallet();
                     SaveRun(RunResumePoint.WeekStart);
                     break;

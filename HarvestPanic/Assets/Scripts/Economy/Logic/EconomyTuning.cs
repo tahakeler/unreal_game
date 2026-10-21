@@ -11,6 +11,14 @@ namespace HarvestPanic.Economy
         [Min(1)] public int BaseQuantity;
     }
 
+    /// <summary>Extra loose goods spawned each Morning per player beyond the first (beta-bugs-1 balance, tuned 2026-10-21).</summary>
+    [Serializable]
+    public struct ExtraDailyGoods
+    {
+        public string GoodsId;
+        [Min(0)] public int PerExtraPlayer;
+    }
+
     /// <summary>
     /// Every economy/day-loop/ledger tuning knob in one asset (goods-value, day-loop, shared-wallet-economy,
     /// week-quota, blame-ledger, hud-menus §Tuning Knobs). Loaded from Resources/Data/Goods/EconomyTuning;
@@ -34,6 +42,9 @@ namespace HarvestPanic.Economy
         public int CompostValue = 1;
         public float WaterBpsCrop = 15f, WaterBpsLivestock = 5f;
         [Tooltip("IGoodsSoakable.ApplySoak = this many seconds of submersion.")] public float SoakSeconds = 1f;
+        [Tooltip("Seconds after a goods item spawns during which impacts never bruise it (spawn settle). Until the first " +
+                 "handler touches it, impacts against static/kinematic bodies are also ignored (beta-bugs-1).")]
+        public float SpawnGraceSeconds = 3f;
 
         [Header("Freshness (goods-value §4)")]
         public float CropGrace = 120f, CropDecay = 480f;
@@ -85,6 +96,14 @@ namespace HarvestPanic.Economy
         public float QuotaGrowth = 1.35f;
         public float RegionMult = 1f;
         public float[] PlayerScale = { 0.45f, 0.65f, 0.85f, 1f };
+        [Tooltip("Week-1 learning-week relief on Q(1) (GDD 9.7, tuned 2026-10-21). 1 = off.")] [Range(0.5f, 1f)] public float QuotaWeekOneMult = 0.85f;
+
+        [Header("Daily loose goods by crew size (GDD 9.11, tuned 2026-10-21)")]
+        [Tooltip("Extra goods spawned at the matching Goods markers each Morning, per player beyond the first.")]
+        public ExtraDailyGoods[] ExtraDailyGoodsPerExtraPlayer =
+        {
+            new ExtraDailyGoods { GoodsId = "Product.Crate", PerExtraPlayer = 1 },
+        };
 
         [Header("Blame ledger")]
         public float MergeWindow = 1.5f;
