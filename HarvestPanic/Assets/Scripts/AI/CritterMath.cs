@@ -69,6 +69,9 @@ namespace HarvestPanic.AI
             return LureTag.None;
         }
 
+        /// <summary>Threat a mandrake scream within the spook radius adds: just over the species' flee threshold (cursed-crops AC 2).</summary>
+        public static float MandrakeSpook(float fleeThreshold) => Mathf.Clamp01(fleeThreshold + 0.2f);
+
         /// <summary>Affinity for <paramref name="lure"/> from the personality, or <paramref name="fallback"/> when not listed.</summary>
         public static float LureAffinityFor(CritterPersonality p, LureTag lure, float fallback)
         {
