@@ -4,6 +4,7 @@
     "references": [
         "HarvestPanic.Core",
         "HarvestPanic.Networking",
+        "HarvestPanic.Editor",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

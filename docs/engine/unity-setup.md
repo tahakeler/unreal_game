@@ -104,5 +104,26 @@ git config merge.unityyamlmerge.recursive binary
 - Record each pack — name, source URL, author, licence, date — in
   `THIRD_PARTY_LICENSES.md` at the repo root (create it with the first pack).
 - Packages from the Unity registry (NGO, Input System, URP) live in
-  `Packages/manifest.json`; Facepunch.Steamworks DLLs go under
-  `Assets/ThirdParty/Facepunch.Steamworks/` and need `steam_appid.txt` for dev runs.
+  `Packages/manifest.json`. Dev runs need `steam_appid.txt`.
+- **Steamworks plugins** (Facepunch.Steamworks 2.5.2 + Valve SDK 1.61 natives) live only in
+  `HarvestPanic/Assets/Plugins/Steamworks/`. Each has explicit per-platform import settings:
+  `Facepunch.Steamworks.Posix.dll` + `macOS/libsteam_api.dylib` (universal arm64/x86_64) for the macOS editor and
+  player; `Facepunch.Steamworks.Win64.dll` + `Windows/steam_api64.dll` for the Windows editor and player.
+  Replace managed DLLs and natives together, from one Facepunch release: the native flat-API exports must match the
+  managed DLL's imports.
+- The Facepunch NGO transport is an **embedded package**
+  (`HarvestPanic/Packages/com.community.netcode.transport.facepunch/`), byte-identical to upstream except that its
+  bundled `Runtime/Facepunch/` plugins are removed. Those plugins were Facepunch.Steamworks 2.3.2, with an
+  i386/x86_64-only macOS library and a Linux DLL enabled for macOS players. Update procedure:
+  `HARVESTPANIC-PATCH.md` in that folder.
+- `BuildScript` guards Steam on every player build (`HarvestPanic.Editor.SteamPluginCheck`):
+  - **Preflight** (before building): fails if any Facepunch.Steamworks / steam_api plugin is found outside
+    `Assets/Plugins/Steamworks/` (for example, a package update re-adding its own copy), or if the set enabled for the
+    target is wrong.
+  - **Post-build**: fails a macOS build when `Contents/PlugIns/libsteam_api.dylib` is missing, or `lipo -archs` shows it
+    lacks arm64 or any architecture of the player executable, or the managed assembly isn't exactly
+    `Facepunch.Steamworks.Posix.dll` (for example, the Linux variant is shipped). A Windows build fails without an x64
+    `HarvestPanic_Data/Plugins/x86_64/steam_api64.dll` and `Facepunch.Steamworks.Win64.dll`.
+  - To check an existing build without rebuilding:
+    `-executeMethod HarvestPanic.Editor.SteamPluginCheck.VerifyPlayerCli -checkTarget mac|win -checkPlayer <.app|.exe>`.
+  - EditMode `SteamPluginCheckTests` covers the same rules.
