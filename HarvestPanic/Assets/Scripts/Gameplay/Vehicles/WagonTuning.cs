@@ -43,5 +43,7 @@ namespace HarvestPanic.Gameplay
         [Tooltip("Fraction of a hard hit on the wagon passed to each cargo item as a bruise")] [Range(0, 1)] public float CargoCushion = 0.5f;
         [Tooltip("Hits on the wagon above this (design units) bruise the cargo")] public float CargoHitMin = 600f;
         [Tooltip("The wagon knocks players over above this speed (m/s)")] public float KnockSpeed = 3f;
+        [Tooltip("Bruise (design units) each goods item takes when the wagon tips: books the TippedWagon loss on the driver")] public float TipSpillImpulse = 700f;
+        [Tooltip("Bruise (design units) a bounced-out item takes: books the SpilledCargo loss on the driver")] public float BumpSpillImpulse = 680f;
     }
 }

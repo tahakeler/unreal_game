@@ -5,9 +5,12 @@ using UnityEngine;
 namespace HarvestPanic.Gameplay
 {
     /// <summary>
-    /// Server: blame events raised by tools and the wagon (blame-ledger verbs LassoedIntoRiver, SpookedHerd,
-    /// SpilledCargo, TippedWagon). Dollar losses are booked by the goods' own bruise/soak events; these name the
-    /// culprit of the incident (receipt line, camcorder disaster, stinger).
+    /// Server: incident blame events raised by tools and the wagon (blame-ledger verbs LassoedIntoRiver, SpookedHerd,
+    /// SpilledCargo, TippedWagon), submitted through <see cref="IEconomyService.EmitBlame"/>. Money is never booked here:
+    /// wagon spills book their loss through <see cref="IGoods.ApplyBruise"/> with the wagon verb (one event per item),
+    /// and a lassoed item's river soak is booked by the river on the lasser through the goods' touch history. The
+    /// ledger's $2 noise floor (blame-ledger rule 3) therefore keeps these $0 incident lines only once Economy treats
+    /// LassoedIntoRiver/SpookedHerd as non-economic like YeetedTeammate (open request in docs/qa/tools-progress.md).
     /// </summary>
     public static class ToolBlame
     {

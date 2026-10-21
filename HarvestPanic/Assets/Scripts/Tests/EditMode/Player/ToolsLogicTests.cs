@@ -78,7 +78,9 @@ namespace HarvestPanic.Tests.EditMode.Player
         {
             Assert.That(LassoMath.GroundFor(true, 1f), Is.EqualTo(RopeGround.Plank));
             Assert.That(LassoMath.GroundFor(false, 0.6f), Is.EqualTo(RopeGround.Mud));
+            Assert.That(LassoMath.GroundFor(false, 0.6f * 0.9f), Is.EqualTo(RopeGround.Mud), "mud in a storm");
             Assert.That(LassoMath.GroundFor(false, 1f), Is.EqualTo(RopeGround.Grass));
+            Assert.That(LassoMath.GroundFor(false, 0.92f), Is.EqualTo(RopeGround.Grass), "rain's global ground slow-down is not mud");
         }
 
         [Test] public void Lasso_ReelAutoGrabAndSnap()

@@ -17,7 +17,7 @@ namespace HarvestPanic.Gameplay
 
         /// <summary>Ground under the wheels: bridge planks, else mud when the movement zones slow things, else dirt.</summary>
         public static WagonGround GroundFor(bool onBridge, float movementMult) =>
-            onBridge ? WagonGround.Plank : movementMult < 0.95f ? WagonGround.Mud : WagonGround.Dirt;
+            onBridge ? WagonGround.Plank : movementMult < LassoMath.MudBelow ? WagonGround.Mud : WagonGround.Dirt;
 
         /// <summary><c>v_max = clamp(sum_pull_force / (total_mass_kg * rolling_k), 0, cap)</c> m/s.</summary>
         public static float VMax(float sumPullForceN, float totalMassKg, float rollingK, float cap = 6f)

@@ -105,6 +105,8 @@ namespace HarvestPanic.Gameplay
         public bool IsYanked => _yanked;
         /// <summary>Server: verdict of the last throw (tests).</summary>
         public LassoVerdict LastVerdict => _flyVerdict;
+        /// <summary>Server: what the last throw's aim ray hit and picked (QA logs).</summary>
+        public string LastThrowInfo { get; private set; } = string.Empty;
         /// <summary>Tuning in use.</summary>
         public ToolTuning Tuning => tuning;
 
@@ -312,6 +314,7 @@ namespace HarvestPanic.Gameplay
                 }
             }
             if (cand != null) candPoint = TargetPoint(cand);
+            LastThrowInfo = $"aim {aim} direct {(direct != null ? direct.name + "/" + LayerMask.LayerToName(direct.gameObject.layer) : "none")} cand {(cand != null ? cand.name : "none")} {verdict}";
 
             _flyFrom = transform.position;
             _flyVerdict = verdict;
@@ -345,12 +348,11 @@ namespace HarvestPanic.Gameplay
                 return true;
             }
             var carry = c.GetComponentInParent<ICarryable>();
-            if (carry == null || carry.IsKinematicCarry || carry is ISelfSimulatedCarryable) return false;
-            if (carry is CarryableProp prop && prop.IsHolstered) return false;
+            if (carry == null || carry is ISelfSimulatedCarryable || IsTool(carry)) return false;
             no = (carry as Component) != null ? ((Component)carry).GetComponentInParent<NetworkObject>() : null;
             if (no == null || !no.IsSpawned) return false;
             var go = carry.CarryTransform.gameObject;
-            bool critter = go.layer == LayerMask.NameToLayer(GameLayers.Critter) || go.GetComponent<NavMeshAgent>() != null;
+            bool critter = IsCritter(go);
             var cb = carry.CarryTransform.GetComponent<CarryBody>();
             bool held = cb != null && cb.GripCount > 0;
             var p = critter ? FindPersonality(go) : null;
@@ -358,6 +360,12 @@ namespace HarvestPanic.Gameplay
                 LassoMath.FlatDistance(thrower.transform.position, carry.CarryTransform.position), range, t.LassoMinSize, held);
             return true;
         }
+
+        /// <summary>Tools and other rigid props (critters are kinematic carries too, so the flag alone is not enough).</summary>
+        static bool IsTool(ICarryable c) => c is IUsableTool || (c is CarryableProp p && (p.IsKinematicCarry || p.IsHolstered));
+
+        /// <summary>Critter body: Critter layer or a NavMesh agent.</summary>
+        static bool IsCritter(GameObject go) => go.layer == LayerMask.NameToLayer(GameLayers.Critter) || go.GetComponent<NavMeshAgent>() != null;
 
         /// <summary>Critter personality for a critter object (through its goods id, Core data only).</summary>
         public static CritterPersonality FindPersonality(GameObject go)
@@ -932,10 +940,9 @@ namespace HarvestPanic.Gameplay
             var victim = c.GetComponentInParent<PlayerCharacter>();
             if (victim != null) return victim != me && victim.State == PlayerState.KnockedOut;
             var carry = c.GetComponentInParent<ICarryable>();
-            if (carry == null || carry.IsKinematicCarry || carry is ISelfSimulatedCarryable) return false;
-            if (carry is CarryableProp p && p.IsHolstered) return false;
+            if (carry == null || carry is ISelfSimulatedCarryable || IsTool(carry)) return false;
             var go = carry.CarryTransform.gameObject;
-            bool critter = go.layer == LayerMask.NameToLayer(GameLayers.Critter) || go.GetComponent<NavMeshAgent>() != null;
+            bool critter = IsCritter(go);
             if (!critter) return true;
             var pers = FindPersonality(go);
             return (pers != null ? pers.SizeClass : SizeClass.Medium) >= t.LassoMinSize;

@@ -44,9 +44,15 @@ namespace HarvestPanic.Gameplay
         /// <summary>ground_mult: grass 1.0, mud 0.6, plank 0.8.</summary>
         public static float GroundMult(RopeGround g) => g == RopeGround.Mud ? 0.6f : g == RopeGround.Plank ? 0.8f : 1f;
 
-        /// <summary>Ground class for the rope holder: bridge planks, else mud when the movement zones slow you, else grass.</summary>
+        /// <summary>
+        /// Ground class for the rope holder: bridge planks, else mud when the movement zones slow you like mud does
+        /// (mud 0.6, 0.8 with Rubber Boots), else grass. Rain/storm's global ground multiplier (0.9-0.92) is not mud.
+        /// </summary>
         public static RopeGround GroundFor(bool onBridge, float movementMult) =>
-            onBridge ? RopeGround.Plank : movementMult < 0.95f ? RopeGround.Mud : RopeGround.Grass;
+            onBridge ? RopeGround.Plank : movementMult < MudBelow ? RopeGround.Mud : RopeGround.Grass;
+
+        /// <summary>Movement multiplier below which the ground counts as mud.</summary>
+        public const float MudBelow = 0.75f;
 
         /// <summary>
         /// <c>player_anchor = base * (stamina &gt; 0 ? 1 : 0.4) * (helpers + 1) * ground_mult</c> in newtons.

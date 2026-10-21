@@ -358,7 +358,7 @@ namespace HarvestPanic.Gameplay
             if (_serverBody.NetObject == null || _belt.SlotOf(_serverBody.NetObject.NetworkObjectId) <= 0) return; // only pocket tools auto-holster
             ServerRelease(HandlingMode.Dropped); // holsters it (ServerOnReleased)
             _belt.ServerSelect(0);
-            ServerGrab(no, localPoint, true);
+            if (!ServerGrab(no, localPoint, true)) Debug.Log($"[Carry] swap-grab of {no.name} refused (out of reach or taken)");
         }
 
         [Rpc(SendTo.Server)]

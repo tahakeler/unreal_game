@@ -50,6 +50,7 @@ namespace HarvestPanic.Gameplay
                 var wagon = FindPrefab<WagonCart>();
                 if (wagon == null) { _next += 10f; return; }
                 NetworkObject.InstantiateAndSpawn(wagon, nm, position: home.position, rotation: home.rotation);
+                Debug.Log($"[Wagon] spawned at {home.position} (barn {barn.position})");
                 var post = FindPrefab<HitchingPost>();
                 if (post != null)
                 {

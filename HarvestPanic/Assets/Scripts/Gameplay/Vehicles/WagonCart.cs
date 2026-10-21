@@ -365,8 +365,11 @@ namespace HarvestPanic.Gameplay
             int spilled = _cargo.Count;
             for (int i = _cargo.Count - 1; i >= 0; i--)
             {
+                var c = _cargo[i];
                 Vector3 jitter = new Vector3(Random.Range(-1f, 1f), 0f, Random.Range(-1f, 1f)) * 0.8f;
-                Unload(_cargo[i], (down + jitter).normalized * tuning.SpillSpeed + Vector3.up * 2f);
+                Unload(c, (down + jitter).normalized * tuning.SpillSpeed + Vector3.up * 2f);
+                // The money: each spilled item's bruise is booked as TippedWagon on the driver (blame-ledger "tipped the wagon").
+                if (c.Goods != null) { c.Goods.RecordTouch(who); c.Goods.ApplyBruise(tuning.TipSpillImpulse, who, BlameVerb.TippedWagon); }
             }
             ToolBlame.Emit(BlameVerb.TippedWagon, who, string.Empty, "Vehicle.Wagon", transform.position, spilled > 0 ? "Cargo." + spilled : "Vehicle.Wagon");
             NoiseService.TryEmit(NoiseSource.Vehicle, 0.7f, transform.position, NetworkObjectId, who);
@@ -399,6 +402,7 @@ namespace HarvestPanic.Gameplay
             Vector3 at = c.No != null ? c.No.transform.position : transform.position;
             Vector3 side = Random.value < 0.5f ? transform.right : -transform.right;
             Unload(c, side * tuning.SpillSpeed + Vector3.up * 3f + flat);
+            if (c.Goods != null) { c.Goods.RecordTouch(who); c.Goods.ApplyBruise(tuning.BumpSpillImpulse, who, BlameVerb.SpilledCargo); }
             ToolBlame.Emit(BlameVerb.SpilledCargo, who, id, string.IsNullOrEmpty(id) ? "Prop" : id, at, "Vehicle.Wagon");
         }
 
@@ -457,8 +461,8 @@ namespace HarvestPanic.Gameplay
         {
             if (!IsServer || no == null || !no.IsSpawned || _tipped.Value) return false;
             var carry = no.GetComponentInChildren<ICarryable>();
-            if (carry == null || carry is PlayerCharacter || carry is ISelfSimulatedCarryable || carry.IsKinematicCarry) return false;
-            if (carry is CarryableProp prop && prop.IsHolstered) return false;
+            if (carry == null || carry is PlayerCharacter || carry is ISelfSimulatedCarryable || carry is IUsableTool) return false;
+            if (carry is CarryableProp prop && (prop.IsHolstered || prop.IsKinematicCarry)) return false; // tools ride on belts, not in the bed
             var cb = carry.CarryTransform.GetComponent<CarryBody>();
             if (cb != null && cb.GripCount > 0) return false;
             if (LassoTool.IsTetherTarget(no)) return false;
