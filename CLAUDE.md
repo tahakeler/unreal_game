@@ -65,6 +65,27 @@ See `docs/COLLABORATIVE-DESIGN-PRINCIPLE.md` for full protocol and examples.
 > **First session?** If the project has no engine configured and no game concept,
 > run `/start` to begin the guided onboarding flow.
 
+## Routing (GOAT)
+
+Model routing from the owner's Model Routing Playbook. Standing rule: every coding task goes through it.
+
+1. For every coding task, call the triage agent first.
+2. Delegate to the agent matching its route: quick, build or deep.
+   Pass the full task and the triage JSON (it names the owning studio specialist, whose
+   `.claude/agents/<owner>.md` rules the worker follows). Never pass a model parameter.
+3. Then call the verifier with the risk and checks from triage.
+4. If the verifier says FAIL, retry once, one step up:
+   - it skipped a file or didn't run the tests → more effort (quick → build)
+   - it had full context and was still wrong → bigger model (build → deep → escalate)
+5. After any escalation, ask triage to save one line to its memory:
+   "<task pattern> → <route that worked>".
+
+Routes: quick = sonnet/low · build = opus/medium · deep = opus/xhigh · escalate = fable/high ·
+triage = sonnet/low · verifier = sonnet/medium. The main session is the router (`/model sonnet`); don't
+set `CLAUDE_CODE_EFFORT_LEVEL`, it overrides the subagents' own effort. The Stop hook
+`.claude/hooks/check.sh` blocks "done" while EditMode tests fail (only when `HarvestPanic/` changed).
+Design-only work (GDDs, art, audio, narrative) still goes to the studio's domain agents directly.
+
 ## Coding Standards
 
 @.claude/docs/coding-standards.md
