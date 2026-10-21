@@ -204,8 +204,7 @@ namespace HarvestPanic.Gameplay
         {
             if (Carryable is ICarryLoadOverride over)
             {
-                float m = over.CarrierSpeedMultiplier(_grips.Count);
-                foreach (var g in _grips) g.Carrier.ServerSetLoad(m, 0f, g.Hands);
+                foreach (var g in _grips) g.Carrier.ServerSetLoad(over.CarrierSpeedMultiplier(g.Carrier, _grips.Count), 0f, g.Hands);
                 return;
             }
             float mass = Carryable.MassKg;

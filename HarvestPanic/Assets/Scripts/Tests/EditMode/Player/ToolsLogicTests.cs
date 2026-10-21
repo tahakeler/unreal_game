@@ -219,17 +219,23 @@ namespace HarvestPanic.Tests.EditMode.Player
             Assert.That(back.y, Is.EqualTo(-2f / 3f).Within(1e-4), "back-right");
         }
 
-        [Test] public void Wagon_HandleTowBar_PushesAndPulls()
+        [Test] public void Wagon_HandleTowBar_PushesPullsAndNeverInverts()
         {
             Vector3 handle = new Vector3(0f, 1f, 0f);
-            // Player 0.5 m behind a handle that wants 1 m: pushing, force away from the player (+Z).
-            var push = WagonMath.HandleForce(handle, new Vector3(0f, 1f, -0.5f), Vector3.zero, 1f, 1800f, 300f, 900f);
+            Vector3 rearOut = Vector3.back, frontOut = Vector3.forward;
+            // Player 0.5 m behind a rear bar that wants 1 m: pushing, force away from the player (+Z).
+            var push = WagonMath.HandleForce(handle, new Vector3(0f, 1f, -0.5f), Vector3.zero, rearOut, 1f, 1800f, 300f, 900f);
             Assert.That(push.z, Is.GreaterThan(0f));
-            // Player 2 m away: pulling, force toward the player, capped at 900 N.
-            var pull = WagonMath.HandleForce(handle, new Vector3(0f, 1f, 2f), Vector3.zero, 1f, 1800f, 300f, 900f);
+            // Player 2 m ahead of a front bar: pulling, force toward the player, capped at 900 N.
+            var pull = WagonMath.HandleForce(handle, new Vector3(0f, 1f, 2f), Vector3.zero, frontOut, 1f, 1800f, 300f, 900f);
             Assert.That(pull.z, Is.GreaterThan(0f));
             Assert.That(pull.magnitude, Is.EqualTo(900f).Within(1e-2), "900 N per player");
             Assert.That(push.y, Is.EqualTo(0f), "never lifts");
+            // Walked through the rear bar into the cart: still pushes forward, never pulls the cart back onto the player.
+            var through = WagonMath.HandleForce(handle, new Vector3(0f, 1f, 0.4f), Vector3.zero, rearOut, 1f, 1800f, 300f, 900f);
+            Assert.That(through.z, Is.EqualTo(900f).Within(1e-2));
+            Assert.That(WagonMath.HandleGap(handle, new Vector3(0f, 1f, 0.4f), rearOut), Is.EqualTo(-0.4f).Within(1e-4), "wrong side is negative");
+            Assert.That(WagonMath.HandleGap(handle, new Vector3(0.3f, 1f, -1.2f), rearOut), Is.EqualTo(1.2f).Within(1e-4));
         }
 
         [Test] public void Wagon_TuningDefaults_MatchGdd()

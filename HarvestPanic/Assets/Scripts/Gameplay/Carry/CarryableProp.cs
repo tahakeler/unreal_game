@@ -39,6 +39,9 @@ namespace HarvestPanic.Gameplay
 
         public override void OnNetworkSpawn()
         {
+            // Spawned with a pose (InstantiateAndSpawn moves the transform after Instantiate): keep the interpolated
+            // body in step so the first physics step does not snap it back to the instantiate pose.
+            if (IsServer && Body != null) { Body.position = transform.position; Body.rotation = transform.rotation; }
             _holsteredBy.OnValueChanged += OnHolsterChanged;
             ApplyHolsterVisual(IsHolstered);
         }

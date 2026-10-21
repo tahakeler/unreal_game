@@ -83,6 +83,9 @@ namespace HarvestPanic.Gameplay
         public IReadOnlyList<Transform> Handles => handles;
         /// <summary>Server: the cargo objects (tests).</summary>
         public void GetCargo(List<NetworkObject> into) { into.Clear(); foreach (var c in _cargo) if (c.No != null) into.Add(c.No); }
+        /// <summary>Server: per-instance bounce-out chance override (tests, scripted scenes); negative uses the tuning.</summary>
+        public float BumpSpillChanceOverride { get; set; } = -1f;
+
         /// <summary>Server: true when <paramref name="no"/> rides in this bed.</summary>
         public bool HasCargo(NetworkObject no) { foreach (var c in _cargo) if (c.No == no) return true; return false; }
 
@@ -107,7 +110,15 @@ namespace HarvestPanic.Gameplay
 
         public override void OnNetworkSpawn()
         {
-            if (IsServer) CarryHooks.Claiming += OnClaiming;
+            if (IsServer)
+            {
+                CarryHooks.Claiming += OnClaiming;
+                // NGO moves the transform to the spawn pose after Instantiate; an interpolated body would otherwise
+                // snap back to the instantiate pose (origin) on its first physics step.
+                _rb.position = transform.position;
+                _rb.rotation = transform.rotation;
+            }
+            else Debug.Log($"[Wagon] replicated on client at {transform.position}");
         }
 
         public override void OnNetworkDespawn()
@@ -166,12 +177,45 @@ namespace HarvestPanic.Gameplay
         public ArmPose ArmPose => ArmPose.WagonPush;
 
         /// <inheritdoc />
-        public float CarrierSpeedMultiplier(int holders)
+        /// <remarks>
+        /// The GDD pace (<c>v_max / walk</c>), and never more than <see cref="WagonTuning.FollowSlack"/> faster than the
+        /// cart is rolling: a farmer cannot sprint off and leave the cart behind (or walk through their own handle);
+        /// pushing builds up speed together with the cart.
+        /// </remarks>
+        public float CarrierSpeedMultiplier(PlayerCarry carrier, int holders)
         {
             if (_tipped.Value) return 0.6f;
+            var pc = carrier != null ? carrier.Character : null;
+            var pt = pc != null ? pc.Tuning : null;
+            float walk = pt != null ? pt.WalkSpeed : 4f;
+            float baseSpeed = pt != null && pc.MoveMode == 1 ? pt.SprintSpeed : walk;
             float vmax = WagonMath.VMax(holders * tuning.PushForcePerPlayer, _rb.mass, CurrentK(), tuning.VMax);
-            float walk = PlayerCharacter.All.Count > 0 && PlayerCharacter.All[0].Tuning != null ? PlayerCharacter.All[0].Tuning.WalkSpeed : 4f;
-            return WagonMath.CarrierSpeedMult(vmax, walk);
+            Vector3 v = _rb.linearVelocity; v.y = 0f;
+            float m = Mathf.Min(WagonMath.CarrierSpeedMult(vmax, walk), (v.magnitude + tuning.FollowSlack) / Mathf.Max(0.1f, baseSpeed));
+            if (pc != null && HandleGap(carrier, out float gap) && gap < tuning.HandleMinGap) m = Mathf.Min(m, tuning.CrawlMult);
+            return Mathf.Clamp(m, tuning.CrawlMult, 1f);
+        }
+
+        bool HandleGap(PlayerCarry carrier, out float gap)
+        {
+            gap = 0f;
+            foreach (var g in Grips)
+            {
+                if (g.Carrier != carrier) continue;
+                int h = NearestHandle(g.LocalPoint);
+                if (h < 0) return false;
+                gap = WagonMath.HandleGap(transform.TransformPoint(g.LocalPoint), carrier.Character.transform.position, Outward(h));
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>Outward axis of a handle: ahead of the front pull bar (0-1), behind the rear push bar (2-3).</summary>
+        Vector3 Outward(int handle)
+        {
+            Vector3 f = transform.forward; f.y = 0f;
+            f = f.sqrMagnitude > 1e-6f ? f.normalized : Vector3.forward;
+            return handle <= 1 ? f : -f;
         }
 
         float CurrentK()
@@ -217,6 +261,9 @@ namespace HarvestPanic.Gameplay
         void Drive(float dt)
         {
             int front = -1;
+            foreach (var g in Grips) if (g.Carrier != null && NearestHandle(g.LocalPoint) is int fh && fh >= 0 && fh <= 1) front = fh;
+            Vector3 axis = Vector3.ProjectOnPlane(transform.forward, Vector3.up);
+            axis = axis.sqrMagnitude > 1e-6f ? axis.normalized : Vector3.forward;
             // Handle springs.
             foreach (var g in Grips)
             {
@@ -224,8 +271,8 @@ namespace HarvestPanic.Gameplay
                 if (carrier == null || carrier.Character == null) continue;
                 int h = NearestHandle(g.LocalPoint);
                 if (h < 0) continue;
-                if (h <= 1) front = h;
-                Vector3 hp = handles[h].position;
+                // Force through the hand: the grab point on the bar (a farmer at one end of the bar turns the cart).
+                Vector3 hp = transform.TransformPoint(g.LocalPoint);
                 var pc = carrier.Character;
                 Vector3 chest = pc.transform.position + Vector3.up * 1.0f;
                 if (!_rest.TryGetValue(carrier, out float rest))
@@ -236,7 +283,10 @@ namespace HarvestPanic.Gameplay
                 float flat = LassoMath.FlatDistance(hp, chest);
                 if (flat > tuning.HandleSlipDistance) { carrier.ServerOnGripLost(); _body.RemoveGrip(carrier, HandlingMode.Slipped); continue; }
                 Vector3 rel = _rb.GetPointVelocity(hp) - pc.Velocity;
-                Vector3 f = WagonMath.HandleForce(hp, chest, rel, rest, tuning.HandleStiffness, tuning.HandleDamping, tuning.PushForcePerPlayer);
+                Vector3 f = WagonMath.HandleForce(hp, chest, rel, Outward(h), rest, tuning.HandleStiffness, tuning.HandleDamping, tuning.PushForcePerPlayer);
+                // Rule 3: the front handle steers; with nobody there the axle stays centred, so rear pushers push along
+                // the cart (a pusher slightly off-line does not swing it into the bridge posts).
+                if (h >= 2 && front < 0) f = axis * Vector3.Dot(f, axis);
                 _rb.AddForceAtPosition(f, new Vector3(hp.x, _rb.worldCenterOfMass.y, hp.z));
                 _lastPusher = carrier.OwnerClientId;
             }
@@ -250,15 +300,22 @@ namespace HarvestPanic.Gameplay
             Vector3 right = Vector3.Cross(Vector3.up, fwd);
             float m = _rb.mass;
 
-            // Sideways grip per axle: the rear axle is fixed; the front axle steers while someone holds the front handle.
-            Vector3 rearAxle = transform.TransformPoint(new Vector3(0f, wheelRadius, -tuning.BedLength * 0.35f));
-            Vector3 frontAxle = transform.TransformPoint(new Vector3(0f, wheelRadius, tuning.BedLength * 0.35f));
-            float rearLat = Vector3.Dot(_rb.GetPointVelocity(rearAxle), right);
-            _rb.AddForceAtPosition(-right * rearLat * m * 0.5f * tuning.LateralGrip, rearAxle);
+            // Sideways grip. Nobody at the front handle: the front axle is centred (rule 3), so with both axles fixed the
+            // cart can only roll along its heading: side-slip and yaw rate are taken out directly. A driver at the front
+            // steers: only the rear axle grips and the front follows the pull.
+            float grip = Mathf.Clamp01(tuning.LateralGrip * dt);
             if (front < 0)
             {
-                float frontLat = Vector3.Dot(_rb.GetPointVelocity(frontAxle), right);
-                _rb.AddForceAtPosition(-right * frontLat * m * 0.5f * tuning.LateralGrip, frontAxle);
+                Vector3 lv = _rb.linearVelocity;
+                _rb.linearVelocity = lv - right * Vector3.Dot(lv, right) * grip;
+                Vector3 av = _rb.angularVelocity;
+                _rb.angularVelocity = av - Vector3.up * Vector3.Dot(av, Vector3.up) * grip;
+            }
+            else
+            {
+                Vector3 rearAxle = transform.TransformPoint(new Vector3(0f, wheelRadius, -tuning.BedLength * 0.35f));
+                float rearLat = Vector3.Dot(_rb.GetPointVelocity(rearAxle), right);
+                _rb.AddForceAtPosition(-right * rearLat * m * 0.5f * tuning.LateralGrip, rearAxle);
             }
 
             // Rolling resistance: v_max = F / (m k) under a constant push (section 4).
@@ -391,11 +448,12 @@ namespace HarvestPanic.Gameplay
             float vy = _rb.linearVelocity.y;
             float accel = (vy - _lastVy) / Mathf.Max(1e-4f, dt);
             _lastVy = vy;
-            if (_cargo.Count == 0 || _tipped.Value || tuning.BumpSpillChance <= 0f || now < _nextBump) return;
+            float chance = BumpSpillChanceOverride >= 0f ? BumpSpillChanceOverride : tuning.BumpSpillChance;
+            if (_cargo.Count == 0 || _tipped.Value || chance <= 0f || now < _nextBump) return;
             Vector3 flat = _rb.linearVelocity; flat.y = 0f;
             if (accel < WagonMath.BounceThreshold(tuning.WallHeight) || flat.magnitude < tuning.BumpMinSpeed) return;
             _nextBump = now + tuning.BumpCooldown;
-            if (Random.value >= tuning.BumpSpillChance) return;
+            if (Random.value >= chance) return;
             var c = _cargo[Random.Range(0, _cargo.Count)];
             ulong who = _driver.Value != PlayerIds.None ? _driver.Value : _lastPusher;
             string id = c.Goods != null ? c.Goods.GoodsId : string.Empty;

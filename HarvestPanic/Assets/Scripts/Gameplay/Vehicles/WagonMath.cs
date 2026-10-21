@@ -62,18 +62,33 @@ namespace HarvestPanic.Gameplay
         public static float CargoBruise(float designImpulse, float cushion) => Mathf.Max(0f, designImpulse) * Mathf.Clamp01(cushion);
 
         /// <summary>
-        /// Handle "tow bar": force (N, horizontal) that keeps a grip <paramref name="rest"/> metres from the player.
-        /// Pushing closes the gap (force away from the player), pulling opens it (force toward the player).
+        /// Signed distance of the player outside a handle bar along its <paramref name="outward"/> axis (behind a rear
+        /// push bar, ahead of a front pull bar); negative once they have walked through it into the cart.
         /// </summary>
-        public static Vector3 HandleForce(Vector3 handle, Vector3 player, Vector3 relVelocity, float rest, float stiffness, float damping, float maxForce)
+        public static float HandleGap(Vector3 handle, Vector3 player, Vector3 outward)
         {
-            Vector3 d = handle - player; d.y = 0f;
-            float dist = d.magnitude;
-            Vector3 n = dist > 1e-4f ? d / dist : Vector3.forward;
+            Vector3 d = player - handle; d.y = 0f; outward.y = 0f;
+            return Vector3.Dot(d, outward.sqrMagnitude > 1e-6f ? outward.normalized : Vector3.back);
+        }
+
+        /// <summary>
+        /// Handle "tow bar": horizontal force (N) on the handle that keeps the player <paramref name="rest"/> metres
+        /// outside the bar. Too close pushes the handle away (pushing the cart), too far pulls it toward the player
+        /// (pulling). A player who ends up on the wrong side of the bar only ever pushes along the cart's axis, so the
+        /// bar never yanks the cart back onto them.
+        /// </summary>
+        public static Vector3 HandleForce(Vector3 handle, Vector3 player, Vector3 relVelocity, Vector3 outward, float rest, float stiffness, float damping, float maxForce)
+        {
+            outward.y = 0f;
+            outward = outward.sqrMagnitude > 1e-6f ? outward.normalized : Vector3.back;
+            Vector3 d = player - handle; d.y = 0f; // from the handle to the player
+            float along = Vector3.Dot(d, outward);
+            bool outside = along > 0.2f && d.sqrMagnitude > 1e-6f;
+            Vector3 dir = outside ? d.normalized : outward;
+            float dist = outside ? d.magnitude : along;
             relVelocity.y = 0f;
-            float stretch = dist - rest;
-            float f = -stiffness * stretch - damping * Vector3.Dot(relVelocity, n);
-            return n * Mathf.Clamp(f, -maxForce, maxForce);
+            float f = stiffness * (dist - rest) - damping * Vector3.Dot(relVelocity, dir);
+            return dir * Mathf.Clamp(f, -maxForce, maxForce);
         }
     }
 

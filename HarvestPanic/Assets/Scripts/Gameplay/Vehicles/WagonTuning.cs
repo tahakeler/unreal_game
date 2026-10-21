@@ -22,7 +22,10 @@ namespace HarvestPanic.Gameplay
         [Tooltip("Handle damping (N per m/s)")] public float HandleDamping = 300f;
         [Tooltip("Grip distance kept between a player and their handle (m), clamped from the grab distance")] public Vector2 HandleRest = new Vector2(0.75f, 1.15f);
         [Tooltip("Grip breaks when the handle is this far from the holder (m)")] public float HandleSlipDistance = 2.8f;
-        [Tooltip("Sideways tyre grip: fraction of lateral speed removed per second")] public float LateralGrip = 10f;
+        [Tooltip("A holder walks at most this much faster than the wagon is rolling (m/s), so pushing ramps up with the cart")] public float FollowSlack = 1.5f;
+        [Tooltip("Holder closer than this to their own handle walks at the crawl multiplier (the cart is blocked) (m)")] public float HandleMinGap = 0.45f;
+        [Tooltip("Movement multiplier while the cart does not give way")] public float CrawlMult = 0.12f;
+        [Tooltip("Sideways tyre grip: fraction of lateral speed removed per second (fixed axles track their heading)")] public float LateralGrip = 40f;
         [Tooltip("Extra rolling drag with nobody on the handles (per second)")] public float IdleRollDrag = 3f;
         [Tooltip("Below this speed with nobody holding, the parking brake holds it (m/s)")] public float ParkSpeed = 0.6f;
 

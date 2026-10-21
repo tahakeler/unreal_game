@@ -47,8 +47,8 @@ namespace HarvestPanic.Gameplay
     /// </summary>
     public interface ICarryLoadOverride
     {
-        /// <summary>Server: movement multiplier for each holder with <paramref name="holders"/> players attached.</summary>
-        float CarrierSpeedMultiplier(int holders);
+        /// <summary>Server: movement multiplier for <paramref name="carrier"/> with <paramref name="holders"/> players attached.</summary>
+        float CarrierSpeedMultiplier(PlayerCarry carrier, int holders);
     }
 
     /// <summary>Optional custom E prompts for unusual carryables (wagon handles).</summary>

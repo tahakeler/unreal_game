@@ -199,13 +199,13 @@ namespace HarvestPanic.Gameplay.Editor
                 axle.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
                 foreach (float s in new[] { -1f, 1f })
                 {
-                    // Sphere colliders sit under the bed so the cart stays 1.6 m wide on the 2.4 m bridge; the
-                    // visual wheels sit outside.
+                    // Sphere colliders sit under the bed (inside the walls) so the walls are the widest part of the
+                    // cart (1.38 m) between the 2.25 m bridge-entrance posts; the visual wheels sit outside.
                     var pos = new Vector3(s * (w * 0.5f + 0.16f), r, z);
                     var sc = new GameObject("WheelCollider");
                     sc.layer = layer;
                     sc.transform.SetParent(root.transform, false);
-                    sc.transform.localPosition = new Vector3(s * 0.42f, r, z);
+                    sc.transform.localPosition = new Vector3(s * 0.3f, r, z);
                     var sph = sc.AddComponent<SphereCollider>(); sph.radius = r; sph.sharedMaterial = wheelMat;
                     var wv = Child(v, "Wheel", pos);
                     var rim = Prim(PrimitiveType.Cylinder, "Rim", wv, Vector3.zero, new Vector3(r * 2f, 0.05f, r * 2f), woodDark);

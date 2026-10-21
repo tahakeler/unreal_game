@@ -56,6 +56,8 @@ namespace HarvestPanic.Tests.PlayMode.Tools
 
         public static IEnumerator Teleport(PlayerCharacter pc, Vector3 pos, float yaw)
         {
+            pc.Input.UseScripted = true; // tests drive the farmer through scripted input from here on
+            pc.Input.Scripted.Move = Vector2.zero;
             pc.OwnerTeleport(pos + Vector3.up * 0.05f, Quaternion.Euler(0f, yaw, 0f));
             pc.Motor.SetLook(yaw, 0f);
             for (int i = 0; i < 4; i++) yield return new WaitForFixedUpdate();
@@ -99,6 +101,26 @@ namespace HarvestPanic.Tests.PlayMode.Tools
             if (down) yield return Tap(pc, i => { i.Scripted.UsePressed = true; i.Scripted.UseHeld = true; });
             else yield return Tap(pc, i => { i.Scripted.UseReleased = true; i.Scripted.UseHeld = false; });
             yield return null;
+        }
+
+        /// <summary>
+        /// A yaw from <paramref name="from"/> with nothing in the way for <paramref name="distance"/> m at chest and knee
+        /// height (fences, buildings) and NavMesh at the end, so a critter can be put there and lassoed.
+        /// </summary>
+        public static float ClearYaw(Vector3 from, float distance)
+        {
+            int mask = ~LayerMask.GetMask(GameLayers.Player, GameLayers.Critter, GameLayers.Carryable, GameLayers.Ragdoll, GameLayers.Interactable, GameLayers.Water, "Ignore Raycast");
+            for (int i = 0; i < 16; i++)
+            {
+                float yaw = i * 22.5f;
+                Vector3 dir = Quaternion.Euler(0f, yaw, 0f) * Vector3.forward;
+                if (Physics.Raycast(from + Vector3.up * 1.2f, dir, distance + 1f, mask, QueryTriggerInteraction.Ignore)) continue;
+                if (Physics.Raycast(from + Vector3.up * 0.4f, dir, distance + 1f, mask, QueryTriggerInteraction.Ignore)) continue;
+                if (!NavMesh.SamplePosition(from + dir * distance, out var hit, 0.5f, NavMesh.AllAreas)) continue;
+                return yaw;
+            }
+            Assert.Fail("no clear direction from " + from);
+            return 0f;
         }
 
         public static Goods Goods(string id, int skip = 0) => HarvestPanic.Economy.Goods.All.Where(g => g != null && g.GoodsId == id).Skip(skip).FirstOrDefault();
@@ -209,14 +231,16 @@ namespace HarvestPanic.Tests.PlayMode.Tools
             Assert.That(post, Is.Not.Null, "the bootstrapper spawns a hitching post at the farm");
             Vector3 knot = post.Tie.transform.position;
             Vector3 spot = Farm.Ground(knot + new Vector3(1.2f, 0f, -1.2f));
-            yield return Farm.Teleport(pc, spot, 180f);
+            float yaw = Farm.ClearYaw(spot, 5f);
+            Vector3 toPig = Quaternion.Euler(0f, yaw, 0f) * Vector3.forward;
+            yield return Farm.Teleport(pc, spot, yaw);
             yield return Farm.Equip(pc, ToolSlot.Lasso);
             var lasso = belt.PocketTool<LassoTool>(ToolSlot.Lasso);
             var pig = Farm.Critters("Critter.Pig").Skip(1).FirstOrDefault() ?? Farm.Critters("Critter.Pig").First();
             bool caught = false;
             for (int attempt = 0; attempt < 3 && !caught; attempt++)
             {
-                Farm.Warp(pig, spot + Vector3.back * 5f);
+                Farm.Warp(pig, spot + toPig * 5f);
                 yield return new WaitForFixedUpdate();
                 pc.Motor.LookAt(pig.transform.position + Vector3.up * 0.35f);
                 yield return Farm.Press(pc, true);
@@ -408,18 +432,26 @@ namespace HarvestPanic.Tests.PlayMode.Tools
             return Mathf.Abs(local.x) <= box.size.x * 0.5f && Mathf.Abs(local.z) <= box.size.z * 0.5f;
         }
 
+        /// <summary>Grabs the front (0) or rear (2) handle bar in its middle, then looks straight along the wagon.</summary>
         IEnumerator GrabHandle(PlayerCharacter pc, WagonCart wagon, int handle)
         {
-            var h = wagon.Handles[handle];
+            Vector3 bar = (wagon.Handles[handle].position + wagon.Handles[handle + 1].position) * 0.5f;
             for (int i = 0; i < 3 && pc.Carry.HeldId != wagon.NetworkObjectId; i++)
             {
-                pc.Motor.LookAt(h.position);
+                pc.Motor.LookAt(bar);
                 yield return null;
-                if (!pc.Carry.TryGrabAimed()) Debug.Log($"[ToolsQA] nothing aimed at handle {handle}");
+                if (!pc.Carry.TryGrabAimed())
+                {
+                    var cp = pc.CameraPivot;
+                    bool hit = Physics.Raycast(cp.position, cp.forward, out var rh, 4f, ~0, QueryTriggerInteraction.Ignore);
+                    Debug.Log($"[ToolsQA] nothing aimed at handle {handle}: cam {cp.position} bar {bar} me {pc.transform.position} hit {(hit ? rh.collider.name + "@" + rh.distance.ToString("0.00") : "none")}");
+                }
                 float until = Time.time + 1f;
                 while (pc.Carry.HeldId != wagon.NetworkObjectId && Time.time < until) yield return null;
             }
             Assert.That(pc.Carry.HeldId, Is.EqualTo(wagon.NetworkObjectId), "wagon handle not grabbed");
+            pc.Motor.SetLook(pc.transform.eulerAngles.y, 8f);
+            yield return new WaitForFixedUpdate();
         }
 
         IEnumerator LoadCrates(WagonCart wagon, int count, List<Goods> into)
@@ -455,6 +487,7 @@ namespace HarvestPanic.Tests.PlayMode.Tools
             float west = planks.Min(p => p.transform.position.x) - 1f, east = planks.Max(p => p.transform.position.x) + 1f;
             Vector3 start = Farm.Ground(new Vector3(west - 6f, 0f, 0f)) + Vector3.up * 0.1f;
             wagon.ServerPlace(start, Quaternion.Euler(0f, 90f, 0f));
+            wagon.BumpSpillChanceOverride = 0f; // this test is about the plank load; random bounce-outs are covered by WagonMath
             yield return new WaitForSeconds(1f);
             var crates = new List<Goods>();
             yield return LoadCrates(wagon, 3, crates);
@@ -465,13 +498,15 @@ namespace HarvestPanic.Tests.PlayMode.Tools
             yield return Farm.Teleport(pc, Farm.Ground(wagon.transform.TransformPoint(new Vector3(0f, 0f, -2.3f))), 90f);
             yield return GrabHandle(pc, wagon, 2);
             yield return new WaitForSeconds(0.3f);
-            Assert.That(pc.Carry.SpeedMultiplier, Is.GreaterThan(0.5f), "pushing a light wagon is not a 120 kg lift");
             pc.Input.Scripted.Move = new Vector2(0f, 1f);
+            float bestMult = 0f, bestSpeed = 0f;
             float midX = (west + east) * 0.5f;
             float until = Time.time + 25f, nextLog = 0f;
             var wrb = wagon.GetComponent<Rigidbody>();
             while (wagon.transform.position.x < midX && Time.time < until)
             {
+                bestMult = Mathf.Max(bestMult, pc.Carry.SpeedMultiplier);
+                bestSpeed = Mathf.Max(bestSpeed, new Vector2(wrb.linearVelocity.x, wrb.linearVelocity.z).magnitude);
                 if (Time.time >= nextLog)
                 {
                     nextLog = Time.time + 0.5f;
@@ -481,6 +516,9 @@ namespace HarvestPanic.Tests.PlayMode.Tools
             }
             pc.Input.Scripted.Move = Vector2.zero;
             Assert.That(wagon.transform.position.x, Is.GreaterThanOrEqualTo(midX), $"wagon stuck at {wagon.transform.position}");
+            Debug.Log($"[ToolsQA] push top speed {bestSpeed:0.00} m/s, best walk multiplier {bestMult:0.00}");
+            Assert.That(bestMult, Is.GreaterThan(0.8f), "a rolling light wagon lets the farmer walk (not a 120 kg lift)");
+            Assert.That(bestSpeed, Is.LessThanOrEqualTo(wagon.Tuning.VMax + 0.3f), "never faster than v_max");
 
             // Stop on the bridge: let go and let the planks sample a still load.
             yield return new WaitForSeconds(0.4f);
@@ -526,7 +564,7 @@ namespace HarvestPanic.Tests.PlayMode.Tools
         {
             var pc = PlayerCharacter.Local;
             var wagon = WagonCart.All[0];
-            Vector3 home = Farm.Ground(wagon.transform.position) + Vector3.up * 0.1f;
+            Vector3 home = Farm.Ground(new Vector3(30f, 0f, 0f)) + Vector3.up * 0.1f; // open road (the barn yard has props in front of the wagon)
             wagon.ServerPlace(home, Quaternion.Euler(0f, 90f, 0f));
             yield return new WaitForSeconds(1f);
             var crates = new List<Goods>();
@@ -535,7 +573,7 @@ namespace HarvestPanic.Tests.PlayMode.Tools
 
             // Driver at the front handle.
             yield return Farm.Teleport(pc, Farm.Ground(wagon.transform.TransformPoint(new Vector3(0f, 0f, 2.7f))), 270f);
-            yield return GrabHandle(pc, wagon, 0);
+            yield return GrabHandle(pc, wagon, 0); // aimed grab of the front (driver) bar
             yield return new WaitForSeconds(0.4f);
             Assert.That(wagon.Driver, Is.EqualTo(pc.OwnerClientId), "front handle holder drives");
             var bruiseBefore = crates.Select(c => c.BruisePoints).ToArray();
