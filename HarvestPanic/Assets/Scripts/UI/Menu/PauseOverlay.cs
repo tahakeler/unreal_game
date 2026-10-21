@@ -54,7 +54,39 @@ namespace HarvestPanic.UI
             _prevLock = Cursor.lockState; _prevVisible = Cursor.visible;
             Cursor.lockState = CursorLockMode.None; Cursor.visible = true;
             _panel.Root.style.display = DisplayStyle.Flex;
+            RefreshVoiceRow();
             ShowLayer(Layer.Main);
+        }
+
+        /// <summary>Proximity voice (feature/voice-chat): one "Mute / Unmute name" button per other player, above Leave.</summary>
+        void RefreshVoiceRow()
+        {
+            var leave = _panel.Root.Q<Button>("btn-leave");
+            var help = _panel.Root.Q<Button>("btn-help");
+            if (leave == null || leave.parent == null) return;
+            var row = _panel.Root.Q("pause-voice");
+            if (row == null)
+            {
+                row = new VisualElement { name = "pause-voice" };
+                leave.parent.Insert(leave.parent.IndexOf(leave), row);
+            }
+            row.Clear();
+            int n = 0;
+            if (Services.TryGet(out IVoiceChat voice) && Services.TryGet(out ISessionService s) && s.IsConnected)
+            {
+                foreach (var p in s.Players)
+                {
+                    if (p.ClientId == s.LocalClientId) continue;
+                    ulong id = p.ClientId;
+                    string who = string.IsNullOrEmpty(p.Name) ? "Farmer" : p.Name;
+                    var b = new Button(() => { voice.SetMuted(id, !voice.IsMuted(id)); RefreshVoiceRow(); })
+                    { name = "btn-mute-" + id, text = (voice.IsMuted(id) ? "Unmute " : "Mute ") + who };
+                    if (help != null) foreach (var c in help.GetClasses()) b.AddToClassList(c);
+                    row.Add(b);
+                    n++;
+                }
+            }
+            row.style.display = n > 0 ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
         /// <summary>Esc/B: sub-layer back to main, main closes.</summary>
