@@ -59,6 +59,7 @@ namespace HarvestPanic.Gameplay
 
         readonly List<Cargo> _cargo = new List<Cargo>();
         readonly Dictionary<PlayerCarry, float> _rest = new Dictionary<PlayerCarry, float>();
+        readonly Dictionary<ulong, float> _letGoAt = new Dictionary<ulong, float>();
         readonly List<Collider> _own = new List<Collider>();
         WagonSlots _slots;
         Rigidbody _rb;
@@ -147,6 +148,7 @@ namespace HarvestPanic.Gameplay
         public void OnReleased(ulong clientId)
         {
             if (!IsServer) return;
+            _letGoAt[clientId] = Time.time;
             var pc = PlayerCharacter.Find(clientId);
             if (pc != null && pc.Carry != null) _rest.Remove(pc.Carry);
         }
@@ -221,7 +223,7 @@ namespace HarvestPanic.Gameplay
         float CurrentK()
         {
             Vector3 p = transform.position;
-            bool bridge = Physics.Raycast(p + Vector3.up * 0.5f, Vector3.down, 2f, LayerMask.GetMask(GameLayers.Bridge), QueryTriggerInteraction.Ignore);
+            bool bridge = Physics.Raycast(p + Vector3.up * 0.5f, Vector3.down, 2f, Masks.Bridge, QueryTriggerInteraction.Ignore);
             var g = WagonMath.GroundFor(bridge, MovementModifiers.Evaluate(p));
             return WagonMath.RollingK(g, tuning.RollingKDirt, tuning.RollingKMud, tuning.RollingKPlank);
         }
@@ -315,7 +317,8 @@ namespace HarvestPanic.Gameplay
             {
                 Vector3 rearAxle = transform.TransformPoint(new Vector3(0f, wheelRadius, -tuning.BedLength * 0.35f));
                 float rearLat = Vector3.Dot(_rb.GetPointVelocity(rearAxle), right);
-                _rb.AddForceAtPosition(-right * rearLat * m * 0.5f * tuning.LateralGrip, rearAxle);
+                // Off-centre force: keep the per-step correction well under 1 so it cannot overshoot.
+                _rb.AddForceAtPosition(-right * rearLat * m * 0.5f * Mathf.Min(tuning.LateralGrip, 15f), rearAxle);
             }
 
             // Rolling resistance: v_max = F / (m k) under a constant push (section 4).
@@ -357,13 +360,21 @@ namespace HarvestPanic.Gameplay
             return best;
         }
 
+        readonly Vector3[] _wheelProbes = new Vector3[4];
+        int _groundMask;
+
         bool Grounded()
         {
-            int mask = ~LayerMask.GetMask(GameLayers.Player, GameLayers.Carryable, GameLayers.Critter, GameLayers.Ragdoll, GameLayers.Interactable, GameLayers.Water, "Ignore Raycast");
+            if (_groundMask == 0)
+            {
+                _groundMask = Masks.Ground;
+                float x = tuning.BedWidth * 0.6f, z = tuning.BedLength * 0.35f;
+                _wheelProbes[0] = new Vector3(-x, wheelRadius, z); _wheelProbes[1] = new Vector3(x, wheelRadius, z);
+                _wheelProbes[2] = new Vector3(-x, wheelRadius, -z); _wheelProbes[3] = new Vector3(x, wheelRadius, -z);
+            }
             int n = 0;
-            float x = tuning.BedWidth * 0.6f, z = tuning.BedLength * 0.35f;
-            foreach (var c in new[] { new Vector3(-x, 0f, z), new Vector3(x, 0f, z), new Vector3(-x, 0f, -z), new Vector3(x, 0f, -z) })
-                if (Physics.Raycast(transform.TransformPoint(c + Vector3.up * wheelRadius), -transform.up, wheelRadius + 0.15f, mask, QueryTriggerInteraction.Ignore)) n++;
+            for (int i = 0; i < _wheelProbes.Length; i++)
+                if (Physics.Raycast(transform.TransformPoint(_wheelProbes[i]), -transform.up, wheelRadius + 0.15f, _groundMask, QueryTriggerInteraction.Ignore)) n++;
             return n >= 2;
         }
 
@@ -435,7 +446,7 @@ namespace HarvestPanic.Gameplay
 
         void CheckWater()
         {
-            bool wet = Physics.CheckSphere(transform.position + Vector3.up * 0.4f, 0.4f, LayerMask.GetMask(GameLayers.Water), QueryTriggerInteraction.Collide);
+            bool wet = Physics.CheckSphere(transform.position + Vector3.up * 0.4f, 0.4f, Masks.Water, QueryTriggerInteraction.Collide);
             if (wet && !_inWater)
             {
                 // Into the river: the cargo floats off (the river soaks/sweeps it); the cart is swept to the pile.
@@ -471,12 +482,18 @@ namespace HarvestPanic.Gameplay
             float design = ImpactUnits.ToDesign(c.impulse.magnitude);
             ulong who = _driver.Value != PlayerIds.None ? _driver.Value : _lastPusher;
             Vector3 flat = _rb.linearVelocity; flat.y = 0f;
-            // Runaway wagon vs a farmer who is not on the handles.
-            if (Knockables.TryGetFor(c.collider.gameObject, out var knock) && flat.magnitude > tuning.KnockSpeed)
+            // Runaway wagon vs a farmer who is not on the handles (moving toward them; not someone who just let go of it
+            // while standing against it, whose collisions with the cart were only just switched back on).
+            if (Knockables.TryGetFor(c.collider.gameObject, out var knock))
             {
                 bool holder = false;
                 foreach (var g in Grips) if (g.Carrier != null && c.collider.transform.IsChildOf(g.Carrier.transform)) holder = true;
-                if (!holder) knock.ApplyImpulse(flat.normalized * Mathf.Max(design, flat.magnitude * _rb.mass * 0.5f), who, BlameVerb.Crashed);
+                var victim = c.collider.GetComponentInParent<PlayerCharacter>();
+                bool justLetGo = victim != null && _letGoAt.TryGetValue(victim.OwnerClientId, out float t) && Time.time - t < 1f;
+                Vector3 toVictim = c.collider.transform.position - transform.position; toVictim.y = 0f;
+                float closing = toVictim.sqrMagnitude > 1e-4f ? Vector3.Dot(flat, toVictim.normalized) : 0f;
+                if (!holder && !justLetGo && closing > tuning.KnockSpeed)
+                    knock.ApplyImpulse(flat.normalized * Mathf.Max(design, closing * _rb.mass * 0.5f), who, BlameVerb.Crashed);
             }
             if (design < tuning.CargoHitMin) return;
             float bruise = WagonMath.CargoBruise(design, tuning.CargoCushion);
@@ -493,7 +510,7 @@ namespace HarvestPanic.Gameplay
                 if (_cargo[i].No == body) { Unload(_cargo[i], Vector3.zero); return; }
         }
 
-        int LoadMask => LayerMask.GetMask(GameLayers.Carryable, GameLayers.Critter);
+        static int LoadMask => Masks.Cargo;
 
         void ScanBed()
         {

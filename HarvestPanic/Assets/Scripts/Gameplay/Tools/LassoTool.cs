@@ -194,7 +194,7 @@ namespace HarvestPanic.Gameplay
 
         public override void OnNetworkDespawn()
         {
-            if (IsServer) { EndTether(false); CarryHooks.Claiming -= OnClaiming; }
+            if (IsServer) { ReleaseTarget(); CarryHooks.Claiming -= OnClaiming; } // no NetworkVariable writes while despawning
             base.OnNetworkDespawn();
         }
 
@@ -253,7 +253,7 @@ namespace HarvestPanic.Gameplay
         public override void OnReleased(ulong clientId)
         {
             base.OnReleased(clientId);
-            if (!IsServer || _tying) return;
+            if (!IsServer || !IsSpawned || _tying) return;
             _reeling.Value = false;
             if (Phase == LassoPhase.Aiming) _phase.Value = (byte)LassoPhase.Idle;
             else if (IsTethered && !IsTied && !_waterSki) EndTether(false); // let go of the rope
@@ -274,7 +274,7 @@ namespace HarvestPanic.Gameplay
 
         // ================================================================================================ server: throw
 
-        static int AimMask => ~LayerMask.GetMask(GameLayers.Water, "Ignore Raycast", "UI", GameLayers.Interactable);
+        static int AimMask => Masks.Aim;
 
         void Throw(PlayerCarry user)
         {
@@ -602,7 +602,7 @@ namespace HarvestPanic.Gameplay
             if (face.sqrMagnitude > 1e-4f) _targetRb.MoveRotation(Quaternion.LookRotation(-face.normalized)); // dragged backwards
         }
 
-        static int GroundMask => ~LayerMask.GetMask(GameLayers.Player, GameLayers.Critter, GameLayers.Carryable, GameLayers.Ragdoll, GameLayers.Interactable, "Ignore Raycast", "UI");
+        static int GroundMask => Masks.GroundOrWater;
 
         /// <summary>Ground height under <paramref name="p"/>; <paramref name="water"/> when the first thing below is the river.</summary>
         static bool GroundBelow(Vector3 p, out float y, out bool water)
@@ -615,7 +615,7 @@ namespace HarvestPanic.Gameplay
         }
 
         static bool InWater(Vector3 p) =>
-            Physics.CheckSphere(p, 0.25f, LayerMask.GetMask(GameLayers.Water), QueryTriggerInteraction.Collide);
+            Physics.CheckSphere(p, 0.25f, Masks.Water, QueryTriggerInteraction.Collide);
 
         void StartWaterSki(Vector3 away)
         {
@@ -647,7 +647,7 @@ namespace HarvestPanic.Gameplay
         static RopeGround GroundUnder(PlayerCharacter pc)
         {
             Vector3 p = pc.transform.position;
-            bool bridge = Physics.Raycast(p + Vector3.up * 0.3f, Vector3.down, 1.2f, LayerMask.GetMask(GameLayers.Bridge), QueryTriggerInteraction.Ignore);
+            bool bridge = Physics.Raycast(p + Vector3.up * 0.3f, Vector3.down, 1.2f, Masks.Bridge, QueryTriggerInteraction.Ignore);
             return LassoMath.GroundFor(bridge, MovementModifiers.Evaluate(p));
         }
 
@@ -743,6 +743,19 @@ namespace HarvestPanic.Gameplay
             }
             Vector3 from = _target != null ? TargetPoint(_target) : _loopPos.Value;
             bool wasTied = IsTied;
+            ReleaseTarget();
+            _targetId.Value = PlayerCarry.NoObject;
+            _reeling.Value = false;
+            SetAnchor(AnchorMode.Holder, _holderPc != null ? _holderPc.NetworkObject : null, null, Vector3.zero);
+            if (wasTied && Body != null && !IsHolstered) Body.isKinematic = false; // the coil drops off the post
+            bool held = _user != null && _user.ServerBody != null && _user.ServerBody.NetObject == NetworkObject;
+            if (retract && held) StartRetract(from);
+            else _phase.Value = (byte)LassoPhase.Idle;
+        }
+
+        /// <summary>Server: lets go of the catch (joint, yank, drain, registry) without touching replicated state.</summary>
+        void ReleaseTarget()
+        {
             DestroyJoint();
             if (_yanked) EndYank();
             if (_targetEvents != null) _targetEvents.OnForcedRelease -= OnTargetBrokeFree;
@@ -751,13 +764,6 @@ namespace HarvestPanic.Gameplay
             _target = null; _targetPlayer = null; _targetCarry = null; _targetEvents = null; _goods = null; _agent = null; _targetRb = null; _personality = null;
             _mode = TargetMode.None;
             _waterSki = false; _overSince = -1f;
-            _targetId.Value = PlayerCarry.NoObject;
-            _reeling.Value = false;
-            SetAnchor(AnchorMode.Holder, _holderPc != null ? _holderPc.NetworkObject : null, null, Vector3.zero);
-            if (wasTied && Body != null && !IsHolstered) Body.isKinematic = false; // the coil drops off the post
-            bool held = _user != null && _user.ServerBody != null && _user.ServerBody.NetObject == NetworkObject;
-            if (retract && held) StartRetract(from);
-            else _phase.Value = (byte)LassoPhase.Idle;
         }
 
         void SetAnchor(AnchorMode mode, NetworkObject obj, Rigidbody rb, Vector3 point)

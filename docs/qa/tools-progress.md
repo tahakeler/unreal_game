@@ -1,30 +1,48 @@
 # Tools, wagon, lasso, whistle — progress (feature/wagon-lasso-whistle)
 
-Owner: Player team (gameplay-programmer). Scope: `Scripts/Gameplay/Tools`, new `Scripts/Gameplay/Vehicles`, tool/wagon prefabs.
-Specs: `design/gdd/farm-tools.md`, `design/gdd/wagon-vehicles.md`, `design/gdd/physics-carry.md`, GDD ch.5 and 7.
-
-## Plan (session 1)
-- Lasso tool (aim, server-simulated throw, 6 m tether, reel, auto-grab at 1.5 m, tie to post/wagon hitch, tug-of-war, LassoedIntoRiver).
-- Whistle tool (short = scare `NoiseTag.Whistle` 0.7; long 1 s = `NoiseTag.WhistleLong`; 3 s cooldown; carried critters wobble harder).
-- Wagon (Vehicles): self-simulated `ICarryable` push/pull handle, cargo slots + soft cap, tipping/righting, blame, bridge load, BruiseMult.
-- Toolbelt: slots Hands / Net / Bucket / Lasso / Whistle, keys 1-5 + scroll, 0.4 s equip, arm poses.
+Owner: Player team (gameplay-programmer). Scope: `Scripts/Gameplay/Tools`, `Scripts/Gameplay/Vehicles`, small add-only hooks in
+`Scripts/Gameplay/Carry` + `Player`, prefabs in `Prefabs/Tools` and `Prefabs/Vehicles`.
+Specs: `design/gdd/farm-tools.md`, `design/gdd/wagon-vehicles.md`, `design/gdd/physics-carry.md`, GDD 4.7-4.8, 5.8-5.10, 7.2.
 
 ## Status
-- [ ] Lasso
-- [ ] Whistle
-- [ ] Wagon
-- [ ] Toolbelt + arm poses
-- [ ] EditMode tests
-- [ ] PlayMode tests
-- [ ] Screenshots
+- [x] Lasso: aim (twirl + arc preview), throw (12 m), loop flight, 6 m tether, reel (2 m/s, 10 stamina/s), auto-grab at 1.5 m,
+  tie to post / wagon hitch (3 m), untie by picking the coil up, GDD tug-of-war + water-ski, tow rope joint for goods,
+  knocked-out teammate drag, awake teammate bounce, LassoedIntoRiver
+- [x] Whistle: short blow `Whistle`, long blow (1 s) `WhistleLong` only, 0.7 loudness, 3 s cooldown, carried critters +50% struggle
+  for 2 s, SpookedHerd when one escapes in that window
+- [x] Wagon: networked server-simulated cart, 4 grips, GDD rolling drag / v_max, 6 cargo slots + 400 kg soft cap, bump bounce-outs
+  (SpilledCargo), tipping past 50 deg (TippedWagon), 2-player (or solo) righting, plank load, Padded Crates via Goods.BruiseMult,
+  spawns at the barn yard with a hitching post, morning return
+- [x] Toolbelt hotbar (Hands / Net / Bucket / Lasso / Whistle; keys 1-4 + Q, wheel, LB/RB; rebindable actions) + HUD strip
+- [x] First-person arm poses: lasso twirl / hold / reel (hand over hand), whistle at the lips, wagon push
+- [x] EditMode tests (`Tests/EditMode/Player/ToolsLogicTests.cs`, 21)
+- [x] PlayMode tests (`Tests/PlayMode/Tools/ToolsPlayModeTests.cs`, 7) + QA captures (`ToolsScreenshots.cs`, `docs/qa/tools/`)
 
-## Session 1 findings (code survey, no code yet)
-- Real game scene (Muddlebury) spawns no tools at all; nets/buckets only exist in `Scenes/Dev/PlayerTest`. Decision: a per-player
-  `PlayerToolbelt` spawns a personal Net, FeedBucket, Lasso and Whistle (holstered) on the server when the player spawns.
-- `CritterBrain.HearNoise` treats `NoiseReaction.Rally` as Ignore and picks the FIRST matching tag response; so the long blow
-  emits only `NoiseTag.WhistleLong` (not Whistle|WhistleLong) or it would scare. "Toward the whistler" works today through a
-  `Lure` response on WhistleLong; true Rally-follow is AI-owned (sheep branch) and not edited here to avoid conflicts.
-- Pig asset ignores `Whistle` (chicken and goat flee). Whistle PlayMode test therefore uses chickens.
-- Bridge planks (`BridgePlank.SampleLoad`) count `ICarryable.MassKg` else non-kinematic `rb.mass` per body centre, so the wagon
-  (rb 120 kg, not double counted) plus each cargo body (ICarryable) load planks with no World change.
-- Wagon pushing reuses PlayerCarry grips via `ISelfSimulatedCarryable` (CarryBody tracks grips, the wagon applies its own 900 N/player).
+## How it works (short)
+- Lasso on critters keeps the AI in charge: the rope only pulls the NavMeshAgent back to the rope length (`agent.Move`), so a
+  roped pig runs circles at the end of the rope. Pull vs `LassoMath.PlayerAnchor` (summed over every rope on the catch) decides
+  the tug-of-war; a winner drags the holder (ragdoll + IDraggable) for 2.5 s. Where the NavMesh ends (bank, bridge edge) the
+  critter is yanked off its feet (`ICarryable.OnGrabbed(lasser)`), dragged, and over water it falls in. No Carried-state
+  break-free rolls while roped (a pig would wriggle free ~50% of reels otherwise).
+- Wagon: a holder's handle is a tow bar (spring to 0.75-1.15 m, capped 900 N). Holders walk at most 1.5 m/s faster than the cart
+  rolls and crawl at their own bar, so pushing ramps up with the cart and nobody walks through it. Rear pushers push along the
+  cart and, with nobody steering at the front, side-slip and yaw are removed (rule 3: the front axle centres); a front-handle
+  driver steers. Measured: one farmer, 132 kg, dirt: 4.47-4.50 m/s (GDD 4.5).
+- Bridge planks: plank 10 with the wagon + 3 crates parked on it read exactly 132.0 kg, the farmer's plank 70.0 kg.
+
+## Deviations from the GDD (flagged)
+- Tool slots: a 4-tool belt + hands instead of 2 slots + barn racks (the slice has no racks). Tool loss/restock ($15) not built.
+- Lasso range is the GDD's 12 m (the task brief said ~10 m). Awake teammates cannot be lassoed (GDD 5.11 rule 6); knocked-out
+  ones can and are dragged.
+- Wagon cargo rides in slots (kinematic) instead of loose bodies; bounce-outs are a per-bump roll above the GDD threshold.
+  No tarp, brake lever or wheel damage yet; the $40 recovery fee is not charged. One farmer cannot heave 300 kg over the 8 cm
+  bridge abutment lip (needs a second pusher).
+- Whistle "rally" toward the whistler only happens for Lure/Rally responders; no current species has one (sheep/dog not built).
+
+## Requests to other teams
+- Economy: the $2 noise floor drops the $0 `LassoedIntoRiver` and `SpookedHerd` incidents (the river already books the soak on the
+  lasser). Add both to `EconomyMath.IsNonEconomic` like `YeetedTeammate`, or let the river use the lasso verb. Padded Crates is a
+  global `Goods.BruiseMult` x0.8; the GDD says "in wagon" only.
+- Audio: every Tool noise plays `SFX_Tool_Metal`; route `NoiseTag.Whistle`/`WhistleLong` to a whistle cue (and a rope creak).
+- AI: `CritterBrain.HearNoise` ignores noise while Carried, so a whistle cannot raise a carried critter's real break-free chance;
+  the +50% struggle is the carry wobble only.

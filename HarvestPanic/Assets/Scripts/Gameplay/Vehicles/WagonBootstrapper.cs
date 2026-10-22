@@ -78,8 +78,7 @@ namespace HarvestPanic.Gameplay
         {
             Vector3 p = barn.TransformPoint(offset);
             Quaternion r = Quaternion.Euler(0f, barn.eulerAngles.y, 0f);
-            int mask = ~LayerMask.GetMask(GameLayers.Player, GameLayers.Carryable, GameLayers.Critter, GameLayers.Ragdoll, GameLayers.Interactable, GameLayers.Water, "Ignore Raycast");
-            if (Physics.Raycast(p + Vector3.up * 30f, Vector3.down, out var hit, 60f, mask, QueryTriggerInteraction.Ignore)) p.y = hit.point.y + 0.05f;
+            if (Physics.Raycast(p + Vector3.up * 30f, Vector3.down, out var hit, 60f, Masks.Ground, QueryTriggerInteraction.Ignore)) p.y = hit.point.y + 0.05f;
             return new Pose(p, r);
         }
 

@@ -88,7 +88,7 @@ namespace HarvestPanic.Gameplay
         public override void OnReleased(ulong clientId)
         {
             base.OnReleased(clientId);
-            if (!IsServer) return;
+            if (!IsServer || !IsSpawned) return;
             _downAt = -1f;
             _blowing.Value = false;
         }
