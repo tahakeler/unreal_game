@@ -189,7 +189,7 @@ namespace HarvestPanic.Customization
             float yaw; Vector3 target; float dist;
             switch (f)
             {
-                case PreviewFocus.Head: yaw = 205f; target = new Vector3(0f, headY + 0.08f, 0f); dist = 2.3f; break;
+                case PreviewFocus.Head: yaw = 205f; target = new Vector3(0f, headY - 0.02f, 0f); dist = 1.75f; break;
                 case PreviewFocus.Face: yaw = 195f; target = new Vector3(0f, headY - 0.12f, 0.04f); dist = 1.25f; break;
                 case PreviewFocus.Back: yaw = 35f; target = new Vector3(0f, headY * 0.72f, 0f); dist = 2.4f; break;
                 case PreviewFocus.Outfit: yaw = 200f; target = new Vector3(0f, headY * 0.55f, 0f); dist = 3.0f; break;

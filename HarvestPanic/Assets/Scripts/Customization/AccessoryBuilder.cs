@@ -143,7 +143,7 @@ namespace HarvestPanic.Customization
                     _mpb.Clear();
                     if (item.tintMode == TintMode.MaskTexture)
                     {
-                        _mpb.SetColor(PrimaryId, tints.Primary);
+                        _mpb.SetColor(PrimaryId, tints.Resolve(item.maskRed == PartTint.Fixed ? PartTint.Primary : item.maskRed, tints.Primary));
                         _mpb.SetColor(SecondaryId, tints.Secondary);
                         _mpb.SetColor(AccentId, tints.Accent);
                         _mpb.SetColor(SkinId, tints.Skin);

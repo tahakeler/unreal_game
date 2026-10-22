@@ -162,6 +162,8 @@ namespace HarvestPanic.Customization
         public TintMode tintMode;
         /// <summary>PerMaterial: colour source per material slot (missing entries = Fixed).</summary>
         public List<PartTint> materialTints = new List<PartTint>();
+        /// <summary>MaskTexture: what the mask's red channel follows (Primary; Hair for hair and beards).</summary>
+        public PartTint maskRed = PartTint.Primary;
         /// <summary>Primitive recipe.</summary>
         [Header("Procedural placeholder")]
         public List<CosmeticPart> parts = new List<CosmeticPart>();

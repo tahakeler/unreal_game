@@ -37,6 +37,10 @@ Cross-talk = register an interface in `Services` (`Services.Register<T>`, `Get<T
 | Day clock | `IDayClockService` (`Phase` as `DayClockPhase`, `PhaseProgress01`) | Economy director -> lighting, Audio |
 | Impact units | `ImpactUnits` | all (see below) |
 | Run save | `IRunSaveService` (`HasSave`, `Summary`, `ContinueRequested`, `DeleteSave`) | Economy (registered at startup) -> Frontend main menu "Continue Farm" |
+| Character creator | `ICharacterCreator` (`IsOpen`, `NeedsFirstRun`, `Open(CharacterCreatorContext)`, `Closed`) | Customization (registered at startup) -> Frontend main menu (first run, Customize), lobby (C), pause (owns Esc while open) |
+| Player name | `IPlayerNameService` (`PlayerName`, `SetPlayerName`) | Frontend UI (Settings name + session platform) -> Customization creator Name tab |
+| UI accessibility | `UiAccessibility` static snapshot (`Colorblind` as `UiColorblind`, `ReducedMotion`, `UiScale`, `TextSize`, `Changed`) | Frontend UI writes from settings -> any non-Frontend screen (creator) |
+| Name filter | `NameFilter` (`Check`, `Resolve`, `ContainsProfanity`, `Fallback`; list `Resources/Data/Social/NameFilter.txt`) | Customization creator (Farm Name 3-16 chars) + Networking connection approval (profanity -> "Farmhand #N") |
 | Session | `ISessionService`, `PlayerInfo` | Networking -> Frontend UI (v0, add-only) |
 | Markers | `MarkerRole`, `MarkerTag`, `LevelMarker` | World places -> owners spawn |
 | Layers | `GameLayers` | all |
@@ -123,3 +127,10 @@ registered as `IAudioService` and `IAudioSettingsSink`. Everything is client-loc
 - Weeping-angel rule: server checks every connected player's `HeadPivot` child (pitch replicated by Player) as a frustum (camera FOV, 16:9) within 40 m (15 m when `Weather.FogDistance` > 0) with `Physics.Linecast` LOS, >= 15% of 9 bounds samples; downed and AFK (60 s) players don't count. Tests/bots add `INightViewerSource`s via `NightObservers.Register`.
 - Creature KO: `IKnockable.ApplyImpulse(yank toward the field, PlayerIds.Nature, BlameVerb.KnockedOut)` (2400 design units = KO). Stitches/foxes move carryables by `ICarryable.OnGrabbed/OnReleased(PlayerIds.Nature)` + kinematic follow.
 - Core add-only: `DayParams.NightLanternPosts`, `DayParams.NightThreatMult`. Economy minimal hook: the Lantern Posts upgrade modifier also adds `Night.LanternPosts +1` (asset + `UpgradeAssetBuilder`); each lit post is a 6 m safe circle (barn 10 m, market 14 m, bridge planks 3.5 m are always safe).
+## Character creator (feature/character-creator)
+- Core add-only: `ICharacterCreator` + `CharacterCreatorContext`, `IPlayerNameService`, `UiAccessibility` + `UiColorblind`, `NameFilter` + `NameCheck`.
+- Frontend minimal hooks: `MainMenuController` opens the creator once on first run (skipped in batchmode players) and from Customize,
+  ignores Esc while it is open; `LobbyController` C opens it, hotkeys/chat Enter pause while it is open; `PauseOverlay` leaves Esc to it;
+  `UiRuntime` registers `IPlayerNameService` and publishes `UiAccessibility`.
+- Networking minimal hook: `ConnectionApproval` replaces profane names with `NameFilter.Fallback(n)`.
+- Loadout v2 is 25 bytes on the wire (budget 32): see `Scripts/Customization/FarmerLoadout.cs` and `INTEGRATION.md`.

@@ -30,9 +30,13 @@ Rebuild all generated assets: `Unity -batchmode -nographics -quit -projectPath H
 ## Networking
 - `Resources/NetworkPrefabs/Customization.asset` exists and is intentionally empty (FarmerBody nests under the Player NetworkObject;
   wardrobes are local props).
-- Loadout replication: owner sends its saved loadout (`PlayerPrefs` key `HP_Loadout`) on every spawn and every scene load;
+- Loadout replication: owner sends its saved loadout (`PlayerPrefs` key `HP_Loadout`, JSON v2) on every spawn and every scene load;
   the server sanitises it (unowned/unknown -> slot default, duplicate name-tag colour -> next free by join order) and writes a
-  server-owned `NetworkVariable<FarmerLoadout>` (20 bytes). Late joiners get it on initial sync.
+  server-owned `NetworkVariable<FarmerLoadout>`. Late joiners get it on initial sync.
+- Loadout v2 wire format (25 bytes, GDD budget 32): format byte, body, primary, secondary, accent, skin, tag, **head, hair,
+  hair colour, outfit** (u8 each), hat/face/back (u16), 4 emotes (u16). v1 saves (JSON without `v`/`v:1`) and v1 20-byte blobs
+  load with the base head/hair/outfit and the default hair colour, and are re-saved as v2. Byte table: `FarmerLoadout.cs`.
+- Connection approval (Networking) replaces a profane player name with "Farmhand #N" (Core `NameFilter`).
 - Names on tags come from `ISessionService.Players` (fallback "Farmer N").
 
 ## World
@@ -41,10 +45,25 @@ marker on scene load on every peer, facing the marker's forward; interaction ran
 
 ## UI / HUD
 - Player colour for HUD/Ledger: `CosmeticCatalog.NameTag(loadout.NameTag)` (colour + `TagShape`). Customization does not reference UI.
-- Wardrobe UI is UI Toolkit (`WardrobeUI`, panel `Art/Cosmetics/UI/WardrobePanel.asset`), opened from the wardrobe prop or `WardrobeUI.Open(FarmerLoadoutSync.Local)`.
+- The character creator ("Create your farmer" / Grandpa's Wardrobe) is UI Toolkit (`WardrobeUI` + `Art/Cosmetics/UI/CharacterCreator.uss`,
+  panel `Art/Cosmetics/UI/WardrobePanel.asset`). Frontend opens it through Core `ICharacterCreator` (registered by
+  `CharacterCreatorService`): main menu first run (`NeedsFirstRun`, never in batchmode unless a test opts in), main menu
+  Customize, lobby C. The wardrobe prop opens it for `FarmerLoadoutSync.Local`. While `IsOpen` (and on the frame it closed)
+  Frontend's menu, lobby hotkeys and pause ignore Esc/keys.
+- Frontend provides `IPlayerNameService` (Settings player name + session platform) for the Name tab and publishes
+  `UiAccessibility` (colour-blind mode, reduced motion, UI scale, text size) which the creator follows.
+- The main menu finds the catalogue through `Resources/Customization/CustomizationLink.asset`.
+
+## Art pipeline
+- New cosmetics are `CosmeticEntry` assets in the catalogue's `entries` (same slot + id replaces a placeholder). Tripo FBXs:
+  HarvestPanic/Cosmetics/Import Tripo Cosmetic (see docs/art/adding-cosmetics.md). Tint-mask shader: `Art/Cosmetics/Shaders/CosmeticTintMask.shader`.
+- `FarmerAssetBuilder.BuildAll` also writes UV'd copies of the farmer meshes (`Art/Cosmetics/Meshes`, for outfit patterns),
+  the Shrug/Salute/Chicken Dance clips, merges new default items into an existing catalogue (`EnsureDefaults`) and builds the
+  test-only network prefab `Prefabs/Farmer/Test/FarmerNetTest.prefab` (not in any NetworkPrefabs list).
 
 ## Open requests (need a Core contract or another team)
 - Wardrobe holds `InputModal` (Push on open, Pop on close/destroy); emotes and the wardrobe prop also respect `InputModal.IsBlocking`.
 - No day-phase contract: "wardrobe blocked during the active day timer" is not enforced yet.
 - E for the wardrobe may overlap the Player's interact key.
-- Ownership on the server only trusts starter items + `unlockAllCosmetics` (no profile/unlock service yet).
+- Ownership on the server only trusts starter items + `unlockAllCosmetics` (no profile/unlock service yet); `CosmeticCatalog.LocalOwnedKeys` is the client hook.
+- First-person arms get the outfit's sleeve colour through the existing `IFirstPersonArmsSkin` (Muscle Tank = bare arms, Rain Slicker = overalls colour); patterns are not drawn on the arms.

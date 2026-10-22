@@ -4,6 +4,7 @@
     "references": [
         "HarvestPanic.Core",
         "HarvestPanic.Customization",
+        "HarvestPanic.Customization.Editor",
         "Unity.Netcode.Runtime",
         "Unity.Collections",
         "HarvestPanic.UI",
