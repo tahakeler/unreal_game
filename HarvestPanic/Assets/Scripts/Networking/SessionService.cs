@@ -17,6 +17,9 @@ namespace HarvestPanic.Networking
     /// automatic LAN fallback when Steam is not running. Roster (names/ready) syncs via named messages:
     /// "HP.Roster" server->clients (full list on change), "HP.Ready" client->server.
     /// Scene flow through NGO SceneManager: host start -> Lobby, StartGame -> Muddlebury, end -> menu (local load).
+    /// Joins and NGO scene switches never overlap on the server (<see cref="SceneTransitionGate"/>): a join arriving
+    /// mid-load is held (approval Pending) until the host's load completes, and a switch requested while a joiner is
+    /// still synchronising waits for it, so every late joiner synchronises each scene exactly once.
     /// </summary>
     [DefaultExecutionOrder(-900)]
     [RequireComponent(typeof(NetworkManager), typeof(NetworkBootstrap), typeof(PlayerSpawnService))]
@@ -40,6 +43,10 @@ namespace HarvestPanic.Networking
         readonly SessionRoster _roster = new SessionRoster();
         readonly ChatRules _chat = new ChatRules();
         readonly Dictionary<ulong, string> _pendingNames = new Dictionary<ulong, string>();
+        readonly SceneTransitionGate _gate = new SceneTransitionGate();
+        readonly Dictionary<ulong, NetworkManager.ConnectionApprovalResponse> _heldJoins = new Dictionary<ulong, NetworkManager.ConnectionApprovalResponse>();
+        readonly List<ulong> _gateRelease = new List<ulong>();
+        readonly List<ulong> _gateRefuse = new List<ulong>();
         LanDiscovery _discovery;
         SteamPlatform _steam;
 
@@ -80,6 +87,8 @@ namespace HarvestPanic.Networking
         public PlayerSpawnService Spawner => _spawner;
         /// <summary>Steam lobby id while hosting/joined through Steam (0 otherwise).</summary>
         public ulong SteamLobbyId => _steam?.CurrentLobbyId ?? 0;
+        /// <summary>Server: join/scene-switch ordering state (diagnostics, tests).</summary>
+        public SceneTransitionGate SceneGate => _gate;
 
         void Awake()
         {
@@ -144,6 +153,7 @@ namespace HarvestPanic.Networking
         {
             _discovery.Tick(Time.realtimeSinceStartup);
             _steam.Tick(_nm.IsListening && _transport == SessionTransport.Steam);
+            if (_nm.IsListening && _nm.IsServer && !_nm.ShutdownInProgress) TickSceneGate();
             if (_nm.IsListening || _nm.ShutdownInProgress) return;
             if (_steamReinit) { _steamReinit = false; _steam.EnsureInit(true); }
             if (_pendingMenu) { _pendingMenu = false; GoToMenu(); }
@@ -292,6 +302,8 @@ namespace HarvestPanic.Networking
             _bootstrap.RegisterPrefabLists();
             _roster.Clear();
             _pendingNames.Clear();
+            _heldJoins.Clear();
+            _gate.Reset();
             _capturedReason = null;
             _wasConnected = false;
             _leaving = false;
@@ -302,6 +314,11 @@ namespace HarvestPanic.Networking
             c.TickRate = _cfg.tickRate;
             c.ConnectionApproval = true;
             c.EnableSceneManagement = true;
+            // Held joins must be resolved before NGO's handshake timeout drops them (both peers read this).
+            c.ClientConnectionBufferTimeout = Mathf.Max(_cfg.approvalTimeoutSeconds, Mathf.CeilToInt(_cfg.joinHoldMaxSeconds) + 3);
+            _gate.MaxHoldSeconds = Mathf.Min(_cfg.joinHoldMaxSeconds, c.ClientConnectionBufferTimeout - 3);
+            _gate.MaxJoinerWaitSeconds = _cfg.switchWaitForJoinerSeconds;
+            _gate.MaxSceneLoadSeconds = c.LoadSceneTimeOut + 10f;
             c.ConnectionData = new ConnectionPayload { Protocol = _cfg.protocolVersion, BuildVersion = LocalBuildVersion, PlayerName = LocalPlayerName }.ToBytes();
             _utp.ConnectTimeoutMS = _cfg.connectTimeoutMs;
             _utp.MaxConnectAttempts = _cfg.maxConnectAttempts;
@@ -347,13 +364,82 @@ namespace HarvestPanic.Networking
                 if (_nm.IsServer) OnServerSceneLoaded?.Invoke(scene, completed);
                 if (_nm.IsServer) BroadcastRoster(); // discovery "in progress" + late UI refresh
             };
+            _nm.SceneManager.OnSceneEvent += OnNgoSceneEvent;
         }
 
+        /// <summary>
+        /// Server: feeds the gate from every NGO scene event, including loads not started through this service.
+        /// Only the server's own LoadComplete ends a load: by then NGO has sent the Load event to every connected
+        /// client, so a join released afterwards is synchronised into the new scene and gets no second Load.
+        /// (LoadEventCompleted is not used: it can arrive after the next load has already started.)
+        /// </summary>
+        void OnNgoSceneEvent(SceneEvent e)
+        {
+            if (!_nm.IsServer) return;
+            bool own = e.ClientId == _nm.LocalClientId;
+            switch (e.SceneEventType)
+            {
+                case SceneEventType.Load when own:
+                    _gate.ServerLoadStarted(Time.realtimeSinceStartup);
+                    break;
+                case SceneEventType.LoadComplete when own:
+                    _gate.ServerLoadFinished();
+                    break;
+                case SceneEventType.SynchronizeComplete:
+                    _gate.Synchronized(e.ClientId);
+                    break;
+            }
+        }
+
+        /// <summary>Server: NGO scene switch, deferred while approved joiners are still synchronising.</summary>
         void LoadNetworkScene(string scene)
+        {
+            if (_nm.IsServer && !_gate.RequestSwitch(scene, Time.realtimeSinceStartup))
+            {
+                NetLog.Info($"Switch to '{scene}' waits for joining farmhands to finish loading.");
+                return;
+            }
+            StartSceneLoad(scene);
+        }
+
+        void StartSceneLoad(string scene)
         {
             var status = _nm.SceneManager.LoadScene(scene, LoadSceneMode.Single);
             if (status != SceneEventProgressStatus.Started)
                 NetLog.Warn("scene-load" + scene, $"NGO refused to load '{scene}': {status}.");
+        }
+
+        /// <summary>Server, every frame: releases/refuses held joins and starts a queued switch.</summary>
+        void TickSceneGate()
+        {
+            string start = _gate.Tick(Time.realtimeSinceStartup, _gateRelease, _gateRefuse);
+            foreach (var id in _gateRefuse) ResolveHeldJoin(id, false, ConnectionApproval.BusyReason);
+            foreach (var id in _gateRelease) ResolveHeldJoin(id, true, null);
+            if (start != null && _nm.SceneManager != null) StartSceneLoad(start);
+        }
+
+        /// <summary>
+        /// Completes a held approval; NGO applies it on its next approval pass. A client that left while held is
+        /// declined without a reason (nothing is sent to it) so NGO drops its pending entry.
+        /// </summary>
+        void ResolveHeldJoin(ulong id, bool approve, string reason)
+        {
+            if (!_heldJoins.TryGetValue(id, out var resp)) return;
+            _heldJoins.Remove(id);
+            if (approve && JoinLocked) { approve = false; reason = ConnectionApproval.LockedReason; }
+            resp.Approved = approve;
+            resp.Reason = approve ? null : reason;
+            resp.CreatePlayerObject = false;
+            resp.Pending = false;
+            if (approve)
+            {
+                _gate.Approved(id, Time.realtimeSinceStartup);
+                NetLog.Info($"Approved held join of client {id} (host finished loading).");
+                return;
+            }
+            _gate.Disconnected(id);
+            _pendingNames.Remove(id);
+            if (reason != null) NetLog.Warn("reject", $"Rejected client {id}: {reason}");
         }
 
         // ---------------- Lobby actions ----------------
@@ -408,6 +494,8 @@ namespace HarvestPanic.Networking
         {
             _roster.Clear();
             _pendingNames.Clear();
+            _heldJoins.Clear(); // NGO clears its own approval queue on shutdown
+            _gate.Reset();
             _chat.Clear();
             _transport = SessionTransport.None;
             _connecting = false;
@@ -431,12 +519,29 @@ namespace HarvestPanic.Networking
             taken.AddRange(_pendingNames.Values);
             var d = ConnectionApproval.Evaluate(req.Payload, self, _roster.Count + _pendingNames.Count, _maxPlayers,
                 _cfg.protocolVersion, Application.version, JoinLocked, taken);
-            resp.Approved = d.Approved;
             resp.Reason = d.Reason;
             resp.CreatePlayerObject = false; // PlayerSpawnService spawns at markers after scene sync
+            if (!d.Approved)
+            {
+                resp.Approved = false;
+                resp.Pending = false;
+                NetLog.Warn("reject", $"Rejected client {req.ClientNetworkId}: {d.Reason}");
+                return;
+            }
+            _pendingNames[req.ClientNetworkId] = d.PlayerName; // reserves the slot while held too
+            if (!self && _gate.ShouldHoldJoins)
+            {
+                // NGO would synchronise this client mid-switch (see SceneTransitionGate); hold until the load is done.
+                resp.Approved = false;
+                resp.Pending = true;
+                _heldJoins[req.ClientNetworkId] = resp;
+                _gate.Hold(req.ClientNetworkId, Time.realtimeSinceStartup);
+                NetLog.Info($"Holding client {req.ClientNetworkId}'s join until the host finishes loading.");
+                return;
+            }
+            resp.Approved = true;
             resp.Pending = false;
-            if (d.Approved) _pendingNames[req.ClientNetworkId] = d.PlayerName;
-            else NetLog.Warn("reject", $"Rejected client {req.ClientNetworkId}: {d.Reason}");
+            if (!self) _gate.Approved(req.ClientNetworkId, Time.realtimeSinceStartup);
         }
 
         void HandleConnectionEvent(NetworkManager nm, ConnectionEventData e)
@@ -460,6 +565,8 @@ namespace HarvestPanic.Networking
             }
             else if (e.EventType == ConnectionEvent.ClientDisconnected && nm.IsServer && e.ClientId != nm.LocalClientId)
             {
+                ResolveHeldJoin(e.ClientId, false, null);
+                _gate.Disconnected(e.ClientId);
                 _pendingNames.Remove(e.ClientId);
                 _chat.Forget(e.ClientId);
                 if (_roster.Remove(e.ClientId)) { BroadcastRoster(); OnSessionChanged?.Invoke(); }
@@ -468,7 +575,13 @@ namespace HarvestPanic.Networking
 
         void HandleClientDisconnect(ulong id)
         {
-            if (_nm.IsServer) { _pendingNames.Remove(id); return; }
+            if (_nm.IsServer)
+            {
+                ResolveHeldJoin(id, false, null); // left while held: let NGO drop the pending approval
+                _gate.Disconnected(id);
+                _pendingNames.Remove(id);
+                return;
+            }
             if (!string.IsNullOrEmpty(_nm.DisconnectReason)) _capturedReason = _nm.DisconnectReason;
         }
 

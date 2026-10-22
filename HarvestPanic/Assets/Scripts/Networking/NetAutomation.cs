@@ -22,6 +22,8 @@ namespace HarvestPanic.Networking
     ///           -netRejoin (after ok, leave and rejoin once; logs "rejoin ok=1"),
     ///           -netExpectReject text (pass when the join is refused with a reason containing text),
     ///           -netFakeVersion V (dev builds: send build version V)
+    ///   host load stress (dev builds): -netHostLoadDelay S holds the activation of every host NGO scene load
+    ///           (Lobby, Muddlebury) for S seconds, so joins land mid-load (logs "hostLoadHeld"/"hostLoadReleased")
     /// </summary>
     [RequireComponent(typeof(SessionService))]
     public sealed class NetAutomation : MonoBehaviour
@@ -38,6 +40,8 @@ namespace HarvestPanic.Networking
         int _final, _lastRoster = -1;
         string _quitFile, _expectReject, _joinAddr;
         bool _waitHost, _rejoin, _rejoining, _rejoined;
+        float _hostLoadDelay, _heldLoadUntil;
+        AsyncOperation _heldLoad;
 
         void Start()
         {
@@ -87,13 +91,37 @@ namespace HarvestPanic.Networking
             };
             _session.OnChat += (from, text) => { _chatReceived++; Write($"chat from={from} text={text.Replace(' ', '_')}"); };
             Write($"role={(_host ? "host" : "client")} pid={System.Diagnostics.Process.GetCurrentProcess().Id}");
+            if (_host && Debug.isDebugBuild && float.TryParse(SessionService.Arg("-netHostLoadDelay"), System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture, out var hold) && hold > 0f)
+            {
+                _hostLoadDelay = hold;
+                var nm = _session.Manager;
+                nm.OnServerStarted += () => nm.SceneManager.OnSceneEvent += HoldHostLoad; // before the Lobby load starts
+            }
             if (_host) _session.HostLan("AutoTest", maxPlayers);
             else _session.JoinLan(join);
+        }
+
+        /// <summary>Load stress: keeps the host's own NGO scene load from activating for -netHostLoadDelay seconds.</summary>
+        void HoldHostLoad(SceneEvent e)
+        {
+            var nm = _session.Manager;
+            if (_heldLoad != null || e.SceneEventType != SceneEventType.Load || e.ClientId != nm.LocalClientId || e.AsyncOperation == null) return;
+            _heldLoad = e.AsyncOperation;
+            _heldLoad.allowSceneActivation = false;
+            _heldLoadUntil = Time.realtimeSinceStartup + _hostLoadDelay;
+            Write($"hostLoadHeld scene={e.SceneName} s={_hostLoadDelay:F1}");
         }
 
         void Update()
         {
             if (!_active) return;
+            if (_heldLoad != null && Time.realtimeSinceStartup >= _heldLoadUntil)
+            {
+                _heldLoad.allowSceneActivation = true;
+                _heldLoad = null;
+                Write($"hostLoadReleased held={_session.SceneGate.HeldCount}");
+            }
             if (_quitAt > 0f)
             {
                 if (Time.realtimeSinceStartup >= _quitAt) Quit(_quitCode);

@@ -20,6 +20,8 @@ namespace HarvestPanic.Networking
     {
         public const string MalformedReason = "Couldn't read your join request. Please update the game.";
         public const string LockedReason = "The host isn't taking new farmhands right now.";
+        /// <summary>Join held while the host switched scenes, for longer than the hold limit (SceneTransitionGate).</summary>
+        public const string BusyReason = "The host is still loading the farm. Try joining again in a moment.";
 
         /// <summary>Evaluates a join.</summary>
         /// <param name="payloadBytes">Raw NGO connection data.</param>
