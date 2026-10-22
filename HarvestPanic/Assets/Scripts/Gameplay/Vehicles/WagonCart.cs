@@ -417,7 +417,8 @@ namespace HarvestPanic.Gameplay
             _tipped.Value = true;
             _rightingFor = 0f;
             ulong who = _driver.Value != PlayerIds.None ? _driver.Value : _lastPusher;
-            Vector3 down = Vector3.ProjectOnPlane(-transform.up, Vector3.up); // toward the side it fell on
+            // Cargo falls out of the open top of the bed, which now faces sideways (the wagon's up).
+            Vector3 down = Vector3.ProjectOnPlane(transform.up, Vector3.up);
             down = down.sqrMagnitude > 1e-3f ? down.normalized : transform.right;
             int spilled = _cargo.Count;
             for (int i = _cargo.Count - 1; i >= 0; i--)

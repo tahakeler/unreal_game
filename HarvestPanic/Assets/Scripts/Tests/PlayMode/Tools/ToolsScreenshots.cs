@@ -153,7 +153,8 @@ namespace HarvestPanic.Tests.PlayMode.Tools
             {
                 Farm.Place(pumpkin, wagon.Bed.TransformPoint(new Vector3(0f, 0.9f, 0.35f)));
                 yield return new WaitForSeconds(0.1f);
-                Debug.Log($"[ToolsQA] pumpkin loaded on the bridge: {wagon.ServerTryLoad(pumpkin.NetworkObject, false)}");
+                if (!wagon.HasCargo(pumpkin.NetworkObject)) wagon.ServerTryLoad(pumpkin.NetworkObject, false); // the bed scan may already have taken it
+                Debug.Log($"[ToolsQA] pumpkin in the bed on the bridge: {wagon.HasCargo(pumpkin.NetworkObject)} ({wagon.CargoKg:0} kg)");
             }
 
             // Third-person: the jackpot load on the bridge, farmer on the push bar.
@@ -191,7 +192,9 @@ namespace HarvestPanic.Tests.PlayMode.Tools
             rb.rotation = Quaternion.Euler(0f, 90f, 75f);
             rb.angularVelocity = Vector3.zero;
             yield return new WaitForSeconds(1.6f);
-            yield return Chase(wagon.transform.position + new Vector3(-5.5f, 3.4f, -5f), wagon.transform.position + new Vector3(0f, 0.2f, -0.8f), "tools_8_tp_wagon_tipped.png");
+            Vector3 open = Vector3.ProjectOnPlane(wagon.transform.up, Vector3.up).normalized; // the spill side
+            Vector3 side = Vector3.Cross(Vector3.up, open);
+            yield return Chase(wagon.transform.position + open * 5.5f + side * 2.5f + Vector3.up * 3.2f, wagon.transform.position + open * 1.4f, "tools_8_tp_wagon_tipped.png");
 
             // Whistle at the lips + hotbar.
             float t0 = Time.time;
