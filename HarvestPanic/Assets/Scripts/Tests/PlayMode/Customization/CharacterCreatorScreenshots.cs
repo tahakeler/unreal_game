@@ -193,6 +193,41 @@ namespace HarvestPanic.Tests.PlayMode.Customization
             Save(RenderCamera(Camera.main, 1600, 900), Path.Combine(dir, "lineup_b_bodies.png"));
         }
 
+        [UnityTest]
+        public IEnumerator Capture_TintMaskAuthoredItem()
+        {
+            string dir = Dir();
+#if UNITY_EDITOR
+            var lineup = Object.FindFirstObjectByType<WardrobeTestLineup>();
+            lineup.ApplySet(WardrobeTestLineup.SetC, new[] { "Rusty", "Pip", "Big Bert", "Marge" });
+            var model = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/ThirdParty/Tripo/EggBasket/EggBasket.fbx");
+            var bc = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/ThirdParty/Tripo/EggBasket/EggBasket_BaseColor.jpg");
+            Assert.That(model, Is.Not.Null);
+            var mask = new Texture2D(64, 64, TextureFormat.RGBA32, false, true);
+            var px = new Color[64 * 64];
+            for (int y = 0; y < 64; y++) for (int x = 0; x < 64; x++) px[y * 64 + x] = x < 32 ? new Color(1f, 0f, 0f, 0f) : new Color(0f, 0f, 0f, 0f); // left half follows Primary
+            mask.SetPixels(px); mask.Apply();
+            var mat = new Material(Shader.Find("HarvestPanic/Cosmetics/TintMask"));
+            mat.SetTexture("_BaseMap", bc); mat.SetTexture("_MaskMap", mask);
+            var item = new CosmeticItem { id = 99, key = "back.tintmasktest", displayName = "Mask test", prefab = model, tintMode = TintMode.MaskTexture,
+                offset = new Vector3(0f, -0.12f, -0.2f), scale = 1f };
+            var cam = Camera.main;
+            var pos = cam.transform.position; var rot = cam.transform.rotation;
+            for (int i = 0; i < lineup.Farmers.Count; i++)
+            {
+                var f = lineup.Farmers[i];
+                var go = AccessoryBuilder.Build(item, f.BackAttachPoint, f.Catalog.baseMaterial, f.TintsFor(f.Current));
+                foreach (var r in go.GetComponentsInChildren<Renderer>()) { var m = r.sharedMaterials; for (int k = 0; k < m.Length; k++) m[k] = mat; r.sharedMaterials = m; }
+                AccessoryBuilder.ApplyPrefabTint(go, item, f.TintsFor(f.Current));
+                f.transform.rotation = Quaternion.Euler(0f, 160f, 0f);
+            }
+            yield return new WaitForSeconds(0.4f);
+            Save(RenderCamera(cam, 1600, 900), Path.Combine(dir, "tintmask_authored_item_backs.png"));
+            cam.transform.SetPositionAndRotation(pos, rot);
+#endif
+            yield return null;
+        }
+
         // ---- capture helpers ----
 
         internal static Texture2D RenderCamera(Camera cam, int w, int h)
