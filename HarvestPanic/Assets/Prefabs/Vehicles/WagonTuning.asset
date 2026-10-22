@@ -28,7 +28,7 @@ MonoBehaviour:
   HandleDamping: 300
   HandleRest: {x: 0.75, y: 1.15}
   HandleSlipDistance: 2.8
-  LateralGrip: 10
+  LateralGrip: 40
   IdleRollDrag: 3
   ParkSpeed: 0.6
   TipAngle: 50

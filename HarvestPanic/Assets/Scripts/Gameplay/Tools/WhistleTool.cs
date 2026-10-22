@@ -18,7 +18,7 @@ namespace HarvestPanic.Gameplay
         [SerializeField] ToolTuning tuning;
         [SerializeField, Tooltip("Visual root moved to the lips while blowing")] Transform visual;
         [SerializeField, Tooltip("Right-hand target ('Grip')")] Transform grip;
-        [SerializeField, Tooltip("Lips position in head space (m)")] Vector3 mouth = new Vector3(0.015f, -0.11f, 0.17f);
+        [SerializeField, Tooltip("Lips position in head space (m); first person sees it at the bottom edge")] Vector3 mouth = new Vector3(0.03f, -0.19f, 0.24f);
 
         readonly NetworkVariable<bool> _blowing = new NetworkVariable<bool>(false);
         readonly NetworkVariable<double> _readyAt = new NetworkVariable<double>(0);

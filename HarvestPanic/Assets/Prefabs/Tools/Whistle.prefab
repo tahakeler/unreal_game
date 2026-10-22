@@ -713,4 +713,4 @@ MonoBehaviour:
   tuning: {fileID: 11400000, guid: 1e6873bec527f4816bf9a99f2d0416bb, type: 2}
   visual: {fileID: 7136676892498967444}
   grip: {fileID: 5158086213094042876}
-  mouth: {x: 0.015, y: -0.11, z: 0.17}
+  mouth: {x: 0.03, y: -0.19, z: 0.24}

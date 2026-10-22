@@ -819,9 +819,10 @@ namespace HarvestPanic.Gameplay
             Vector3 coilPos = _coilRest, gripPos = _gripRest, gripLPos = _gripLRest;
             if (ph == LassoPhase.Aiming)
             {
+                // Coil in the left hand; right hand up by the right temple spinning the loop above the head.
                 coilPos = _coilRest + new Vector3(-0.24f, 0.04f, -0.06f);
                 gripLPos = coilPos + new Vector3(0f, 0.1f, 0f);
-                gripPos = new Vector3(-0.2f, 0.58f, -0.2f) + new Vector3(Mathf.Cos(_twirl), 0f, Mathf.Sin(_twirl)) * 0.07f;
+                gripPos = new Vector3(-0.02f, 0.68f, -0.27f) + new Vector3(Mathf.Cos(_twirl), 0f, Mathf.Sin(_twirl)) * 0.06f;
             }
             else if (ph == LassoPhase.Tethered && !IsTied)
             {
@@ -847,8 +848,9 @@ namespace HarvestPanic.Gameplay
                     Vector3 c; float radius; Quaternion plane;
                     if (ph == LassoPhase.Aiming && grip != null)
                     {
-                        c = grip.position + Vector3.up * 0.08f; radius = 0.42f;
-                        plane = Quaternion.Euler(10f, _twirl * Mathf.Rad2Deg, 0f);
+                        // Above and a little ahead of the head (first person: an arc at the top of the view).
+                        c = grip.position + transform.up * 0.26f + transform.forward * 0.2f; radius = 0.32f;
+                        plane = Quaternion.LookRotation(transform.forward, transform.up) * Quaternion.Euler(12f, _twirl * Mathf.Rad2Deg, 0f);
                     }
                     else if (ph == LassoPhase.Tethered && target != null)
                     {
