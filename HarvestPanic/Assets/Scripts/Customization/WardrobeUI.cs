@@ -151,6 +151,7 @@ namespace HarvestPanic.Customization
             UiAccessibility.Changed += OnAccessibilityChanged;
             BuildLayout();
             ShowTab(_tab);
+            FocusSelectedLater(); // keyboard / gamepad users start on the equipped item
         }
 
         void OnAccessibilityChanged()

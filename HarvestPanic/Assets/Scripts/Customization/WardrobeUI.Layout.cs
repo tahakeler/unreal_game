@@ -272,10 +272,10 @@ namespace HarvestPanic.Customization
                     () => { var l = _working; l.HairColor = idx; _working = l; _preview?.Apply(_working); ShowTab(CreatorTab.Hair, keepFocus: true); },
                     () => ShowInfo(sw.name, "Hair colour. Dye costs nothing; dignity costs extra.", null));
             }
-            ItemTab(CosmeticSlot.Hair, "Hair", "hats squash big hairdos", PreviewFocus.Head, clear: false);
+            ItemTab(CosmeticSlot.Hair, "Hair", "hats squash big hairdos", PreviewFocus.Head);
         }
 
-        void ItemTab(CosmeticSlot slot, string title, string note, PreviewFocus framing, bool clear = true)
+        void ItemTab(CosmeticSlot slot, string title, string note, PreviewFocus framing)
         {
             _sectionTitle.text = title;
             _sectionNote.text = note;

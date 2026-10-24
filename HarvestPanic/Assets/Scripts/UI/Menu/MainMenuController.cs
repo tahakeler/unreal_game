@@ -49,6 +49,7 @@ namespace HarvestPanic.UI
                 SettingsService.Changed += OnSettingsChanged;
             }
             Build();
+            if (Services.TryGet(out ICharacterCreator cc)) cc.Closed += OnCreatorClosed;
             _session.OnSessionChanged += OnSessionChanged;
             _session.OnError += OnSessionError;
             Stack.Changed += OnScreenChanged;
@@ -75,6 +76,12 @@ namespace HarvestPanic.UI
                 creator.Open(CharacterCreatorContext.FirstRun);
         }
 
+        void OnCreatorClosed(bool confirmed)
+        {
+            if (this == null || !isActiveAndEnabled) return;
+            if (Stack.Current == MenuScreen.Title) UiFocus.FocusLater(_root.Q<Button>("btn-play")); // back to the menu, ready to play
+        }
+
         /// <summary>True while the character creator owns input on top of the menu.</summary>
         static bool CreatorOpen => Services.TryGet(out ICharacterCreator c) && c.IsOpen;
 
@@ -86,6 +93,7 @@ namespace HarvestPanic.UI
             if (_platform != null) { _platform.OnLanSessionsChanged -= OnLanChanged; _platform.StopLanSearch(); SettingsService.Changed -= OnSettingsChanged; }
             if (_session != null) { _session.OnSessionChanged -= OnSessionChanged; _session.OnError -= OnSessionError; }
             Stack.Changed -= OnScreenChanged;
+            if (Services.TryGet(out ICharacterCreator cc)) cc.Closed -= OnCreatorClosed;
         }
 
         void Update()
