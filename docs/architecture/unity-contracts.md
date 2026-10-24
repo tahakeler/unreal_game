@@ -132,3 +132,18 @@ registered as `IAudioService` and `IAudioSettingsSink`. Everything is client-loc
 - Ducking: the primary service calls `IAudioService.ReportVoiceActivity` while a speaker within 15 m (or the local talker) is speaking.
 - Minimal Frontend edits (scoped by the feature brief): `GameSettings.OpenMicThreshold` + `PushToTalk` default true, "Open mic sensitivity" slider, `UiRuntime` applies both to `IVoiceChat`, Lobby crew rows get Mute + TALKING, pause menu gets per-player Mute buttons. Speaking marker is parented at runtime under the farmer's `NameTag` (no Customization edit).
 - ProjectSettings: `microphoneUsageDescription` set (macOS permission prompt).
+
+## Scene switches and late joiners (fix/join-during-load)
+- NGO 2.x synchronises a client the moment it is approved, even mid scene load, which made a joiner load the Lobby twice
+  ("Server Scene Handle (...) already exist!") and never spawn. `SessionService` now orders joins against NGO scene
+  switches with `SceneTransitionGate` (Networking, no contract change): a join arriving while the host is loading a scene
+  is held (approval `Pending`) until the host's own `LoadComplete`, and `StartGame` / the initial Lobby load wait for
+  joiners that are still synchronising. Limits live in `NetworkingConfig` (`approvalTimeoutSeconds` = NGO
+  `ClientConnectionBufferTimeout`, `joinHoldMaxSeconds`, after which the join is refused with
+  `ConnectionApproval.BusyReason`, and `switchWaitForJoinerSeconds`).
+- Held joins are detected from NGO `OnSceneEvent`, so they also cover loads started outside `SessionService`
+  (`EconomyDirector.ReturnToLobby` calls `NetworkManager.SceneManager.LoadScene` directly). Only switches started through
+  `SessionService` wait for synchronising joiners. If another team needs a host scene switch, ask Networking for an
+  add-only `ISessionService` method rather than calling NGO directly.
+- Test hooks: `-netHostLoadDelay S` (dev builds, NetAutomation host) holds every host NGO load open for S seconds;
+  `NET_LOAD_DELAY=S tools/net/two-process-test.sh` runs the LAN test under that stress.

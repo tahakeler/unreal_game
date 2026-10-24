@@ -10,6 +10,10 @@
 # Proximity voice (always): "Client Cora" runs with -hpVoiceSynth (a 330 Hz tone, never the microphone); the host must
 #   receive her uplink over UDP and play it (PlayerStarts are 2 m apart), and with NET_EXTENDED=1 "Late Lou" must hear
 #   her through the host relay (HP_VoiceDown).
+# Load stress (NET_LOAD_DELAY=S): the host holds every NGO scene load (Lobby, Muddlebury) open for S seconds
+#   (-netHostLoadDelay), so Client Cora and Old Olga connect while the host is still loading the Lobby. Cora's join
+#   must be held until the load finishes (host log "Holding client"), then sync the Lobby once and reach Muddlebury.
+# Always: no peer may log NGO's duplicate-scene error ("Server Scene Handle (...) already exist").
 # Usage: tools/net/two-process-test.sh [/abs/out-dir]   (exit 0 = pass). NET_PORT overrides the (random) port.
 set -u
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -17,6 +21,7 @@ APP="$ROOT/HarvestPanic/Builds/macOS-dev/HarvestPanic.app/Contents/MacOS/HARVEST
 OUT="${1:-$ROOT/HarvestPanic/Logs/nettest}"
 PORT="${NET_PORT:-$((20000 + RANDOM % 20000))}"
 EXT="${NET_EXTENDED:-1}"
+LOAD_DELAY="${NET_LOAD_DELAY:-0}"
 mkdir -p "$OUT"; rm -f "$OUT"/*.txt "$OUT"/*.log "$OUT"/quit
 [ -x "$APP" ] || { echo "Missing build: $APP"; exit 2; }
 COMMON=(-batchmode -nographics -nosteam -netPort "$PORT" -netGameScene "${NET_GAME_SCENE:-Muddlebury}" -netExpectPlayers 2 -netTimeout 90)
@@ -26,6 +31,8 @@ if [ "$EXT" = 1 ]; then
   HOSTX=(-netExpectPlayers 2 -netMaxPlayers 3 -netFinalPlayers 3 -netQuitFile "$OUT/quit")
   CLIX=(-netExpectPlayers 2 -netWaitHost)
 fi
+[ "$LOAD_DELAY" != 0 ] && HOSTX+=(-netHostLoadDelay "$LOAD_DELAY")
+echo "port=$PORT extended=$EXT loadDelay=$LOAD_DELAY"
 JOIN=(-netJoin "127.0.0.1:$PORT")
 # wait_for <file> <regex> <seconds>
 wait_for() { local i=0; while [ $i -lt "$3" ]; do grep -qE "$2" "$1" 2>/dev/null && return 0; sleep 1; i=$((i+1)); done; echo "timeout waiting for '$2' in $1"; return 1; }
@@ -67,6 +74,13 @@ fi
 echo "--- host ($HC)";   cat "$OUT/host.txt" 2>/dev/null
 echo "--- client ($CC)"; cat "$OUT/client.txt" 2>/dev/null
 # Muddlebury state seen by each peer (SessionStateProbe lines): host has critters+goods+economy, both see 2 farmers with loadouts.
+# Join-during-load regression: a late joiner must never be sent a scene it already synchronised.
+if grep -lE "Scene Handle \(-?[0-9]+\) already exist" "$OUT"/*.log 2>/dev/null; then echo "FAIL: NGO duplicate scene load (Server Scene Handle already exist)"; EC=1; fi
+if [ "$LOAD_DELAY" != 0 ]; then
+  grep -E "hostLoad(Held|Released)" "$OUT/host.txt" | head -4 | sed 's/^/stress: /'
+  grep -E "\[Net\] (Holding|Approved held)" "$OUT/host.log" | head -4 | sed 's/^/stress: /'
+  grep -q "\[Net\] Holding client" "$OUT/host.log" || { echo "FAIL: load stress not exercised (no join arrived while the host was loading)"; EC=1; }
+fi
 if [ "${NET_GAME_SCENE:-Muddlebury}" = "Muddlebury" ]; then
   grep -E "state role=host critters=[1-9][0-9]* goods=[1-9][0-9]* economy=1 .* farmers=2 loadouts=.*body" "$OUT/host.txt" | tail -1 | sed 's/^/host-state: /'
   grep -E "state role=client critters=[1-9][0-9]* .* farmers=2 loadouts=.*;.*body" "$OUT/client.txt" | tail -1 | sed 's/^/client-state: /'

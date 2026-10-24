@@ -21,6 +21,9 @@ MonoBehaviour:
   connectTimeoutMs: 1000
   maxConnectAttempts: 10
   disconnectTimeoutMs: 10000
+  approvalTimeoutSeconds: 20
+  joinHoldMaxSeconds: 15
+  switchWaitForJoinerSeconds: 20
   discoveryPort: 47777
   discoveryInterval: 1.5
   discoveryExpiry: 5

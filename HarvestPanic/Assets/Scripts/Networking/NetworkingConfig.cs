@@ -32,6 +32,15 @@ namespace HarvestPanic.Networking
         [Tooltip("Seconds without traffic before a peer is dropped.")]
         public int disconnectTimeoutMs = 10000;
 
+        [Header("Joins during scene switches (SceneTransitionGate)")]
+        [Tooltip("NGO ClientConnectionBufferTimeout (s): how long a join handshake may take. Joins that arrive while the host " +
+                 "is switching scenes are held until the switch finishes, so this must exceed joinHoldMaxSeconds.")]
+        public int approvalTimeoutSeconds = 20;
+        [Tooltip("A join held this long (host still loading) is refused with a retry reason instead of timing out.")]
+        public float joinHoldMaxSeconds = 15f;
+        [Tooltip("A host scene switch waits up to this long for a joining farmhand to finish synchronising.")]
+        public float switchWaitForJoinerSeconds = 20f;
+
         [Header("LAN discovery (UDP broadcast)")]
         public ushort discoveryPort = 47777;
         public float discoveryInterval = 1.5f;
