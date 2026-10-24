@@ -53,5 +53,5 @@ namespace HarvestPanic.UI
         public bool Contains(T screen) => _stack.Contains(screen);
     }
 
-    public enum MenuScreen { Title, Play, Host, Join, Settings }
+    public enum MenuScreen { Title, Play, Host, Join, Settings, Credits }
 }

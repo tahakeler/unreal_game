@@ -80,6 +80,16 @@ namespace HarvestPanic.AI
         [Tooltip("Members within this distance of the flock centre count as regrouped (m).")] [Min(0)] public float FlockRegroupRadius = 3f;
         [Tooltip("Max distance to auto-join an existing flock (m).")] [Min(0)] public float FlockJoinRadius = 12f;
 
+        [Header("Follow herd (sheep, livestock-roster 4)")]
+        [Tooltip("Followers stop within this distance of the bell-wether (m).")] [Min(0)] public float FollowMinDistance = 2f;
+        [Tooltip("Followers start walking once the leader is further than this (m).")] [Min(0)] public float FollowMaxDistance = 4f;
+        [Tooltip("Follower speed while the leader is being carried, as a share of SprintSpeed (roster: 70%).")] [Range(0, 1)] public float FollowCarriedSpeedMult = 0.7f;
+        [Tooltip("Threat scale for followers whose leader is carried (they trail the carrier instead of fleeing it).")] [Range(0, 1)] public float FollowCarriedThreatScale = 0.25f;
+        [Tooltip("Seconds without a leader before the oldest member takes over (roster: 3 s).")] [Min(0)] public float LeaderReelectSeconds = 3f;
+        [Tooltip("Random spread around the shared stampede heading (deg).")] [Range(0, 90)] public float StampedeJitterDegrees = 14f;
+        [Tooltip("Seconds a stampede heading stays shared by the flock.")] [Min(0)] public float StampedeShareSeconds = 2.5f;
+        [Tooltip("Noise tagged Mandrake within this radius always panics livestock (cursed-crops AC 2, 20 m).")] [Min(0)] public float MandrakeSpookRadius = 20f;
+
         static CritterTuning _default;
 
         /// <summary>The shared asset, or a defaults instance when none is authored.</summary>

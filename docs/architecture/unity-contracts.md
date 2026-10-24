@@ -38,6 +38,7 @@ Cross-talk = register an interface in `Services` (`Services.Register<T>`, `Get<T
 | Impact units | `ImpactUnits` | all (see below) |
 | Run save | `IRunSaveService` (`HasSave`, `Summary`, `ContinueRequested`, `DeleteSave`) | Economy (registered at startup) -> Frontend main menu "Continue Farm" |
 | Session | `ISessionService`, `PlayerInfo` | Networking -> Frontend UI (v0, add-only) |
+| Voice chat | `IVoiceChat` (`Mode`, `OpenMicThreshold`, `MicMuted`, `IsTransmitting`, `LocalLoudness`, `BackendName`, `IsSpeaking`, `IsMuted`, `SetMuted`, `OnSpeakingChanged`), `VoiceTransmitMode` | Voice (`HarvestPanic.Voice`) -> Frontend UI (settings, crew list, pause menu) |
 | Markers | `MarkerRole`, `MarkerTag`, `LevelMarker` | World places -> owners spawn |
 | Layers | `GameLayers` | all |
 | Data lookup | `Content.Goods/Critters/DayModifiers` (`ContentCatalog<T>`), `PlayerIds` | all |
@@ -63,7 +64,7 @@ Each team owns `Assets/Resources/NetworkPrefabs/<Team>.asset` (a `NetworkPrefabs
 
 | Team | Owns (folders / scenes / prefabs / data) |
 |---|---|
-| Networking | `Scripts/Networking`, `Scripts/Editor`, `Packages/manifest.json`, `ProjectSettings/**`, `Scenes/Bootstrap`, `Prefabs/Networking`, NetworkManager, `Resources/NetworkPrefabs` loader |
+| Networking | `Scripts/Networking`, `Scripts/Voice`, `Scripts/Editor`, `Packages/manifest.json`, `ProjectSettings/**`, `Scenes/Bootstrap`, `Prefabs/Networking`, NetworkManager, `Resources/NetworkPrefabs` loader |
 | Player | `Scripts/Gameplay`, `Prefabs/Player`, `Prefabs/Tools`, input actions, `Resources/NetworkPrefabs/Player.asset` |
 | Critter AI | `Scripts/AI`, `Prefabs/Critters`, `Resources/Data/Critters`, `NetworkPrefabs/Critter.asset` |
 | Economy+HUD | `Scripts/Economy`, `Prefabs/Goods`, `Prefabs/HUD`, `Resources/Data/Goods`, `Data/DayModifiers`, `NetworkPrefabs/Economy.asset` |
@@ -130,3 +131,12 @@ registered as `IAudioService` and `IAudioSettingsSink`. Everything is client-loc
 - Wagon on the bridge: `WagonCart.MassKg` is the frame only (120 kg); every cargo body sits on the planks with its own `ICarryable`, so `BridgePlank.SampleLoad` sees wagon + cargo with nothing counted twice.
 - Blame: wagon spills book their loss through `IGoods.ApplyBruise(impulse, driver, TippedWagon | SpilledCargo)`; `LassoedIntoRiver` / `SpookedHerd` go to `IEconomyService.EmitBlame` as $0 incidents (the river books the soak on the lasser through the touch history). Open request to Economy: treat those two as non-economic like `YeetedTeammate`, or the $2 floor drops them.
 - Spawning: `WagonBootstrapper` (server, needs MarketPen + BarnRespawn markers) spawns the Wagon and a HitchingPost from `NetworkPrefabs/Player.asset`, and brings a lost or tipped wagon home on a new day. `WagonBootstrapper.Enabled = false` keeps a scene wagon-free. Each player's `PlayerToolbelt` spawns a personal Net, FeedBucket, Lasso and Whistle (holstered: hidden, no colliders, parked).
+
+## Proximity voice (feature/voice-chat)
+- New Networking-owned asmdef `HarvestPanic.Voice` (`Scripts/Voice`, refs Core + Netcode + Collections + Input System + Facepunch transport; no team assembly). Decision record: `docs/architecture/adr-voice-chat.md`.
+- `VoiceChatService` auto-creates after the first scene loads (skipped in the test runner's InitTestScene and with `-hpVoiceOff`), follows `NetworkManager.Singleton` and registers `IVoiceChat`. Messages: `HP_VoiceUp` (client->host, unreliable), `HP_VoiceDown` (host->clients, unreliable), `HP_VoiceMute` (client->host, reliable), versioned byte layouts in `VoicePacket`.
+- Steam voice on the Steam transport, else Unity Microphone -> IMA ADPCM 3-bit 8 kHz (26.2 kbps up / 28.0 kbps down per talker). The real microphone is never opened in batchmode unless `-hpVoiceMic`; `-hpVoiceSynth` sends a test tone.
+- Range 25 m x `DayParams.NoiseVoiceRadiusMult` (Megaphone upgrade x2), resolved by the host. Heads: player object child `HeadPivot`. The host emits `NoiseSource.Voice` events (loudness >= 0.35, 1 per 0.5 s per player) through `INoiseService`.
+- Ducking: the primary service calls `IAudioService.ReportVoiceActivity` while a speaker within 15 m (or the local talker) is speaking.
+- Minimal Frontend edits (scoped by the feature brief): `GameSettings.OpenMicThreshold` + `PushToTalk` default true, "Open mic sensitivity" slider, `UiRuntime` applies both to `IVoiceChat`, Lobby crew rows get Mute + TALKING, pause menu gets per-player Mute buttons. Speaking marker is parented at runtime under the farmer's `NameTag` (no Customization edit).
+- ProjectSettings: `microphoneUsageDescription` set (macOS permission prompt).

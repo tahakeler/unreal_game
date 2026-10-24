@@ -17,10 +17,22 @@ namespace HarvestPanic.AI.Editor
     {
         public const string MuddleburyPath = "Assets/Scenes/Muddlebury.unity";
         static readonly Vector3 PigPen = new Vector3(16f, 0f, 34f);
+        /// <summary>Sheep flock (5) grazing west of the pig pen; same spot as World's BuildMuddlebury marker.</summary>
+        public static readonly Vector3 SheepMeadow = new Vector3(-6f, 0.1f, 20f);
+        public const int SheepCount = 5;
+
         public static readonly (string name, string key, Vector3 pos)[] Markers =
         {
             ("CritterSpawner_Cow", "Critter.Cow", PigPen + new Vector3(-14f, 0.1f, -12f)),
             ("CritterSpawner_Goat", "Critter.Goat", PigPen + new Vector3(-11f, 0.1f, -4f)),
+            ("CritterSpawner_Sheep", "Critter.Sheep", SheepMeadow),
+        };
+
+        /// <summary>Cursed-crop fields (AI-owned <see cref="Crops.CursedCropField"/> objects): mandrakes in the veg-row lanes, melons by the pumpkin patch.</summary>
+        public static readonly (string name, string goodsId, Vector3 pos, int count, int columns, float spacing, float depth)[] Fields =
+        {
+            ("CursedCropField_Mandrake", "Crop.Mandrake", new Vector3(-74f, 0f, 34f), 6, 2, 3f, 0.25f),
+            ("CursedCropField_TumbleMelon", "Crop.TumbleMelon", new Vector3(-43f, 0f, -44f), 3, 3, 1.8f, 0f),
         };
 
         public static void AddMuddleburyMarkers()
@@ -33,8 +45,18 @@ namespace HarvestPanic.AI.Editor
                 var g = new GameObject(m.name);
                 if (parent != null) g.transform.SetParent(parent.transform, false);
                 g.transform.position = m.pos;
-                g.AddComponent<LevelMarker>().Configure(MarkerRole.CritterSpawner, m.key, 1);
+                g.AddComponent<LevelMarker>().Configure(MarkerRole.CritterSpawner, m.key, m.key == "Critter.Sheep" ? SheepCount : 1);
                 try { g.tag = MarkerTag.CritterSpawner; } catch (UnityException) { }
+            }
+            var crops = GameObject.Find("CursedCrops") ?? new GameObject("CursedCrops");
+            foreach (var f in Fields)
+            {
+                var existing = GameObject.Find(f.name);
+                var g = existing != null ? existing : new GameObject(f.name);
+                g.transform.SetParent(crops.transform, false);
+                g.transform.position = f.pos;
+                var field = g.GetComponent<Crops.CursedCropField>() ?? g.AddComponent<Crops.CursedCropField>();
+                field.Configure(f.goodsId, f.count, f.spacing, f.columns, f.depth);
             }
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);

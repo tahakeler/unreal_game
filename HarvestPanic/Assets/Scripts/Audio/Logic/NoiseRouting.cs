@@ -25,7 +25,8 @@ namespace HarvestPanic.Audio
         {
             cue = new SoundCue { Position = e.Location, GainDb = 0f };
             var t = e.Tags;
-            if ((t & NoiseTag.PlankBreak) != 0) cue.Event = AudioEvents.PlankBreak;
+            if ((t & NoiseTag.Mandrake) != 0) cue.Event = AudioEvents.MandrakeScream;
+            else if ((t & NoiseTag.PlankBreak) != 0) cue.Event = AudioEvents.PlankBreak;
             else if ((t & NoiseTag.Creak) != 0) cue.Event = AudioEvents.PlankCreak;
             else if ((t & NoiseTag.Splash) != 0) cue.Event = e.Loudness >= 0.6f ? AudioEvents.SplashBig : AudioEvents.SplashSmall;
             else if (e.Source == NoiseSource.Footstep) { cue.Event = AudioEvents.FootstepDirt; cue.GainDb = LoudnessDb(e.Loudness, 0.5f); }
@@ -48,6 +49,7 @@ namespace HarvestPanic.Audio
             if (k.Contains("chicken")) return AudioEvents.ChickenPanic;
             if (k.Contains("cow")) return AudioEvents.CowMoo;
             if (k.Contains("goat")) return AudioEvents.GoatBleat;
+            if (k.Contains("sheep")) return AudioEvents.SheepBaa;
             return AudioEvents.PigSqueal;
         }
 

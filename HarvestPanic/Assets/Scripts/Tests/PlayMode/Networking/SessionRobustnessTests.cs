@@ -69,11 +69,17 @@ namespace HarvestPanic.Tests.PlayMode
             nm.NetworkConfig = cfg;
             go.SetActive(true);
             Object.DontDestroyOnLoad(go);
-            utp.SetConnectionData("127.0.0.1", _port);
+            utp.SetConnectionData("127.0.0.1", HostPort());
             Assert.IsTrue(nm.StartClient(), "client " + name + " failed to start");
             nm.SceneManager.VerifySceneBeforeLoading = (_, __, ___) => false;
             return nm;
         }
+
+        /// <summary>
+        /// Port the host really listens on. SessionService prefers a <c>-netPort</c> command-line argument over
+        /// <c>NetworkingConfig.lanPort</c>, and parallel batchmode test runs pass one, so read it from the host transport.
+        /// </summary>
+        ushort HostPort() => _session.Manager.NetworkConfig.NetworkTransport is UnityTransport t ? t.ConnectionData.Port : _port;
 
         static IEnumerator WaitFor(System.Func<bool> cond, float seconds = 10f)
         {

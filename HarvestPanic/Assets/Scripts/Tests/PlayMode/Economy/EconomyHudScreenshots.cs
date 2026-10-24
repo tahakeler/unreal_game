@@ -14,7 +14,7 @@ namespace HarvestPanic.Tests.PlayMode.Economy
     /// to $HP_QA_OUT (default Logs/qa). Run batchmode WITHOUT -nographics:
     /// <c>-runTests -testPlatform PlayMode -testFilter EconomyHudScreenshots</c>.
     /// </summary>
-    [Explicit, Category("QA")]
+    [Explicit("QA screenshot capture; run by name with a GPU (no -nographics)"), Category("QA")]
     public class EconomyHudScreenshots
     {
         const int W = 1920, H = 1080;

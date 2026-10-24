@@ -62,6 +62,10 @@ namespace HarvestPanic.AI.Editor
             // Goat: $70 / 0.5 / 2 hands. No goat model in the CC0 packs yet: Quaternius Sheep rig, scaled down and tinted goat off-white (cow is Jersey brown so they read apart).
             new Spec { Name = "Goat", Fbx = AnimalsDir + "/Sheep/Sheep.fbx", HeadBone = "Head", CritterId = "Critter.Goat", GoodsId = "Livestock.Goat", ShortId = "goat",
                        Fit = Fit.Length, TargetM = 1.05f, BaseValue = 70, CarryHands = 2, Fragility = 0.5f, MassKg = 35f, Tint = new Color(0.86f, 0.84f, 0.78f) },
+            // Sheep (5th species, livestock-roster #4): the real Quaternius Sheep mesh, full size and creamy wool; no goat parts.
+            // $80 / 0.6 / 2 hands (1 carrier). The bell-wether wears a brass bell (SheepBehaviour shows it on the flock leader only).
+            new Spec { Name = "Sheep", Fbx = AnimalsDir + "/Sheep/Sheep.fbx", HeadBone = "Head", CritterId = "Critter.Sheep", GoodsId = "Livestock.Sheep", ShortId = "sheep",
+                       Fit = Fit.Length, TargetM = 1.30f, BaseValue = 80, CarryHands = 2, Fragility = 0.6f, MassKg = 45f, Tint = new Color(0.97f, 0.95f, 0.89f) },
         };
 
         public const string LivestockTuningPath = DataDir + "/LivestockTuning.asset";
@@ -79,7 +83,45 @@ namespace HarvestPanic.AI.Editor
             var lt = BuildLivestockTuning();
             if (s.Name == "Cow") root.AddComponent<CowBehaviour>().Configure(lt);
             if (s.Name == "Goat") root.AddComponent<GoatBehaviour>().Configure(lt, model);
+            if (s.Name == "Sheep") root.AddComponent<SheepBehaviour>().Configure(lt, BuildBell(root.transform, model));
             AddLod(root);
+        }
+
+        /// <summary>Brass bell-wether bell under the chin (primitive, colliderless, hidden until the sheep leads its flock).</summary>
+        static GameObject BuildBell(Transform root, Transform model)
+        {
+            var b = MeasureLocal(root, model);
+            var bell = new GameObject("Bell").transform;
+            bell.SetParent(root, false);
+            bell.localPosition = new Vector3(0f, b.size.y * 0.52f, b.max.z * 0.62f);
+            var brass = SharedMat("M_Sheep_Bell", new Color(0.83f, 0.62f, 0.2f), 0.7f, 0.8f);
+            var strap = SharedMat("M_Sheep_Strap", new Color(0.35f, 0.13f, 0.1f), 0.2f, 0f);
+            void Part(string n, PrimitiveType t, Vector3 pos, Vector3 scale, Material m)
+            {
+                var g = GameObject.CreatePrimitive(t);
+                g.name = n;
+                UnityEngine.Object.DestroyImmediate(g.GetComponent<Collider>());
+                g.transform.SetParent(bell, false);
+                g.transform.localPosition = pos; g.transform.localScale = scale;
+                g.GetComponent<Renderer>().sharedMaterial = m;
+                g.layer = root.gameObject.layer;
+            }
+            Part("Strap", PrimitiveType.Cylinder, new Vector3(0f, 0.05f, -0.04f), new Vector3(0.26f, 0.012f, 0.26f), strap);
+            Part("Cup", PrimitiveType.Cylinder, new Vector3(0f, -0.04f, 0.05f), new Vector3(0.09f, 0.055f, 0.09f), brass);
+            Part("Lip", PrimitiveType.Cylinder, new Vector3(0f, -0.095f, 0.05f), new Vector3(0.12f, 0.01f, 0.12f), brass);
+            bell.gameObject.SetActive(false);
+            return bell.gameObject;
+        }
+
+        static Material SharedMat(string name, Color c, float smooth, float metal)
+        {
+            string path = $"{PrefabDir}/Materials/{name}.mat";
+            if (!AssetDatabase.IsValidFolder(PrefabDir + "/Materials")) AssetDatabase.CreateFolder(PrefabDir, "Materials");
+            var m = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (m == null) { m = new Material(Shader.Find("Universal Render Pipeline/Lit")); AssetDatabase.CreateAsset(m, path); }
+            m.SetColor("_BaseColor", c); m.SetFloat("_Smoothness", smooth); m.SetFloat("_Metallic", metal);
+            EditorUtility.SetDirty(m);
+            return m;
         }
 
         /// <summary>Critter LODs: LOD0 full mesh with shadows; LOD1 same mesh (shared) to 4%; culled below 1.5% of screen height.</summary>
@@ -121,6 +163,38 @@ namespace HarvestPanic.AI.Editor
                 if (Application.isBatchMode) EditorApplication.Exit(1);
             }
         }
+
+        /// <summary>
+        /// Builds only the named species (personality + prefab + network list entry) without touching the others or the
+        /// test scene. <c>-executeMethod HarvestPanic.AI.Editor.CritterAssetBuilder.BuildSheep</c>.
+        /// </summary>
+        public static void BuildOnly(params string[] names)
+        {
+            try
+            {
+                EnsureDirs();
+                var tuning = BuildTuning();
+                var prefabs = new List<GameObject>();
+                foreach (var s in Specs.Where(x => names.Contains(x.Name)))
+                {
+                    var p = BuildPersonality(s);
+                    var prefab = BuildPrefab(s, p, tuning);
+                    SetProp(p, "Prefab", prefab);
+                    prefabs.Add(prefab);
+                }
+                BuildNetworkList(prefabs);
+                AssetDatabase.SaveAssets();
+                Content.Critters.Invalidate();
+                Debug.Log($"[CritterAssetBuilder] Built {string.Join(", ", names)}.");
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                if (Application.isBatchMode) EditorApplication.Exit(1);
+            }
+        }
+
+        public static void BuildSheep() => BuildOnly("Sheep");
 
         static void EnsureDirs()
         {
@@ -187,6 +261,21 @@ namespace HarvestPanic.AI.Editor
                 Set(so, "ComedyFlags", (int)ComedyFlag.None); Set(so, "Curiosity", 0.6f); Set(so, "Aggression", 0.5f);
                 SetLures(so, (LureTag.FeedBucket, 0.4f), (LureTag.Shiny, 0.5f));
                 SetNoise(so, (NoiseTag.Food, NoiseReaction.Lure, 0.4f), (NoiseTag.Whistle, NoiseReaction.Ignore, 0f), (NoiseTag.WhistleLong, NoiseReaction.Ignore, 0f));
+            }
+            else if (s.Name == "Sheep")
+            {
+                // Sheep - herd follower, timid: 260/480 cm/s, AlertRadius 12, NoiseSens 1.2, Freeze, whistle 0.8, Follow herd,
+                // Agility 2, CritterPullN 350, SecureCarriers 1, Struggle 80; short whistle Flee / long whistle Rally.
+                Set(so, "Traits", (int)(CritterTrait.Skittish | CritterTrait.Herd));
+                Set(so, "MoveSpeed", 2.6f); Set(so, "SprintSpeed", 4.8f); Set(so, "Acceleration", 14f);
+                Set(so, "AlertRadius", 12f); Set(so, "NoiseSensitivity", 1.2f); Set(so, "SightCone", 300f);
+                Set(so, "AlertThreshold", 0.3f); Set(so, "FleeThreshold", 0.5f); Set(so, "CalmThreshold", 0.15f); Set(so, "CalmTime", 3f);
+                Set(so, "CorneredResponse", (int)CorneredResponse.Freeze); Set(so, "SizeClass", (int)SizeClass.Medium);
+                Set(so, "Agility", 2f); Set(so, "CritterPullN", 350f); Set(so, "SecureCarriers", 1); Set(so, "StruggleImpulse", 80f);
+                Set(so, "HerdMode", (int)HerdMode.Follow); Set(so, "ShortcutAccess", (int)NavShortcut.None);
+                Set(so, "ComedyFlags", (int)ComedyFlag.None); Set(so, "Curiosity", 0.1f);
+                SetLures(so, (LureTag.Whistle, 0.8f), (LureTag.FeedBucket, 0.5f));
+                SetNoise(so, (NoiseTag.Food, NoiseReaction.Lure, 0.5f), (NoiseTag.Whistle, NoiseReaction.Flee, 0.6f), (NoiseTag.WhistleLong, NoiseReaction.Rally, 0.8f));
             }
             else
             {

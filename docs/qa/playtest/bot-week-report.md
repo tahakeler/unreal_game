@@ -47,3 +47,20 @@ morning; goods reset to 5 every morning; 0 errors.
 | 6 | S4 (test) | The last row of the raw log (W2D2) is a partial-day snapshot with negative delivery deltas. This is a log artifact, not a game bug. | raw log | perf/qa |
 
 No crashes, exceptions, NetworkObject leaks or wallet desyncs were found.
+
+## Follow-up: fix/beta-bugs-1 (2026-10-21)
+
+| # | Root cause | Fix | Regression test |
+|---|---|---|---|
+| 1 (S2) | Muddlebury spawned 4 crates/day whatever the crew while rent scales with `S_p`; livestock is a one-time stock. A 4p crew selling every crate and all livestock reached 0.84 of W1 rent | Crates per Morning = 4 + 2 per extra player (`EconomyTuning.ExtraDailyGoodsPerExtraPlayer`); rent unchanged. Competent W1: 2p 1.29, 3p 1.24, 4p 1.22 (no pumpkin); solo pays only with effort. Math: `docs/economy/week1-income-model.md`; GDD §9.3/9.11 | EditMode `BetaBugsBalanceTests` (model), PlayMode `CrewOfFour_MorningSpawnsTenCrates_OnTheGround` |
+| 2 (S3) | Not a pen bug. At day scale 0.05 each bot fits one 126 m run into the 36 s market window, so 3 bots sell 3 goods; the 4th crate and the pumpkin (175 m) are still out at close. Bots also re-grabbed their own drop from the pen every 0.5 s (the "~15 deliveries") | `BotFarmers` leaves goods in the pen alone; the soak log lists goods unsold at close | PlayMode `EveryDailyGood_DroppedInSalePen_Sells`, `AllDailyGoods_DumpedTogether_AllSell` (both also pass on main) |
+| 3 (S3) | Pumpkin marker 9.5 cm above the ground + 5 cm spawn offset: the 180 kg pumpkin fell 14.5 cm (≈300 N·s ≫ 40 N·s) and took the 60 BP per-hit cap with no instigator. Two crate markers sit inside the cart's box collider; one crate was ejected 1.85 m with 60 BP | Goods rest on the nearest surface below their marker (5 mm lift), extras/blocked spots move to the nearest free spot; 3 s settle grace for untouched goods | PlayMode `SpawnedGoods_SettleWithoutBruises` (fails on main: pumpkin 60 BP, crate 60 BP) |
+| 4 (S3) | Barks came only from visits (W2+, Tue–Thu), inspections and missed appointments; rules and run start were silent and the run stopped at W2 Tue. Also: a continued run never planned its visits; Monday ran last week's visit plan; deferred visits arrived silently | Welcome bark at run start, rule bark when drawn, deferred-visit bark; `ApplySave` plans the week; Monday re-runs the new plan | PlayMode `LandlordBarks_Week1Welcome_And_Week2Rule`, `ContinuedRun_PlansTheWeeksLandlordVisit` (both fail on main) |
+| 5 (S4) | Matches design: budget `10 + 4·DayIndex + 3·PlayersOutside` buys +1 fox/day (cost 4) until the weekly cap (2, +1/week, max 5) binds | none | EditMode `NightFoxEscalationTests` |
+
+Soak re-run on the fix (raw log regenerated): 0 errors, NetObjs flat 24; bot deliveries 3/day, 3 sales/day; no Morning
+spawn bruises (W1 D1–D3 "A quiet day"); Landlord barks fire (W2 rule, W2D2 inspection). Rent without the top-up: in two runs the bots
+were **$292 / $374 short**, but only because the random evening shop bought $550 / $600 of upgrades; without those buys
+they end week 1 at **$798 / $766 vs $540 rent (1.48 / 1.42)**, so they can pay on their own when they don't shop. The bot crew counts as solo for rent and supply (bots are not
+session players), and the "Nobody" pumpkin bruises left are bot teleport-carries (bots never register as handlers).
+The dev top-up stays: the random shop policy can still leave the bots short.

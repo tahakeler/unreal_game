@@ -12,6 +12,7 @@
                 <ui:Button name="btn-play" text="Play" class="hp-btn hp-btn--primary" />
                 <ui:Button name="btn-customize" text="Customize" class="hp-btn" />
                 <ui:Button name="btn-settings" text="Settings" class="hp-btn" />
+                <ui:Button name="btn-credits" text="Credits" class="hp-btn" />
                 <ui:Button name="btn-quit" text="Quit" class="hp-btn" />
             </ui:VisualElement>
         </ui:VisualElement>
@@ -82,6 +83,9 @@
         <!-- SETTINGS (filled by SettingsPanel) -->
         <ui:VisualElement name="settings-screen" class="screen centered">
             <ui:VisualElement name="settings-host" class="settings-host" />
+        </ui:VisualElement>
+        <ui:VisualElement name="credits-screen" class="screen centered">
+            <ui:VisualElement name="credits-host" />
         </ui:VisualElement>
 
         <!-- FOOTER -->

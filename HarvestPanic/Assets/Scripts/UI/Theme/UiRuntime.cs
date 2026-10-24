@@ -47,6 +47,7 @@ namespace HarvestPanic.UI
             SettingsService.Changed += ApplyToEngine;
             ApplyToEngine(SettingsService.Current);
             Services.WhenAvailable<IAudioSettingsSink>(_ => ApplyToEngine(SettingsService.Current));
+            Services.WhenAvailable<IVoiceChat>(_ => ApplyToEngine(SettingsService.Current));
             EnsureEventSystem();
             gameObject.AddComponent<PauseOverlay>();
             gameObject.AddComponent<OnboardingOverlay>();
@@ -104,6 +105,12 @@ namespace HarvestPanic.UI
                 sink.SetBusVolume(AudioBus.Voice, s.VoiceVolume);
             }
             else AudioListener.volume = s.MasterVolume;
+            // Proximity voice (feature/voice-chat): transmit mode and open-mic threshold; the Voice bus volume is above.
+            if (Services.TryGet(out IVoiceChat voice))
+            {
+                voice.Mode = s.PushToTalk ? VoiceTransmitMode.PushToTalk : VoiceTransmitMode.OpenMic;
+                voice.OpenMicThreshold = s.OpenMicThreshold;
+            }
             ApplyComfort(s);
             if (Application.isEditor || Application.isBatchMode) return; // never touch window/URP asset from the editor
             switch (s.WindowMode)
