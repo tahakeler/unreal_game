@@ -18,6 +18,19 @@ Specs: `design/gdd/farm-tools.md`, `design/gdd/wagon-vehicles.md`, `design/gdd/p
 - [x] EditMode tests (`Tests/EditMode/Player/ToolsLogicTests.cs`, 21)
 - [x] PlayMode tests (`Tests/PlayMode/Tools/ToolsPlayModeTests.cs`, 7) + QA captures (`ToolsScreenshots.cs`, `docs/qa/tools/`)
 
+## Results (2026-10-22, branch head after 2a172fd)
+- EditMode: 303/303 passed (21 new in `ToolsLogicTests`).
+- PlayMode, full suite (`-netPort` random): 85 total, 64 passed, 17 skipped (GPU / HP_QA_DIR captures), 4 failed: the
+  SessionRobustness tests, because `SessionService.Port()` prefers `-netPort` over their own random `lanPort`. Re-run without
+  `-netPort`: 4/4 passed. Tools PlayMode on the final code: 7/7.
+- QA captures (HP_QA_DIR, GPU): 2/2, images in `docs/qa/tools/` (lasso aim / tethered / reel, roped pig, loaded wagon on the
+  bridge, push pose, tipped wagon with spilled crates, whistle, HUD hotbar).
+- macOS dev build: success. `tools/net/two-process-test.sh` (extended: version reject, late join + rejoin, cap, host quit): PASS;
+  host spawned the wagon at the barn yard, every client (incl. the late joiner) logged `[Wagon] replicated on client`; no
+  exceptions in host/client/late logs.
+- Re-run captures: `HP_QA_DIR=<dir>` + PlayMode `-assemblyNames HarvestPanic.Tests.PlayMode.Tools -testFilter ToolsScreenshots`
+  without `-nographics`.
+
 ## How it works (short)
 - Lasso on critters keeps the AI in charge: the rope only pulls the NavMeshAgent back to the rope length (`agent.Move`), so a
   roped pig runs circles at the end of the rope. Pull vs `LassoMath.PlayerAnchor` (summed over every rope on the catch) decides
