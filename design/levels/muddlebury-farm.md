@@ -1,43 +1,51 @@
 # Level: Muddlebury Farm (Region 1)
 
-Built by `HarvestPanic/Scripts/LevelBuild/build_muddlebury.py` -> `/Game/HarvestPanic/Maps/Lvl_Muddlebury`.
-Verified by `verify_muddlebury.py`. Units cm; +X east (toward bridge/market), +Y north, river flows -Y.
+Built by `HarvestPanic.World.Editor.BuildMuddlebury.Build` (Unity, seeded, reproducible) -> `HarvestPanic/Assets/Scenes/Muddlebury.unity`.
+Units metres; +X east (toward bridge/market), +Z north, the river flows -Z. Farm ground y 0, water y -4.2.
+Canonical spec: GDD 11.5 (zones, critical path, traversal, markers, hotspots) and 11.6 (rules). Progress and QA: `docs/qa/map-progress.md`.
+The archived Unreal version of this doc lives on `archive/unreal-final`.
 
 ## Layout
-| Zone | Location (m) | Purpose |
+| Zone | Location (x, z) | Purpose / contents |
 |---|---|---|
-| Farm plateau | x -120..60, y -140..95 (farm zone ~180x180) | everything west of the river |
-| Barn (brick-toned) | (-26, 0), doors face east | spawn: 4 PlayerStarts at x -11; HP_BarnRespawn; 4 HP_Goods_Crate in yard |
-| Main road | barn -> bridge, 5 m dirt | primary sightline: spawn looks straight down the road at the bridge and market arch |
-| Pig pen 18x12 m | (16, 34), mud wallow | HP_CritterSpawner_Pig:3; south gate, north critter hole behind hay |
-| Coop yard 15x15 m | (16, -36) | HP_CritterSpawner_Chicken:8; north + east gaps toward orchard |
-| Corn maze | x -8..42, y 56..86 | tall cards with corridors: main hiding spot, LOS breaker |
-| Veg rows | x -78..-62, y 26..42 | low, open: easy catch zone |
-| Wheat field + NS_Wheat | x -108..-68, y -15..18 | soft hide, wind VFX |
-| Pumpkin patch | (-56, -44) fenced | HP_Goods_PrizePumpkin (watermelon meshes stand in for pumpkins) |
-| Orchard | x 0..50, y -80..-56 | 15 trees, shade/hide |
-| Windmill landmark | (-86, -38) | west skyline anchor |
-| Bank hedge | x ~55 along river | bush hide spots with gaps |
-| River | channel x 60..100, bed -6 m, water -4.2 m | HP_River box over water; current to -Y |
-| Bridge | x 60..100 at y 0, 40 m, 20 planks (2 m), 70 cm sag, rope rails at 1 m | each plank tagged HP_BridgePlank (+ HP_BridgePlank_NN), Movable |
-| Spit-out pile | (54, -120) west bank, 120 m downstream | HP_RiverPile + "Lost & Found" sign |
-| Market square | x 108..162, y -28..28 | arch, Sale Pen 8x8 m at (114, 0) open to the west (HP_MarketPen box), Butcher/Greengrocer/Oddities stalls, town bell |
-
-Barn -> market pen: 127.5 m (spec 70-140). Edge: 4 BlockingVolumes (HP_WorldEdge); NavMeshBoundsVolume covers the whole playable area including the river channel.
+| Barn & yard | (-26, 0), doors east | Hollow red gambrel barn: plank floor, hay loft + ladder, 3 stalls, workbench + tools, lanterns. **Wardrobe corner** inside (-20.4, 6.3), facing into the barn. 4 `PlayerStart` at x -11 facing east, `BarnRespawn` (-14.5, 0), 4 crates (-12.5, 6.5) |
+| Grandpa's farmhouse | (-47, 24), porch faces south | Stone/plaster two-storey house, porch, picket garden, mailbox, well, woodpile, washing line, doghouse ("BEWARE OF GOAT"), kitchen garden |
+| Main road + fork | x -17 -> 62, fork at x 7 | Fingerpost (MARKET / PIGS / CHICKENS), hay bales, fork mud (-4, -7) |
+| Pasture | (-20..10, 12..36) | Cow (2, 22), goat (5, 30), sheep x5 (-6, 20) spawn on open grass; stone trough, hay rack, salt lick, shade oak |
+| Pig pen | (16, 34), 18 x 12 | `Critter.Pig x3`, Tripo gate (south), mud wallow, A-frame hut, trough, hay bale over the north critter hole |
+| Coop yard | (16, -36), 15 x 15 | `Critter.Chicken x8`, coop with ramp + nest boxes, north/east gaps toward the orchard |
+| Corn maze | x -8 -> 42, z 56 -> 86 | 20 x 12 seeded maze, entrances south and east |
+| Veg rows | x -78 -> -62, z 26 -> 42 | 11 tilled rows; AI's Mandrake field at (-74, 34) |
+| Wheat field | x -108 -> -68, z -15 -> 18 | Soft hide, trampled path through the middle |
+| Pumpkin patch | (-56, -44) | `Crop.PrizePumpkin`; AI's Tumble Melon field at (-43, -44) |
+| Windmill | (-86, -38) | West skyline anchor: stone base, gallery, spinning lattice sails, flour sacks |
+| Hay meadow | (-112..-92, -70..-48) | Round bales, hay cart |
+| Orchard | x 0 -> 50, z -80 -> -56 | 15 trees, apples, crates, ladder |
+| Patchwork fields | outer acres (N-W, S) | Ploughed and hay fields with hedgerows (gaps every ~22 m) |
+| Bank hedge | x ~55 | Bush line with gaps |
+| River | x 60 -> 100 inside the map | Straight inside the play area, bends away beyond both edges; reeds, rocks, lilies; boundary weirs at z 101 / -145 |
+| Bridge | x 60 -> 100, z 0 | 40 m, 20 x 2 m planks, 0.7 m sag (gameplay unchanged); stone footings, lanterns, "ONE AT A TIME!" sign |
+| Lost & Found | (52, -120) | `RiverPile`, "LOST & FOUND (mostly)" signs, crates |
+| Market arch | x 104 | Stone pillars, "MUDDLEBURY MARKET" board, banners |
+| Sale Pen | (114, 0), 8 x 8, open west | `MarketPen` trigger, straw floor, "SALE PEN" sign |
+| Market square | x 108 -> 162, z -28 -> 28 | Butcher / Greengrocer / Oddities (Tripo) + 4 produce stalls, town bell (134, 0), fountain, lamps, planters, bunting, order board |
+| Town | around the square | 20 storybook houses ringing the square + ~8 cottages behind (shops: BAKERY, TEA ROOM, HATS & BONNETS, SEEDS, POST, INN, TAILOR, CHEESE, TOOLS, BOOKS, ODDS & ENDS, "BANK - Loans & Regrets", APOTHECARY, SADDLERY); **town hall clock tower** (165, 0) on the road axis = the east skyline anchor seen from the spawn |
+| Surroundings | beyond x -122 / 177, z -148 / 104 | 3 x 3 terrain grid: wooded hills (instanced forest), river valley, hazy horizon ring |
+| Boundaries | play rectangle | Boundary rail fence (west/north/south), edge forest band with trunk colliders, lane ends "ROAD CLOSED (cows)", 4 invisible 70 m walls |
 
 ## Flow (4 players)
-Spawn faces east; road splits at x~7 north to the pig pen and south to the coop, so a crew naturally splits in pairs. Critters flee toward the cover ring (corn maze N, orchard S, hedge E, wheat W); fence gaps and the hay hole are critter-only shortcuts. All goods funnel to one 2.4 m wide bridge: the only crossing, and the daily "boss fight". Market sits on open cobbles so sales are visible to the whole team.
+Spawn faces east straight down the road at the bridge rails, the arch and the clock tower behind it. The fork at x 7 splits
+the crew: pigs north, chickens south, livestock on the pasture between. Critters flee into the cover ring (corn maze N,
+orchard S, hedge E, wheat W). Everything funnels to the single 2.4 m bridge, then through the arch into the Sale Pen in
+full view of the square. Measured navmesh distances: see `docs/qa/map-progress.md` (spawn -> Sale Pen ~125 m).
 
 ## Comedy hotspots
-- Mid-bridge sag (lowest planks at the centre): a 4-player cow carry stalls exactly where the drop is worst.
-- Sale pen opens toward the bridge: critters can wander back out toward the river.
-- Spit-out pile is on the farm bank, 120 m downstream: soaked goods have to be carried back and over the bridge again (toll again).
-- Stepping-rock bait in the river 65 m downstream (gaps too wide): tempts a shortcut that ends in a swim.
-- The town bell sits central in the square so the sundown panic pulls critters across the open cobbles.
+Unchanged from GDD 11.5.8: mid-bridge sag, bridge-approach mud, Sale Pen open west, town bell, stepping-rock bait 65 m
+downstream, Lost & Found loop, pig-pen hay hole, coop gaps -> orchard, fork mud, corn maze at night.
 
 ## Deviations / open questions
-- bridge-hazards.md says 24 m with 1.2 m planks; this brief asked for 40 m, so planks are 2 m. Game-design should pick one.
-- Spawner tags use the literal strings `HP_CritterSpawner_Pig:3` / `HP_CritterSpawner_Chicken:8`, one actor each (the count is in the tag).
-- No landscape (it can't be generated reliably headless). The ground is scaled cube slabs with a world-aligned material (`M_HP_WorldGround`).
-- No pumpkin mesh in the pack, so watermelons stand in.
-- Art bible folder rule says `/Game/HarvestPanic/Art/Environment`. Materials are under `/Game/HarvestPanic/Environment/Materials` because that is the folder this branch owns.
+- Bridge 40 m / 20 x 2 m planks is canonical (GDD 7.2, 11.7 Q4).
+- The farmhouse and the town hall are new set pieces (not in GDD 11.5.3); they carry no markers or gameplay.
+- Patchwork fields, hay meadow and pasture props are dressing only; critters may cross them.
+- The forest beyond the walls is presentation-only (`InstancedForest`, no colliders); the river outside the play area has no
+  river volume (nobody can reach it).

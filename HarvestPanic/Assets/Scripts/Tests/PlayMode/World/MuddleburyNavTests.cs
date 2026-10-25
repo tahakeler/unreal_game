@@ -42,6 +42,7 @@ namespace HarvestPanic.Tests.PlayMode.World
             Assert.AreEqual(NavMeshPathStatus.PathComplete, path.status, $"{what}: path {path.status}");
             float len = 0f;
             for (int i = 1; i < path.corners.Length; i++) len += Vector3.Distance(path.corners[i - 1], path.corners[i]);
+            Debug.Log($"[MapNav] {what}: {len:0} m (walk {len / 4f:0} s, sprint {len / 6.5f:0} s)");
             return len;
         }
 

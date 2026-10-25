@@ -175,7 +175,7 @@ namespace HarvestPanic.World.Editor
                 {
                     tris[sm] = src.GetTriangles(sm);
                     cols[sm] = sm < mats.Length && mats[sm] != null ? mats[sm].GetColor("_BaseColor") : Color.gray;
-                    if (!palette.Exists(c => (c - cols[sm]).maxColorComponent < 0.01f)) palette.Add(cols[sm]);
+                    if (!palette.Exists(c => SameColor(c, cols[sm]))) palette.Add(cols[sm]);
                 }
                 perModel.Add((v, n, tris, cols));
                 Object.DestroyImmediate(go);
@@ -189,7 +189,7 @@ namespace HarvestPanic.World.Editor
                 var nv = new List<Vector3>(); var nn = new List<Vector3>(); var uv = new List<Vector2>(); var t = new List<int>();
                 for (int sm = 0; sm < tris.Length; sm++)
                 {
-                    int slot = palette.FindIndex(c => (c - cols[sm]).maxColorComponent < 0.01f);
+                    int slot = palette.FindIndex(c => SameColor(c, cols[sm]));
                     var cell = new Vector2((slot + 0.5f) / palette.Count, 0.5f);
                     foreach (int idx in tris[sm]) { t.Add(nv.Count); nv.Add(v[idx]); nn.Add(n[idx]); uv.Add(cell); }
                 }
@@ -200,6 +200,8 @@ namespace HarvestPanic.World.Editor
                 _treeInstances[i] = new List<Vector4>();
             }
         }
+
+        static bool SameColor(Color a, Color b) => Mathf.Abs(a.r - b.r) < 0.01f && Mathf.Abs(a.g - b.g) < 0.01f && Mathf.Abs(a.b - b.b) < 0.01f;
 
         /// <summary>Scatters the forest over every tile beyond the playable rectangle (ForestDensity) and builds the renderer.</summary>
         static void Forest()

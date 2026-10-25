@@ -35,8 +35,8 @@ Baseline captures: `MuddleburyQa.CaptureAll` (8 QA cameras). Zone-by-zone agains
 Perf before (docs/qa/perf/perf-baseline.md, M2 Pro editor): 508 draw calls, 592k tris avg, 3.8 ms main thread.
 
 ## 2. Plan
-- Landscape: 3 x 3 terrain grid (play tile unchanged in size + 8 low-res outer tiles), hills rising into a bowl, forest as
-  terrain trees (no scene bloat), river meanders away beyond the play edges, hazy horizon ring.
+- Landscape: 3 x 3 terrain grid (play tile unchanged in size + 8 low-res outer tiles), hills rising into a bowl, a GPU-instanced
+  scenery forest (no scene bloat), river meanders away beyond the play edges, hazy horizon ring.
 - Farm: hollow barn with interior + reachable wardrobe, farmhouse with garden, pasture, pig hut, tilled rows, hay meadow,
   windmill/orchard dressing, farm boundary fence, readable signs.
 - Bridge: approach dressing, warning sign, abutment rocks/lanterns.

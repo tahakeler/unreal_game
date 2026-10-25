@@ -402,12 +402,17 @@ namespace HarvestPanic.World.Editor
 
             // wheat: mostly the lighter stage B mesh (360 tris) with stage A (720 tris) only on the field edges; culled at 110 m
             var wheat = Cullable(Group("Wheat Field"), 8f, 110f);
+            var wheatStalk = WorldAssets.Mat("WheatStalk", WorldAssets.Hex("D3B566"));
+            var wheatHead = WorldAssets.Mat("WheatHead", WorldAssets.Hex("E8CF86"));
             for (float x = -107f; x <= -69f; x += 1.42f)
             for (float z = -14f; z <= 17f; z += 1.42f)
             {
                 if (Mathf.Abs(z - 1.5f) < 1.2f && x > -100f) continue; // a trampled path through the middle
                 bool edge = x < -105f || x > -71f || z < -12.5f || z > 15.5f;
-                Place(NF, edge && ((int)(x * 7 + z * 3) & 1) == 0 ? "crops_wheatStageA" : "crops_wheatStageB", new Vector3(x + Rnd(-0.35f, 0.35f), 0, z + Rnd(-0.35f, 0.35f)), Rnd(0, 360), Rnd(1.0f, 1.25f), wheat);
+                bool green = edge && ((int)(x * 7 + z * 3) & 1) == 0;
+                var w = Place(NF, green ? "crops_wheatStageA" : "crops_wheatStageB", new Vector3(x + Rnd(-0.35f, 0.35f), 0, z + Rnd(-0.35f, 0.35f)), Rnd(0, 360), Rnd(1.0f, 1.25f), wheat);
+                // ripe wheat reads golden (crops are the palette's saturation exception), not as tan sticks
+                if (w != null && !green) foreach (var r in w.GetComponentsInChildren<MeshRenderer>()) r.sharedMaterials = new[] { wheatStalk, wheatHead };
             }
 
             var patch = Group("Pumpkin Patch");
