@@ -2,18 +2,45 @@ using UnityEngine;
 
 namespace HarvestPanic.Gameplay
 {
-    /// <summary>First-person arm pose chosen from the carry state (player-character 5b).</summary>
-    public enum ArmPose : byte { Idle, Reach, GripOneHand, GripTwoHands, Tool, ThrowSwing }
+    /// <summary>
+    /// First-person arm pose chosen from the carry state (player-character 5b). The poses after
+    /// <see cref="ThrowSwing"/> are asked for by the held tool or vehicle (<see cref="IToolArmPose"/>, farm-tools / wagon).
+    /// </summary>
+    public enum ArmPose : byte { Idle, Reach, GripOneHand, GripTwoHands, Tool, ThrowSwing, LassoTwirl, LassoHold, LassoReel, WhistleBlow, WagonPush }
 
     /// <summary>Pure arm math (no scene access) so it is EditMode-testable.</summary>
     public static class ArmMath
     {
         /// <summary>Picks the pose. A throw follow-through overrides everything for its duration.</summary>
-        public static ArmPose Select(bool holding, bool tool, int handsRequired, bool aiming, bool swinging)
+        public static ArmPose Select(bool holding, bool tool, int handsRequired, bool aiming, bool swinging) =>
+            Select(holding, tool, handsRequired, aiming, swinging, ArmPose.Idle);
+
+        /// <summary>
+        /// Picks the pose; <paramref name="heldOverride"/> is the held tool/vehicle's own pose (lasso twirl, whistle,
+        /// wagon push) and wins over the generic grip while holding. Anything below <see cref="ArmPose.LassoTwirl"/> is
+        /// "no override".
+        /// </summary>
+        public static ArmPose Select(bool holding, bool tool, int handsRequired, bool aiming, bool swinging, ArmPose heldOverride)
         {
             if (swinging) return ArmPose.ThrowSwing;
+            if (holding && IsToolPose(heldOverride)) return heldOverride;
             if (holding) return tool ? ArmPose.Tool : handsRequired >= 2 ? ArmPose.GripTwoHands : ArmPose.GripOneHand;
             return aiming ? ArmPose.Reach : ArmPose.Idle;
+        }
+
+        /// <summary>True for the tool/vehicle-specific poses.</summary>
+        public static bool IsToolPose(ArmPose p) => p >= ArmPose.LassoTwirl;
+
+        /// <summary>
+        /// Hand-over-hand reel: how far (m, along the rope toward the body) each hand has pulled at
+        /// <paramref name="phase"/> (cycles). The hands alternate: one pulls back while the other reaches forward.
+        /// </summary>
+        public static void ReelHands(float phase, float stroke, out float left, out float right)
+        {
+            float u = phase - Mathf.Floor(phase);
+            float tri = u < 0.5f ? u * 2f : 2f - u * 2f; // 0..1..0
+            left = tri * stroke;
+            right = (1f - tri) * stroke;
         }
 
         /// <summary>Finger curl 0 (open) .. 1 (fist) for a pose.</summary>
@@ -26,6 +53,11 @@ namespace HarvestPanic.Gameplay
                 case ArmPose.GripTwoHands: return 0.45f;
                 case ArmPose.Tool: return 0.92f;
                 case ArmPose.ThrowSwing: return 0.05f;
+                case ArmPose.LassoTwirl: return 0.88f;
+                case ArmPose.LassoHold:
+                case ArmPose.LassoReel: return 0.95f;
+                case ArmPose.WhistleBlow: return 0.72f;
+                case ArmPose.WagonPush: return 0.9f;
                 default: return 0.62f;
             }
         }

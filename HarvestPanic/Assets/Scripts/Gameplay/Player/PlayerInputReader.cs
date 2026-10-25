@@ -18,7 +18,14 @@ namespace HarvestPanic.Gameplay
             public Vector2 Move, Look;
             public bool Sprint, Crouch, InteractHeld, ThrowHeld, UseHeld;
             public bool JumpPressed, InteractPressed, InteractReleased, ThrowReleased, UsePressed, UseReleased, HollerPressed;
+            /// <summary>One-shot hotbar pick, 1-based (1 = Hands ... 5 = Whistle); 0 = none.</summary>
+            public int ToolSlot;
+            /// <summary>One-shot hotbar step: -1 previous, +1 next, 0 none.</summary>
+            public int ToolCycle;
         }
+
+        /// <summary>Hotbar slot actions in order (ToolSlot1 = Hands ... ToolSlot5 = Whistle).</summary>
+        public const int ToolSlotCount = 5;
 
         [SerializeField] InputActionAsset actions;
 
@@ -29,6 +36,8 @@ namespace HarvestPanic.Gameplay
 
         InputActionAsset _instance;
         InputAction _move, _look, _jump, _sprint, _crouch, _interact, _throw, _use, _holler;
+        InputAction _toolNext, _toolPrev, _toolScroll;
+        readonly InputAction[] _toolSlots = new InputAction[ToolSlotCount];
         bool _active;
 
         /// <summary>Activates device input (called for the owning player only).</summary>
@@ -41,6 +50,9 @@ namespace HarvestPanic.Gameplay
             _move = map.FindAction("Move"); _look = map.FindAction("Look"); _jump = map.FindAction("Jump");
             _sprint = map.FindAction("Sprint"); _crouch = map.FindAction("Crouch"); _interact = map.FindAction("Interact");
             _throw = map.FindAction("Throw"); _use = map.FindAction("Use"); _holler = map.FindAction("Holler");
+            // Hotbar (farm-tools rule 1 / GDD 4.8 "Tool slot swap"); optional so older assets still load.
+            for (int i = 0; i < ToolSlotCount; i++) _toolSlots[i] = map.FindAction("ToolSlot" + (i + 1));
+            _toolNext = map.FindAction("ToolNext"); _toolPrev = map.FindAction("ToolPrev"); _toolScroll = map.FindAction("ToolScroll");
             map.Enable();
         }
 
@@ -67,6 +79,7 @@ namespace HarvestPanic.Gameplay
         {
             Scripted.JumpPressed = Scripted.InteractPressed = Scripted.InteractReleased = false;
             Scripted.ThrowReleased = Scripted.UsePressed = Scripted.UseReleased = Scripted.HollerPressed = false;
+            Scripted.ToolSlot = 0; Scripted.ToolCycle = 0;
         }
 
         /// <summary>Device input is live: active owner, not scripted, and no UI modal (Core InputModal) is open.</summary>
@@ -87,5 +100,45 @@ namespace HarvestPanic.Gameplay
         public bool UsePressed => UseScripted ? Scripted.UsePressed : Dev && _use.WasPressedThisFrame();
         public bool UseReleased => UseScripted ? Scripted.UseReleased : Dev && _use.WasReleasedThisFrame();
         public bool HollerPressed => UseScripted ? Scripted.HollerPressed : Dev && _holler.WasPressedThisFrame();
+
+        /// <summary>Hotbar slot picked this frame (0 = Hands ... 4 = Whistle), or -1.</summary>
+        public int ToolSlotPressed
+        {
+            get
+            {
+                if (UseScripted) return Scripted.ToolSlot > 0 ? Scripted.ToolSlot - 1 : -1;
+                if (!Dev) return -1;
+                for (int i = 0; i < ToolSlotCount; i++) if (_toolSlots[i] != null && _toolSlots[i].WasPressedThisFrame()) return i;
+                return -1;
+            }
+        }
+
+        /// <summary>Hotbar step this frame: +1 next (RB, wheel down), -1 previous (LB, wheel up), 0 none.</summary>
+        public int ToolCycle
+        {
+            get
+            {
+                if (UseScripted) return Mathf.Clamp(Scripted.ToolCycle, -1, 1);
+                if (!Dev) return 0;
+                if (_toolNext != null && _toolNext.WasPressedThisFrame()) return 1;
+                if (_toolPrev != null && _toolPrev.WasPressedThisFrame()) return -1;
+                if (_toolScroll != null)
+                {
+                    float y = _toolScroll.ReadValue<float>();
+                    if (y > 0.01f) return -1;
+                    if (y < -0.01f) return 1;
+                }
+                return 0;
+            }
+        }
+
+        /// <summary>Display text of the key bound to hotbar slot <paramref name="slot"/> (0-based), e.g. "1" or "Q".</summary>
+        public string ToolSlotKey(int slot)
+        {
+            var a = slot >= 0 && slot < ToolSlotCount ? _toolSlots[slot] : null;
+            if (a == null) return slot == ToolSlotCount - 1 ? "Q" : (slot + 1).ToString();
+            string s = a.GetBindingDisplayString(InputBinding.MaskByGroup("KeyboardMouse"));
+            return string.IsNullOrEmpty(s) ? (slot + 1).ToString() : s.ToUpperInvariant();
+        }
     }
 }

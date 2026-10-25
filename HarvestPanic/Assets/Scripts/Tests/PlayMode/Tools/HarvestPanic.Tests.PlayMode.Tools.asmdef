@@ -1,0 +1,31 @@
+{
+    "name": "HarvestPanic.Tests.PlayMode.Tools",
+    "rootNamespace": "HarvestPanic.Tests.PlayMode.Tools",
+    "references": [
+        "HarvestPanic.Core",
+        "HarvestPanic.Gameplay",
+        "HarvestPanic.AI",
+        "HarvestPanic.Economy",
+        "HarvestPanic.World",
+        "HarvestPanic.Networking",
+        "HarvestPanic.Tests.PlayMode.Integration",
+        "Unity.Netcode.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "UnityEngine.UIElementsModule",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

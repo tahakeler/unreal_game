@@ -106,7 +106,7 @@ namespace HarvestPanic.Gameplay
             float speed = _crouched ? t.CrouchSpeed : sprint ? t.SprintSpeed : t.WalkSpeed;
             speed *= _pc.Carry != null ? _pc.Carry.SpeedMultiplier : 1f;
             speed *= MovementModifiers.Evaluate(transform.position); // world zones (mud 0.6, ...)
-            _stamina.Tick(dt, sprint, load);
+            _stamina.Tick(dt, sprint, load, _pc.Carry != null ? _pc.Carry.ExtraStaminaDrain : 0f);
 
             Vector3 wish = (transform.forward * mv.y + transform.right * mv.x) * speed;
             bool grounded = _cc.isGrounded;
