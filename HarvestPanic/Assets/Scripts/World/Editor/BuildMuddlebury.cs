@@ -95,6 +95,7 @@ namespace HarvestPanic.World.Editor
                 BankHedge();
                 LostAndFound();
                 HayMeadow();
+                Patchwork();
                 MarketTown();
                 FarmDressing();
                 Boundaries();
@@ -481,9 +482,9 @@ namespace HarvestPanic.World.Editor
             Wall("Edge_N", new Vector3((x0 + x1) / 2f, h / 2f - 12f, z1 + 1f), new Vector3(x1 - x0 + 4f, h, 2f));
         }
 
-        static GameObject Marker(string name, Vector3 pos, Transform parent)
+        static GameObject Marker(string name, Vector3 pos, Transform parent, bool prefix = true)
         {
-            var go = new GameObject("HP_" + name);
+            var go = new GameObject(prefix ? "HP_" + name : name);
             go.transform.SetParent(parent, false);
             go.transform.position = new Vector3(pos.x, GroundY(pos.x, pos.z) + pos.y, pos.z);
             return go;
@@ -510,10 +511,11 @@ namespace HarvestPanic.World.Editor
             AddMarker(barn, MarkerRole.BarnRespawn);
             AddMarker(Marker("CritterSpawner_Pig", PigPen + new Vector3(3f, 0.1f, -1f), g), MarkerRole.CritterSpawner, "Critter.Pig", 3);
             AddMarker(Marker("CritterSpawner_Chicken", Coop + new Vector3(2f, 0.1f, -2f), g), MarkerRole.CritterSpawner, "Critter.Chicken", 8);
-            // Livestock (feature/cow-goat): keep in sync with HarvestPanic.AI.Editor.LivestockSceneHook.Markers.
-            AddMarker(Marker("CritterSpawner_Cow", PigPen + new Vector3(-14f, 0.1f, -12f), g), MarkerRole.CritterSpawner, "Critter.Cow", 1);
-            AddMarker(Marker("CritterSpawner_Goat", PigPen + new Vector3(-11f, 0.1f, -4f), g), MarkerRole.CritterSpawner, "Critter.Goat", 1);
-            AddMarker(Marker("CritterSpawner_Sheep", new Vector3(-6f, 0.1f, 20f), g), MarkerRole.CritterSpawner, "Critter.Sheep", 5); // feature/sheep-cursed-crops
+            // Livestock (feature/cow-goat, feature/sheep-cursed-crops): same names and spots as HarvestPanic.AI.Editor.
+            // LivestockSceneHook.Markers, which finds them by name (no "HP_" prefix) and so never adds a duplicate.
+            AddMarker(Marker("CritterSpawner_Cow", PigPen + new Vector3(-14f, 0.1f, -12f), g, prefix: false), MarkerRole.CritterSpawner, "Critter.Cow", 1);
+            AddMarker(Marker("CritterSpawner_Goat", PigPen + new Vector3(-11f, 0.1f, -4f), g, prefix: false), MarkerRole.CritterSpawner, "Critter.Goat", 1);
+            AddMarker(Marker("CritterSpawner_Sheep", new Vector3(-6f, 0.1f, 20f), g, prefix: false), MarkerRole.CritterSpawner, "Critter.Sheep", 5);
             AddMarker(Marker("Goods_PrizePumpkin", Pumpkins + new Vector3(0, 0.1f, 0), g), MarkerRole.Goods, "Crop.PrizePumpkin");
             for (int i = 0; i < 4; i++)
                 AddMarker(Marker($"Goods_Crate_{i}", new Vector3(-12.5f + (i % 2) * 1.4f, 0.1f, 6.5f + (i / 2) * 1.4f), g), MarkerRole.Goods, "Product.Crate", 1, i);
@@ -537,12 +539,12 @@ namespace HarvestPanic.World.Editor
             Cam("01_Spawn_FirstPerson", new Vector3(-11f, 1.7f, 0f), new Vector3(80f, 0.5f, 0f), 80f);
             Cam("02_Aerial_Overview", new Vector3(-60f, 120f, -230f), new Vector3(30f, 0f, -10f), 60f);
             Cam("03_Bridge", new Vector3(63f, 2.6f, -9f), new Vector3(82f, -1f, 1f), 70f);
-            Cam("04_Market_Square", new Vector3(108f, 3.0f, -16f), new Vector3(140f, 3.5f, 6f), 75f);
+            Cam("04_Market_Square", new Vector3(113f, 2.2f, -9f), new Vector3(142f, 3.2f, 8f), 75f);
             Cam("05_PigPen_CornMaze", new Vector3(-2f, 9f, 12f), new Vector3(18f, 0f, 46f), 70f);
             Cam("06_Windmill_Wheat", new Vector3(-58f, 5f, 14f), new Vector3(-88f, 4f, -30f), 70f);
             Cam("07_River_Downstream_Pile", new Vector3(66f, 6f, -88f), new Vector3(54f, -1f, -120f), 70f);
             Cam("08_Barn_From_Road", new Vector3(8f, 3f, 9f), new Vector3(-26f, 4f, 0f), 70f);
-            Cam("09_Farmyard_Farmhouse", new Vector3(-20f, 4.5f, 2f), new Vector3(-47f, 3f, 24f), 70f);
+            Cam("09_Farmyard_Farmhouse", new Vector3(-24f, 3.2f, 14f), new Vector3(-47f, 3f, 23f), 70f);
             Cam("10_Barn_Interior", new Vector3(-18.6f, 1.7f, -2.2f), new Vector3(-32f, 1.6f, 2.5f), 80f);
             Cam("11_Fields_Veg_Wheat", new Vector3(-50f, 6f, 46f), new Vector3(-85f, 0f, 10f), 70f);
             Cam("12_Arch_From_Bridge", new Vector3(92f, 1.7f, 0f), new Vector3(140f, 4f, 0f), 75f);

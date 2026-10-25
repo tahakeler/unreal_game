@@ -108,12 +108,14 @@ namespace HarvestPanic.World.Editor
             b.Box(new Vector3(x0 - 0.1f, 0.2f, 0f), new Vector3(0.2f, 0.4f, w), Mats.StoneDark, 1.2f);
             foreach (float s in new[] { -1f, 1f }) b.Box(new Vector3(x1 + 0.1f, 0.2f, s * (doorW * 0.5f + pw * 0.5f + 0.15f)), new Vector3(0.2f, 0.4f, pw + 0.3f), Mats.StoneDark, 1.2f);
             // windows on both long walls, outside and inside
-            foreach (float wx in new[] { -31f, -26f, -21f })
+            // windows between the frame posts (x -31.5 / -27 / -22.5), clear of the loft edge and the wardrobe corner
+            foreach (float wx in new[] { -28.4f, -25.0f, -20.3f })
             {
-                Window(b, new Vector3(wx, 3.4f, z1), Vector3.forward, 1.1f, 1.0f, null, false, null);
                 Window(b, new Vector3(wx, 3.4f, z0), Vector3.back, 1.1f, 1.0f, null, false, null);
-                Window(b, new Vector3(wx, 3.4f, z1 - t), Vector3.back, 1.1f, 1.0f, null, false, null);
                 Window(b, new Vector3(wx, 3.4f, z0 + t), Vector3.forward, 1.1f, 1.0f, null, false, null);
+                if (wx > -21f) continue; // north wall: wardrobe corner + sign
+                Window(b, new Vector3(wx, 3.4f, z1), Vector3.forward, 1.1f, 1.0f, null, false, null);
+                Window(b, new Vector3(wx, 3.4f, z1 - t), Vector3.back, 1.1f, 1.0f, null, false, null);
             }
             // weather vane: rooster on the ridge
             float vy = H + 5.1f;
@@ -181,7 +183,7 @@ namespace HarvestPanic.World.Editor
             b.Box(new Vector3(-18.7f, 1.55f, 6.66f), new Vector3(1.0f, 1.7f, 0.06f), Mats.WoodDark, 1f);
             b.Box(new Vector3(-18.7f, 1.55f, 6.62f), new Vector3(0.8f, 1.5f, 0.02f), WorldAssets.Mat("Mirror", WorldAssets.Hex("C9DCE4"), 0.85f), 1f);
             BakeBuilding(b, "SM_World_Barn", "Barn Building", g, Vector3.zero, 0f);
-            SignBoard("WARDROBE", new Vector3(-20.4f, 3.0f, 6.64f), 180f, 1.7f, 0.42f, g, Mats.SignBoard, Ink);
+            SignBoard("WARDROBE", new Vector3(-20.4f, 2.85f, 6.64f), 180f, 1.7f, 0.42f, g, Mats.SignBoard, Ink);
             SignBoard("GRANDPA'S FARM", new Vector3(x1 + 0.12f, 6.45f, 0f), 90f, 4.2f, 0.7f, g, Mats.SignBoard, Ink, thickness: 0.1f);
             AddMarker(MarkerAt("Wardrobe", new Vector3(-20.4f, 0f, 6.33f), 180f, g), MarkerRole.Wardrobe);
 
@@ -221,7 +223,7 @@ namespace HarvestPanic.World.Editor
         {
             var g = Group("Farmhouse");
             var small = Cullable(Group("Farmhouse Garden", g), 10f, 55f);
-            var spec = new HouseSpec { W = 10f, D = 7.5f, H1 = 3.0f, H2 = 2.7f, Wall = 0, Upper = -1, Roof = 2, Shutter = 1, GableFront = false, Jetty = false, Timber = false, Porch = true, FrontWindows = 2, Chimney = true, Pitch = 0.85f };
+            var spec = new HouseSpec { W = 10f, D = 7.5f, H1 = 3.0f, H2 = 2.7f, Wall = 0, Upper = -1, Roof = 5, Shutter = 1, GableFront = false, Jetty = false, Timber = false, StoneGround = true, Porch = true, FrontWindows = 2, Chimney = true, Pitch = 0.85f };
             PlaceHouse("Farmhouse", spec, Farmhouse, 90f, g, small);
             float gy = GroundY(Farmhouse.x, Farmhouse.z);
             // porch furniture (deck top 0.28 m)
@@ -246,7 +248,8 @@ namespace HarvestPanic.World.Editor
             var wb = new WorldMeshBuilder();
             wb.Cylinder(Vector3.zero, 0.95f, 0.95f, 0.85f, 10, Mats.Stone, null, 1.2f, capTop: false);
             wb.Cylinder(new Vector3(0, 0.82f, 0), 1.02f, 1.02f, 0.12f, 10, Mats.StoneDark, Mats.StoneDark, 1.2f, capTop: false);
-            wb.Cylinder(new Vector3(0, 0.55f, 0), 0.8f, 0.8f, 0.01f, 10, null, WorldAssets.Mat("WellWater", WorldAssets.Hex("2E5E6A"), 0.6f));
+            var wellWater = WorldAssets.Mat("WellWater", WorldAssets.Hex("2E5E6A"), 0.6f);
+            wb.Cylinder(new Vector3(0, 0.55f, 0), 0.8f, 0.8f, 0.01f, 10, wellWater, wellWater);
             foreach (float s in new[] { -1f, 1f }) wb.Box(new Vector3(0, 1.45f, s * 0.95f), new Vector3(0.14f, 1.8f, 0.14f), Mats.WoodDark, 1f);
             wb.Push(new Vector3(0, 2.3f, 0), Quaternion.identity);
             Roof(wb, 1.5f, 2.4f, 0.9f, Mats.Roof(3), Mats.WoodMid);
@@ -603,6 +606,45 @@ namespace HarvestPanic.World.Editor
             Place(NF, "log_stack", Pile + new Vector3(1f, 0, -3.5f), 70f, 0.9f, pile, "box");
             Place(SV, "bucket", Pile + new Vector3(-1.2f, 0, -2.6f), 0f, 0.4f, pile);
             Place(FD, "bag", Pile + new Vector3(-3.4f, 0, 1.4f), 50f, 0.6f, pile);
+        }
+
+        /// <summary>Hedgerows (bush lines with gaps) around the patchwork fields, field-corner oaks and a few bales.</summary>
+        static void Patchwork()
+        {
+            var g = Group("Patchwork Fields");
+            var hedge = Cullable(Group("Hedgerows", g), 20f, 160f);
+            var all = new List<Vector4>(PloughedFields); all.AddRange(HayFields);
+            foreach (var f in all)
+            {
+                var c = new[] { new Vector2(f.x - 2f, f.y - 2f), new Vector2(f.z + 2f, f.y - 2f), new Vector2(f.z + 2f, f.w + 2f), new Vector2(f.x - 2f, f.w + 2f) };
+                for (int s = 0; s < 4; s++)
+                {
+                    Vector2 a = c[s], b = c[(s + 1) % 4];
+                    float len = (b - a).magnitude;
+                    for (float t = 1.5f; t < len - 1.5f; t += Rnd(2.6f, 3.6f))
+                    {
+                        if (Mathf.Repeat(t, 22f) < 3.5f) continue; // gaps every ~22 m for critters and players
+                        var p = Vector2.Lerp(a, b, t / len);
+                        if (Outside(p.x, p.y) > -3f || NearKeepClear(p.x, p.y, 1f) || Blocked2(p.x, p.y)) continue;
+                        Place(NF, Pick("plant_bushLarge", "plant_bushDetailed", "plant_bush"), new Vector3(p.x, 0, p.y), Rnd(0, 360), Rnd(1.3f, 2.0f), hedge);
+                    }
+                }
+                var corner = c[_rng.Next(4)];
+                if (!NearKeepClear(corner.x, corner.y, 2f) && Outside(corner.x, corner.y) < -6f)
+                    Place(NF, Pick("tree_oak", "tree_default", "tree_fat"), new Vector3(corner.x, 0, corner.y), Rnd(0, 360), Rnd(7.5f, 9.5f), g, "trunk");
+            }
+            var b2 = new WorldMeshBuilder();
+            foreach (var p in new[] { new Vector2(-44f, 62f), new Vector2(-38f, 70f), new Vector2(-30f, 58f), new Vector2(-50f, -118f), new Vector2(-40f, -108f) })
+                if (!NearKeepClear(p.x, p.y, 2f)) RoundBale(b2, g, G(p.x, p.y) - Vector3.up * 0.05f, Rnd(0, 180));
+            BakeBuilding(b2, "SM_World_FieldBales", "Field Bales", g, Vector3.zero, 0f);
+        }
+
+        /// <summary>True on roads and built-up farm spots (hedgerows skip them).</summary>
+        static bool Blocked2(float x, float z)
+        {
+            var p = new Vector2(x, z);
+            foreach (var r in Roads) if (DistSeg(p, r.a, r.b) < r.w + 1.5f) return true;
+            return false;
         }
 
         static void HayMeadow()

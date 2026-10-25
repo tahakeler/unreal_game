@@ -96,7 +96,7 @@ namespace HarvestPanic.World.Editor
                 Layer("Road", WorldAssets.NoiseTexture("Road", WorldAssets.Hex("C4A272"), WorldAssets.Hex("B08E60"), WorldAssets.Hex("8A6E4A"), 0.04f, seed: 3), 5f),
                 Layer("Soil", WorldAssets.NoiseTexture("Soil", WorldAssets.Hex("8E6640"), WorldAssets.Hex("76522F"), WorldAssets.Hex("A87C52"), 0.02f, seed: 4, stripes: true), 4f),
                 Layer("Mud", WorldAssets.NoiseTexture("Mud", WorldAssets.Hex("6B4A2E"), WorldAssets.Hex("5A3C24"), WorldAssets.Hex("8A6644"), 0.02f, seed: 5), 3f),
-                Layer("Cobble", WorldAssets.CobbleTexture("Cobble", WorldAssets.Hex("C9BBA2"), WorldAssets.Hex("8F8270")), 3f),
+                Layer("Cobble", WorldAssets.CobbleTexture("Cobble", WorldAssets.Hex("C9BBA2"), WorldAssets.Hex("8F8270")), 1.7f),
                 Layer("Bank", WorldAssets.NoiseTexture("Bank", WorldAssets.Hex("B49A72"), WorldAssets.Hex("9C8462"), WorldAssets.Hex("D2BE98"), 0.05f, seed: 6), 4f),
                 Layer("Meadow", WorldTextures.GrassStrokes("MeadowPaint", WorldAssets.Hex("97B05A"), WorldAssets.Hex("82A04C"), WorldAssets.Hex("E3D68A"), 8), 7f),
                 Layer("Forest", WorldAssets.NoiseTexture("ForestFloor", WorldAssets.Hex("5E7A3E"), WorldAssets.Hex("4E6A34"), WorldAssets.Hex("8A7A4A"), 0.05f, seed: 9), 6f),
@@ -123,6 +123,7 @@ namespace HarvestPanic.World.Editor
             bool create = l == null;
             if (create) l = new TerrainLayer();
             l.diffuseTexture = tex; l.tileSize = new Vector2(tile, tile); l.smoothness = 0f; l.metallic = 0f;
+            l.smoothnessSource = TerrainLayerSmoothnessSource.Constant; // default reads albedo alpha (=1): glossy pale grass at grazing angles
             if (create) AssetDatabase.CreateAsset(l, p); else EditorUtility.SetDirty(l);
             return l;
         }
@@ -134,13 +135,26 @@ namespace HarvestPanic.World.Editor
         {
             var list = new List<TreePrototype>();
             _treeHeights = new float[TreeModels.Length];
+            const string dir = WorldAssets.ArtRoot + "/Prefabs/Trees";
+            System.IO.Directory.CreateDirectory(dir);
             for (int i = 0; i < TreeModels.Length; i++)
             {
+                // Terrain tree prototype: LODGroup root (no "Nature/Soft Occlusion" warning, distance cull) + trunk capsule
+                // (navmesh-friendly, and tree colliders on the playable tile's outer strip).
                 var src = WorldAssets.Model(NF, TreeModels[i]);
-                var probe = (GameObject)Object.Instantiate(src);
-                _treeHeights[i] = Mathf.Max(0.2f, RendererBounds(probe).size.y);
-                Object.DestroyImmediate(probe);
-                list.Add(new TreePrototype { prefab = src, bendFactor = 0f });
+                var root = new GameObject("PF_Tree_" + TreeModels[i]);
+                var model = (GameObject)PrefabUtility.InstantiatePrefab(src);
+                model.transform.SetParent(root.transform, false);
+                var b = RendererBounds(model);
+                _treeHeights[i] = Mathf.Max(0.2f, b.size.y);
+                var lg = root.AddComponent<LODGroup>();
+                lg.SetLODs(new[] { new LOD(0.004f, model.GetComponentsInChildren<Renderer>()) });
+                lg.RecalculateBounds();
+                var cap = root.AddComponent<CapsuleCollider>();
+                cap.radius = Mathf.Max(0.04f, b.size.x * 0.08f); cap.height = b.size.y * 0.6f; cap.center = new Vector3(0f, b.size.y * 0.3f, 0f);
+                var prefab = PrefabUtility.SaveAsPrefabAsset(root, $"{dir}/PF_Tree_{TreeModels[i]}.prefab");
+                Object.DestroyImmediate(root);
+                list.Add(new TreePrototype { prefab = prefab, bendFactor = 0f });
             }
             return list.ToArray();
         }
@@ -295,6 +309,10 @@ namespace HarvestPanic.World.Editor
             soil = Mathf.Max(soil, 1f - Smooth(0f, 1.2f, DistRect(x, z, -64, -52, -48, -36)));    // pumpkin patch
             soil = Mathf.Max(soil, (1f - Smooth(0f, 1.5f, DistRect(x, z, -9, 55, 43, 87))) * 0.85f); // corn maze
             soil = Mathf.Max(soil, 1f - Smooth(0f, 0.8f, DistRect(x, z, -55, 27.5f, -50, 31)));   // farmhouse kitchen garden
+            foreach (var f in PloughedFields) soil = Mathf.Max(soil, (1f - Smooth(0f, 1.5f, DistRect(x, z, f.x, f.y, f.z, f.w))) * 0.9f);
+            float hayField = 0f;
+            foreach (var f in HayFields) hayField = Mathf.Max(hayField, 1f - Smooth(0f, 2f, DistRect(x, z, f.x, f.y, f.z, f.w)));
+            w[6] = Mathf.Max(w[6], hayField); w[0] *= 1f - hayField;
             float mud = 0f;
             mud = Mathf.Max(mud, 1f - Smooth(0.7f, 1.0f, Ellipse(x, z, PigPen.x - 3f, PigPen.z + 1f, 5.5f, 3.6f)));
             mud = Mathf.Max(mud, 1f - Smooth(0.6f, 1.0f, Ellipse(x, z, 53f, 4.5f, 3.2f, 2.2f)));
@@ -312,6 +330,10 @@ namespace HarvestPanic.World.Editor
             w[0] += 1e-4f;
         }
 
+        /// <summary>Patchwork farmland on the outer acres (x0, z0, x1, z1): ploughed soil and hay meadows, hedgerows between.</summary>
+        static readonly Vector4[] PloughedFields = { new Vector4(-112, 50, -88, 88), new Vector4(-112, -138, -74, -100), new Vector4(-6, -136, 32, -96) };
+        static readonly Vector4[] HayFields = { new Vector4(-58, 44, -18, 80), new Vector4(-64, -136, -24, -96) };
+
         static float Ellipse(float x, float z, float cx, float cz, float rx, float rz)
         {
             float dx = (x - cx) / rx, dz = (z - cz) / rz; return Mathf.Sqrt(dx * dx + dz * dz);
@@ -323,7 +345,12 @@ namespace HarvestPanic.World.Editor
         static void HorizonRing()
         {
             var mb = new WorldMeshBuilder();
-            var mat = WorldAssets.Mat("HorizonHills", WorldAssets.Hex("7F9A72"));
+            string hp = WorldAssets.MatDir + "/M_World_HorizonHills.mat";
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(hp);
+            if (mat == null || mat.shader.name != "HarvestPanic/Horizon") { AssetDatabase.DeleteAsset(hp); mat = new Material(Shader.Find("HarvestPanic/Horizon")); AssetDatabase.CreateAsset(mat, hp); }
+            mat.SetColor("_Color", WorldAssets.Hex("8FA89A"));
+            mat.SetFloat("_FogMix", 0.5f);
+            EditorUtility.SetDirty(mat);
             float[] radii = { 560f, 660f, 780f, 900f, 985f };
             const int seg = 120;
             float H(int ring, int s)

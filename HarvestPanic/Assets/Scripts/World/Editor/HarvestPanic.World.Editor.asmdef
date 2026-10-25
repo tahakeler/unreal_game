@@ -4,6 +4,7 @@
     "references": [
         "HarvestPanic.Core",
         "HarvestPanic.World",
+        "HarvestPanic.Weather",
         "Unity.Netcode.Runtime",
         "Unity.AI.Navigation",
         "Unity.RenderPipelines.Core.Runtime",

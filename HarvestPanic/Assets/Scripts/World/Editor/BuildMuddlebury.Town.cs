@@ -118,8 +118,11 @@ namespace HarvestPanic.World.Editor
             float span = s.GableFront ? W2 : D2, length = s.GableFront ? D2 : W2;
             b.Push(new Vector3(0f, top, 0f), Quaternion.Euler(0f, s.GableFront ? 90f : 0f, 0f));
             float rise = Roof(b, span, length, s.Pitch, roofM, upperM);
-            if (s.GableFront && s.H2 > 0f) // round gable window facing the street
-                Window(b, new Vector3(0f, rise * 0.38f, length * 0.5f), Vector3.forward, 0.7f, 0.7f, shut, false, null);
+            if (s.H2 > 0f) // attic windows in both gables
+            {
+                Window(b, new Vector3(0f, rise * 0.36f, length * 0.5f), Vector3.forward, 0.7f, 0.7f, null, false, null);
+                if (!s.GableFront) Window(b, new Vector3(0f, rise * 0.36f, -length * 0.5f), Vector3.back, 0.7f, 0.7f, null, false, null);
+            }
             b.Pop();
             o.RoofTop = top + rise;
             if (s.Chimney)
