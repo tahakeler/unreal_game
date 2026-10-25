@@ -136,9 +136,8 @@ namespace HarvestPanic.World.Editor
         }
 
         /// <summary>Gable roof with the ridge along local Z (span along X), eaves at y = 0. Returns the rise.</summary>
-        static float Roof(WorldMeshBuilder b, float span, float length, float pitch, Material roofM, Material gableM, bool gableNeg = true, bool gablePos = true)
+        static float Roof(WorldMeshBuilder b, float span, float length, float pitch, Material roofM, Material gableM, bool gableNeg = true, bool gablePos = true, float over = 0.45f, float gableOver = 0.35f)
         {
-            float over = 0.45f, gableOver = 0.35f;
             float hs = span * 0.5f + over, rise = (span * 0.5f) * pitch, riseO = hs * pitch;
             float th = Mathf.Atan2(riseO, hs) * Mathf.Rad2Deg;
             float L = Mathf.Sqrt(hs * hs + riseO * riseO) + 0.06f, wl = length + 2f * gableOver;

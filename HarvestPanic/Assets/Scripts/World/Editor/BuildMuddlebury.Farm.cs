@@ -252,7 +252,7 @@ namespace HarvestPanic.World.Editor
             wb.Cylinder(new Vector3(0, 0.55f, 0), 0.8f, 0.8f, 0.01f, 10, wellWater, wellWater);
             foreach (float s in new[] { -1f, 1f }) wb.Box(new Vector3(0, 1.45f, s * 0.95f), new Vector3(0.14f, 1.8f, 0.14f), Mats.WoodDark, 1f);
             wb.Push(new Vector3(0, 2.3f, 0), Quaternion.identity);
-            Roof(wb, 1.5f, 2.4f, 0.9f, Mats.Roof(3), Mats.WoodMid);
+            Roof(wb, 1.5f, 2.4f, 0.9f, Mats.Roof(3), Mats.WoodMid, over: 0.25f, gableOver: 0.15f);
             wb.Pop();
             wb.Box(new Vector3(0, 1.85f, 0), new Vector3(0.12f, 0.12f, 2.0f), Mats.WoodMid, 1f);
             wb.Box(new Vector3(0, 1.45f, 0), new Vector3(0.02f, 0.8f, 0.02f), Mats.Rope, 1f);
@@ -287,7 +287,7 @@ namespace HarvestPanic.World.Editor
             var dh = new WorldMeshBuilder();
             dh.Box(new Vector3(0, 0.45f, 0), new Vector3(1.1f, 0.9f, 1.3f), Mats.WoodMid, 1.2f);
             dh.Push(new Vector3(0, 0.9f, 0), Quaternion.identity);
-            Roof(dh, 1.1f, 1.3f, 0.9f, Mats.Roof(0), Mats.WoodMid);
+            Roof(dh, 1.1f, 1.3f, 0.95f, Mats.Roof(0), Mats.WoodMid, over: 0.14f, gableOver: 0.1f);
             dh.Pop();
             dh.Box(new Vector3(0.56f, 0.38f, 0), new Vector3(0.04f, 0.6f, 0.5f), WorldAssets.Mat("Interior", WorldAssets.Hex("3A2A20")), 1f);
             var doghouse = BakeBuilding(dh, "SM_World_Doghouse", "Doghouse", g, G(-40.8f, 18.4f), 180f);
@@ -371,7 +371,7 @@ namespace HarvestPanic.World.Editor
             b.Box(hp + new Vector3(0, 0.75f, 0), new Vector3(2.5f, 0.7f, 0.7f), Mats.Hay, 1f);
             for (float x = -1.1f; x <= 1.15f; x += 0.28f) b.Box(hp + new Vector3(x, 0.8f, 0.37f), new Vector3(0.04f, 0.9f, 0.04f), Mats.WoodMid, 1f);
             b.Push(hp + new Vector3(0, 1.4f, 0), Quaternion.identity);
-            Roof(b, 1.0f, 2.8f, 0.7f, Mats.Roof(4), Mats.WoodMid);
+            Roof(b, 1.0f, 2.8f, 0.7f, Mats.Roof(4), Mats.WoodMid, over: 0.2f, gableOver: 0.12f);
             b.Pop();
             Solid("HayRack", g, hp + new Vector3(0, 0.7f, 0), new Vector3(2.7f, 1.4f, 0.9f), Quaternion.identity);
             // salt lick on a post

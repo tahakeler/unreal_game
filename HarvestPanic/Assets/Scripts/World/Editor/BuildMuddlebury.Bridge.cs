@@ -121,7 +121,7 @@ namespace HarvestPanic.World.Editor
                 for (int i = 0; i < 4; i++)
                 {
                     float z = side * Rnd(2.8f, 6.5f), x = bx + (bx < RiverCentre ? Rnd(-1f, 2.5f) : Rnd(-2.5f, 1f));
-                    Place(FT, Pick("rock-large", "rock-wide", "rock-small"), new Vector3(x, -0.2f, z), Rnd(0, 360), Rnd(0.8f, 1.6f), g);
+                    Place(NF, Pick("rock_largeA", "rock_largeB", "rock_largeC", "rock_tallA"), new Vector3(x, -0.25f, z), Rnd(0, 360), Rnd(0.8f, 1.5f), g);
                 }
             // Lanterns on both ends (the east one is also a night lantern-post spot).
             foreach (var p in new[] { new Vector3(RiverWest - 2.6f, 0, 2.6f), new Vector3(RiverEast + 2.6f, 0, -2.6f) })
