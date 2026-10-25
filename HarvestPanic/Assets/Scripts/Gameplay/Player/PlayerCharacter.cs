@@ -18,7 +18,7 @@ namespace HarvestPanic.Gameplay
     /// (state, carry, impulses, noise, fees) is decided on the server.
     /// </summary>
     [DefaultExecutionOrder(-60)]
-    public sealed class PlayerCharacter : NetworkBehaviour, IPlayerHooks, IKnockable, IDraggable, ICarryable, IGrabGate, ISelfSimulatedCarryable
+    public sealed class PlayerCharacter : NetworkBehaviour, IPlayerHooks, IPlayerAnimationSource, IKnockable, IDraggable, ICarryable, IGrabGate, ISelfSimulatedCarryable
     {
         [Header("Config")]
         [SerializeField] PlayerTuning tuning;
@@ -150,6 +150,17 @@ namespace HarvestPanic.Gameplay
             if (fainted && State == PlayerState.Normal) { if (IsServer) ServerEnterRagdoll(Vector3.zero, PlayerIds.None, false); else if (IsOwner) OwnerTrip(); }
             else if (!fainted && State == PlayerState.Ragdoll && IsOwner) GetUpRpc();
         }
+
+        // ---- IPlayerAnimationSource (third-person body animation; replicated state only) -------------------
+
+        /// <inheritdoc />
+        public int CarryHands => Carry != null && Carry.IsHoldingReplicated ? Mathf.Max(1, Carry.HandsUsed) : 0;
+        /// <inheritdoc />
+        public bool HoldingTool => Carry != null && Carry.HoldingTool;
+        /// <inheritdoc />
+        public float ThrowCharge => Carry != null && IsOwnerSafe ? Carry.ThrowCharge : 0f;
+        /// <inheritdoc />
+        public bool IsDown => State == PlayerState.Ragdoll || State == PlayerState.KnockedOut;
 
         // ---- ICarryable (knocked-out body) -----------------------------------------------------------------
 

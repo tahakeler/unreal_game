@@ -1,0 +1,37 @@
+{
+  "source": "SK_Farmer_Hero_Tripo_original.fbx",
+  "source_tris": 20038,
+  "height_m": 1.75,
+  "zones": {
+    "overalls_R": {
+      "coverage_pct": 19.3,
+      "mean_linear_lum": 0.1274
+    },
+    "shirt_G": {
+      "coverage_pct": 7.58,
+      "mean_linear_lum": 0.6483
+    },
+    "bootsgloves_B": {
+      "coverage_pct": 25.88,
+      "mean_linear_lum": 0.1955
+    },
+    "skin_A": {
+      "coverage_pct": 21.29,
+      "mean_linear_lum": 0.2569
+    },
+    "hat": {
+      "coverage_pct": 14.19,
+      "mean_linear_lum": 0.3752
+    },
+    "band": {
+      "coverage_pct": 1.05,
+      "mean_linear_lum": 0.1675
+    },
+    "hair": {
+      "coverage_pct": 0.89,
+      "mean_linear_lum": 0.0619
+    }
+  },
+  "output_tris": 10000,
+  "scale_applied": 1.7509
+}

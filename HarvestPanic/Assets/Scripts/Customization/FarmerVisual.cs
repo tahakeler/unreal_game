@@ -46,6 +46,26 @@ namespace HarvestPanic.Customization
         public static readonly int JumpParam = Animator.StringToHash("Jump");
         /// <summary>Animator parameter: fainted (holds the faint pose while true).</summary>
         public static readonly int FaintedParam = Animator.StringToHash("Fainted");
+        /// <summary>Animator parameter: hands on the carried object (0 none, 1 one-handed, 2 two-handed).</summary>
+        public static readonly int CarryHandsParam = Animator.StringToHash("CarryHands");
+        /// <summary>Animator parameter: holding a tool.</summary>
+        public static readonly int ToolParam = Animator.StringToHash("Tool");
+        /// <summary>Animator parameter: throw wind-up 0..1.</summary>
+        public static readonly int ThrowChargeParam = Animator.StringToHash("ThrowCharge");
+        /// <summary>Animator trigger: let go of the carried object (toss gesture).</summary>
+        public static readonly int TossParam = Animator.StringToHash("Toss");
+        /// <summary>Animator parameter: ragdolled / knocked out (limp).</summary>
+        public static readonly int DownParam = Animator.StringToHash("Down");
+        /// <summary>Animator trigger: get up after being down.</summary>
+        public static readonly int GetUpParam = Animator.StringToHash("GetUp");
+        /// <summary>Animator layer with the carry / throw upper-body poses (weight driven from code).</summary>
+        public const int UpperBodyLayer = 1;
+
+        static readonly int PrimaryId = Shader.PropertyToID("_PrimaryColor"), SecondaryId = Shader.PropertyToID("_SecondaryColor"),
+            AccentId = Shader.PropertyToID("_AccentColor"), SkinId = Shader.PropertyToID("_SkinColor"), HairId = Shader.PropertyToID("_HairColor"),
+            BandId = Shader.PropertyToID("_BandColor"), HideHatId = Shader.PropertyToID("_HideHat"), PatternId = Shader.PropertyToID("_PatternMap"),
+            PatternTilingId = Shader.PropertyToID("_PatternTiling"), ShirtPatternId = Shader.PropertyToID("_ShirtPatternMap"),
+            ShirtPatternTilingId = Shader.PropertyToID("_ShirtPatternTiling");
 
         [SerializeField] CosmeticCatalog catalog;
         [SerializeField] Animator animator;
@@ -63,6 +83,17 @@ namespace HarvestPanic.Customization
         bool autoLocomotion = true;
         [SerializeField, Tooltip("Standalone (no Player parent): treat as the local player.")] bool offlineIsLocal;
 
+        [Header("Recoloured body (mask shader, e.g. the hero Tripo farmer)")]
+        [SerializeField, Tooltip("Renderers using HarvestPanic/Characters/FarmerRecolour; colours go through property blocks.")]
+        List<Renderer> recolourRenderers = new List<Renderer>();
+        [SerializeField, Tooltip("Key of the hat baked into the body mesh (shown when that hat is equipped, clipped otherwise).")]
+        string bakedHatKey;
+        [SerializeField, Tooltip("Body-variant head scale that matches this model's own head (chunky heads are already modelled).")]
+        float headScaleReference = 1f;
+        [SerializeField, Tooltip("Scalp cap (hair coloured) plugging the head top when the baked hat is clipped; HatAttach space.")]
+        Vector3 scalpCapSize = new Vector3(0.3f, 0.14f, 0.32f);
+        [SerializeField] Vector3 scalpCapOffset = new Vector3(0f, -0.04f, -0.01f);
+
         readonly List<GameObject> _accessories = new List<GameObject>();
         IPlayerHooks _owner;
         bool _ownerSearched;
@@ -73,6 +104,33 @@ namespace HarvestPanic.Customization
         Coroutine _faintRoutine;
         float _headScale = 1f;
         Vector3 _headShape = Vector3.one;
+        MaterialPropertyBlock _mpb;
+        IPlayerAnimationSource _animSource;
+        bool _animSourceSearched, _wasDown;
+        int _lastCarry;
+        float _upperWeight, _tossHold;
+        readonly HashSet<int> _params = new HashSet<int>();
+
+        /// <summary>True when the baked hat is currently clipped (another hat or none is worn).</summary>
+        public bool BakedHatHidden { get; private set; }
+
+        /// <summary>Renderers recoloured through property blocks (empty for the zone-material farmer).</summary>
+        public IReadOnlyList<Renderer> RecolourRenderers => recolourRenderers;
+
+        /// <summary>Key of the hat baked into the body mesh, or null.</summary>
+        public string BakedHatKey => bakedHatKey;
+
+        /// <summary>The Player's animation state source above this body, or null when standalone.</summary>
+        public IPlayerAnimationSource AnimSource
+        {
+            get
+            {
+                if (_animSourceSearched && (!(_animSource is UnityEngine.Object uo) || uo != null)) return _animSource;
+                _animSourceSearched = true;
+                _animSource = Owner as IPlayerAnimationSource;
+                return _animSource;
+            }
+        }
         Vector3 _headBaseScale = Vector3.one;
         Vector3 _hatAttachBase = Vector3.one, _faceAttachBase = Vector3.one;
         Renderer _baseHeadRenderer;
@@ -187,6 +245,8 @@ namespace HarvestPanic.Customization
         public void Faint(bool fainted)
         {
             if (animator == null) return;
+            if (AnimSource != null) return; // a real player ragdolls: the Down pose follows its state, no second fall
+            
             animator.SetBool(FaintedParam, fainted);
             if (fainted) animator.CrossFadeInFixedTime("Faint", 0.1f, 0);
         }
@@ -214,7 +274,7 @@ namespace HarvestPanic.Customization
 
             var body = catalog.Body(loadout.Body);
             if (modelRoot != null) modelRoot.localScale = body.bodyScale;
-            _headScale = body.headScale;
+            _headScale = body.headScale / Mathf.Max(0.01f, headScaleReference);
 
             var headItem = catalog.FindItem(CosmeticSlot.Head, loadout.Head);
             var hairItem = catalog.FindItem(CosmeticSlot.Hair, loadout.Hair);
@@ -247,9 +307,21 @@ namespace HarvestPanic.Customization
             }
             foreach (var kv in mats) kv.Key.sharedMaterials = kv.Value;
 
+            bool bakedHat = !string.IsNullOrEmpty(bakedHatKey) && hatItem != null && hatItem.key == bakedHatKey;
+            BakedHatHidden = !string.IsNullOrEmpty(bakedHatKey) && !bakedHat;
+            if (recolourRenderers.Count > 0)
+                ApplyRecolour(tints, style, shirt, hairItem != null && hairItem.hideBaseHair ? tints.Skin : tints.Hair);
+
             ClearAccessories();
             bool hatWorn = hatItem != null;
-            AddAccessory(hatItem, CosmeticSlot.Hat, tints, hatWorn);
+            AddAccessory(bakedHat ? null : hatItem, CosmeticSlot.Hat, tints, hatWorn);
+            if (BakedHatHidden && headAttach != null && !(hatItem != null && hatItem.hidesHair))
+            {
+                var cap = new CosmeticPart { shape = PartShape.Sphere, position = scalpCapOffset, size = scalpCapSize, tint = hairItem != null && hairItem.hideBaseHair ? PartTint.Skin : PartTint.Hair };
+                var go = AccessoryBuilder.BuildPart(cap, headAttach, catalog.baseMaterial, tints);
+                go.name = "ScalpCap";
+                _accessories.Add(go);
+            }
             AddAccessory(catalog.FindItem(CosmeticSlot.Face, loadout.Face), CosmeticSlot.Face, tints, hatWorn);
             AddAccessory(catalog.FindItem(CosmeticSlot.Back, loadout.Back), CosmeticSlot.Back, tints, hatWorn);
             AddAccessory(headItem, CosmeticSlot.Head, tints, hatWorn);
@@ -262,6 +334,36 @@ namespace HarvestPanic.Customization
             ApplyArmColors(SleeveColor, tints.Accent, tints.Skin);
             if (poof && !IsPreview) HayPoof.Spawn(transform.position + Vector3.up * 1.1f, catalog.poofDuration, catalog.baseMaterial);
             Applied?.Invoke(loadout);
+        }
+
+        /// <summary>Mask-shader body: colours, patterns, hat clip and band (name-tag colour) through one property block per renderer.</summary>
+        void ApplyRecolour(in TintColors tints, OutfitStyle style, Color shirt, Color hair)
+        {
+            if (_mpb == null) _mpb = new MaterialPropertyBlock();
+            bool tank = style.shirtTint == PartTint.Skin;
+            foreach (var r in recolourRenderers)
+            {
+                if (r == null) continue;
+                _mpb.Clear();
+                _mpb.SetColor(PrimaryId, tints.Primary);
+                _mpb.SetColor(SecondaryId, shirt);
+                _mpb.SetColor(AccentId, tints.Accent);
+                _mpb.SetColor(SkinId, tints.Skin);
+                _mpb.SetColor(HairId, hair);
+                _mpb.SetColor(BandId, tints.NameTag);
+                _mpb.SetFloat(HideHatId, BakedHatHidden ? 1f : 0f);
+                SetPattern(PatternId, PatternTilingId, style.overallsPattern);
+                SetPattern(ShirtPatternId, ShirtPatternTilingId, tank ? OutfitPattern.Plain : style.shirtPattern);
+                r.SetPropertyBlock(_mpb);
+            }
+        }
+
+        void SetPattern(int tex, int tiling, OutfitPattern p)
+        {
+            if (p == OutfitPattern.Plain) { _mpb.SetTexture(tex, Texture2D.whiteTexture); _mpb.SetVector(tiling, Vector4.one); return; }
+            var t = OutfitPatterns.Tiling(p);
+            _mpb.SetTexture(tex, OutfitPatterns.Texture(p));
+            _mpb.SetVector(tiling, new Vector4(t.x, t.y, 0f, 0f));
         }
 
         void EnsureBaseScales()
@@ -367,7 +469,9 @@ namespace HarvestPanic.Customization
 
         void Update()
         {
-            if (!autoLocomotion || animator == null || IsPreview) return;
+            if (animator == null || IsPreview) return;
+            DriveGameplayParams();
+            if (!autoLocomotion) return;
             float dt = Time.deltaTime;
             if (dt <= 0f) return;
             Vector3 p = transform.position, v = (p - _lastPos) / dt;
@@ -387,6 +491,36 @@ namespace HarvestPanic.Customization
         }
 
         void LateUpdate() => ApplyHeadBoneScale();
+
+        bool Has(int param)
+        {
+            if (_params.Count == 0 && animator != null && animator.runtimeAnimatorController != null)
+                foreach (var p in animator.parameters) _params.Add(p.nameHash);
+            return _params.Contains(param);
+        }
+
+        /// <summary>Carry / throw / down / get-up from the Player's replicated state (every peer).</summary>
+        void DriveGameplayParams()
+        {
+            var src = AnimSource;
+            if (src == null || !animator.isActiveAndEnabled) return;
+            int hands = src.CarryHands;
+            bool down = src.IsDown;
+            if (Has(CarryHandsParam)) animator.SetInteger(CarryHandsParam, hands);
+            if (Has(ToolParam)) animator.SetBool(ToolParam, src.HoldingTool);
+            if (Has(ThrowChargeParam)) animator.SetFloat(ThrowChargeParam, src.ThrowCharge);
+            if (Has(DownParam)) animator.SetBool(DownParam, down);
+            if (_lastCarry > 0 && hands == 0 && !down && Has(TossParam)) { animator.SetTrigger(TossParam); _tossHold = 0.45f; }
+            if (_wasDown && !down && Has(GetUpParam)) animator.SetTrigger(GetUpParam);
+            _lastCarry = hands; _wasDown = down;
+            if (animator.layerCount > UpperBodyLayer)
+            {
+                _tossHold -= Time.deltaTime;
+                float target = !down && (hands > 0 || _tossHold > 0f) ? 1f : 0f;
+                _upperWeight = Mathf.MoveTowards(_upperWeight, target, Time.deltaTime * 6f);
+                animator.SetLayerWeight(UpperBodyLayer, _upperWeight);
+            }
+        }
 
         /// <summary>
         /// Re-applies the chunky-head scale and head shape to the head bone. Clips carry bone scale keys, so this runs after
@@ -411,6 +545,12 @@ namespace HarvestPanic.Customization
 
         /// <summary>Editor builder hook: outfit attach points.</summary>
         public void EditorSetupOutfitAttach(Transform chest, Transform hips) { chestAttach = chest; hipsAttach = hips; }
+
+        /// <summary>Editor builder hook: mask-recoloured body (hero farmer).</summary>
+        public void EditorSetupRecolour(List<Renderer> renderers, string bakedHat, float headRef, Vector3 capSize, Vector3 capOffset)
+        {
+            recolourRenderers = renderers; bakedHatKey = bakedHat; headScaleReference = headRef; scalpCapSize = capSize; scalpCapOffset = capOffset;
+        }
 #endif
 
         /// <summary>Standalone farmer (no Player parent) counts as the local player (test scenes).</summary>

@@ -85,6 +85,9 @@ namespace HarvestPanic.Customization.Editor
             }
         }
 
+        /// <summary>Creates an asset folder (and parents) if missing.</summary>
+        public static void EnsureFolderPublic(string path) => EnsureFolder(path);
+
         static void EnsureFolder(string path)
         {
             if (AssetDatabase.IsValidFolder(path)) return;
