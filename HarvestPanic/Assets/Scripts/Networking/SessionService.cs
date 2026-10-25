@@ -760,7 +760,31 @@ namespace HarvestPanic.Networking
         };
 
         // ---------------- helpers ----------------
-        ushort Port() => ushort.TryParse(Arg("-netPort"), out var p) ? p : _cfg.lanPort;
+        static ushort _testPort;
+        ushort Port()
+        {
+            if (ushort.TryParse(Arg("-netPort"), out var p)) return p;
+            // Editor test runs (batchmode) pick one free UDP port per process so parallel Unity runs never collide on lanPort.
+            if (Application.isEditor && Application.isBatchMode)
+            {
+                if (_testPort == 0) _testPort = FreeUdpPort(_cfg.lanPort);
+                return _testPort;
+            }
+            return _cfg.lanPort;
+        }
+
+        static ushort FreeUdpPort(ushort fallback)
+        {
+            try
+            {
+                using (var sock = new System.Net.Sockets.Socket(System.Net.Sockets.AddressFamily.InterNetwork, System.Net.Sockets.SocketType.Dgram, System.Net.Sockets.ProtocolType.Udp))
+                {
+                    sock.Bind(new IPEndPoint(IPAddress.Any, 0));
+                    return (ushort)((IPEndPoint)sock.LocalEndPoint).Port;
+                }
+            }
+            catch (Exception) { return fallback; }
+        }
 
         void Fail(string message)
         {

@@ -41,6 +41,8 @@ Path-scoped rules in `.claude/rules/` match `HarvestPanic/Assets/Scripts/{Gamepl
 
 ## 4. Batchmode commands (also in `project.yaml` → `commands`)
 
+Any `-batchmode` process (test runs, headless players) is silent: `BatchModeSilence` forces `AudioListener.volume = 0`. Pass `-hpAudible` to hear audio.
+
 ```bash
 UNITY="/Applications/Unity/Hub/Editor/6000.3.26f1/Unity.app/Contents/MacOS/Unity"
 

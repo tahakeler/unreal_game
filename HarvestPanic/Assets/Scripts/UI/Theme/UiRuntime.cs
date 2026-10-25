@@ -111,6 +111,7 @@ namespace HarvestPanic.UI
                 voice.Mode = s.PushToTalk ? VoiceTransmitMode.PushToTalk : VoiceTransmitMode.OpenMic;
                 voice.OpenMicThreshold = s.OpenMicThreshold;
             }
+            HarvestPanic.Core.BatchModeSilence.Apply();
             ApplyComfort(s);
             if (Application.isEditor || Application.isBatchMode) return; // never touch window/URP asset from the editor
             switch (s.WindowMode)
