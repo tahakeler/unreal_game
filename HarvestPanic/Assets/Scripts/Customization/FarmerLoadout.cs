@@ -76,10 +76,14 @@ namespace HarvestPanic.Customization
         /// <summary>Palette index of the default hair colour (Mud Brown).</summary>
         public const byte DefaultHairColor = 17;
 
-        /// <summary>Starter loadout: Sturdy, Denim overalls, Straw Hat, Wave/Point/Dance/Faint on 5-8.</summary>
+        /// <summary>
+        /// Starter loadout: Sturdy, Straw Hat, Wave/Point/Dance/Faint on 5-8, and every colour on the hero farmer's "home"
+        /// swatch (Slate overalls, Cream shirt, Rust boots/gloves, Toffee skin, Mud Brown hair, Pumpkin tag = red band) so
+        /// the default farmer is the painted model (HeroFarmerBuilder.HomeSwatches; a test keeps the two in step).
+        /// </summary>
         public static FarmerLoadout Default => new FarmerLoadout
         {
-            Body = 0, Primary = 0, Secondary = 14, Accent = 17, Skin = 2, NameTag = 0,
+            Body = 0, Primary = 22, Secondary = 14, Accent = 11, Skin = 6, NameTag = 1,
             Head = 0, Hair = 0, HairColor = DefaultHairColor, Outfit = 0,
             Hat = 1, Face = 0, Back = 0, Emote0 = 1, Emote1 = 2, Emote2 = 3, Emote3 = 4
         };

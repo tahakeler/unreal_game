@@ -4,6 +4,7 @@
     "references": [
         "HarvestPanic.Core",
         "HarvestPanic.Customization",
+        "HarvestPanic.Networking",
         "Unity.Netcode.Runtime",
         "Unity.Collections",
         "Unity.RenderPipelines.Core.Runtime",

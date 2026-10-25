@@ -51,15 +51,26 @@ namespace HarvestPanic.Tests.PlayMode.Customization
             yield return null;
 
             Assert.That(f.Current, Is.EqualTo(l));
-            Assert.That(f.Accessories.Count, Is.EqualTo(3));
+            // hat, goggles, pitchfork (+ the scalp cap that plugs the head when the hero's baked straw hat is clipped)
+            Assert.That(f.BakedHatHidden, Is.EqualTo(!string.IsNullOrEmpty(f.BakedHatKey)), "a non-straw hat clips the baked one");
+            int cap = f.BakedHatHidden ? 1 : 0;
+            Assert.That(f.Accessories.Count, Is.EqualTo(3 + cap));
             var hat = f.Accessories[0];
             Assert.That(hat.name, Is.EqualTo("Cosmetic_hat.viking"));
             Assert.That(hat.transform.IsChildOf(f.HeadAttachPoint), "hat attaches to the head bone");
-            Assert.That(f.Accessories[2].transform.IsChildOf(f.BackAttachPoint));
+            Assert.That(f.Accessories[f.Accessories.Count - 1].transform.IsChildOf(f.BackAttachPoint));
             Assert.That(hat.GetComponentsInChildren<Collider>().Length, Is.EqualTo(0), "cosmetics are never grabbable");
 
             var primary = cat.PaletteColor(l.Primary);
-            bool overallsTinted = f.GetComponentsInChildren<SkinnedMeshRenderer>().SelectMany(r => r.sharedMaterials)
+            bool overallsTinted;
+            if (f.RecolourRenderers.Count > 0)
+            {
+                var mpb = new MaterialPropertyBlock();
+                f.RecolourRenderers[0].GetPropertyBlock(mpb);
+                var c = mpb.GetColor("_PrimaryColor");
+                overallsTinted = Near(c, primary) || Near(c, primary.linear);
+            }
+            else overallsTinted = f.GetComponentsInChildren<SkinnedMeshRenderer>().SelectMany(r => r.sharedMaterials)
                 .Any(m => m != null && m.HasProperty("_BaseColor") && m.GetColor("_BaseColor") == primary);
             Assert.That(overallsTinted, "overalls use the primary palette colour");
             Assert.That(f.NameTag.Shape, Is.EqualTo(cat.NameTag(l.NameTag).shape));
@@ -68,9 +79,11 @@ namespace HarvestPanic.Tests.PlayMode.Customization
             l.Hat = 0; l.Face = 0;
             f.Apply(l);
             yield return null;
-            Assert.That(f.Accessories.Count, Is.EqualTo(1));
-            Assert.That(f.HeadAttachPoint.GetComponentsInChildren<MeshRenderer>().Length, Is.EqualTo(0));
+            Assert.That(f.Accessories.Count, Is.EqualTo(1 + (f.BakedHatHidden ? 1 : 0)));
+            Assert.That(f.HeadAttachPoint.GetComponentsInChildren<MeshRenderer>().Count(r => r.name != "ScalpCap" && !r.transform.parent.name.StartsWith("ScalpCap")), Is.EqualTo(0));
         }
+
+        static bool Near(Color a, Color b) => Mathf.Abs(a.r - b.r) < 0.003f && Mathf.Abs(a.g - b.g) < 0.003f && Mathf.Abs(a.b - b.b) < 0.003f;
 
         [UnityTest]
         public IEnumerator BodyVariant_ScalesModel()
@@ -81,7 +94,9 @@ namespace HarvestPanic.Tests.PlayMode.Customization
             f.Apply(l);
             yield return null;
             var model = f.BodyAnimator.transform;
-            Assert.That(model.localScale, Is.EqualTo(f.Catalog.Body(1).bodyScale));
+            var r = f.BodyScaleReference; // variants scale relative to the model's own build
+            var want = f.Catalog.Body(1).bodyScale;
+            Assert.That(model.localScale, Is.EqualTo(new Vector3(want.x / r.x, want.y / r.y, want.z / r.z)));
         }
 
         [UnityTest]

@@ -47,7 +47,7 @@ namespace HarvestPanic.Tests.PlayMode.Integration
 
         static readonly FarmerLoadout[] Colourways =
         {
-            new FarmerLoadout { Body = 0, Primary = 0, Secondary = 14, Accent = 17, Skin = 4, NameTag = 0, HairColor = 17, Hat = 1, Emote0 = 1, Emote1 = 2, Emote2 = 3, Emote3 = 4 },
+            FarmerLoadout.Default, // the painted model
             new FarmerLoadout { Body = 0, Primary = 1, Secondary = 15, Accent = 13, Skin = 10, NameTag = 1, HairColor = 13, Hat = 1, Emote0 = 1, Emote1 = 2, Emote2 = 3, Emote3 = 4 },
             new FarmerLoadout { Body = 0, Primary = 2, Secondary = 20, Accent = 12, Skin = 0, NameTag = 2, HairColor = 11, Hat = 1, Emote0 = 1, Emote1 = 2, Emote2 = 3, Emote3 = 4 },
             new FarmerLoadout { Body = 0, Primary = 3, Secondary = 19, Accent = 9, Skin = 7, NameTag = 3, HairColor = 20, Hat = 1, Emote0 = 1, Emote1 = 2, Emote2 = 3, Emote3 = 4 },
@@ -147,14 +147,14 @@ namespace HarvestPanic.Tests.PlayMode.Integration
             string[] names = { "Hank", "Cora", "Lou", "Fay" };
             for (int i = 0; i < 4; i++) Spawn(origin + right * ((i - 1.5f) * 1.9f), crew[i], names[i]);
             yield return new WaitForSeconds(0.8f);
-            var crewCam = Cam(origin - fwd * 6.5f + Vector3.up * 2.2f, origin + Vector3.up * 1.1f, 45f);
+            var crewCam = Cam(origin - fwd * 4.9f + Vector3.up * 2.0f, origin + Vector3.up * 1.0f, 45f); // ahead of the local player's own arms
             Save(crewCam, Path.Combine(dir, "hero_crew_4_muddlebury.png"));
             foreach (var s in spawned) Object.Destroy(s);
             spawned.Clear();
             yield return null;
             for (int i = 0; i < Colourways.Length; i++) Spawn(origin + right * ((i - 2.5f) * 1.35f), Colourways[i], "");
             yield return new WaitForSeconds(0.8f);
-            var cwCam = Cam(origin - fwd * 6.8f + Vector3.up * 1.9f, origin + Vector3.up * 1.0f, 45f);
+            var cwCam = Cam(origin - fwd * 5.0f + Vector3.up * 1.8f, origin + Vector3.up * 0.95f, 50f);
             Save(cwCam, Path.Combine(dir, "hero_colourways_6.png"));
             foreach (var s in spawned) Object.Destroy(s);
             LogAssert.ignoreFailingMessages = false;

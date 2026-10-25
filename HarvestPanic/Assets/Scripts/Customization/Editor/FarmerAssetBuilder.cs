@@ -30,7 +30,7 @@ namespace HarvestPanic.Customization.Editor
         public const string MatDir = Root + "/Materials";
         public const string UiDir = Root + "/UI";
         public const string CatalogPath = Root + "/CosmeticCatalog.asset";
-        public const string ControllerPath = AnimDir + "/FarmerBody.controller";
+        public const string LegacyControllerPath = AnimDir + "/FarmerBody.controller"; // pre-hero generic controller (removed by BuildAll)
         public const string PanelPath = UiDir + "/WardrobePanel.asset";
         public const string ThemePath = UiDir + "/WardrobeTheme.tss";
         public const string PrefabPath = "Assets/Prefabs/Farmer/FarmerBody.prefab";
@@ -82,7 +82,7 @@ namespace HarvestPanic.Customization.Editor
         /// <summary>Assets of the previous Quaternius body (generic rig clips, UV'd mesh copies) that nothing uses any more.</summary>
         static void RemoveObsolete()
         {
-            foreach (var p in new[] { ControllerPath, AnimDir + "/Farmer_Dance.anim", AnimDir + "/Farmer_Jump.anim", AnimDir + "/Farmer_Shrug.anim",
+            foreach (var p in new[] { LegacyControllerPath, AnimDir + "/Farmer_Dance.anim", AnimDir + "/Farmer_Jump.anim", AnimDir + "/Farmer_Shrug.anim",
                          AnimDir + "/Farmer_Salute.anim", AnimDir + "/Farmer_ChickenDance.anim", Root + "/Meshes" })
                 if (AssetDatabase.LoadMainAssetAtPath(p) != null || AssetDatabase.IsValidFolder(p)) AssetDatabase.DeleteAsset(p);
         }
@@ -224,8 +224,12 @@ namespace HarvestPanic.Customization.Editor
                 var tag = BuildNameTag(root.transform, m.topY + 0.75f, catalog); // clear of tall hats (cone, toque)
                 visual.EditorSetup(catalog, anim, inst.transform, head, hatAttach, faceAttach, backAttach, smr, new List<ZoneBinding>(), tag);
                 visual.EditorSetupOutfitAttach(chestAttach, hipsAttach);
+                var (refs, _) = HeroFarmerBuilder.ReadStats();
+                var homes = HeroFarmerBuilder.HomeSwatches(catalog, refs);
+                Debug.Log("[HeroFarmerBuilder] home swatches (overalls, shirt, boots/gloves, skin, hair, band): " + string.Join(", ", homes));
                 visual.EditorSetupRecolour(new List<Renderer> { smr }, "hat.straw", 1.18f, new Vector3(1.12f, 0.96f, 1.12f),
-                    new Vector3(0.27f, 0.17f, 0.3f), new Vector3(0f, -0.06f, -0.01f));
+                    new Vector3(0.27f, 0.17f, 0.3f), new Vector3(0f, -0.06f, -0.01f),
+                    homes, refs.Select(r => new Color(r.x, r.y, r.z).gamma).ToArray());
                 return PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             }
             finally { Object.DestroyImmediate(root); }

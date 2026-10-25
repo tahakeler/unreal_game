@@ -191,18 +191,69 @@ namespace HarvestPanic.Customization.Editor
             if (d) ti.SaveAndReimport();
         }
 
-        [Serializable] class ZoneStat { public float coverage_pct; public float mean_linear_lum; }
+        [Serializable] class ZoneStat { public float coverage_pct; public float mean_linear_lum; public float[] mean_linear_rgb; }
         [Serializable] class Zones { public ZoneStat overalls_R, shirt_G, bootsgloves_B, skin_A, hat, band, hair; }
         [Serializable] class Stats { public Zones zones; public int output_tris; public float height_m; }
 
-        /// <summary>Recolour stats written by tools/tripo/farmer_hero.py (zone coverage + reference luminance).</summary>
-        public static (Vector4 maskRef, Vector4 regionRef, float[] coverage) ReadStats()
+        /// <summary>Shader reference property per recolour zone, in <see cref="FarmerVisual"/> zone order.</summary>
+        public static readonly string[] RefProperties = { "_RefOveralls", "_RefShirt", "_RefAccent", "_RefSkin", "_RefHair", "_RefBand" };
+
+        /// <summary>
+        /// Recolour stats written by tools/tripo/farmer_hero.py: per zone (FarmerVisual order: overalls, shirt, boots/gloves,
+        /// skin, hair, band) the mean painted colour (linear rgb, luminance in w) and texture coverage %.
+        /// </summary>
+        public static (Vector4[] refs, float[] coverage) ReadStats()
         {
-            var s = JsonUtility.FromJson<Stats>(File.ReadAllText(StatsPath));
-            var z = s.zones;
-            return (new Vector4(z.overalls_R.mean_linear_lum, z.shirt_G.mean_linear_lum, z.bootsgloves_B.mean_linear_lum, z.skin_A.mean_linear_lum),
-                new Vector4(z.hat.mean_linear_lum, z.band.mean_linear_lum, z.hair.mean_linear_lum, 0f),
-                new[] { z.overalls_R.coverage_pct, z.shirt_G.coverage_pct, z.bootsgloves_B.coverage_pct, z.skin_A.coverage_pct });
+            var z = JsonUtility.FromJson<Stats>(File.ReadAllText(StatsPath)).zones;
+            var zones = new[] { z.overalls_R, z.shirt_G, z.bootsgloves_B, z.skin_A, z.hair, z.band };
+            var refs = zones.Select(q => q.mean_linear_rgb != null && q.mean_linear_rgb.Length == 3
+                ? new Vector4(q.mean_linear_rgb[0], q.mean_linear_rgb[1], q.mean_linear_rgb[2], q.mean_linear_lum)
+                : new Vector4(q.mean_linear_lum, q.mean_linear_lum, q.mean_linear_lum, q.mean_linear_lum)).ToArray();
+            return (refs, zones.Select(q => q.coverage_pct).ToArray());
+        }
+
+        /// <summary>OKLab distance between two sRGB colours.</summary>
+        public static float OkLabDistance(Color a, Color b)
+        {
+            Vector3 Lab(Color c)
+            {
+                var l = c.linear;
+                float L = Mathf.Pow(0.4122214708f * l.r + 0.5363325363f * l.g + 0.0514459929f * l.b, 1f / 3f);
+                float M = Mathf.Pow(0.2119034982f * l.r + 0.6806995451f * l.g + 0.1073969566f * l.b, 1f / 3f);
+                float S = Mathf.Pow(0.0883024619f * l.r + 0.2817188376f * l.g + 0.6299787005f * l.b, 1f / 3f);
+                return new Vector3(0.2104542553f * L + 0.7936177850f * M - 0.0040720468f * S,
+                    1.9779984951f * L - 2.4285922050f * M + 0.4505937099f * S, 0.0259040371f * L + 0.7827717662f * M - 0.8086757660f * S);
+            }
+            return Vector3.Distance(Lab(a), Lab(b));
+        }
+
+        /// <summary>
+        /// "Home" swatch per zone: the selectable swatch nearest (OKLab) to the zone's painted colour. That swatch renders
+        /// the painted colour exactly, so the default farmer (FarmerLoadout.Default uses the homes) is the owner's model.
+        /// </summary>
+        public static int[] HomeSwatches(CosmeticCatalog catalog, Vector4[] refs)
+        {
+            int Nearest(IList<Color> options, Vector4 r, Func<int, bool> allowed)
+            {
+                var painted = new Color(r.x, r.y, r.z).gamma;
+                int best = 0; float bd = float.MaxValue;
+                for (int i = 0; i < options.Count; i++)
+                {
+                    if (!allowed(i)) continue;
+                    float d = OkLabDistance(options[i], painted);
+                    if (d < bd) { bd = d; best = i; }
+                }
+                return best;
+            }
+            var palette = catalog.palette.Select(p => p.color).ToList();
+            var skins = catalog.skinTones.Select(p => p.color).ToList();
+            var tags = catalog.nameTags.Select(t => t.color).ToList();
+            return new[]
+            {
+                Nearest(palette, refs[FarmerVisual.ZonePrimary], _ => true), Nearest(palette, refs[FarmerVisual.ZoneSecondary], _ => true),
+                Nearest(palette, refs[FarmerVisual.ZoneAccent], _ => true), Nearest(skins, refs[FarmerVisual.ZoneSkin], i => !catalog.skinTones[i].fantasy),
+                Nearest(palette, refs[FarmerVisual.ZoneHair], _ => true), Nearest(tags, refs[FarmerVisual.ZoneBand], _ => true),
+            };
         }
 
         public static Material BuildMaterial()
@@ -218,9 +269,9 @@ namespace HarvestPanic.Customization.Editor
             mat.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(BaseColorPath));
             mat.SetTexture("_MaskMap", AssetDatabase.LoadAssetAtPath<Texture2D>(MaskPath));
             mat.SetTexture("_RegionMap", AssetDatabase.LoadAssetAtPath<Texture2D>(RegionsPath));
-            var (maskRef, regionRef, _) = ReadStats();
-            mat.SetVector("_MaskRef", maskRef);
-            mat.SetVector("_RegionRef", regionRef);
+            var (refs, _) = ReadStats();
+            for (int i = 0; i < refs.Length; i++) mat.SetVector(RefProperties[i], refs[i]);
+            mat.SetFloat("_Smoothness", 0.12f);
             mat.enableInstancing = true;
             EditorUtility.SetDirty(mat);
             return mat;
@@ -314,12 +365,16 @@ namespace HarvestPanic.Customization.Editor
 
         static void HoldBoth(Dictionary<HumanBodyBones, Quaternion> r, float lift, float breathe)
         {
-            // Both arms forward around a big load (pig, crate): upper arms forward + in, forearms up a little.
-            r[HumanBodyBones.LeftUpperArm] = Y(14f) * X(-72f - lift - breathe);
-            r[HumanBodyBones.RightUpperArm] = Y(-14f) * X(-72f - lift - breathe);
-            r[HumanBodyBones.LeftLowerArm] = Y(22f) * X(-22f);
-            r[HumanBodyBones.RightLowerArm] = Y(-22f) * X(-22f);
-            r[HumanBodyBones.Chest] = X(-7f);
+            // Both arms forward around a big load (pig, crate) held in front of the chest, clear of the belly:
+            // upper arms forward and a little in, forearms level, palms facing each other.
+            // (the hero's shoulders sit level with his chin, so the hands stay ~20 cm under them: forearms just below level)
+            r[HumanBodyBones.LeftUpperArm] = Y(14f) * X(-62f - lift - breathe);
+            r[HumanBodyBones.RightUpperArm] = Y(-14f) * X(-62f - lift - breathe);
+            r[HumanBodyBones.LeftLowerArm] = Y(20f) * X(-18f);
+            r[HumanBodyBones.RightLowerArm] = Y(-20f) * X(-18f);
+            r[HumanBodyBones.LeftHand] = Z(-20f);
+            r[HumanBodyBones.RightHand] = Z(20f);
+            r[HumanBodyBones.Chest] = X(-6f);
         }
 
         static void Carry2(float t, Dictionary<HumanBodyBones, Quaternion> r, Dictionary<HumanBodyBones, Vector3> p)
@@ -329,10 +384,12 @@ namespace HarvestPanic.Customization.Editor
 
         static void Carry1(float t, Dictionary<HumanBodyBones, Quaternion> r, Dictionary<HumanBodyBones, Vector3> p)
         {
+            // A small thing (egg, carrot) held out in the right hand at chest height, clear of the belly.
             float b = 2f * Mathf.Sin(t * Mathf.PI * 2f);
-            r[HumanBodyBones.RightUpperArm] = Y(-10f) * X(-38f - b);
-            r[HumanBodyBones.RightLowerArm] = Y(-30f) * X(-62f);
-            r[HumanBodyBones.Chest] = Z(3f);
+            r[HumanBodyBones.RightUpperArm] = Y(-8f) * X(-50f - b);
+            r[HumanBodyBones.RightLowerArm] = Y(-16f) * X(-34f);
+            r[HumanBodyBones.RightHand] = Z(25f);
+            r[HumanBodyBones.Chest] = Z(2f);
         }
 
         static void Tool(float t, Dictionary<HumanBodyBones, Quaternion> r, Dictionary<HumanBodyBones, Vector3> p)
@@ -421,6 +478,7 @@ namespace HarvestPanic.Customization.Editor
                 var graph = PlayableGraph.Create("HeroIdleSample");
                 var output = AnimationPlayableOutput.Create(graph, "out", anim);
                 var playable = AnimationClipPlayable.Create(graph, idle);
+                playable.SetApplyFootIK(false); // the controller states run without foot IK too
                 output.SetSourcePlayable(playable);
                 playable.SetTime(0.0); graph.Evaluate(0f);
                 var handler = new HumanPoseHandler(avatar, go.transform);
@@ -468,10 +526,10 @@ namespace HarvestPanic.Customization.Editor
                     clip.ClearCurves();
                     clip.frameRate = fps;
                     for (int i = 0; i < curves.Length; i++)
-                        AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve("", typeof(Animator), muscleBindings[i]), curves[i]);
+                        AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve("", typeof(Animator), muscleBindings[i]), Reduce(curves[i], 0.002f));
                     string[] tn = { "RootT.x", "RootT.y", "RootT.z" }, qn = { "RootQ.x", "RootQ.y", "RootQ.z", "RootQ.w" };
-                    for (int i = 0; i < 3; i++) AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve("", typeof(Animator), tn[i]), rootT[i]);
-                    for (int i = 0; i < 4; i++) AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve("", typeof(Animator), qn[i]), rootQ[i]);
+                    for (int i = 0; i < 3; i++) AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve("", typeof(Animator), tn[i]), Reduce(rootT[i], 0.0005f));
+                    for (int i = 0; i < 4; i++) AnimationUtility.SetEditorCurve(clip, EditorCurveBinding.FloatCurve("", typeof(Animator), qn[i]), Reduce(rootQ[i], 0.0005f));
                     var settings = AnimationUtility.GetAnimationClipSettings(clip);
                     settings.loopTime = loop;
                     settings.loopBlend = loop;
@@ -485,6 +543,37 @@ namespace HarvestPanic.Customization.Editor
             }
             finally { Object.DestroyImmediate(go); }
             return result;
+        }
+
+        /// <summary>
+        /// Linear-tangent copy of a densely sampled curve keeping only the keys linear interpolation cannot reproduce within
+        /// <paramref name="tolerance"/> (constant muscles collapse to two keys; keeps the text .anim small).
+        /// </summary>
+        public static AnimationCurve Reduce(AnimationCurve dense, float tolerance)
+        {
+            var k = dense.keys;
+            if (k.Length <= 2) return dense;
+            var kept = new List<Keyframe> { k[0] };
+            int anchor = 0;
+            for (int i = 1; i < k.Length - 1; i++)
+            {
+                // keep k[i] if dropping it would put any key between the anchor and k[i + 1] off the straight line
+                bool needed = false;
+                for (int j = anchor + 1; j <= i; j++)
+                {
+                    float u = (k[j].time - k[anchor].time) / (k[i + 1].time - k[anchor].time);
+                    if (Mathf.Abs(Mathf.Lerp(k[anchor].value, k[i + 1].value, u) - k[j].value) > tolerance) { needed = true; break; }
+                }
+                if (needed) { kept.Add(k[i]); anchor = i; }
+            }
+            kept.Add(k[k.Length - 1]);
+            var c = new AnimationCurve(kept.Select(x => new Keyframe(x.time, x.value)).ToArray());
+            for (int i = 0; i < c.length; i++)
+            {
+                AnimationUtility.SetKeyLeftTangentMode(c, i, AnimationUtility.TangentMode.Linear);
+                AnimationUtility.SetKeyRightTangentMode(c, i, AnimationUtility.TangentMode.Linear);
+            }
+            return c;
         }
 
         /// <summary>

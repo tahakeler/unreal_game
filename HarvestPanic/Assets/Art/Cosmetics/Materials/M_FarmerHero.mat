@@ -46,7 +46,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _HideHat: 0
-    - _Smoothness: 0.1
+    - _Smoothness: 0.12
     m_Colors:
     - _AccentColor: {r: 0.41999996, g: 0.28999996, b: 0.17999998, a: 1}
     - _BandColor: {r: 0.75, g: 0.26999995, b: 0.22999996, a: 1}
@@ -55,6 +55,12 @@ Material:
     - _MaskRef: {r: 0.1274, g: 0.6483, b: 0.1955, a: 0.2569}
     - _PatternTiling: {r: 1, g: 1, b: 0, a: 0}
     - _PrimaryColor: {r: 0.22999996, g: 0.42999998, b: 0.82, a: 1}
+    - _RefAccent: {r: 0.32061, g: 0.16198, b: 0.04053, a: 0.1955}
+    - _RefBand: {r: 0.52391, g: 0.01624, b: 0.0125, a: 0.1676}
+    - _RefHair: {r: 0.12814, g: 0.03596, b: 0.01453, a: 0.0611}
+    - _RefOveralls: {r: 0.07135, g: 0.13562, b: 0.23319, a: 0.1274}
+    - _RefShirt: {r: 0.7525, g: 0.63557, b: 0.43486, a: 0.6477}
+    - _RefSkin: {r: 0.51171, g: 0.16557, b: 0.05589, a: 0.2567}
     - _RegionRef: {r: 0.3752, g: 0.1675, b: 0.0619, a: 0}
     - _SecondaryColor: {r: 0.95, g: 0.9, b: 0.78, a: 1}
     - _ShirtPatternTiling: {r: 1, g: 1, b: 0, a: 0}

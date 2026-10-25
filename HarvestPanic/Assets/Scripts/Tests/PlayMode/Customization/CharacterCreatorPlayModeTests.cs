@@ -290,7 +290,7 @@ namespace HarvestPanic.Tests.PlayMode.Customization
             Assert.That(arms.Shirt, Is.EqualTo(cat.PaletteColor(1)), "Rain Slicker sleeves follow the overalls colour");
             l.Outfit = 0;
             v.Apply(l);
-            Assert.That(arms.Shirt, Is.EqualTo(cat.PaletteColor(14)), "plain overalls: shirt sleeves");
+            Assert.That(arms.Shirt, Is.EqualTo(v.TintsFor(l).Secondary), "plain overalls: shirt sleeves (the painted shirt on its home swatch)");
 
             var hatScale = v.HeadAttachPoint.lossyScale;
             l.Head = (byte)IdOf(cat, "head.long");

@@ -95,6 +95,10 @@ namespace HarvestPanic.Customization
         [SerializeField, Tooltip("Scalp cap (hair coloured) plugging the head top when the baked hat is clipped; HatAttach space.")]
         Vector3 scalpCapSize = new Vector3(0.3f, 0.14f, 0.32f);
         [SerializeField] Vector3 scalpCapOffset = new Vector3(0f, -0.04f, -0.01f);
+        [SerializeField, Tooltip("Per zone (overalls, shirt, boots/gloves, skin, hair, band): the swatch index that shows the painted colour.")]
+        int[] homeSwatches = new int[0];
+        [SerializeField, Tooltip("Per zone: the painted colour (the recolour shader's reference) shown for the home swatch.")]
+        Color[] paintedColours = new Color[0];
 
         readonly List<GameObject> _accessories = new List<GameObject>();
         IPlayerHooks _owner;
@@ -121,6 +125,9 @@ namespace HarvestPanic.Customization
 
         /// <summary>Key of the hat baked into the body mesh, or null.</summary>
         public string BakedHatKey => bakedHatKey;
+
+        /// <summary>Body-variant scale that leaves the model at its own proportions (variants scale relative to it).</summary>
+        public Vector3 BodyScaleReference => bodyScaleReference;
 
         /// <summary>The Player's animation state source above this body, or null when standalone.</summary>
         public IPlayerAnimationSource AnimSource
@@ -421,15 +428,31 @@ namespace HarvestPanic.Customization
             if (arms != null && arms.TryGetComponent<IFirstPersonArmsSkin>(out var skinHook)) skinHook.ApplyArmColors(sleeve, glove, skin);
         }
 
-        /// <summary>Resolved colours for recipe tints.</summary>
+        /// <summary>Recolour zone order of <see cref="HomeSwatches"/> / <see cref="PaintedColours"/>.</summary>
+        public const int ZonePrimary = 0, ZoneSecondary = 1, ZoneAccent = 2, ZoneSkin = 3, ZoneHair = 4, ZoneBand = 5;
+
+        /// <summary>Per zone: the swatch that shows the model's painted colour (empty for the zone-material farmer).</summary>
+        public IReadOnlyList<int> HomeSwatches => homeSwatches;
+
+        /// <summary>Per zone: the painted colour shown for the home swatch.</summary>
+        public IReadOnlyList<Color> PaintedColours => paintedColours;
+
+        Color Shown(int zone, int index, Color swatch) =>
+            homeSwatches != null && paintedColours != null && zone < homeSwatches.Length && zone < paintedColours.Length && homeSwatches[zone] == index
+                ? paintedColours[zone] : swatch;
+
+        /// <summary>
+        /// Resolved colours for recipe tints. A zone on its home swatch resolves to the painted colour, so the shader's
+        /// colour transfer is the identity there and accessories tinted from that slot match the painting.
+        /// </summary>
         public TintColors TintsFor(FarmerLoadout l) => new TintColors
         {
-            Primary = catalog.PaletteColor(l.Primary),
-            Secondary = catalog.PaletteColor(l.Secondary),
-            Accent = catalog.PaletteColor(l.Accent),
-            NameTag = catalog.NameTag(l.NameTag).color,
-            Skin = catalog.SkinColor(l.Skin),
-            Hair = catalog.PaletteColor(l.HairColor),
+            Primary = Shown(ZonePrimary, l.Primary, catalog.PaletteColor(l.Primary)),
+            Secondary = Shown(ZoneSecondary, l.Secondary, catalog.PaletteColor(l.Secondary)),
+            Accent = Shown(ZoneAccent, l.Accent, catalog.PaletteColor(l.Accent)),
+            NameTag = Shown(ZoneBand, l.NameTag, catalog.NameTag(l.NameTag).color),
+            Skin = Shown(ZoneSkin, l.Skin, catalog.SkinColor(l.Skin)),
+            Hair = Shown(ZoneHair, l.HairColor, catalog.PaletteColor(l.HairColor)),
         };
 
         void AddAccessory(CosmeticItem item, CosmeticSlot slot, in TintColors tints, bool hatWorn)
@@ -553,9 +576,11 @@ namespace HarvestPanic.Customization
         public void EditorSetupOutfitAttach(Transform chest, Transform hips) { chestAttach = chest; hipsAttach = hips; }
 
         /// <summary>Editor builder hook: mask-recoloured body (hero farmer).</summary>
-        public void EditorSetupRecolour(List<Renderer> renderers, string bakedHat, float headRef, Vector3 bodyRef, Vector3 capSize, Vector3 capOffset)
+        public void EditorSetupRecolour(List<Renderer> renderers, string bakedHat, float headRef, Vector3 bodyRef, Vector3 capSize, Vector3 capOffset,
+            int[] homes = null, Color[] painted = null)
         {
             recolourRenderers = renderers; bakedHatKey = bakedHat; headScaleReference = headRef; bodyScaleReference = bodyRef; scalpCapSize = capSize; scalpCapOffset = capOffset;
+            homeSwatches = homes ?? new int[0]; paintedColours = painted ?? new Color[0];
         }
 #endif
 
