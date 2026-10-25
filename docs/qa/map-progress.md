@@ -47,5 +47,74 @@ Perf before (docs/qa/perf/perf-baseline.md, M2 Pro editor): 508 draw calls, 592k
 - Tests: EditMode (required roles, markers not inside colliders, bounds closed, wardrobe reachable), PlayMode navmesh
   reachability (critters -> sale pen, spawn -> market) and HP_QA_DIR map screenshots incl. dusk.
 
-## 3. Progress
-(updated as work lands)
+## 3. Progress (built on feature/map-complete)
+
+### What changed, per zone
+| Zone | Now |
+|---|---|
+| Surroundings | 3 x 3 terrain grid: playable tile unchanged (513 heightmap, 8 layers), 8 scenery tiles (129 heightmap, 4 layers = one pass, no colliders), hills to ~70 m forming a bowl, the river valley bending out of sight beyond both edges, `InstancedForest` (GPU-instanced, ~7k trees, per-camera chunk culling, far LOD, stops at linear fog end), `HP_Horizon` hill ring (aerial-perspective fog share, honours real fog at night/in weather) |
+| Barn & yard | Hollow gambrel barn (wall/gable/roof boxes with colliders, open hinged doors, trims, windows, weather vane, "GRANDPA'S FARM"); interior: plank floor, timber frame, hay loft + ladder, 3 stalls, workbench + hung tools, barrels/sacks, 2 lanterns + warm unshadowed fill lights; **wardrobe corner** (marker moved out of the old solid collider to (-20.4, 6.33) facing into the barn; rug, mirror, sign) |
+| Farmhouse (new) | Stone/plaster two-storey house (porch, railings, shutters, window boxes, chimney, attic windows), picket garden, path, mailbox ("GRANDPA"), well, woodpile + axe, washing line, doghouse + "BEWARE OF GOAT", kitchen garden, shade trees |
+| Pasture (new) | Stone trough, hay rack, salt lick, shade oak, sign; cow/goat/sheep spawners kept on open grass (`KeepClear`) |
+| Pens | Pig pen: A-frame hut, trough, hay over the hole, "PIGS"; coop rebuilt (ramp, nest boxes), "CHICKENS" |
+| Fields | Veg rows 11 tilled rows; wheat golden (crop palette exception) and thinned 1.25 -> 1.42 m; corn maze mostly the 148-tri stalk; "VEG / CORN MAZE / PUMPKINS"; hay meadow with round bales; patchwork ploughed + hay fields with hedgerows (gaps every ~22 m) on the empty outer acres |
+| Windmill | Rebuilt: stone base, plaster tower, gallery deck + rail, shingle cap, windows, lattice cloth sails (spinner kept), "FLOUR MILL", sacks |
+| Orchard / hedge / Lost & Found | Apples, mushrooms, crates, ladder, "ORCHARD"; hedge unchanged; "LOST & FOUND" + "(mostly)" |
+| River | Water ribbon follows the centreline (straight in play, meandering outside), irregular banks (zero at the bridge), thinner flow lines, reeds/rocks/lilies, rock weirs at both play edges; river volume, sweep path and pile unchanged |
+| Bridge | Gameplay geometry untouched (40 m, 20 x 2 m planks, 0.7 m sag); stone footings, bank boulders, lanterns, "ONE AT A TIME!", "MARKET >", staging crates, "MUDDLEBURY MARKET" landing board |
+| Market town | Arch rebuilt (lettered both faces); 20 storybook houses (jetties, timber framing, shutters, window boxes, chimneys, attic windows, striped awnings + fascia lettering, incl. "BANK - Loans & Regrets" in landlord plum); **town hall + clock tower** on the road axis (east skyline anchor from the spawn); bell rebuilt; 4 extra produce stalls; fountain, lamps (lit at night), planters, benches, carts, notice board, bunting; ~8 cottages behind; lanes end at "ROAD CLOSED (cows)" |
+| Boundaries | Broken boundary rail fence W/N/S, edge forest band with trunk colliders + undergrowth, invisible walls raised to 70 m (y -12..58) |
+| Lighting | Scene sun/sky = `WeatherLook` afternoon (no pop when WeatherPresenter takes over); volume per art bible (bloom 0.4 / 1.2, contrast 10, vignette 0.24, violet lifted shadows; saturation +4 / exposure 0.1 baseline kept for WeatherPresenter's delta); `NightWindows` lights window glass and lamps from late Dusk; `LitText` signs dim with the scene |
+| Tooling | `WorldMeshBuilder` (one renderer per building), `WorldTextures` (seeded value maps), LOD culling cells for small dressing, `MuddleburyQa -qaCams/-qaLook`, builder re-runs `LivestockSceneHook` (by reflection) and keeps its marker names, `.gitattributes`: binary terrain/navmesh `.asset` -> LFS |
+
+### Traversal (navmesh, `MuddleburyNavTests`, walk 4 m/s / sprint 6.5 m/s)
+| Route | Measured | GDD 11.5.5 |
+|---|---|---|
+| Spawn -> Sale Pen | 125 m (31 s / 19 s) | ~125 m (31 s / 19 s) |
+| Barn respawn -> Sale Pen | 129 m | 127.5 m |
+| Pig / chicken / cow / goat / sheep spawn -> Sale Pen | 113 / 116 / 119 / 121 / 126 m | pig pen gate ~136 m |
+| Pumpkin patch -> Sale Pen | 187 m (47 s) | ~195 m (49 s) |
+| Lost & Found -> bridge west end | 134 m (33 s) | ~150 m (37 s) |
+| Spawn -> wardrobe | 12 m | (new) |
+
+### Perf (`PerfCaptureTests`, 4 farmers, rain + night, 60 s, M2 Pro editor batchmode, 1080p)
+| Metric | Before (main) | Pass 1 | Final | Budget |
+|---|---|---|---|---|
+| Draw calls avg (p99) | 508 | 6,854 | **959 (994)** | <= 1,500 |
+| Triangles avg | 592k | 934k | **807k** | <= 1.5 M |
+| Main thread avg (p95 / p99) | 3.8 ms | 13.6 ms | **6.3 (7.8 / 9.9) ms** | <= 10 ms |
+| Shadow casters | 172 | 368 | 220 | -- |
+| Texture / mesh memory | 134 / 10 MB | 138 / 17 MB | 140 / 17 MB | <= 1.5 GB tex |
+| GC per frame | 1.94 KB | 2.49 KB | 2.30 KB | ~0 |
+Day views without players (probe): 275-889 draws, 0.43-1.06 M tris. The pass-1 spike was terrain mesh trees (one draw per tree)
+and per-patch terrain; fixed by `InstancedForest` + `Terrain.drawInstanced`. GPU time is still unmeasured (needs an M1 dev build).
+
+### Tests
+- EditMode: `MuddleburyLayoutTests` (every role placed; spawn-type markers clear of colliders and grounded; all markers inside
+  the play rectangle; world edges overlap and 432 rays from 6 interior points never escape; wardrobe cabinet + interact space
+  free and reachable through the doorway; 9 tiles, one collider, instanced terrain, forest > 2,000 trees; no renderer without
+  mesh/material; signage lit and legible). Existing `MuddleburySceneTests` unchanged (counts 4/1/5/5/20/1/1/1/1).
+- PlayMode: `MuddleburyNavTests` (above), `MuddleburyMapScreenshots` (HP_QA_DIR: 17 day + 6 dusk + 3 night captures).
+
+### Results (final scene)
+- EditMode full suite: **405 / 405** pass.
+- PlayMode full suite (`-nographics`): 86 pass, 19 skipped (GPU-only screenshot/perf), 2 failed: a temporary draw-call probe
+  (deleted, it needs a GPU) and `LivestockPlayTests.Goat_HeadbuttKnocksPlayerDown` (passes 2/2 in isolation, see gaps).
+- World PlayMode with graphics: **8 / 8** (nav, bridge, scene, map screenshots); `PerfCaptureTests` pass (numbers above).
+- `BuildScript.BuildMacDev`: success, 377 MB, 0 errors.
+- `tools/net/two-process-test.sh` (random port): **PASS** - version-mismatch and farm-full rejects, late join + rejoin (3
+  replicated), host-quit message, voice uplink + relay, host and client both see Muddlebury with critters=18 goods=7 economy=1
+  farmers=2.
+
+### Screenshots
+`MuddleburyMapScreenshots` (play mode, `HP_QA_DIR/map/`): `map_day_<camera>`, `map_dusk_<camera>`, `map_night_<camera>` for the
+17 QA cameras (overview, spawn, farmyard, barn interior, fields, pasture, bridge, arch, market, town hall, market overview,
+windmill/wheat, river north, river downstream/pile, forest edge). Editor variant: `MuddleburyQa.CaptureAll -qaLook Dusk|Night`.
+
+### Remaining gaps
+- GPU frame time unmeasured (dev build on a base M1 needed); day-time perf capture not automated (the capture forces night).
+- Town interiors are closed (houses are solid); only the barn is enterable.
+- Bridge sway / rail grab, toll, town folk and the bell behaviour remain gameplay items (GDD 7.2, 11.5.9).
+- Water foam is still the shared stylized shader (thinner streaks, no shoreline foam mesh).
+- `LivestockPlayTests.Goat_HeadbuttKnocksPlayerDown` failed once in the full PlayMode run and passes in isolation (2/2): an
+  order-dependent flake in the AI suite (CritterTest scene), not a map regression.
