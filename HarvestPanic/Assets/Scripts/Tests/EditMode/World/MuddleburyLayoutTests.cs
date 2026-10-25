@@ -139,6 +139,10 @@ namespace HarvestPanic.Tests.EditMode.World
             var terrains = Object.FindObjectsByType<Terrain>(FindObjectsSortMode.None);
             Assert.That(terrains.Length, Is.EqualTo(9), "3 x 3 terrain grid");
             Assert.That(terrains.Count(t => t.GetComponent<TerrainCollider>() != null), Is.EqualTo(1), "only the playable tile collides");
+            Assert.That(terrains.All(t => t.drawInstanced && !t.drawTreesAndFoliage), "instanced terrain, no per-tree terrain draws");
+            var forest = Object.FindFirstObjectByType<InstancedForest>();
+            Assert.IsNotNull(forest, "scenery forest");
+            Assert.That(forest.InstanceCount, Is.GreaterThan(2000), "the bowl reads as forested");
             foreach (var r in Object.FindObjectsByType<MeshRenderer>(FindObjectsSortMode.None))
             {
                 if (r.GetComponent<TextMesh>() != null) continue;

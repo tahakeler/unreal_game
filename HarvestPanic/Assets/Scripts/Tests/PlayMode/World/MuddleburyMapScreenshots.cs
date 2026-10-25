@@ -23,7 +23,7 @@ namespace HarvestPanic.Tests.PlayMode.World
     {
         const string ScenePath = "Assets/Scenes/Muddlebury.unity";
 
-        [TearDown] public void Reset() { NightWindows.ForceLit = null; _captured = false; }
+        [TearDown] public void Reset() { NightWindows.ForceLit = null; _captured = false; _ca = null; _sky = null; }
 
         [UnityTest]
         public IEnumerator Capture_Map_Day_And_Dusk()
@@ -43,29 +43,42 @@ namespace HarvestPanic.Tests.PlayMode.World
             int n = 0;
             foreach (var cam in cams) { Capture(cam, Path.Combine(dir, $"map_day_{cam.name}.png")); n++; }
 
-            ApplyLook(WeatherLook.ForPhase(DayClockPhase.Dusk, 0.12f));
+            // The live WeatherPresenter (if a director spawned) re-applies its own look every LateUpdate: park it, and
+            // apply the QA look right before each capture.
+            foreach (var wp in Object.FindObjectsByType<WeatherPresenter>(FindObjectsSortMode.None)) wp.enabled = false;
             NightWindows.ForceLit = true;
             foreach (var nw in Object.FindObjectsByType<NightWindows>(FindObjectsSortMode.None)) nw.Refresh();
-            yield return null;
+            var dusk = WeatherLook.ForPhase(DayClockPhase.Dusk, 0.12f);
+            var night = WeatherLook.ForPhase(DayClockPhase.Dusk, 0.9f);
             foreach (var cam in cams)
                 if (cam.name.StartsWith("01") || cam.name.StartsWith("02") || cam.name.StartsWith("04") || cam.name.StartsWith("08") || cam.name.StartsWith("12") || cam.name.StartsWith("13"))
-                { Capture(cam, Path.Combine(dir, $"map_dusk_{cam.name}.png")); n++; }
-
-            ApplyLook(WeatherLook.ForPhase(DayClockPhase.Dusk, 0.9f));
-            yield return null;
+                { ApplyLook(dusk); Capture(cam, Path.Combine(dir, $"map_dusk_{cam.name}.png")); n++; }
             foreach (var cam in cams)
                 if (cam.name.StartsWith("04") || cam.name.StartsWith("09") || cam.name.StartsWith("13"))
-                { Capture(cam, Path.Combine(dir, $"map_night_{cam.name}.png")); n++; }
+                { ApplyLook(night); Capture(cam, Path.Combine(dir, $"map_night_{cam.name}.png")); n++; }
+            yield return null;
             Debug.Log($"[MapQA] wrote {n} captures to {dir}");
             Assert.That(n, Is.GreaterThanOrEqualTo(20));
         }
 
         static Color _amb0, _amb1, _amb2; static bool _captured;
+        static ColorAdjustments _ca;
+        static Material _sky;
 
         /// <summary>Same mapping as WeatherPresenter.Apply (sun pitch/colour, ambient multiply, fog, sky, grade delta).</summary>
         static void ApplyLook(WeatherLook l)
         {
-            if (!_captured) { _amb0 = RenderSettings.ambientSkyColor; _amb1 = RenderSettings.ambientEquatorColor; _amb2 = RenderSettings.ambientGroundColor; _captured = true; }
+            if (!_captured)
+            {
+                _amb0 = RenderSettings.ambientSkyColor; _amb1 = RenderSettings.ambientEquatorColor; _amb2 = RenderSettings.ambientGroundColor;
+                _sky = RenderSettings.skybox != null ? new Material(RenderSettings.skybox) : null;
+                var vgo = new GameObject("QA Weather Volume");
+                var vol = vgo.AddComponent<Volume>(); vol.isGlobal = true; vol.priority = 20;
+                var prof = ScriptableObject.CreateInstance<VolumeProfile>();
+                _ca = prof.Add<ColorAdjustments>(true);
+                vol.profile = prof;
+                _captured = true;
+            }
             var sun = RenderSettings.sun;
             if (sun != null)
             {
@@ -74,22 +87,16 @@ namespace HarvestPanic.Tests.PlayMode.World
                 sun.color = l.SunColor; sun.intensity = l.SunIntensity;
             }
             RenderSettings.ambientSkyColor = _amb0 * l.Ambient; RenderSettings.ambientEquatorColor = _amb1 * l.Ambient; RenderSettings.ambientGroundColor = _amb2 * l.Ambient;
+            RenderSettings.fog = true; RenderSettings.fogMode = FogMode.Linear;
             RenderSettings.fogColor = l.FogColor; RenderSettings.fogStartDistance = l.FogStart; RenderSettings.fogEndDistance = l.FogEnd;
-            if (RenderSettings.skybox != null)
+            if (_sky != null)
             {
-                var sky = new Material(RenderSettings.skybox);
-                sky.SetColor("_SkyTint", l.SkyTint); sky.SetFloat("_Exposure", l.SkyExposure);
-                sky.SetColor("_GroundColor", Color.Lerp(l.FogColor, l.SkyTint, 0.3f));
-                RenderSettings.skybox = sky;
+                _sky.SetColor("_SkyTint", l.SkyTint); _sky.SetFloat("_Exposure", l.SkyExposure);
+                _sky.SetColor("_GroundColor", Color.Lerp(l.FogColor, l.SkyTint, 0.3f));
+                RenderSettings.skybox = _sky;
             }
-            var existing = GameObject.Find("QA Weather Volume");
-            if (existing != null) Object.Destroy(existing);
-            var vgo = new GameObject("QA Weather Volume");
-            var vol = vgo.AddComponent<Volume>(); vol.isGlobal = true; vol.priority = 20;
-            var prof = ScriptableObject.CreateInstance<VolumeProfile>();
-            var ca = prof.Add<ColorAdjustments>(true);
-            ca.saturation.Override(l.Saturation - 4f); ca.postExposure.Override(l.PostExposure - 0.1f);
-            vol.profile = prof;
+            _ca.saturation.Override(l.Saturation - 4f); _ca.postExposure.Override(l.PostExposure - 0.1f);
+            Debug.Log($"[MapQA] look sun={l.SunIntensity:0.00}@{l.SunPitch:0} fog={l.FogStart:0}-{l.FogEnd:0} exp={l.PostExposure:0.00} applied sun={(sun != null ? sun.intensity : -1f):0.00}");
         }
 
         static void Capture(Camera cam, string path)

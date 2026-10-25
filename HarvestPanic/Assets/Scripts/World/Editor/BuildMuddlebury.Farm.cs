@@ -390,20 +390,20 @@ namespace HarvestPanic.World.Editor
             CornMaze();
             var veg = Cullable(Group("Veg Rows"), 8f, 75f);
             string[] crops = { "crop_carrot", "crop_turnip", "crops_leafsStageB", "crop_melon" };
-            for (int r = 0; r < 6; r++)
+            for (int r = 0; r < 11; r++)
             {
-                float x = -77f + r * 3f;
+                float x = -77.5f + r * 1.55f;
                 for (float z = 27.2f; z <= 41f; z += 1.2f) Place(NF, "crops_dirtRow", new Vector3(x, 0f, z), 90f, 0.06f, veg);
-                for (float z = 27f; z <= 41f; z += 1.6f)
-                    Place(NF, crops[r % crops.Length], new Vector3(x, 0, z + Rnd(-0.2f, 0.2f)), Rnd(0, 360), r % 4 == 3 ? 0.55f : 0.45f, veg);
+                for (float z = 27.3f; z <= 41f; z += 1.0f)
+                    Place(NF, crops[(r / 2) % crops.Length], new Vector3(x + Rnd(-0.08f, 0.08f), 0, z + Rnd(-0.15f, 0.15f)), Rnd(0, 360), (r / 2) % 4 == 3 ? 0.62f : Rnd(0.55f, 0.7f), veg);
             }
             FenceRect(new Vector3(-70f, 0, 34f), 18f, 18f, Group("Veg Fence"), (1, 9f, 3f), (0, 4f, 2.5f));
             SignPost("VEG", new Vector3(-58.6f, 0f, 24.6f), 90f, 0.9f, 0.4f, _root, Mats.SignBoard, Ink, postHeight: 0.9f);
 
             // wheat: mostly the lighter stage B mesh (360 tris) with stage A (720 tris) only on the field edges; culled at 110 m
             var wheat = Cullable(Group("Wheat Field"), 8f, 110f);
-            for (float x = -107f; x <= -69f; x += 1.25f)
-            for (float z = -14f; z <= 17f; z += 1.25f)
+            for (float x = -107f; x <= -69f; x += 1.42f)
+            for (float z = -14f; z <= 17f; z += 1.42f)
             {
                 if (Mathf.Abs(z - 1.5f) < 1.2f && x > -100f) continue; // a trampled path through the middle
                 bool edge = x < -105f || x > -71f || z < -12.5f || z > 15.5f;

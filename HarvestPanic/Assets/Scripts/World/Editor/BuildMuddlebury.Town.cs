@@ -423,7 +423,7 @@ namespace HarvestPanic.World.Editor
             nb.Box(new Vector3(0, 1.98f, 0), new Vector3(0.5f, 0.1f, 2.3f), Mats.Roof(2), 1.6f, roll: 0f);
             for (int i = 0; i < 5; i++) nb.Box(new Vector3(-0.07f, 0.9f + (i % 2) * 0.42f, -0.65f + i * 0.33f), new Vector3(0.01f, 0.32f, 0.26f), Mats.Laundry, 1f, roll: Rnd(-6f, 6f));
             BakeBuilding(nb, "SM_World_NoticeBoard", "Notice Board", g, new Vector3(119f, GroundY(119f, -9f), -9f), 0f);
-            Lettering("TODAY'S\nORDERS", new Vector3(118.92f, GroundY(119f, -9f) + 1.72f, -9f), -90f, 1.6f, 0.28f, g, WorldAssets.Hex("2B2118"));
+            SignBoard("TODAY'S ORDERS", new Vector3(118.86f, GroundY(119f, -9f) + 2.32f, -9f), -90f, 2.2f, 0.42f, g, Mats.SignBoard, WorldAssets.Hex("2B2118"), twoSided: true);
             Solid("NoticeBoard", g, new Vector3(119f, 1f, -9f), new Vector3(0.3f, 2f, 2f), Quaternion.identity);
             Bunting(g);
         }

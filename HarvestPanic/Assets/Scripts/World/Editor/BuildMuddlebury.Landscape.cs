@@ -101,11 +101,13 @@ namespace HarvestPanic.World.Editor
                 Layer("Meadow", WorldTextures.GrassStrokes("MeadowPaint", WorldAssets.Hex("97B05A"), WorldAssets.Hex("82A04C"), WorldAssets.Hex("E3D68A"), 8), 7f),
                 Layer("Forest", WorldAssets.NoiseTexture("ForestFloor", WorldAssets.Hex("5E7A3E"), WorldAssets.Hex("4E6A34"), WorldAssets.Hex("8A7A4A"), 0.05f, seed: 9), 6f),
             };
-            var protos = TreePrototypes();
+            // Outer tiles: 4 layers only (one control map -> a single terrain pass); roads, soil, mud and cobble never reach them.
+            _outerLayers = new[] { _layers[0], _layers[6], _layers[7], _layers[5] };
+            TreeMeshes();
             var tiles = new Terrain[3, 3];
             for (int j = -1; j <= 1; j++)
             for (int i = -1; i <= 1; i++)
-                tiles[i + 1, j + 1] = Tile(i, j, protos);
+                tiles[i + 1, j + 1] = Tile(i, j);
             for (int j = 0; j < 3; j++)
             for (int i = 0; i < 3; i++)
             {
@@ -113,8 +115,11 @@ namespace HarvestPanic.World.Editor
                 Terrain T(int a, int b) => a < 0 || b < 0 || a > 2 || b > 2 || (a == 1 && b == 1) ? null : tiles[a, b];
                 tiles[i, j].SetNeighbors(T(i - 1, j), T(i, j + 1), T(i + 1, j), T(i, j - 1));
             }
+            Forest();
             HorizonRing();
         }
+
+        static TerrainLayer[] _outerLayers;
 
         static TerrainLayer Layer(string name, Texture2D tex, float tile)
         {
@@ -128,38 +133,105 @@ namespace HarvestPanic.World.Editor
             return l;
         }
 
-        static readonly string[] TreeModels = { "tree_default", "tree_oak", "tree_fat", "tree_tall", "tree_plateau", "tree_pineRoundA", "tree_pineRoundC", "tree_pineTallA", "tree_cone", "tree_simple" };
-        static float[] _treeHeights;
+        // ------------------------------------------------------------------ scenery forest (GPU-instanced, no GameObjects)
 
-        static TreePrototype[] TreePrototypes()
+        static readonly string[] TreeModels = { "tree_default", "tree_oak", "tree_fat", "tree_pineRoundA", "tree_pineTallA", "tree_cone" };
+        static Mesh[] _treeMeshes;
+        static Material _treeMat;
+        static List<Vector4>[] _treeInstances;
+
+        /// <summary>
+        /// Bakes each Kenney tree into a unit-height, single-submesh mesh (import transform applied) whose UVs point into a
+        /// tiny bark/leaf palette texture, so every species draws with ONE shared instanced material (1 draw per chunk).
+        /// </summary>
+        static void TreeMeshes()
         {
-            var list = new List<TreePrototype>();
-            _treeHeights = new float[TreeModels.Length];
-            const string dir = WorldAssets.ArtRoot + "/Prefabs/Trees";
-            System.IO.Directory.CreateDirectory(dir);
+            AssetDatabase.DeleteAsset(WorldAssets.ArtRoot + "/Prefabs"); // pass-2 terrain-tree prefabs, superseded
+            foreach (var guid in AssetDatabase.FindAssets("SM_World_Tree_ t:Mesh", new[] { WorldAssets.MeshDir }))
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (System.Array.IndexOf(TreeModels, System.IO.Path.GetFileNameWithoutExtension(path).Replace("SM_World_Tree_", "")) < 0) AssetDatabase.DeleteAsset(path);
+            }
+            _treeMeshes = new Mesh[TreeModels.Length];
+            _treeInstances = new List<Vector4>[TreeModels.Length];
+            var palette = new List<Color>();
+            var perModel = new List<(Vector3[] v, Vector3[] n, int[][] tris, Color[] cols)>();
             for (int i = 0; i < TreeModels.Length; i++)
             {
-                // Terrain tree prototype: LODGroup root (no "Nature/Soft Occlusion" warning, distance cull) + trunk capsule
-                // (navmesh-friendly, and tree colliders on the playable tile's outer strip).
-                var src = WorldAssets.Model(NF, TreeModels[i]);
-                var root = new GameObject("PF_Tree_" + TreeModels[i]);
-                var model = (GameObject)PrefabUtility.InstantiatePrefab(src);
-                model.transform.SetParent(root.transform, false);
-                var b = RendererBounds(model);
-                _treeHeights[i] = Mathf.Max(0.2f, b.size.y);
-                var lg = root.AddComponent<LODGroup>();
-                lg.SetLODs(new[] { new LOD(0.004f, model.GetComponentsInChildren<Renderer>()) });
-                lg.RecalculateBounds();
-                var cap = root.AddComponent<CapsuleCollider>();
-                cap.radius = Mathf.Max(0.04f, b.size.x * 0.08f); cap.height = b.size.y * 0.6f; cap.center = new Vector3(0f, b.size.y * 0.3f, 0f);
-                var prefab = PrefabUtility.SaveAsPrefabAsset(root, $"{dir}/PF_Tree_{TreeModels[i]}.prefab");
-                Object.DestroyImmediate(root);
-                list.Add(new TreePrototype { prefab = prefab, bendFactor = 0f });
+                var go = (GameObject)Object.Instantiate(WorldAssets.Model(NF, TreeModels[i]));
+                go.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+                var mf = go.GetComponentInChildren<MeshFilter>();
+                var mats = mf.GetComponent<MeshRenderer>().sharedMaterials;
+                var b = RendererBounds(go);
+                float inv = 1f / Mathf.Max(0.05f, b.size.y);
+                var m = mf.transform.localToWorldMatrix;
+                var src = mf.sharedMesh;
+                var v = src.vertices; var n = src.normals;
+                for (int k = 0; k < v.Length; k++) { var w = m.MultiplyPoint3x4(v[k]); v[k] = new Vector3(w.x - b.center.x, w.y - b.min.y, w.z - b.center.z) * inv; }
+                for (int k = 0; k < n.Length; k++) n[k] = m.MultiplyVector(n[k]).normalized;
+                var tris = new int[src.subMeshCount][];
+                var cols = new Color[src.subMeshCount];
+                for (int sm = 0; sm < src.subMeshCount; sm++)
+                {
+                    tris[sm] = src.GetTriangles(sm);
+                    cols[sm] = sm < mats.Length && mats[sm] != null ? mats[sm].GetColor("_BaseColor") : Color.gray;
+                    if (!palette.Exists(c => (c - cols[sm]).maxColorComponent < 0.01f)) palette.Add(cols[sm]);
+                }
+                perModel.Add((v, n, tris, cols));
+                Object.DestroyImmediate(go);
             }
-            return list.ToArray();
+            var tex = WorldTextures.Palette("TreePalette", palette.ToArray());
+            _treeMat = WorldAssets.Mat("TreeAtlas", Color.white, 0.1f, tex);
+            for (int i = 0; i < TreeModels.Length; i++)
+            {
+                var (v, n, tris, cols) = perModel[i];
+                // unweld per submesh so each vertex can carry its submesh's palette UV
+                var nv = new List<Vector3>(); var nn = new List<Vector3>(); var uv = new List<Vector2>(); var t = new List<int>();
+                for (int sm = 0; sm < tris.Length; sm++)
+                {
+                    int slot = palette.FindIndex(c => (c - cols[sm]).maxColorComponent < 0.01f);
+                    var cell = new Vector2((slot + 0.5f) / palette.Count, 0.5f);
+                    foreach (int idx in tris[sm]) { t.Add(nv.Count); nv.Add(v[idx]); nn.Add(n[idx]); uv.Add(cell); }
+                }
+                var mesh = new Mesh { name = "SM_World_Tree_" + TreeModels[i] };
+                mesh.SetVertices(nv); mesh.SetNormals(nn); mesh.SetUVs(0, uv); mesh.SetTriangles(t, 0);
+                mesh.RecalculateBounds();
+                _treeMeshes[i] = WorldAssets.SaveMesh(mesh, "SM_World_Tree_" + TreeModels[i]);
+                _treeInstances[i] = new List<Vector4>();
+            }
         }
 
-        static Terrain Tile(int i, int j, TreePrototype[] protos)
+        /// <summary>Scatters the forest over every tile beyond the playable rectangle (ForestDensity) and builds the renderer.</summary>
+        static void Forest()
+        {
+            const float step = 6.5f;
+            for (float z = TZ0 - TSZ + step * 0.5f; z < TZ0 + 2f * TSZ; z += step)
+            for (float x = TX0 - TSX + step * 0.5f; x < TX0 + 2f * TSX; x += step)
+            {
+                float jx = x + Rnd(-2.6f, 2.6f), jz = z + Rnd(-2.6f, 2.6f);
+                float roll = (float)_rng.NextDouble();
+                if (roll > ForestDensity(jx, jz)) continue;
+                float y = GroundY(jx, jz);
+                if (y < WaterY + 0.8f) continue;
+                // pines in the cooler clumps, broadleaf elsewhere
+                bool pine = Mathf.PerlinNoise(jx * 0.02f + 70f, jz * 0.02f + 70f) > 0.55f;
+                int p = pine ? Pick(3, 4, 5) : Pick(0, 1, 2);
+                float height = Rnd(7.5f, 13.5f) * (pine ? 1.15f : 1f);
+                _treeInstances[p].Add(new Vector4(jx, y - 0.15f, jz, height));
+            }
+            var protos = new InstancedForest.Prototype[TreeModels.Length];
+            for (int i = 0; i < protos.Length; i++)
+            {
+                // far LOD: the low-poly sibling of each species (oak/default -> fat, pine round/cone -> pine tall)
+                int far = i == 0 || i == 1 ? 2 : i == 3 || i == 5 ? 4 : -1;
+                protos[i] = new InstancedForest.Prototype { mesh = _treeMeshes[i], farMesh = far >= 0 ? _treeMeshes[far] : null, materials = new[] { _treeMat }, instances = _treeInstances[i].ToArray() };
+            }
+            var go = new GameObject("Scenery Forest (instanced)");
+            go.transform.SetParent(_root, false);
+            go.AddComponent<InstancedForest>().Configure(protos, 140f, 560f);
+        }
+
+        static Terrain Tile(int i, int j)
         {
             bool centre = i == 0 && j == 0;
             int res = centre ? CentreRes : OuterRes;
@@ -185,23 +257,25 @@ namespace HarvestPanic.World.Editor
                 h[jj, ii] = Mathf.Clamp01((world[jj, ii] - TY0) / th);
             td.SetHeights(0, 0, h);
 
-            td.terrainLayers = _layers;
-            var a = new float[ar, ar, _layers.Length];
+            var layers = centre ? _layers : _outerLayers;
+            td.terrainLayers = layers;
+            var a = new float[ar, ar, layers.Length];
             var w = new float[_layers.Length];
             for (int jj = 0; jj < ar; jj++)
             for (int ii = 0; ii < ar; ii++)
             {
                 float x = x0 + (ii + 0.5f) / ar * TSX, z = z0 + (jj + 0.5f) / ar * TSZ;
                 Paint(x, z, w);
-                float sum = 0f; foreach (var v in w) sum += v;
-                for (int k = 0; k < w.Length; k++) a[jj, ii, k] = w[k] / sum;
+                if (!centre) // fold into grass / meadow / forest / bank
+                {
+                    float g = w[0] + w[1] + w[2] + w[3] + w[4];
+                    w[0] = g; w[1] = w[6]; w[2] = w[7]; w[3] = w[5];
+                }
+                float sum = 0f; for (int k = 0; k < layers.Length; k++) sum += w[k];
+                for (int k = 0; k < layers.Length; k++) a[jj, ii, k] = w[k] / sum;
             }
             td.SetAlphamaps(0, 0, a);
             foreach (var at in td.alphamapTextures) if (!AssetDatabase.Contains(at)) AssetDatabase.AddObjectToAsset(at, td);
-
-            td.treePrototypes = protos;
-            td.RefreshPrototypes();
-            td.SetTreeInstances(Trees(x0, z0, th).ToArray(), false);
             EditorUtility.SetDirty(td);
             AssetDatabase.SaveAssets();
 
@@ -213,17 +287,15 @@ namespace HarvestPanic.World.Editor
             var t = go.GetComponent<Terrain>();
             var mat = AssetDatabase.LoadAssetAtPath<Material>("Packages/com.unity.render-pipelines.universal/Runtime/Materials/TerrainLit.mat");
             if (mat != null) t.materialTemplate = mat;
-            t.heightmapPixelError = centre ? 4f : 8f;
+            t.drawInstanced = true;          // instanced patches: ~200 fewer draw calls than per-patch terrain rendering
+            t.heightmapPixelError = centre ? 4f : 10f;
             t.basemapDistance = centre ? 400f : 250f;
-            t.drawTreesAndFoliage = true;
-            t.treeDistance = 520f;
-            t.treeBillboardDistance = 1000f;
-            t.treeMaximumFullLODCount = 20000;
+            t.drawTreesAndFoliage = false;   // the forest is InstancedForest (terrain mesh trees cost one draw each)
             t.allowAutoConnect = !centre;
             t.groupingID = centre ? 1 : 2;
-            t.shadowCastingMode = ShadowCastingMode.TwoSided;
+            t.shadowCastingMode = centre ? ShadowCastingMode.On : ShadowCastingMode.Off;
             var col = go.GetComponent<TerrainCollider>();
-            if (!centre) Object.DestroyImmediate(col); // nobody can reach the scenery tiles (tree prototypes carry no colliders)
+            if (!centre) Object.DestroyImmediate(col); // nobody can reach the scenery tiles
             return t;
         }
 
@@ -240,34 +312,6 @@ namespace HarvestPanic.World.Editor
                 world[k, 0] = Mathf.Lerp(world[k0, 0], world[k1, 0], t);
                 world[k, res - 1] = Mathf.Lerp(world[k0, res - 1], world[k1, res - 1], t);
             }
-        }
-
-        static List<TreeInstance> Trees(float x0, float z0, float th)
-        {
-            var list = new List<TreeInstance>();
-            const float step = 6.5f;
-            for (float z = z0 + step * 0.5f; z < z0 + TSZ; z += step)
-            for (float x = x0 + step * 0.5f; x < x0 + TSX; x += step)
-            {
-                float jx = x + Rnd(-2.6f, 2.6f), jz = z + Rnd(-2.6f, 2.6f);
-                float roll = (float)_rng.NextDouble();
-                if (roll > ForestDensity(jx, jz)) continue;
-                float y = GroundY(jx, jz);
-                if (y < WaterY + 0.8f) continue;
-                // pines in the cooler clumps, broadleaf elsewhere
-                bool pine = Mathf.PerlinNoise(jx * 0.02f + 70f, jz * 0.02f + 70f) > 0.55f;
-                int p = pine ? 5 + _rng.Next(4) : Pick(0, 1, 2, 3, 4, 9);
-                float height = Rnd(7.5f, 13.5f) * (pine ? 1.15f : 1f);
-                float s = height / _treeHeights[p];
-                list.Add(new TreeInstance
-                {
-                    position = new Vector3((jx - x0) / TSX, (y - TY0) / th, (jz - z0) / TSZ),
-                    widthScale = s * Rnd(0.85f, 1.15f), heightScale = s,
-                    rotation = Rnd(0f, Mathf.PI * 2f), prototypeIndex = p,
-                    color = Color.white, lightmapColor = Color.white,
-                });
-            }
-            return list;
         }
 
         // ------------------------------------------------------------------ painting
