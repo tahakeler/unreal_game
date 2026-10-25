@@ -90,6 +90,8 @@ namespace HarvestPanic.Customization
         string bakedHatKey;
         [SerializeField, Tooltip("Body-variant head scale that matches this model's own head (chunky heads are already modelled).")]
         float headScaleReference = 1f;
+        [SerializeField, Tooltip("Body-variant scale that matches this model's own proportions (variants scale relative to it).")]
+        Vector3 bodyScaleReference = Vector3.one;
         [SerializeField, Tooltip("Scalp cap (hair coloured) plugging the head top when the baked hat is clipped; HatAttach space.")]
         Vector3 scalpCapSize = new Vector3(0.3f, 0.14f, 0.32f);
         [SerializeField] Vector3 scalpCapOffset = new Vector3(0f, -0.04f, -0.01f);
@@ -273,7 +275,11 @@ namespace HarvestPanic.Customization
             EnsureBaseScales();
 
             var body = catalog.Body(loadout.Body);
-            if (modelRoot != null) modelRoot.localScale = body.bodyScale;
+            if (modelRoot != null)
+            {
+                var r = bodyScaleReference;
+                modelRoot.localScale = new Vector3(body.bodyScale.x / Mathf.Max(0.01f, r.x), body.bodyScale.y / Mathf.Max(0.01f, r.y), body.bodyScale.z / Mathf.Max(0.01f, r.z));
+            }
             _headScale = body.headScale / Mathf.Max(0.01f, headScaleReference);
 
             var headItem = catalog.FindItem(CosmeticSlot.Head, loadout.Head);
@@ -547,9 +553,9 @@ namespace HarvestPanic.Customization
         public void EditorSetupOutfitAttach(Transform chest, Transform hips) { chestAttach = chest; hipsAttach = hips; }
 
         /// <summary>Editor builder hook: mask-recoloured body (hero farmer).</summary>
-        public void EditorSetupRecolour(List<Renderer> renderers, string bakedHat, float headRef, Vector3 capSize, Vector3 capOffset)
+        public void EditorSetupRecolour(List<Renderer> renderers, string bakedHat, float headRef, Vector3 bodyRef, Vector3 capSize, Vector3 capOffset)
         {
-            recolourRenderers = renderers; bakedHatKey = bakedHat; headScaleReference = headRef; scalpCapSize = capSize; scalpCapOffset = capOffset;
+            recolourRenderers = renderers; bakedHatKey = bakedHat; headScaleReference = headRef; bodyScaleReference = bodyRef; scalpCapSize = capSize; scalpCapOffset = capOffset;
         }
 #endif
 

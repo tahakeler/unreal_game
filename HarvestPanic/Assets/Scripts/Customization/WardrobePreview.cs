@@ -180,10 +180,11 @@ namespace HarvestPanic.Customization
         {
             _focus = focus;
             float headY = HeadHeight();
+            float hk = CosmeticIconRenderer.HeadScale(_farmer);
             switch (focus)
             {
-                case PreviewFocus.Head: _targetGoal = new Vector3(0f, headY + 0.04f, 0f); _distanceGoal = 2.35f; break;
-                case PreviewFocus.Face: _targetGoal = new Vector3(0f, headY - 0.1f, 0f); _distanceGoal = 1.7f; break;
+                case PreviewFocus.Head: _targetGoal = new Vector3(0f, headY + 0.04f * hk, 0f); _distanceGoal = Mathf.Max(2.35f, 1.6f * hk); break;
+                case PreviewFocus.Face: _targetGoal = new Vector3(0f, headY - 0.1f * hk, 0f); _distanceGoal = Mathf.Max(1.7f, 1.2f * hk); break;
                 case PreviewFocus.Back: _targetGoal = new Vector3(0f, headY * 0.7f, 0f); _distanceGoal = 2.9f; break;
                 case PreviewFocus.Outfit: _targetGoal = new Vector3(0f, headY * 0.55f, 0f); _distanceGoal = 3.4f; break;
                 default: _targetGoal = new Vector3(0f, headY * 0.52f, 0f); _distanceGoal = 4.1f; break;

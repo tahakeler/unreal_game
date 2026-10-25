@@ -159,8 +159,7 @@ namespace HarvestPanic.Gameplay
         public bool HoldingTool => Carry != null && Carry.HoldingTool;
         /// <inheritdoc />
         public float ThrowCharge => Carry != null && IsOwnerSafe ? Carry.ThrowCharge : 0f;
-        /// <inheritdoc />
-        public bool IsDown => State == PlayerState.Ragdoll || State == PlayerState.KnockedOut;
+        // IsDown (ragdoll / KO / respawning) is declared above and also serves IPlayerAnimationSource.
 
         // ---- ICarryable (knocked-out body) -----------------------------------------------------------------
 

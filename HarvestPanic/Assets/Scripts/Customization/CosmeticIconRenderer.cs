@@ -186,11 +186,12 @@ namespace HarvestPanic.Customization
         void Frame(PreviewFocus f)
         {
             float headY = _puppet.HeadAttachPoint != null ? _puppet.HeadAttachPoint.position.y - Origin.y : 1.75f;
+            float hk = HeadScale(_puppet); // close-ups follow the head size (the chibi hero head is ~2.6x the old one)
             float yaw; Vector3 target; float dist;
             switch (f)
             {
-                case PreviewFocus.Head: yaw = 205f; target = new Vector3(0f, headY - 0.02f, 0f); dist = 1.75f; break;
-                case PreviewFocus.Face: yaw = 195f; target = new Vector3(0f, headY - 0.12f, 0.04f); dist = 1.25f; break;
+                case PreviewFocus.Head: yaw = 205f; target = new Vector3(0f, headY - 0.06f * hk, 0f); dist = 1.6f * hk; break;
+                case PreviewFocus.Face: yaw = 195f; target = new Vector3(0f, headY - 0.13f * hk, 0.04f * hk); dist = 1.15f * hk; break;
                 case PreviewFocus.Back: yaw = 35f; target = new Vector3(0f, headY * 0.72f, 0f); dist = 2.4f; break;
                 case PreviewFocus.Outfit: yaw = 200f; target = new Vector3(0f, headY * 0.55f, 0f); dist = 3.0f; break;
                 default: yaw = 200f; target = new Vector3(0f, headY * 0.52f, 0f); dist = 4.6f; break;
@@ -200,6 +201,10 @@ namespace HarvestPanic.Customization
             _cam.transform.position = Origin + target - rot * Vector3.forward * dist;
             _cam.transform.rotation = rot;
         }
+
+        /// <summary>World scale of the hat attach point relative to the original 1.18x farmer head (1 = old framing).</summary>
+        public static float HeadScale(FarmerVisual v) =>
+            v != null && v.HeadAttachPoint != null ? Mathf.Clamp(v.HeadAttachPoint.lossyScale.x / 1.18f, 0.6f, 3f) : 1f;
 
         void Isolate(bool on)
         {

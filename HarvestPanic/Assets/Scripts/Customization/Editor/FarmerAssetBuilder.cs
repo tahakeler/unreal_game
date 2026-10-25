@@ -36,44 +36,38 @@ namespace HarvestPanic.Customization.Editor
         public const string PrefabPath = "Assets/Prefabs/Farmer/FarmerBody.prefab";
         public const string NetListPath = "Assets/Resources/NetworkPrefabs/Customization.asset";
         public const string ScenePath = "Assets/Scenes/Dev/WardrobeTest.unity";
-        public const string MeshDir = Root + "/Meshes";
         public const string CreatorStylePath = UiDir + "/CharacterCreator.uss";
         public const string LinkPath = "Assets/Resources/Customization/CustomizationLink.asset";
         public const string NetTestPrefabPath = "Assets/Prefabs/Farmer/Test/FarmerNetTest.prefab";
-
-        /// <summary>Clip name -> FBX take suffix, loop.</summary>
-        static readonly (string name, string take, bool loop)[] Clips =
-        {
-            ("Idle", "Idle", true), ("Walk", "Walk", true), ("Run", "Run", true), ("Wave", "Wave", false),
-            ("Faint", "Death", false), ("Point", "Idle_Gun_Pointing", true), ("Interact", "Interact", false),
-        };
 
         [MenuItem("HarvestPanic/Customization/Build All Farmer Assets")]
         public static void BuildAll()
         {
             try
             {
-                foreach (var d in new[] { AnimDir, MatDir, UiDir, MeshDir, "Assets/Prefabs/Farmer", "Assets/Prefabs/Farmer/Test", "Assets/Resources/NetworkPrefabs", "Assets/Resources/Customization", "Assets/Scenes/Dev" }) EnsureFolder(d);
-                ConfigureFbx();
+                foreach (var d in new[] { AnimDir, MatDir, UiDir, "Assets/Prefabs/Farmer", "Assets/Prefabs/Farmer/Test", "Assets/Resources/NetworkPrefabs", "Assets/Resources/Customization", "Assets/Scenes/Dev" }) EnsureFolder(d);
+                var heroAvatar = HeroFarmerBuilder.ConfigureHumanoid(HeroFarmerBuilder.HeroFbx, HeroFarmerBuilder.HeroMap, null);
+                var animAvatar = HeroFarmerBuilder.ConfigureHumanoid(FbxPath, HeroFarmerBuilder.QuaterniusMap, HeroFarmerBuilder.SourceClips);
+                if (heroAvatar == null || !heroAvatar.isValid || !heroAvatar.isHuman) throw new InvalidOperationException("Hero farmer avatar is not a valid humanoid");
+                if (animAvatar == null || !animAvatar.isValid || !animAvatar.isHuman) throw new InvalidOperationException("Animation source avatar is not a valid humanoid");
                 var (baseMat, unlitMat) = BuildMaterials();
-                var clips = LoadClips();
-                var dance = BuildProceduralClip("Farmer_Dance", 1.0f, true, DancePose);
-                var jump = BuildProceduralClip("Farmer_Jump", 0.7f, false, JumpPose);
-                var extra = new Dictionary<string, AnimationClip>
-                {
-                    { "Shrug", BuildProceduralClip("Farmer_Shrug", 1.4f, false, ShrugPose) },
-                    { "Salute", BuildProceduralClip("Farmer_Salute", 1.6f, false, SalutePose) },
-                    { "ChickenDance", BuildProceduralClip("Farmer_ChickenDance", 1.0f, true, ChickenPose) },
-                };
-                var controller = BuildController(clips, dance, jump, extra);
+                var heroMat = HeroFarmerBuilder.BuildMaterial();
+                var clips = new Dictionary<string, AnimationClip>();
+                foreach (var o in AssetDatabase.LoadAllAssetsAtPath(FbxPath))
+                    if (o is AnimationClip c && !c.name.StartsWith("__preview__")) clips[c.name] = c;
+                Debug.Log("[FarmerAssetBuilder] retargeted clips: " + string.Join(", ", clips.Keys));
+                var heroModel = AssetDatabase.LoadAssetAtPath<GameObject>(HeroFarmerBuilder.HeroFbx);
+                foreach (var kv in HeroFarmerBuilder.BuildProceduralClips(heroModel, heroAvatar, clips["Idle"])) clips[kv.Key] = kv.Value;
+                var controller = HeroFarmerBuilder.BuildController(clips);
                 var panel = BuildPanel();
                 var catalog = BuildCatalog(baseMat, unlitMat, panel);
-                var prefab = BuildPrefab(catalog, controller);
+                var prefab = BuildPrefab(catalog, controller, heroMat, heroAvatar);
                 catalog.farmerPrefab = prefab;
                 EditorUtility.SetDirty(catalog);
                 BuildLink(catalog);
                 BuildNetTestPrefab(prefab);
                 BuildNetworkList();
+                RemoveObsolete();
                 AssetDatabase.SaveAssets();
                 BuildScene(prefab);
                 Debug.Log("[FarmerAssetBuilder] Done");
@@ -85,6 +79,14 @@ namespace HarvestPanic.Customization.Editor
             }
         }
 
+        /// <summary>Assets of the previous Quaternius body (generic rig clips, UV'd mesh copies) that nothing uses any more.</summary>
+        static void RemoveObsolete()
+        {
+            foreach (var p in new[] { ControllerPath, AnimDir + "/Farmer_Dance.anim", AnimDir + "/Farmer_Jump.anim", AnimDir + "/Farmer_Shrug.anim",
+                         AnimDir + "/Farmer_Salute.anim", AnimDir + "/Farmer_ChickenDance.anim", Root + "/Meshes" })
+                if (AssetDatabase.LoadMainAssetAtPath(p) != null || AssetDatabase.IsValidFolder(p)) AssetDatabase.DeleteAsset(p);
+        }
+
         /// <summary>Creates an asset folder (and parents) if missing.</summary>
         public static void EnsureFolderPublic(string path) => EnsureFolder(path);
 
@@ -94,259 +96,6 @@ namespace HarvestPanic.Customization.Editor
             string parent = Path.GetDirectoryName(path).Replace('\\', '/');
             EnsureFolder(parent);
             AssetDatabase.CreateFolder(parent, Path.GetFileName(path));
-        }
-
-        // ---- FBX ----------------------------------------------------------------------------------------------------
-
-        static void ConfigureFbx()
-        {
-            var imp = (ModelImporter)AssetImporter.GetAtPath(FbxPath);
-            if (imp == null) throw new FileNotFoundException(FbxPath);
-            imp.animationType = ModelImporterAnimationType.Generic;
-            imp.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
-            imp.importAnimation = true;
-            imp.materialImportMode = ModelImporterMaterialImportMode.ImportViaMaterialDescription;
-            imp.importBlendShapes = false;
-            imp.importCameras = false; imp.importLights = false;
-            var takes = imp.defaultClipAnimations;
-            Debug.Log("[FarmerAssetBuilder] FBX takes: " + string.Join(", ", takes.Select(t => t.takeName)));
-            var list = new List<ModelImporterClipAnimation>();
-            foreach (var (name, take, loop) in Clips)
-            {
-                var src = takes.FirstOrDefault(t => t.takeName == take || t.takeName.EndsWith("|" + take));
-                if (src == null) { Debug.LogWarning("[FarmerAssetBuilder] Missing take " + take); continue; }
-                src.name = name;
-                src.loopTime = loop;
-                src.loopPose = false;
-                src.lockRootRotation = src.lockRootHeightY = src.lockRootPositionXZ = true;
-                src.keepOriginalOrientation = src.keepOriginalPositionY = src.keepOriginalPositionXZ = true;
-                list.Add(src);
-            }
-            imp.clipAnimations = list.ToArray();
-            imp.SaveAndReimport();
-        }
-
-        static Dictionary<string, AnimationClip> LoadClips()
-        {
-            var d = new Dictionary<string, AnimationClip>();
-            foreach (var o in AssetDatabase.LoadAllAssetsAtPath(FbxPath))
-                if (o is AnimationClip c && !c.name.StartsWith("__preview__")) d[c.name] = c;
-            Debug.Log("[FarmerAssetBuilder] Clips: " + string.Join(", ", d.Keys));
-            return d;
-        }
-
-        // ---- Procedural clips ---------------------------------------------------------------------------------------
-
-        /// <summary>Pose offsets for one key: per-bone world-space rotation (character frame) and position offsets.</summary>
-        delegate void PoseFn(float t, Dictionary<string, Quaternion> rot, Dictionary<string, Vector3> pos);
-
-        static void DancePose(float t, Dictionary<string, Quaternion> rot, Dictionary<string, Vector3> pos)
-        {
-            float ph = t * Mathf.PI * 2f;
-            pos["Body"] = new Vector3(0f, -0.035f * (0.5f - 0.5f * Mathf.Cos(2f * ph)), 0f);
-            rot["Body"] = Quaternion.AngleAxis(7f * Mathf.Sin(ph), Vector3.forward);
-            rot["Torso"] = Quaternion.AngleAxis(16f * Mathf.Sin(ph), Vector3.up);
-            rot["Head"] = Quaternion.AngleAxis(12f * Mathf.Sin(2f * ph), Vector3.right) * Quaternion.AngleAxis(-9f * Mathf.Sin(ph), Vector3.forward);
-            float flap = 25f + 40f * (0.5f + 0.5f * Mathf.Sin(2f * ph));
-            rot["UpperArm.L"] = Quaternion.AngleAxis(-flap, Vector3.forward);
-            rot["UpperArm.R"] = Quaternion.AngleAxis(flap, Vector3.forward);
-            rot["LowerArm.L"] = Quaternion.AngleAxis(80f, Vector3.forward);
-            rot["LowerArm.R"] = Quaternion.AngleAxis(-80f, Vector3.forward);
-        }
-
-        static void JumpPose(float t, Dictionary<string, Quaternion> rot, Dictionary<string, Vector3> pos)
-        {
-            // 0-0.12 crouch, 0.12-0.5 tuck in the air (arms up), 0.5-0.7 land
-            float crouch = t < 0.12f ? t / 0.12f : t < 0.22f ? 1f - (t - 0.12f) / 0.1f : t > 0.55f ? Mathf.Sin((t - 0.55f) / 0.15f * Mathf.PI) * 0.6f : 0f;
-            float air = t < 0.12f ? 0f : t < 0.25f ? (t - 0.12f) / 0.13f : t < 0.45f ? 1f : t < 0.6f ? 1f - (t - 0.45f) / 0.15f : 0f;
-            pos["Body"] = new Vector3(0f, -0.09f * crouch, 0f);
-            rot["Torso"] = Quaternion.AngleAxis(12f * crouch - 6f * air, Vector3.right);
-            rot["UpperArm.L"] = Quaternion.AngleAxis(-140f * air - 20f * crouch, Vector3.forward);
-            rot["UpperArm.R"] = Quaternion.AngleAxis(140f * air + 20f * crouch, Vector3.forward);
-            rot["UpperLeg.L"] = Quaternion.AngleAxis(-35f * air, Vector3.right);
-            rot["UpperLeg.R"] = Quaternion.AngleAxis(-20f * air, Vector3.right);
-            rot["LowerLeg.L"] = Quaternion.AngleAxis(55f * air, Vector3.right);
-            rot["LowerLeg.R"] = Quaternion.AngleAxis(40f * air, Vector3.right);
-            pos["Foot.L"] = new Vector3(0f, 0.14f * air, 0.05f * air);
-            pos["Foot.R"] = new Vector3(0f, 0.1f * air, 0.02f * air);
-        }
-
-        static float Envelope(float t, float rise, float holdEnd, float end) =>
-            t < rise ? Mathf.SmoothStep(0f, 1f, t / rise) : t < holdEnd ? 1f : t < end ? Mathf.SmoothStep(1f, 0f, (t - holdEnd) / (end - holdEnd)) : 0f;
-
-        static void ShrugPose(float t, Dictionary<string, Quaternion> rot, Dictionary<string, Vector3> pos)
-        {
-            float e = Envelope(t, 0.25f, 1.0f, 1.35f);
-            pos["Shoulder.L"] = new Vector3(0f, 0.035f * e, 0f);
-            pos["Shoulder.R"] = new Vector3(0f, 0.035f * e, 0f);
-            rot["UpperArm.L"] = Quaternion.AngleAxis(-22f * e, Vector3.forward);
-            rot["UpperArm.R"] = Quaternion.AngleAxis(22f * e, Vector3.forward);
-            rot["LowerArm.L"] = Quaternion.AngleAxis(-25f * e, Vector3.forward) * Quaternion.AngleAxis(-78f * e, Vector3.right);
-            rot["LowerArm.R"] = Quaternion.AngleAxis(25f * e, Vector3.forward) * Quaternion.AngleAxis(-78f * e, Vector3.right);
-            rot["Head"] = Quaternion.AngleAxis(12f * e, Vector3.forward) * Quaternion.AngleAxis(-6f * e, Vector3.right);
-            rot["Torso"] = Quaternion.AngleAxis(-4f * e, Vector3.right);
-        }
-
-        static void SalutePose(float t, Dictionary<string, Quaternion> rot, Dictionary<string, Vector3> pos)
-        {
-            float e = Envelope(t, 0.3f, 1.2f, 1.55f);
-            rot["UpperArm.R"] = Quaternion.AngleAxis(-22f * e, Vector3.up) * Quaternion.AngleAxis(88f * e, Vector3.forward);
-            rot["LowerArm.R"] = Quaternion.AngleAxis(138f * e, Vector3.forward);
-            rot["Head"] = Quaternion.AngleAxis(-8f * e, Vector3.right);
-            rot["Torso"] = Quaternion.AngleAxis(-3f * e, Vector3.right);
-            pos["Body"] = new Vector3(0f, 0.01f * e, 0f);
-        }
-
-        static void ChickenPose(float t, Dictionary<string, Quaternion> rot, Dictionary<string, Vector3> pos)
-        {
-            float ph = t * Mathf.PI * 2f;
-            float flap = 0.5f + 0.5f * Mathf.Sin(2f * ph);
-            pos["Body"] = new Vector3(0f, -0.04f * (0.5f - 0.5f * Mathf.Cos(2f * ph)), 0f);
-            rot["Torso"] = Quaternion.AngleAxis(8f * Mathf.Sin(ph), Vector3.up) * Quaternion.AngleAxis(6f, Vector3.right);
-            rot["UpperArm.L"] = Quaternion.AngleAxis(-(18f + 38f * flap), Vector3.forward);
-            rot["UpperArm.R"] = Quaternion.AngleAxis(18f + 38f * flap, Vector3.forward);
-            rot["LowerArm.L"] = Quaternion.AngleAxis(140f, Vector3.forward);
-            rot["LowerArm.R"] = Quaternion.AngleAxis(-140f, Vector3.forward);
-            rot["Head"] = Quaternion.AngleAxis(14f * Mathf.Sin(2f * ph), Vector3.right);
-            pos["Head"] = new Vector3(0f, 0f, 0.03f * Mathf.Sin(2f * ph));
-            float l = Mathf.Max(0f, Mathf.Sin(ph)), r = Mathf.Max(0f, -Mathf.Sin(ph));
-            rot["UpperLeg.L"] = Quaternion.AngleAxis(-28f * l, Vector3.right);
-            rot["LowerLeg.L"] = Quaternion.AngleAxis(40f * l, Vector3.right);
-            rot["UpperLeg.R"] = Quaternion.AngleAxis(-28f * r, Vector3.right);
-            rot["LowerLeg.R"] = Quaternion.AngleAxis(40f * r, Vector3.right);
-        }
-
-        /// <summary>
-        /// Authors a Generic clip keyed on every bone: base pose = Idle frame 0, plus character-space offsets from
-        /// <paramref name="pose"/> applied parent-first so children inherit their parent's motion.
-        /// </summary>
-        static AnimationClip BuildProceduralClip(string name, float length, bool loop, PoseFn pose)
-        {
-            var model = AssetDatabase.LoadAssetAtPath<GameObject>(FbxPath);
-            var idle = AssetDatabase.LoadAllAssetsAtPath(FbxPath).OfType<AnimationClip>().First(c => c.name == "Idle");
-            var go = (GameObject)Object.Instantiate(model);
-            try
-            {
-                go.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
-                go.transform.localScale = Vector3.one;
-                idle.SampleAnimation(go, 0f);
-                var bones = go.GetComponentsInChildren<Transform>(true).Where(t => t != go.transform && t.GetComponent<Renderer>() == null).ToList();
-                var baseRot = bones.ToDictionary(b => b, b => b.localRotation);
-                var basePos = bones.ToDictionary(b => b, b => b.localPosition);
-                var byName = new Dictionary<string, Transform>();
-                foreach (var b in bones) if (!byName.ContainsKey(b.name)) byName[b.name] = b;
-
-                const float fps = 24f;
-                int frames = Mathf.RoundToInt(length * fps);
-                var curves = new Dictionary<(Transform, string), AnimationCurve>();
-                AnimationCurve Curve(Transform b, string prop)
-                {
-                    if (!curves.TryGetValue((b, prop), out var c)) curves[(b, prop)] = c = new AnimationCurve();
-                    return c;
-                }
-                var rot = new Dictionary<string, Quaternion>();
-                var pos = new Dictionary<string, Vector3>();
-                for (int f = 0; f <= frames; f++)
-                {
-                    float t = f / fps;
-                    foreach (var b in bones) { b.localRotation = baseRot[b]; b.localPosition = basePos[b]; }
-                    rot.Clear(); pos.Clear();
-                    pose(loop ? t / length : t, rot, pos); // Dance takes a 0..1 phase, Jump takes seconds
-                    foreach (var b in bones) // GetComponentsInChildren is depth-first parent-first
-                    {
-                        if (rot.TryGetValue(b.name, out var q)) b.rotation = q * b.rotation;
-                        if (pos.TryGetValue(b.name, out var p)) b.position += p;
-                    }
-                    foreach (var b in bones)
-                    {
-                        var lr = b.localRotation; var lp = b.localPosition;
-                        Curve(b, "m_LocalRotation.x").AddKey(t, lr.x); Curve(b, "m_LocalRotation.y").AddKey(t, lr.y);
-                        Curve(b, "m_LocalRotation.z").AddKey(t, lr.z); Curve(b, "m_LocalRotation.w").AddKey(t, lr.w);
-                        Curve(b, "m_LocalPosition.x").AddKey(t, lp.x); Curve(b, "m_LocalPosition.y").AddKey(t, lp.y);
-                        Curve(b, "m_LocalPosition.z").AddKey(t, lp.z);
-                    }
-                }
-
-                string path = AnimDir + "/" + name + ".anim";
-                var clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(path);
-                if (clip == null) { clip = new AnimationClip { name = name }; AssetDatabase.CreateAsset(clip, path); }
-                clip.ClearCurves();
-                clip.frameRate = fps;
-                foreach (var kv in curves)
-                {
-                    string rel = AnimationUtility.CalculateTransformPath(kv.Key.Item1, go.transform);
-                    clip.SetCurve(rel, typeof(Transform), kv.Key.Item2, kv.Value);
-                }
-                clip.EnsureQuaternionContinuity();
-                var settings = AnimationUtility.GetAnimationClipSettings(clip);
-                settings.loopTime = loop;
-                AnimationUtility.SetAnimationClipSettings(clip, settings);
-                EditorUtility.SetDirty(clip);
-                return clip;
-            }
-            finally { Object.DestroyImmediate(go); }
-        }
-
-        // ---- Controller ---------------------------------------------------------------------------------------------
-
-        static AnimatorController BuildController(Dictionary<string, AnimationClip> clips, AnimationClip dance, AnimationClip jump, Dictionary<string, AnimationClip> extra)
-        {
-            AssetDatabase.DeleteAsset(ControllerPath);
-            var ac = AnimatorController.CreateAnimatorControllerAtPath(ControllerPath);
-            ac.AddParameter("Speed", AnimatorControllerParameterType.Float);
-            ac.AddParameter(new AnimatorControllerParameter { name = "Grounded", type = AnimatorControllerParameterType.Bool, defaultBool = true });
-            ac.AddParameter("Jump", AnimatorControllerParameterType.Trigger);
-            ac.AddParameter("Fainted", AnimatorControllerParameterType.Bool);
-            var sm = ac.layers[0].stateMachine;
-
-            var loco = ac.CreateBlendTreeInController("Locomotion", out var tree, 0);
-            tree.blendType = BlendTreeType.Simple1D;
-            tree.blendParameter = "Speed";
-            tree.useAutomaticThresholds = false;
-            tree.AddChild(clips["Idle"], 0f);
-            tree.AddChild(clips["Walk"], 1.6f);
-            tree.AddChild(clips["Run"], 4.5f);
-            sm.defaultState = loco;
-
-            AnimatorState State(string n, Motion m, Vector3 p) { var s = sm.AddState(n, p); s.motion = m; return s; }
-            var jumpS = State("Jump", jump, new Vector3(300, -120));
-            var wave = State("Wave", clips["Wave"], new Vector3(300, 0));
-            var point = State("Point", clips["Point"], new Vector3(300, 60));
-            var danceS = State("Dance", dance, new Vector3(300, 120));
-            var faint = State("Faint", clips["Faint"], new Vector3(300, 180));
-
-            var anyJump = sm.AddAnyStateTransition(jumpS);
-            anyJump.AddCondition(AnimatorConditionMode.If, 0, "Jump");
-            anyJump.AddCondition(AnimatorConditionMode.IfNot, 0, "Fainted");
-            anyJump.canTransitionToSelf = false; anyJump.duration = 0.08f;
-            Exit(jumpS, loco, 0.92f);
-            Exit(wave, loco, 0.95f);
-            Exit(point, loco, 0.72f);
-            var danceOut = danceS.AddTransition(loco);
-            danceOut.hasExitTime = false; danceOut.duration = 0.2f;
-            danceOut.AddCondition(AnimatorConditionMode.Greater, 0.6f, "Speed");
-            var shrug = State("Shrug", extra["Shrug"], new Vector3(560, 0));
-            var salute = State("Salute", extra["Salute"], new Vector3(560, 60));
-            var chicken = State("ChickenDance", extra["ChickenDance"], new Vector3(560, 120));
-            Exit(shrug, loco, 0.95f);
-            Exit(salute, loco, 0.95f);
-            var chickenOut = chicken.AddTransition(loco);
-            chickenOut.hasExitTime = false; chickenOut.duration = 0.2f;
-            chickenOut.AddCondition(AnimatorConditionMode.Greater, 0.6f, "Speed");
-            var anyFaint = sm.AddAnyStateTransition(faint);
-            anyFaint.AddCondition(AnimatorConditionMode.If, 0, "Fainted");
-            anyFaint.canTransitionToSelf = false; anyFaint.duration = 0.1f;
-            var faintOut = faint.AddTransition(loco);
-            faintOut.hasExitTime = false; faintOut.duration = 0.35f;
-            faintOut.AddCondition(AnimatorConditionMode.IfNot, 0, "Fainted");
-            EditorUtility.SetDirty(ac);
-            return ac;
-        }
-
-        static void Exit(AnimatorState from, AnimatorState to, float exitTime)
-        {
-            var t = from.AddTransition(to);
-            t.hasExitTime = true; t.exitTime = exitTime; t.duration = 0.2f;
         }
 
         // ---- Materials, panel, catalog ------------------------------------------------------------------------------
@@ -419,27 +168,9 @@ namespace HarvestPanic.Customization.Editor
 
         // ---- Prefab -------------------------------------------------------------------------------------------------
 
-        /// <summary>Material name on the imported FBX -> zone (+ fixed colour).</summary>
-        static (BodyZone, Color) ZoneFor(string renderer, string material)
+        static GameObject BuildPrefab(CosmeticCatalog catalog, AnimatorController controller, Material heroMat, Avatar avatar)
         {
-            string m = material.Split(' ')[0];
-            Color C(string hex) { ColorUtility.TryParseHtmlString(hex, out var c); return c; }
-            switch (m)
-            {
-                case "LightBlue": return (BodyZone.Primary, default);
-                case "Skin": return (BodyZone.Skin, default);
-                case "Brown": return renderer.Contains("Feet") ? (BodyZone.Accent, default) : (BodyZone.Secondary, default);
-                case "Brown2": return (BodyZone.Fixed, C("#3A2A1E"));
-                case "Beige": return (BodyZone.Fixed, C("#C9B48A"));
-                case "Eyebrows": return (BodyZone.Hair, C("#3A2618")); // hair + brows follow the hair colour
-                case "Eye": return (BodyZone.Fixed, C("#16100B"));
-                default: return (BodyZone.Fixed, C("#808080"));
-            }
-        }
-
-        static GameObject BuildPrefab(CosmeticCatalog catalog, AnimatorController controller)
-        {
-            var model = AssetDatabase.LoadAssetAtPath<GameObject>(FbxPath);
+            var model = AssetDatabase.LoadAssetAtPath<GameObject>(HeroFarmerBuilder.HeroFbx);
             var root = new GameObject("FarmerBody");
             try
             {
@@ -450,106 +181,54 @@ namespace HarvestPanic.Customization.Editor
                 var inst = (GameObject)PrefabUtility.InstantiatePrefab(model);
                 inst.name = "Model";
                 inst.transform.SetParent(root.transform, false);
+                inst.transform.localRotation = Quaternion.Euler(0f, 180f, 0f); // the FBX faces -Z; the game's characters face +Z
                 var anim = inst.GetComponent<Animator>() ?? inst.AddComponent<Animator>();
+                anim.avatar = avatar;
                 anim.runtimeAnimatorController = controller;
                 anim.applyRootMotion = false;
                 anim.cullingMode = AnimatorCullingMode.CullUpdateTransforms;
+                var smr = inst.GetComponentInChildren<SkinnedMeshRenderer>(true);
+                smr.sharedMaterial = heroMat;
+                smr.updateWhenOffscreen = false;
 
-                // Blender's glTF importer adds a bone-display icosphere that rides along in the FBX: hide anything not Farmer_*.
-                foreach (var r in inst.GetComponentsInChildren<Renderer>(true))
-                    if (!r.name.StartsWith("Farmer_")) { Debug.Log("[FarmerAssetBuilder] hiding stray renderer " + r.name); r.enabled = false; r.gameObject.SetActive(false); }
-                var all = inst.GetComponentsInChildren<Transform>(true);
-                Transform Find(string n) => all.First(t => t.name == n);
-                var head = Find("Head");
-                var chest = Find("Chest");
-                var smrs = inst.GetComponentsInChildren<SkinnedMeshRenderer>(true).Where(r => r.name.StartsWith("Farmer_")).ToArray();
-                var headSmr = smrs.First(s => s.name.Contains("Head"));
-                var bodySmr = smrs.First(s => s.name.Contains("Body"));
-                foreach (var smr in smrs) smr.sharedMesh = MeshWithUvs(smr);
+                var head = anim.GetBoneTransform(HumanBodyBones.Head);
+                var neck = anim.GetBoneTransform(HumanBodyBones.Neck);
+                var chest = anim.GetBoneTransform(HumanBodyBones.UpperChest) ?? anim.GetBoneTransform(HumanBodyBones.Chest);
+                var hips = anim.GetBoneTransform(HumanBodyBones.Hips);
+                var m = HeroFarmerBuilder.MeasureBody(smr, chest, neck);
+                // Accessory recipes were authored for a 22 cm wide head and a 22 cm deep chest: scale the attach spaces to this body.
+                float headK = Mathf.Clamp(m.headWidth / 0.22f, 0.8f, 3f);
+                // Back/outfit parts: shoulder span (upper-arm roots) vs the 0.30 m of the farmer the recipes were made on;
+                // the belly depth would blow them up.
+                var lu = anim.GetBoneTransform(HumanBodyBones.LeftUpperArm); var ru = anim.GetBoneTransform(HumanBodyBones.RightUpperArm);
+                float widthK = Vector3.Distance(lu.position, ru.position) / 0.30f;
+                float heightK = (neck.position.y - hips.position.y) / 0.613f;          // neck-to-hips of the original farmer
+                float bodyK = Mathf.Clamp(Mathf.Sqrt(widthK * heightK), 0.8f, 2f);     // chibi: wide but short torso
 
-                // Measure the bind pose to place attach points.
-                var headVerts = BakedWorldVerts(headSmr, out var headSub);
-                float crown = headVerts.Max(v => v.y);
-                var skinIdx = MaterialIndex(headSmr, "Skin");
-                var eyeIdx = MaterialIndex(headSmr, "Eye");
-                var eyeVerts = eyeIdx >= 0 ? headSub[eyeIdx] : headVerts;
-                float eyeY = eyeVerts.Average(v => v.y);
-                float faceZ = headVerts.Where(v => Mathf.Abs(v.y - eyeY) < 0.04f && Mathf.Abs(v.x) < 0.05f).DefaultIfEmpty(Vector3.forward * 0.1f).Max(v => v.z);
-                float headX = (headVerts.Min(v => v.x) + headVerts.Max(v => v.x)) * 0.5f;
-                float headZ = (headVerts.Min(v => v.z) + headVerts.Max(v => v.z)) * 0.5f;
-                var bodyVerts = BakedWorldVerts(bodySmr, out _);
-                float chestY = chest.position.y;
-                float backZ = bodyVerts.Where(v => Mathf.Abs(v.y - chestY) < 0.08f && Mathf.Abs(v.x) < 0.12f).DefaultIfEmpty(new Vector3(0, 0, -0.12f)).Min(v => v.z);
-                Debug.Log($"[FarmerAssetBuilder] crown={crown:F3} eyeY={eyeY:F3} faceZ={faceZ:F3} chestY={chestY:F3} backZ={backZ:F3} headCentre=({headX:F3},{headZ:F3})");
-
-                Transform Attach(string n, Transform parent, Vector3 worldPos)
+                Transform Attach(string n, Transform parent, Vector3 worldPos, float k)
                 {
                     var t = new GameObject(n).transform;
                     t.SetParent(parent, true);
                     t.SetPositionAndRotation(worldPos, Quaternion.identity);
-                    var ls = parent.lossyScale; // bones carry the FBX 100x scale; keep the attach point at world scale 1
-                    t.localScale = new Vector3(1f / ls.x, 1f / ls.y, 1f / ls.z);
+                    var ls = parent.lossyScale;
+                    t.localScale = new Vector3(k / ls.x, k / ls.y, k / ls.z);
                     return t;
                 }
-                var hatAttach = Attach("HatAttach", head, new Vector3(headX, crown - 0.015f, headZ));
-                var faceAttach = Attach("FaceAttach", head, new Vector3(headX, eyeY, faceZ));
-                var backAttach = Attach("BackAttach", chest, new Vector3(0f, chestY, backZ));
-                float frontZ = bodyVerts.Where(v => Mathf.Abs(v.y - chestY) < 0.08f && Mathf.Abs(v.x) < 0.12f).DefaultIfEmpty(new Vector3(0, 0, 0.14f)).Max(v => v.z);
-                var hips = Find("Hips");
-                var chestAttach = Attach("ChestAttach", chest, new Vector3(0f, chestY, (frontZ + backZ) * 0.5f));
-                var hipsAttach = Attach("HipsAttach", hips, new Vector3(0f, hips.position.y, hips.position.z));
-                Debug.Log($"[FarmerAssetBuilder] chest front={frontZ:F3} back={backZ:F3} hips={hips.position}");
+                var hatAttach = Attach("HatAttach", head, new Vector3(m.headX, m.crownY, m.headZ), headK);
+                var faceAttach = Attach("FaceAttach", head, new Vector3(m.headX, m.eyeY, m.faceZ), headK);
+                var backAttach = Attach("BackAttach", chest, new Vector3(0f, m.chestY, m.backZ), bodyK);
+                var chestAttach = Attach("ChestAttach", chest, new Vector3(0f, m.chestY, (m.frontZ + m.backZ) * 0.5f), bodyK);
+                var hipsAttach = Attach("HipsAttach", hips, hips.position, bodyK);
+                Debug.Log($"[FarmerAssetBuilder] hero attach scale head {headK:F2} body {bodyK:F2}");
 
-                var zones = new List<ZoneBinding>();
-                foreach (var smr in smrs)
-                {
-                    var mats = smr.sharedMaterials;
-                    for (int i = 0; i < mats.Length; i++)
-                    {
-                        var (zone, col) = ZoneFor(smr.name, mats[i] != null ? mats[i].name : "");
-                        zones.Add(new ZoneBinding { renderer = smr, materialIndex = i, zone = zone, fixedColor = col });
-                    }
-                    smr.updateWhenOffscreen = false;
-                }
-
-                var tag = BuildNameTag(root.transform, crown + 0.85f, catalog);
-                visual.EditorSetup(catalog, anim, inst.transform, head, hatAttach, faceAttach, backAttach, bodySmr, zones, tag);
+                var tag = BuildNameTag(root.transform, m.topY + 0.75f, catalog); // clear of tall hats (cone, toque)
+                visual.EditorSetup(catalog, anim, inst.transform, head, hatAttach, faceAttach, backAttach, smr, new List<ZoneBinding>(), tag);
                 visual.EditorSetupOutfitAttach(chestAttach, hipsAttach);
-
-                var prefab = PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
-                return prefab;
+                visual.EditorSetupRecolour(new List<Renderer> { smr }, "hat.straw", 1.18f, new Vector3(1.12f, 0.96f, 1.12f),
+                    new Vector3(0.27f, 0.17f, 0.3f), new Vector3(0f, -0.06f, -0.01f));
+                return PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
             }
             finally { Object.DestroyImmediate(root); }
-        }
-
-        /// <summary>
-        /// Copy of the renderer's mesh with box-projected UV0 in metres (the CC0 farmer ships without UVs), so outfit patterns
-        /// (gingham, pinstripe...) can tile on it. Saved under Art/Cosmetics/Meshes; bones, weights and bind poses are kept.
-        /// </summary>
-        static Mesh MeshWithUvs(SkinnedMeshRenderer smr)
-        {
-            var src = smr.sharedMesh;
-            string path = MeshDir + "/" + smr.name + "_UV.asset";
-            var baked = new Mesh();
-            smr.BakeMesh(baked, false);
-            var verts = baked.vertices; var normals = baked.normals;
-            var uv = new Vector2[verts.Length];
-            for (int i = 0; i < verts.Length; i++)
-            {
-                Vector3 p = smr.transform.position + smr.transform.rotation * verts[i];
-                Vector3 n = normals.Length == verts.Length ? smr.transform.rotation * normals[i] : Vector3.forward;
-                float ax = Mathf.Abs(n.x), ay = Mathf.Abs(n.y), az = Mathf.Abs(n.z);
-                uv[i] = ax >= ay && ax >= az ? new Vector2(p.z, p.y) : ay >= az ? new Vector2(p.x, p.z) : new Vector2(p.x, p.y);
-            }
-            Object.DestroyImmediate(baked);
-            var mesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
-            bool create = mesh == null;
-            if (create) mesh = new Mesh();
-            EditorUtility.CopySerialized(src, mesh);
-            mesh.name = smr.name + "_UV";
-            mesh.uv = uv;
-            if (create) AssetDatabase.CreateAsset(mesh, path); else EditorUtility.SetDirty(mesh);
-            return mesh;
         }
 
         static void BuildLink(CosmeticCatalog catalog)
@@ -573,26 +252,6 @@ namespace HarvestPanic.Customization.Editor
                 PrefabUtility.SaveAsPrefabAsset(root, NetTestPrefabPath);
             }
             finally { Object.DestroyImmediate(root); }
-        }
-
-        static int MaterialIndex(Renderer r, string name)
-        {
-            var m = r.sharedMaterials;
-            for (int i = 0; i < m.Length; i++) if (m[i] != null && m[i].name.Split(' ')[0] == name) return i;
-            return -1;
-        }
-
-        static List<Vector3> BakedWorldVerts(SkinnedMeshRenderer smr, out List<List<Vector3>> perSubmesh)
-        {
-            var mesh = new Mesh();
-            smr.BakeMesh(mesh, false); // renderer-local vertices; TransformPoint applies the full (imported 0.01/100) scale chain
-            var world = mesh.vertices.Select(v => smr.transform.position + smr.transform.rotation * v).ToList(); // BakeMesh(false) already yields metre-scale skinned positions
-            Debug.Log($"[FarmerAssetBuilder] {smr.name} lossyScale={smr.transform.lossyScale} maxY={world.Max(v => v.y):F3}");
-            perSubmesh = new List<List<Vector3>>();
-            for (int s = 0; s < mesh.subMeshCount; s++)
-                perSubmesh.Add(mesh.GetIndices(s).Distinct().Select(i => world[i]).ToList());
-            Object.DestroyImmediate(mesh);
-            return world;
         }
 
         static NameTag BuildNameTag(Transform parent, float height, CosmeticCatalog catalog)

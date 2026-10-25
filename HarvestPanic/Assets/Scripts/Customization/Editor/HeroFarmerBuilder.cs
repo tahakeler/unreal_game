@@ -59,12 +59,15 @@ namespace HarvestPanic.Customization.Editor
         /// <summary>Quaternius CC0 farmer (animation source) -> humanoid bones (fingers left unmapped: relaxed hands).</summary>
         public static readonly (HumanBodyBones bone, string name)[] QuaterniusMap =
         {
-            (HumanBodyBones.Hips, "Hips"), (HumanBodyBones.Spine, "Abdomen"), (HumanBodyBones.Chest, "Torso"), (HumanBodyBones.UpperChest, "Chest"),
+            // The legs hang off "Body" (Hips is a spine bone in this rig), so Body is the humanoid Hips.
+            (HumanBodyBones.Hips, "Body"), (HumanBodyBones.Spine, "Abdomen"), (HumanBodyBones.Chest, "Torso"), (HumanBodyBones.UpperChest, "Chest"),
             (HumanBodyBones.Neck, "Neck"), (HumanBodyBones.Head, "Head"),
             (HumanBodyBones.LeftShoulder, "Shoulder.L"), (HumanBodyBones.LeftUpperArm, "UpperArm.L"), (HumanBodyBones.LeftLowerArm, "LowerArm.L"), (HumanBodyBones.LeftHand, "Wrist.L"),
             (HumanBodyBones.RightShoulder, "Shoulder.R"), (HumanBodyBones.RightUpperArm, "UpperArm.R"), (HumanBodyBones.RightLowerArm, "LowerArm.R"), (HumanBodyBones.RightHand, "Wrist.R"),
-            (HumanBodyBones.LeftUpperLeg, "UpperLeg.L"), (HumanBodyBones.LeftLowerLeg, "LowerLeg.L"), (HumanBodyBones.LeftFoot, "Foot.L"),
-            (HumanBodyBones.RightUpperLeg, "UpperLeg.R"), (HumanBodyBones.RightLowerLeg, "LowerLeg.R"), (HumanBodyBones.RightFoot, "Foot.R"),
+            // Foot.L/R are IK targets parented to Root (not to the shins), so the shin end bones stand in for the feet
+            // (ankle rotation is not retargeted; the hero's feet stay neutral in these clips).
+            (HumanBodyBones.LeftUpperLeg, "UpperLeg.L"), (HumanBodyBones.LeftLowerLeg, "LowerLeg.L"), (HumanBodyBones.LeftFoot, "LowerLeg.L_end"),
+            (HumanBodyBones.RightUpperLeg, "UpperLeg.R"), (HumanBodyBones.RightLowerLeg, "LowerLeg.R"), (HumanBodyBones.RightFoot, "LowerLeg.R_end"),
         };
 
         /// <summary>Retargeted Quaternius takes: clip name, FBX take, loop.</summary>
@@ -81,21 +84,27 @@ namespace HarvestPanic.Customization.Editor
         {
             var imp = (ModelImporter)AssetImporter.GetAtPath(path);
             if (imp == null) throw new FileNotFoundException(path);
-            if (imp.animationType != ModelImporterAnimationType.Human)
-            {
-                imp.animationType = ModelImporterAnimationType.Human;
-                imp.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
-                imp.SaveAndReimport(); // first pass fills the skeleton description
-            }
-            var desc = imp.humanDescription;
-            desc.human = map.Select(m => new HumanBone { humanName = HumanTrait.BoneName[(int)m.bone], boneName = m.name, limit = new HumanLimit { useDefaultValues = true } }).ToArray();
-            desc.upperArmTwist = 0.5f; desc.lowerArmTwist = 0.5f; desc.upperLegTwist = 0.5f; desc.lowerLegTwist = 0.5f;
-            desc.armStretch = 0.05f; desc.legStretch = 0.05f; desc.feetSpacing = 0f; desc.hasTranslationDoF = false;
-            imp.humanDescription = desc;
-            imp.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
+            // Pass 1: final geometry settings, so the skeleton read below matches what the avatar will be built from.
             imp.importBlendShapes = false; imp.importCameras = false; imp.importLights = false;
             imp.materialImportMode = ModelImporterMaterialImportMode.None;
             imp.bakeAxisConversion = true;
+            imp.animationType = ModelImporterAnimationType.Generic;
+            imp.SaveAndReimport();
+            // Pass 2: humanoid with an explicit bone map and a T-pose reference skeleton. Mecanim treats the avatar's
+            // skeleton pose as the T-pose its muscle space is measured from; the Tripo export is an A-pose (arms ~50 deg
+            // down), which retargeted every clip 25-60 deg off on every limb (arms into the belly, bent backwards).
+            var model = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            var skeleton = TPoseSkeleton(model, map);
+            var desc = new HumanDescription
+            {
+                human = map.Select(m => new HumanBone { humanName = HumanTrait.BoneName[(int)m.bone], boneName = m.name, limit = new HumanLimit { useDefaultValues = true } }).ToArray(),
+                skeleton = skeleton,
+                upperArmTwist = 0.5f, lowerArmTwist = 0.5f, upperLegTwist = 0.5f, lowerLegTwist = 0.5f,
+                armStretch = 0.05f, legStretch = 0.05f, feetSpacing = 0f, hasTranslationDoF = false,
+            };
+            imp.animationType = ModelImporterAnimationType.Human;
+            imp.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
+            imp.humanDescription = desc;
             imp.importAnimation = clips != null && clips.Length > 0;
             if (imp.importAnimation)
             {
@@ -118,6 +127,55 @@ namespace HarvestPanic.Customization.Editor
             var avatar = AssetDatabase.LoadAllAssetsAtPath(path).OfType<Avatar>().FirstOrDefault();
             Debug.Log($"[HeroFarmerBuilder] {path}: avatar {(avatar != null ? avatar.name : "none")} valid={avatar != null && avatar.isValid} human={avatar != null && avatar.isHuman}");
             return avatar;
+        }
+
+        /// <summary>Reference T-pose: (bone, child, direction in the character frame: x right, y up, z forward).</summary>
+        static readonly (HumanBodyBones bone, HumanBodyBones child, Vector3 dir)[] TPoseChain =
+        {
+            (HumanBodyBones.Hips, HumanBodyBones.Spine, Vector3.up), (HumanBodyBones.Spine, HumanBodyBones.Chest, Vector3.up),
+            (HumanBodyBones.Chest, HumanBodyBones.UpperChest, Vector3.up), (HumanBodyBones.UpperChest, HumanBodyBones.Neck, Vector3.up),
+            (HumanBodyBones.Neck, HumanBodyBones.Head, Vector3.up),
+            (HumanBodyBones.LeftShoulder, HumanBodyBones.LeftUpperArm, Vector3.left), (HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftLowerArm, Vector3.left),
+            (HumanBodyBones.LeftLowerArm, HumanBodyBones.LeftHand, Vector3.left),
+            (HumanBodyBones.RightShoulder, HumanBodyBones.RightUpperArm, Vector3.right), (HumanBodyBones.RightUpperArm, HumanBodyBones.RightLowerArm, Vector3.right),
+            (HumanBodyBones.RightLowerArm, HumanBodyBones.RightHand, Vector3.right),
+            (HumanBodyBones.LeftUpperLeg, HumanBodyBones.LeftLowerLeg, Vector3.down), (HumanBodyBones.LeftLowerLeg, HumanBodyBones.LeftFoot, Vector3.down),
+            (HumanBodyBones.RightUpperLeg, HumanBodyBones.RightLowerLeg, Vector3.down), (HumanBodyBones.RightLowerLeg, HumanBodyBones.RightFoot, Vector3.down),
+        };
+
+        /// <summary>
+        /// "Enforce T-Pose": the model's transforms with every mapped chain segment swung (parent first, minimal rotation)
+        /// onto <see cref="TPoseChain"/>, as <see cref="SkeletonBone"/>s for the avatar. The mesh bind pose is untouched.
+        /// </summary>
+        public static SkeletonBone[] TPoseSkeleton(GameObject model, (HumanBodyBones bone, string name)[] map)
+        {
+            var go = (GameObject)Object.Instantiate(model);
+            try
+            {
+                go.name = model.name;
+                go.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+                var all = go.GetComponentsInChildren<Transform>(true);
+                Transform T(HumanBodyBones b)
+                {
+                    foreach (var m in map) if (m.bone == b) return all.FirstOrDefault(t => t.name == m.name);
+                    return null;
+                }
+                Transform l = T(HumanBodyBones.LeftUpperArm), r = T(HumanBodyBones.RightUpperArm);
+                Vector3 right = Vector3.ProjectOnPlane(r.position - l.position, Vector3.up).normalized;
+                var frame = Quaternion.LookRotation(Vector3.Cross(right, Vector3.up), Vector3.up);
+                foreach (var (bone, child, dir) in TPoseChain)
+                {
+                    Transform a = T(bone), c = T(child);
+                    if (a == null || c == null) continue;
+                    Vector3 now = c.position - a.position;
+                    if (now.sqrMagnitude < 1e-8f) continue;
+                    a.rotation = Quaternion.FromToRotation(now, frame * dir) * a.rotation;
+                }
+                return all.Select(t => t == go.transform
+                    ? new SkeletonBone { name = model.name, position = model.transform.localPosition, rotation = model.transform.localRotation, scale = model.transform.localScale }
+                    : new SkeletonBone { name = t.name, position = t.localPosition, rotation = t.localRotation, scale = t.localScale }).ToArray();
+            }
+            finally { Object.DestroyImmediate(go); }
         }
 
         static void ConfigureTexture(string path, bool srgb, int max)
@@ -223,9 +281,11 @@ namespace HarvestPanic.Customization.Editor
         static void Shrug(float t, Dictionary<HumanBodyBones, Quaternion> r, Dictionary<HumanBodyBones, Vector3> p)
         {
             float e = Env(t, 0.25f, 1.0f, 1.35f);
-            r[HumanBodyBones.LeftShoulder] = Z(-12f * e); r[HumanBodyBones.RightShoulder] = Z(12f * e);
-            r[HumanBodyBones.LeftUpperArm] = Z(-22f * e); r[HumanBodyBones.RightUpperArm] = Z(22f * e);
-            r[HumanBodyBones.LeftLowerArm] = Z(-25f * e) * X(-78f * e); r[HumanBodyBones.RightLowerArm] = Z(25f * e) * X(-78f * e);
+            r[HumanBodyBones.LeftShoulder] = Z(-14f * e); r[HumanBodyBones.RightShoulder] = Z(14f * e);
+            // Elbows out and forearms forward-and-out, palms up: clear of a big belly.
+            r[HumanBodyBones.LeftUpperArm] = Z(-42f * e) * X(-15f * e); r[HumanBodyBones.RightUpperArm] = Z(42f * e) * X(-15f * e);
+            r[HumanBodyBones.LeftLowerArm] = Z(-40f * e) * X(-70f * e); r[HumanBodyBones.RightLowerArm] = Z(40f * e) * X(-70f * e);
+            r[HumanBodyBones.LeftHand] = Z(-30f * e); r[HumanBodyBones.RightHand] = Z(30f * e);
             r[HumanBodyBones.Head] = Z(12f * e) * X(-6f * e);
             r[HumanBodyBones.Chest] = X(-4f * e);
         }
@@ -348,10 +408,16 @@ namespace HarvestPanic.Customization.Editor
             var go = (GameObject)Object.Instantiate(heroModel);
             try
             {
+                // Record unrotated: HumanPoseHandler.GetHumanPose reports the body rotation in world space but SetHumanPose
+                // applies it on top of the root, so a rotated root turns the body around between the two calls. The pose
+                // functions are authored in a character frame (+Z forward, +X right) that is mapped onto the model below.
                 go.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
                 var anim = go.GetComponent<Animator>() ?? go.AddComponent<Animator>();
                 anim.avatar = avatar;
                 anim.applyRootMotion = false;
+                // Nothing renders this instance in batchmode, so a culling animator would skip the sample and leave the
+                // bind (A) pose as the base; the arm deltas below assume idle arms hanging down.
+                anim.cullingMode = AnimatorCullingMode.AlwaysAnimate;
                 var graph = PlayableGraph.Create("HeroIdleSample");
                 var output = AnimationPlayableOutput.Create(graph, "out", anim);
                 var playable = AnimationClipPlayable.Create(graph, idle);
@@ -363,6 +429,10 @@ namespace HarvestPanic.Customization.Editor
                 graph.Destroy();
 
                 var bones = ParentFirst.Select(b => (b, t: anim.GetBoneTransform(b))).Where(x => x.t != null).ToList();
+                var bp0 = basePose;
+                handler.SetHumanPose(ref bp0);
+                var frame = CharacterFrame(anim);
+                var frameInv = Quaternion.Inverse(frame);
                 var rot = new Dictionary<HumanBodyBones, Quaternion>();
                 var pos = new Dictionary<HumanBodyBones, Vector3>();
                 var muscleBindings = Enumerable.Range(0, HumanTrait.MuscleCount).Select(i => MuscleProperty(HumanTrait.MuscleName[i])).ToArray();
@@ -384,8 +454,8 @@ namespace HarvestPanic.Customization.Editor
                         fn(loop ? t / length : t, rot, pos); // loops take a 0..1 phase, one-shots take seconds
                         foreach (var (b, tr) in bones)
                         {
-                            if (rot.TryGetValue(b, out var q)) tr.rotation = q * tr.rotation;
-                            if (pos.TryGetValue(b, out var d)) tr.position += d;
+                            if (rot.TryGetValue(b, out var q)) tr.rotation = frame * q * frameInv * tr.rotation;
+                            if (pos.TryGetValue(b, out var d)) tr.position += frame * d;
                         }
                         handler.GetHumanPose(ref pose);
                         for (int i = 0; i < curves.Length; i++) curves[i].AddKey(t, pose.muscles[i]);
@@ -415,6 +485,19 @@ namespace HarvestPanic.Customization.Editor
             }
             finally { Object.DestroyImmediate(go); }
             return result;
+        }
+
+        /// <summary>
+        /// World rotation of the character frame (+Z forward, +X right, +Y up) of a posed humanoid, from its shoulders:
+        /// the Tripo export faces -Z, the Quaternius farmer +Z, and the pose functions must not care.
+        /// </summary>
+        public static Quaternion CharacterFrame(Animator anim)
+        {
+            var l = anim.GetBoneTransform(HumanBodyBones.LeftUpperArm);
+            var r = anim.GetBoneTransform(HumanBodyBones.RightUpperArm);
+            Vector3 right = Vector3.ProjectOnPlane(r.position - l.position, Vector3.up);
+            if (right.sqrMagnitude < 1e-6f) return anim.transform.rotation;
+            return Quaternion.LookRotation(Vector3.Cross(right.normalized, Vector3.up), Vector3.up);
         }
 
         /// <summary>Animator curve property for a muscle (finger muscles use "LeftHand.Index.1 Stretched" style names).</summary>

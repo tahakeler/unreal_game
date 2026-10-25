@@ -194,6 +194,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 2
       position: {x: 0, y: -0.07, z: 0}
@@ -255,6 +256,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 1
       position: {x: 0, y: -0.04, z: 0}
@@ -316,6 +318,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 4
       position: {x: 0, y: -0.2, z: 0}
@@ -377,6 +380,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 1
       position: {x: 0, y: -0.14, z: 0}
@@ -465,6 +469,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 1
       position: {x: 0, y: -0.07, z: 0}
@@ -526,6 +531,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 2
       position: {x: 0, y: 0.02, z: 0}
@@ -587,6 +593,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 2
       position: {x: 0, y: -0.07, z: 0}
@@ -783,6 +790,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 4
       position: {x: 0, y: -0.06, z: 0}
@@ -844,6 +852,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 1
       position: {x: 0, y: -0.07, z: 0}
@@ -914,6 +923,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 2
       position: {x: 0, y: -0.06, z: 0}
@@ -985,6 +995,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 1
       position: {x: 0.045, y: -0.085, z: 0}
@@ -1046,6 +1057,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 2
       position: {x: 0.048, y: 0, z: 0.012}
@@ -1116,6 +1128,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 0
       position: {x: 0.045, y: 0, z: 0.012}
@@ -1186,6 +1199,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 1
       position: {x: 0, y: -0.04, z: 0.03}
@@ -1221,6 +1235,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 4
       position: {x: 0, y: -0.2, z: -0.15}
@@ -1309,6 +1324,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 0
       position: {x: 0, y: -0.28, z: -0.07}
@@ -1352,6 +1368,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 2
       position: {x: 0, y: -0.05, z: -0.09}
@@ -1432,6 +1449,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts: []
     headShape: {x: 0.93, y: 1.13, z: 0.97}
     hideBaseHair: 0
@@ -1457,6 +1475,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 1
       position: {x: 0, y: -0.04, z: 0.012}
@@ -1491,6 +1510,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 1
       position: {x: 0.05, y: -0.045, z: -0.012}
@@ -1588,6 +1608,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 1
       position: {x: 0.064, y: -0.05, z: -0.022}
@@ -1631,6 +1652,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 1
       position: {x: 0.118, y: -0.025, z: -0.11}
@@ -1674,6 +1696,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts: []
     headShape: {x: 1.1, y: 0.97, z: 1.04}
     hideBaseHair: 0
@@ -1699,6 +1722,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 0
       position: {x: 0, y: 0.035, z: 0}
@@ -1734,6 +1758,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 1
       position: {x: 0, y: -0.03, z: -0.015}
@@ -1840,6 +1865,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 1
       position: {x: 0, y: -0.035, z: -0.02}
@@ -1901,6 +1927,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 1
       position: {x: 0, y: -0.02, z: -0.025}
@@ -1953,6 +1980,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 4
       position: {x: 0, y: -0.015, z: 0.08}
@@ -2023,6 +2051,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 1
       position: {x: 0, y: -0.035, z: -0.02}
@@ -2075,6 +2104,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 1
       position: {x: 0, y: -0.035, z: -0.02}
@@ -2145,6 +2175,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 1
       position: {x: 0, y: -0.125, z: -0.03}
@@ -2206,6 +2237,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts: []
     headShape: {x: 1, y: 1, z: 1}
     hideBaseHair: 1
@@ -2231,6 +2263,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 1
       position: {x: 0.118, y: -0.085, z: -0.02}
@@ -2284,6 +2317,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts: []
     headShape: {x: 1, y: 1, z: 1}
     hideBaseHair: 0
@@ -2309,6 +2343,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts: []
     headShape: {x: 1, y: 1, z: 1}
     hideBaseHair: 0
@@ -2334,6 +2369,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts: []
     headShape: {x: 1, y: 1, z: 1}
     hideBaseHair: 0
@@ -2359,6 +2395,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts: []
     headShape: {x: 1, y: 1, z: 1}
     hideBaseHair: 0
@@ -2384,6 +2421,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts: []
     headShape: {x: 1, y: 1, z: 1}
     hideBaseHair: 0
@@ -2409,6 +2447,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts:
     - shape: 1
       position: {x: 0, y: 0.2, z: -0.035}
@@ -2470,6 +2509,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts: []
     headShape: {x: 1, y: 1, z: 1}
     hideBaseHair: 0
@@ -2495,6 +2535,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts: []
     headShape: {x: 1, y: 1, z: 1}
     hideBaseHair: 0
@@ -2520,6 +2561,7 @@ MonoBehaviour:
     prefab: {fileID: 0}
     tintMode: 0
     materialTints: 
+    maskRed: 1
     parts: []
     headShape: {x: 1, y: 1, z: 1}
     hideBaseHair: 0
