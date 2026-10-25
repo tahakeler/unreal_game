@@ -2346,7 +2346,7 @@ The campaign is a linear chain of regions. Each one is a debt of **5 paid Sunday
 - **Scene:** `HarvestPanic/Assets/Scenes/Muddlebury.unity`, rebuilt reproducibly by `HarvestPanic.World.Editor.BuildMuddlebury.Build` (menu: Harvest Panic → World → Build Muddlebury). It is seeded, so every rebuild produces the same scene.
 - **Coordinates:** metres. +X is east (toward the bridge and market), +Z is north, and the river flows toward −Z. Farm ground is at y = 0, water at y = −4.2, riverbed at y = −6.
 - **Playable bounds:** x −122 to 177, z −148 to 104 (four world-edge colliders), inside a forest ring on the surrounding hills that hides the edge and reads as a cosy bowl.
-- **Ground:** Unity Terrain (320 × 270 m) with painted layers (meadow, road, soil, mud, cobble, bank). The NavMesh covers the whole playable area, including the river channel.
+- **Ground:** Unity Terrain (320 × 270 m playable tile) with painted layers (grass, meadow, road, soil, mud, cobble, bank, forest floor), inside a 3 × 3 grid of scenery tiles (wooded hills, the river valley bending out of sight, a hazy horizon ring). The NavMesh covers the whole playable area, including the river channel. Zone-by-zone build notes: `design/levels/muddlebury-farm.md`, QA: `docs/qa/map-progress.md`.
 - **Design intent:** one level that teaches the whole game in its first 30 seconds. You spawn looking straight at the problem: a road, a bridge, a market, and something squealing to your left.
 
 ### 11.5.2 Schematic map

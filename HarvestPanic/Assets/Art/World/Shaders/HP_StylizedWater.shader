@@ -63,8 +63,9 @@ Shader "HarvestPanic/StylizedWater"
                 float centre = 1 - abs(across * 2 - 1);                 // 0 at banks, 1 mid-river
                 half3 col = lerp(_ShallowColor.rgb, _DeepColor.rgb, smoothstep(0.05, 0.7, centre));
                 // Flowing streaks: stretched noise, stepped for a painted look.
-                float n = vnoise(float2(across * 18, down * _StripeScale));
-                float n2 = vnoise(float2(across * 7 + 3, down * _StripeScale * 0.5 + 11));
+                // thin flow lines (wide across-frequency) instead of round blobs
+                float n = vnoise(float2(across * 38, down * _StripeScale));
+                float n2 = vnoise(float2(across * 13 + 3, down * _StripeScale * 0.5 + 11));
                 float streak = step(0.78, n * 0.6 + n2 * 0.4);
                 col = lerp(col, _FoamColor.rgb, streak * 0.55);
                 // Bank foam with a wobbly edge.
