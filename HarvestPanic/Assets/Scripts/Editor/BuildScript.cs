@@ -41,6 +41,12 @@ namespace HarvestPanic.Editor
 
         static void Build(BuildTarget target, string defaultPath, bool? development)
         {
+            // Steam plugins: fail fast if the project would ship the wrong Facepunch.Steamworks set (see SteamPluginCheck).
+            if (!SteamPluginCheck.Report("preflight " + target, SteamPluginCheck.CheckProjectPlugins(target)))
+            {
+                Fail("Steam plugin preflight failed for " + target);
+                return;
+            }
             NetworkingSetup.SyncBuildScenes();
             bool dev = development ?? Environment.GetCommandLineArgs().Contains("-development");
             if (EditorUserBuildSettings.activeBuildTarget != target)
@@ -57,8 +63,25 @@ namespace HarvestPanic.Editor
             var report = BuildPipeline.BuildPlayer(options);
             var s = report.summary;
             Debug.Log($"[BuildScript] {target}: {s.result} size={s.totalSize} errors={s.totalErrors} time={s.totalTime} -> {options.locationPathName}");
-            if (s.result == BuildResult.Succeeded && dev) WriteSteamAppId(options.locationPathName, target);
-            if (Application.isBatchMode && s.result != BuildResult.Succeeded) EditorApplication.Exit(1);
+            if (s.result != BuildResult.Succeeded)
+            {
+                if (Application.isBatchMode) EditorApplication.Exit(1);
+                return;
+            }
+            // Post-process: the player itself must carry a loadable Steam library (macOS: arm64 + every executable arch).
+            if (!SteamPluginCheck.Report("player " + target, SteamPluginCheck.CheckPlayer(target, options.locationPathName)))
+            {
+                Fail($"Steam plugin check failed for the {target} player at {options.locationPathName}");
+                return;
+            }
+            if (dev) WriteSteamAppId(options.locationPathName, target);
+        }
+
+        /// <summary>Marks a build as failed: exit code 1 in batchmode, an error in the console otherwise.</summary>
+        static void Fail(string message)
+        {
+            Debug.LogError("[BuildScript] FAILED: " + message);
+            if (Application.isBatchMode) EditorApplication.Exit(1);
         }
 
         /// <summary>

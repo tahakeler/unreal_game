@@ -50,12 +50,19 @@ namespace HarvestPanic.World.Editor
             m.EnableKeyword("_SPECULARHIGHLIGHTS_OFF");
             m.SetFloat("_EnvironmentReflections", 0f);
             m.EnableKeyword("_ENVIRONMENTREFLECTIONS_OFF");
-            if (tex != null) { m.SetTexture("_BaseMap", tex); }
+            m.SetTexture("_BaseMap", tex);
+            m.enableInstancing = true; // terrain trees and RenderMeshInstanced need it; GRD/SRP batcher ignore it
             if (emission.HasValue)
             {
                 m.EnableKeyword("_EMISSION");
                 m.SetColor("_EmissionColor", emission.Value);
+                m.SetTexture("_EmissionMap", tex);
                 m.globalIlluminationFlags = MaterialGlobalIlluminationFlags.None;
+            }
+            else
+            {
+                m.DisableKeyword("_EMISSION");
+                m.SetColor("_EmissionColor", Color.black);
             }
             if (create) AssetDatabase.CreateAsset(m, path); else EditorUtility.SetDirty(m);
             Cache[path] = m;

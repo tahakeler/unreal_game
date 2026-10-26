@@ -43,6 +43,7 @@ Cross-talk = register an interface in `Services` (`Services.Register<T>`, `Get<T
 | UI accessibility | `UiAccessibility` static snapshot (`Colorblind` as `UiColorblind`, `ReducedMotion`, `UiScale`, `TextSize`, `Changed`) | Frontend UI writes from settings -> any non-Frontend screen (creator) |
 | Name filter | `NameFilter` (`Check`, `Resolve`, `ContainsProfanity`, `Fallback`; list `Resources/Data/Social/NameFilter.txt`) | Customization creator (Farm Name 3-16 chars) + Networking connection approval (profanity -> "Farmhand #N") |
 | Session | `ISessionService`, `PlayerInfo` | Networking -> Frontend UI (v0, add-only) |
+| Voice chat | `IVoiceChat` (`Mode`, `OpenMicThreshold`, `MicMuted`, `IsTransmitting`, `LocalLoudness`, `BackendName`, `IsSpeaking`, `IsMuted`, `SetMuted`, `OnSpeakingChanged`), `VoiceTransmitMode` | Voice (`HarvestPanic.Voice`) -> Frontend UI (settings, crew list, pause menu) |
 | Markers | `MarkerRole`, `MarkerTag`, `LevelMarker` | World places -> owners spawn |
 | Layers | `GameLayers` | all |
 | Data lookup | `Content.Goods/Critters/DayModifiers` (`ContentCatalog<T>`), `PlayerIds` | all |
@@ -68,7 +69,7 @@ Each team owns `Assets/Resources/NetworkPrefabs/<Team>.asset` (a `NetworkPrefabs
 
 | Team | Owns (folders / scenes / prefabs / data) |
 |---|---|
-| Networking | `Scripts/Networking`, `Scripts/Editor`, `Packages/manifest.json`, `ProjectSettings/**`, `Scenes/Bootstrap`, `Prefabs/Networking`, NetworkManager, `Resources/NetworkPrefabs` loader |
+| Networking | `Scripts/Networking`, `Scripts/Voice`, `Scripts/Editor`, `Packages/manifest.json`, `ProjectSettings/**`, `Scenes/Bootstrap`, `Prefabs/Networking`, NetworkManager, `Resources/NetworkPrefabs` loader |
 | Player | `Scripts/Gameplay`, `Prefabs/Player`, `Prefabs/Tools`, input actions, `Resources/NetworkPrefabs/Player.asset` |
 | Critter AI | `Scripts/AI`, `Prefabs/Critters`, `Resources/Data/Critters`, `NetworkPrefabs/Critter.asset` |
 | Economy+HUD | `Scripts/Economy`, `Prefabs/Goods`, `Prefabs/HUD`, `Resources/Data/Goods`, `Data/DayModifiers`, `NetworkPrefabs/Economy.asset` |
@@ -147,3 +148,35 @@ registered as `IAudioService` and `IAudioSettingsSink`. Everything is client-loc
 - Costume colours stay in the existing loadout (no wire change): primary = overalls, secondary = shirt, accent = boots/gloves,
   skin, hair colour, name-tag colour = hat band. `FarmerLoadout.Default` now uses the hero's "home" swatches (Slate, Cream,
   Rust, Toffee, Mud Brown, Pumpkin tag), which render the painted texture exactly.
+
+## Farm tools and wagon (feature/wagon-lasso-whistle)
+- No Core contract changed. Player-team internals: `CarryHooks.Claiming` (server hand-over hook raised before a grip, a lasso tether or a wagon slot takes a body), `ICarryLoadOverride`, `ICustomGrabPrompt`, `IToolInteract`, `IToolArmPose` (`Gameplay/Carry`), `IStaysOutWhenReleased` (`Gameplay/Tools`).
+- Whistle: existing tags. A short blow is `NoiseSource.Tool` 0.7 tagged `Whistle`; a long blow (1 s) carries only `WhistleLong` (CritterBrain uses the first matching tag, so it must not also carry `Whistle`). 3 s cooldown.
+- Lasso on critters: the AI keeps control; the rope only moves the critter's `NavMeshAgent` back to the rope length (`agent.Move`). When the rope drags it where the NavMesh ends it is taken with `ICarryable.OnGrabbed(lasser)` (Carried, kinematic) and released with `OnReleased` (same pattern as the night creatures). Critters in the wagon bed are held with `OnGrabbed(PlayerIds.Nature)`; an AI break-free just leaves the bed.
+- Wagon on the bridge: `WagonCart.MassKg` is the frame only (120 kg); every cargo body sits on the planks with its own `ICarryable`, so `BridgePlank.SampleLoad` sees wagon + cargo with nothing counted twice.
+- Blame: wagon spills book their loss through `IGoods.ApplyBruise(impulse, driver, TippedWagon | SpilledCargo)`; `LassoedIntoRiver` / `SpookedHerd` go to `IEconomyService.EmitBlame` as $0 incidents (the river books the soak on the lasser through the touch history). Open request to Economy: treat those two as non-economic like `YeetedTeammate`, or the $2 floor drops them.
+- Spawning: `WagonBootstrapper` (server, needs MarketPen + BarnRespawn markers) spawns the Wagon and a HitchingPost from `NetworkPrefabs/Player.asset`, and brings a lost or tipped wagon home on a new day. `WagonBootstrapper.Enabled = false` keeps a scene wagon-free. Each player's `PlayerToolbelt` spawns a personal Net, FeedBucket, Lasso and Whistle (holstered: hidden, no colliders, parked).
+
+## Proximity voice (feature/voice-chat)
+- New Networking-owned asmdef `HarvestPanic.Voice` (`Scripts/Voice`, refs Core + Netcode + Collections + Input System + Facepunch transport; no team assembly). Decision record: `docs/architecture/adr-voice-chat.md`.
+- `VoiceChatService` auto-creates after the first scene loads (skipped in the test runner's InitTestScene and with `-hpVoiceOff`), follows `NetworkManager.Singleton` and registers `IVoiceChat`. Messages: `HP_VoiceUp` (client->host, unreliable), `HP_VoiceDown` (host->clients, unreliable), `HP_VoiceMute` (client->host, reliable), versioned byte layouts in `VoicePacket`.
+- Steam voice on the Steam transport, else Unity Microphone -> IMA ADPCM 3-bit 8 kHz (26.2 kbps up / 28.0 kbps down per talker). The real microphone is never opened in batchmode unless `-hpVoiceMic`; `-hpVoiceSynth` sends a test tone.
+- Range 25 m x `DayParams.NoiseVoiceRadiusMult` (Megaphone upgrade x2), resolved by the host. Heads: player object child `HeadPivot`. The host emits `NoiseSource.Voice` events (loudness >= 0.35, 1 per 0.5 s per player) through `INoiseService`.
+- Ducking: the primary service calls `IAudioService.ReportVoiceActivity` while a speaker within 15 m (or the local talker) is speaking.
+- Minimal Frontend edits (scoped by the feature brief): `GameSettings.OpenMicThreshold` + `PushToTalk` default true, "Open mic sensitivity" slider, `UiRuntime` applies both to `IVoiceChat`, Lobby crew rows get Mute + TALKING, pause menu gets per-player Mute buttons. Speaking marker is parented at runtime under the farmer's `NameTag` (no Customization edit).
+- ProjectSettings: `microphoneUsageDescription` set (macOS permission prompt).
+
+## Scene switches and late joiners (fix/join-during-load)
+- NGO 2.x synchronises a client the moment it is approved, even mid scene load, which made a joiner load the Lobby twice
+  ("Server Scene Handle (...) already exist!") and never spawn. `SessionService` now orders joins against NGO scene
+  switches with `SceneTransitionGate` (Networking, no contract change): a join arriving while the host is loading a scene
+  is held (approval `Pending`) until the host's own `LoadComplete`, and `StartGame` / the initial Lobby load wait for
+  joiners that are still synchronising. Limits live in `NetworkingConfig` (`approvalTimeoutSeconds` = NGO
+  `ClientConnectionBufferTimeout`, `joinHoldMaxSeconds`, after which the join is refused with
+  `ConnectionApproval.BusyReason`, and `switchWaitForJoinerSeconds`).
+- Held joins are detected from NGO `OnSceneEvent`, so they also cover loads started outside `SessionService`
+  (`EconomyDirector.ReturnToLobby` calls `NetworkManager.SceneManager.LoadScene` directly). Only switches started through
+  `SessionService` wait for synchronising joiners. If another team needs a host scene switch, ask Networking for an
+  add-only `ISessionService` method rather than calling NGO directly.
+- Test hooks: `-netHostLoadDelay S` (dev builds, NetAutomation host) holds every host NGO load open for S seconds;
+  `NET_LOAD_DELAY=S tools/net/two-process-test.sh` runs the LAN test under that stress.

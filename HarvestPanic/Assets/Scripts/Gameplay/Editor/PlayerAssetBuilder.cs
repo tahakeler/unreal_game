@@ -70,6 +70,7 @@ namespace HarvestPanic.Gameplay.Editor
             AssetDatabase.SaveAssets();
             BuildScene(player, new[] { crate, turnip, bucket, net });
             AssetDatabase.SaveAssets();
+            ToolsAssetBuilder.Build(); // lasso, whistle, wagon, hitching post, toolbelt on the player, list entries
             Debug.Log("[PlayerAssetBuilder] Done.");
         }
 

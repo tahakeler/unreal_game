@@ -36,6 +36,7 @@ namespace HarvestPanic.UI
         bool _readyByPorch, _wasCounting;
         int _lastShown = -1;
         Action _unsubChat;
+        IVoiceChat _voice;
         CursorLockMode _prevLock; bool _prevVisible;
 
         void OnEnable()
@@ -48,6 +49,7 @@ namespace HarvestPanic.UI
             Build();
             _session.OnSessionChanged += Refresh;
             _unsubChat = SessionAccess.SubscribeChat(_session, AddChat);
+            if (Services.TryGet(out _voice)) _voice.OnSpeakingChanged += OnSpeakingChanged;
             _graceLeft = 1f;
             Refresh();
             Cursor.lockState = CursorLockMode.Locked; Cursor.visible = false;
@@ -58,8 +60,11 @@ namespace HarvestPanic.UI
         {
             if (_session != null) _session.OnSessionChanged -= Refresh;
             _unsubChat?.Invoke();
+            if (_voice != null) _voice.OnSpeakingChanged -= OnSpeakingChanged;
             UiFocus.Pop(this);
         }
+
+        void OnSpeakingChanged(ulong clientId, bool speaking) => Refresh();
 
         void Start()
         {
@@ -261,6 +266,15 @@ namespace HarvestPanic.UI
                 ready.EnableInClassList("crew-ready--yes", p.IsReady);
                 row.Add(ready);
                 row.Add(new ShapePip(p.IsReady ? PipShape.Check : PipShape.Circle, p.IsReady ? new Color(0.5f, 0.64f, 0.29f) : new Color(1, 1, 1, 0f), 36f));
+                if (_voice != null && !me)
+                {
+                    // Proximity voice (feature/voice-chat): talking tag + local per-player mute.
+                    ulong vid = p.ClientId;
+                    if (_voice.IsSpeaking(vid)) { var t = new Label("TALKING"); t.AddToClassList("bold"); t.AddToClassList("crew-tag"); row.Add(t); }
+                    var mute = new Button(() => { _voice.SetMuted(vid, !_voice.IsMuted(vid)); Refresh(); }) { text = _voice.IsMuted(vid) ? "Unmute" : "Mute", name = "mute-" + vid };
+                    mute.AddToClassList("hp-btn"); mute.AddToClassList("crew-kick");
+                    row.Add(mute);
+                }
                 if (canKick && !me && !p.IsHost)
                 {
                     ulong id = p.ClientId;

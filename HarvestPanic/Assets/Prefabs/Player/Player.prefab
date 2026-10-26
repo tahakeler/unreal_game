@@ -173,6 +173,7 @@ GameObject:
   - component: {fileID: 6525080200317050062}
   - component: {fileID: 6418174375314859296}
   - component: {fileID: 6087767006638592763}
+  - component: {fileID: 7189515913393496201}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -446,6 +447,25 @@ MonoBehaviour:
   headlineFont: {fileID: 12800000, guid: 9b6bcd0af4677458882eb4896b4edb51, type: 3}
   bodyFont: {fileID: 12800000, guid: 3463cf9e97cd44cfb82bfd335b1f5a33, type: 3}
   staminaHideDelay: 0.6
+--- !u!114 &7189515913393496201
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5795326661159532381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f503e4e446c4c41958d41687cdb47993, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: HarvestPanic.Gameplay::HarvestPanic.Gameplay.PlayerToolbelt
+  ShowTopMostFoldoutHeaderGroup: 1
+  tuning: {fileID: 11400000, guid: 1e6873bec527f4816bf9a99f2d0416bb, type: 2}
+  netPrefab: {fileID: 2849761972667403974, guid: 90f31017a01024fc4a0fa5427c837ce0, type: 3}
+  bucketPrefab: {fileID: 5100620524109117675, guid: 2e245210dfca04802a69b12b0910a3cd, type: 3}
+  lassoPrefab: {fileID: 1105712782329173783, guid: 35147006ec9d6418aad691905e19ed93, type: 3}
+  whistlePrefab: {fileID: 9162654635445415472, guid: 2c06c9bad86b34673900e9a9df7130d1, type: 3}
+  spawnPersonalTools: 1
 --- !u!1 &6280363480580764228
 GameObject:
   m_ObjectHideFlags: 0

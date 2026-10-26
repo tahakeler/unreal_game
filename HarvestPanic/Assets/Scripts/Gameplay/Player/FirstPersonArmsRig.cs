@@ -46,7 +46,8 @@ namespace HarvestPanic.Gameplay
 
         Transform _heldCached;
         readonly List<Renderer> _heldRenderers = new List<Renderer>();
-        Transform _heldGrip;
+        Transform _heldGrip, _heldGripL;
+        IToolArmPose _heldPose;
 
         /// <summary>Current pose (tests, QA).</summary>
         public ArmPose Pose { get; private set; }
@@ -232,7 +233,9 @@ namespace HarvestPanic.Gameplay
                 if (_swingT >= t.SwingDuration) _swingT = -1f;
             }
 
-            Pose = ArmMath.Select(holding && held != null, tool, hands, aiming, swing > 0f && !holding);
+            CacheHeld(held);
+            ArmPose over = _heldPose != null ? _heldPose.ArmPose : ArmPose.Idle;
+            Pose = ArmMath.Select(holding && held != null, tool, hands, aiming, swing > 0f && !holding, over);
             float curl = ArmMath.Curl(Pose);
 
             Vector3 idleL = t.IdleHand, idleR = Mirror(t.IdleHand);
@@ -299,6 +302,50 @@ namespace HarvestPanic.Gameplay
                     pr = Vector3.Lerp(idleR, Mirror(t.SwingHand), swing);
                     fwdL = new Vector3(0.1f, 0.3f, 1f); fwdR = Mirror(fwdL);
                     upL = new Vector3(-0.3f, 1f, 0f); upR = Mirror(upL);
+                    break;
+                }
+                case ArmPose.LassoTwirl:
+                {
+                    // Right hand up by the head spinning the loop (the lasso moves its Grip in a circle); left hand
+                    // keeps the coil low.
+                    if (ToolGrip(held, out var grip)) pr = grip;
+                    fwdR = new Vector3(-0.25f, 0.9f, 0.45f);
+                    upR = new Vector3(0.3f, 0.35f, -1f);
+                    pl = _heldGripL != null ? _space.InverseTransformPoint(_heldGripL.position) : idleL + new Vector3(0.04f, -0.02f, -0.04f);
+                    fwdL = new Vector3(0.3f, 0.15f, 1f); upL = new Vector3(-1f, 0.3f, 0f);
+                    curlL = curlR = curl;
+                    break;
+                }
+                case ArmPose.LassoHold:
+                case ArmPose.LassoReel:
+                {
+                    // Both fists on the rope: right at the coil, left further along the rope (the lasso animates both grips
+                    // hand-over-hand while reeling).
+                    if (ToolGrip(held, out var grip)) pr = grip;
+                    pl = _heldGripL != null ? _space.InverseTransformPoint(_heldGripL.position) : pr + new Vector3(-0.16f, 0.06f, 0.14f);
+                    fwdL = new Vector3(0.35f, 0.1f, 1f); fwdR = new Vector3(-0.1f, 0.1f, 1f);
+                    upL = new Vector3(-1f, 0.25f, 0f); upR = new Vector3(1f, 0.25f, 0f);
+                    curlL = curlR = curl;
+                    break;
+                }
+                case ArmPose.WhistleBlow:
+                {
+                    // Whistle at the lips: the whistle moves its Grip to the mouth, the hand follows; palm toward the face.
+                    if (ToolGrip(held, out var grip)) pr = grip + new Vector3(0.015f, -0.02f, -0.02f);
+                    fwdR = new Vector3(-0.75f, 0.55f, 0.2f);
+                    upR = new Vector3(0.1f, 0.25f, -1f);
+                    curlR = curl;
+                    curlL = ArmMath.Curl(ArmPose.Idle);
+                    break;
+                }
+                case ArmPose.WagonPush:
+                {
+                    // Both fists on the wagon handle bar, low and forward, palms down.
+                    pl = new Vector3(-0.24f, -0.34f, 0.5f);
+                    pr = Mirror(pl);
+                    fwdL = new Vector3(0.15f, -0.25f, 1f); fwdR = Mirror(fwdL);
+                    upL = new Vector3(-0.15f, 1f, 0.2f); upR = Mirror(upL);
+                    curlL = curlR = curl;
                     break;
                 }
             }
@@ -386,15 +433,19 @@ namespace HarvestPanic.Gameplay
             if (held == _heldCached) return;
             _heldCached = held;
             _heldRenderers.Clear();
-            _heldGrip = null;
+            _heldGrip = _heldGripL = null;
+            _heldPose = null;
             if (held == null) return;
+            _heldPose = held.GetComponent<IToolArmPose>();
             held.GetComponentsInChildren(false, _heldRenderers);
             for (int i = _heldRenderers.Count - 1; i >= 0; i--)
                 if (_heldRenderers[i] is ParticleSystemRenderer || _heldRenderers[i] is TrailRenderer || _heldRenderers[i] is LineRenderer) _heldRenderers.RemoveAt(i);
             foreach (var tr in held.GetComponentsInChildren<Transform>())
             {
                 string n = tr.name;
-                if (n == "Grip" || n == "GripR" || n == "HandleTop") { _heldGrip = tr; if (n != "HandleTop") break; }
+                if (n == "GripL") { _heldGripL = tr; continue; }
+                if (_heldGrip != null && _heldGrip.name != "HandleTop") continue;
+                if (n == "Grip" || n == "GripR" || n == "HandleTop") _heldGrip = tr;
             }
         }
 

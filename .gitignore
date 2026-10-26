@@ -142,3 +142,7 @@ $RECYCLE.BIN/
 /reports/
 /test-results/
 /Logs/
+
+# Credits/licence text baked by CreditsBuildStep at build time (source: THIRD_PARTY_LICENSES.md)
+HarvestPanic/Assets/Resources/Frontend/Generated/
+HarvestPanic/Assets/Resources/Frontend/Generated.meta

@@ -33,6 +33,7 @@ namespace HarvestPanic.Gameplay
 
         public override void OnNetworkSpawn()
         {
+            base.OnNetworkSpawn();
             if (IsServer) _uses.Value = tuning != null ? tuning.FeedUses : 10;
         }
 

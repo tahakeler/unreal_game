@@ -180,7 +180,8 @@ namespace HarvestPanic.UI
             AddSlider("Music", 0, 1, s.MusicVolume, v => { s.MusicVolume = v; commit(); }, Pct);
             AddSlider("Effects", 0, 1, s.SfxVolume, v => { s.SfxVolume = v; commit(); }, Pct);
             AddSlider("Voice chat", 0, 1, s.VoiceVolume, v => { s.VoiceVolume = v; commit(); }, Pct);
-            AddToggle("Push to talk", s.PushToTalk, v => { s.PushToTalk = v; commit(); });
+            AddToggle("Push to talk (V)", s.PushToTalk, v => { s.PushToTalk = v; commit(); });
+            AddSlider("Open mic sensitivity", 0, 1, 1f - s.OpenMicThreshold, v => { s.OpenMicThreshold = 1f - Mathf.Round(v * 20f) / 20f; commit(); }, Pct);
         }
 
         void BuildVideo(GameSettings s, Action commit)

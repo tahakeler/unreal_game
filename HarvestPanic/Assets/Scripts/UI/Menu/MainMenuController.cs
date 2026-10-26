@@ -31,6 +31,7 @@ namespace HarvestPanic.UI
         ListView _lanList;
         readonly List<LanHost> _hosts = new List<LanHost>();
         SettingsPanel _settings;
+        CreditsPanel _credits;
         int _maxPlayers = 4;
         float _connectLeft;
         float _loadAt = -1f;
@@ -182,6 +183,7 @@ namespace HarvestPanic.UI
             _screens[MenuScreen.Host] = _root.Q("host-screen");
             _screens[MenuScreen.Join] = _root.Q("join-screen");
             _screens[MenuScreen.Settings] = _root.Q("settings-screen");
+            _screens[MenuScreen.Credits] = _root.Q("credits-screen");
             _popupConnecting = _root.Q("popup-connecting");
             _popupMessage = _root.Q("popup-message");
             _connBody = _root.Q<Label>("connecting-body");
@@ -218,6 +220,7 @@ namespace HarvestPanic.UI
             Click("btn-play", OpenPlay);
             Click("btn-customize", OnCustomize);
             Click("btn-settings", OpenSettings);
+            Click("btn-credits", () => OpenCredits());
             Click("btn-quit", Quit);
             Click("btn-play-back", () => Stack.Pop());
             Click("btn-host-card", () => Stack.Push(MenuScreen.Host));
@@ -324,6 +327,16 @@ namespace HarvestPanic.UI
             _settings = new SettingsPanel(_root.Q("settings-host"));
             _settings.Closed += CloseSettings;
             _settings.FocusFirst();
+        }
+
+        /// <summary>Credits: team + third-party licences (THIRD_PARTY_LICENSES.md). Back / Esc / B returns to the title.</summary>
+        public CreditsPanel OpenCredits()
+        {
+            Stack.Push(MenuScreen.Credits);
+            _credits = new CreditsPanel(_root.Q("credits-host"));
+            _credits.Closed += () => { if (Stack.Current == MenuScreen.Credits) Stack.Pop(); };
+            _credits.FocusFirst();
+            return _credits;
         }
 
         void CloseSettings()

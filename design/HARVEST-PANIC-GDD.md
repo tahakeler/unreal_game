@@ -1556,6 +1556,7 @@ Because every transaction names a player, the receipt can say "Dave −$40 (died
 | Faucet | Rule | Typical size (4p) |
 |---|---|---|
 | Market sale | Sale value `V` (§9.4), credited the moment the pen accepts the item | 80–90% of income |
+| Daily loose goods (Muddlebury) **(tuned 2026-10-21)** | Each Morning: egg crates = 4 (markers) + **2 per player beyond the first** (4 / 6 / 8 / 10 for 1–4p), plus 1 prize pumpkin. Livestock (3 pigs, 8 chickens, goat, cow) is a one-time stock, not restocked | Crates ≈ $23 each ($34 on the order line) |
 | Order Complete Bonus | `$60 × week`, once per day when all 3 lines are filled | $60–300/day |
 | Dusk bonus | ×1.25 on Night Market sales | +$100–260 per dusk |
 | Golden Egg (Donate) | $150 on Sunday if the pocketing player donates | Rare |
@@ -1563,7 +1564,7 @@ Because every transaction names a player, the receipt can say "Dave −$40 (died
 | Sell-back | Upgrades refund `floor(0.5 × price)` (Shop or Sunday Collateral) | Emergency only |
 | Deed Day | After the 5th paid Sunday all goods sell at 2× (no quota) | Celebration |
 
-**Status in build:** Partial. Sales, the order ×1.5 multiplier, the OCB and the dusk bonus are Built. Golden eggs, steal-back, sell-back and Deed Day are Planned.
+**Status in build:** Partial. Sales, the order ×1.5 multiplier, the OCB and the dusk bonus are Built. Golden eggs, steal-back, sell-back and Deed Day are Planned. Crew-scaled daily crates are Built (`EconomyTuning.ExtraDailyGoodsPerExtraPlayer`, tuned 2026-10-21).
 
 ---
 
@@ -1692,6 +1693,8 @@ Due  = Q(w) + IOU_w (+ Double Down term)
 
 Regions 2–5 are listed in Ch. 10 §10.3.
 
+**Week 1 (tuned 2026-10-21).** The rent table is unchanged. The week-1 shortfall found by the bot playtest came from supply, not rent: Muddlebury spawned 4 crates a day whatever the crew size. Supply now scales with the crew (§9.3); the check is in §9.11.
+
 **Worked example.** Week 3, 4p, Region 1: `1,200 × 1.8225 × 1 × 1 = 2,187 → $2,190`. A balance of $2,335 pays it with **$145 carryover**. Exactly equal pays with $0 ("the Landlord seems disappointed").
 
 **Status in build:** Built. Region multiplier is fixed at 1.0 (no region select yet).
@@ -1792,6 +1795,19 @@ The Landlord never hurts anyone. He makes things worse economically.
 
 The per-player target rises for small crews because fewer hands means more trips per person.
 
+**Week 1 in Muddlebury, from real supply (tuned 2026-10-21).** Assumptions: D_day 1.0; crates Scuffed with average freshness 0.9 → **$23** (**$34** on the order line, `q(p)` = 1/1/2/2 crates a day); saturation after 6 units; livestock Scuffed and sold once (no-cow stock **$315**, full stock **$443**; the cow needs 3 carriers); a pumpkin day (4p only, 8 hands) = $383 + $60 order bonus; one respawn per player; start $100. Competent = 80% of the day's crates. Full math: `docs/economy/week1-income-model.md`; pinned by `BetaBugsBalanceTests`.
+
+| Crew | Play | Crates/day | Week-1 $ | Rent | $ ÷ rent |
+|---|---|---|---|---|---|
+| 1p | every crate, no livestock | 4 of 4 | 600 | 540 | 1.11 (pays with effort) |
+| 1p | 3 a day + pigs, chickens, goat | 3 of 4 | 800 | 540 | 1.48 |
+| 1p | casual, 2 a day | 2 of 4 | 370 | 540 | 0.69 (evicted) |
+| 2p | competent + livestock (no cow) | 5 of 6 | 1,005 | 780 | 1.29 |
+| 3p | competent + all livestock | 6 of 8 | 1,268 | 1,020 | 1.24 |
+| 4p | competent + all livestock, no pumpkin | 8 of 10 | 1,458 | 1,200 | 1.22 |
+| 4p | as above + 1 pumpkin day | 8 of 10 | 1,901 | 1,200 | 1.58 |
+| 4p | *before the fix*: every crate + all livestock | 4 of 4 | 1,013 | 1,200 | 0.84 |
+
 **KPIs:** ≥ 80% of first-time 4p crews pay Week 1; ≤ 50% pay Week 5 on the first attempt; ~25% clear Region 1 on the first run, ≥ 60% by the third; median first run ends on the Week 4–5 Sunday; measured Net ÷ Quota within ±10% of the model for Weeks 1–3.
 
 **Worked week (Week 3, 4p, $300 carryover)**: sales $2,560 + order bonuses $360 − respawns $440 − repairs $150 − fines $75 − Electric Fence $250 = **+$2,035** → Sunday balance $2,335 vs $2,190 → paid, **$145** carried. One more stranded dusk (≈ −$200) would fail the week. Buying the Bigger Wagon ($400) on Wednesday instead would have left the crew $15 short: a good buy in the wrong week.
@@ -1834,6 +1850,7 @@ The per-player target rises for small crews because fewer hands means more trips
 3. Livestock values were halved during consistency (pig $60, cow $150). Re-check the $400/day model with real order mixes.
 4. Upgrade price range: the economy doc says $25–1,100 but the catalogue's cheapest is $20 (Burlap Sack). Use $20–1,100.
 5. Solo fees are not scaled: a $25 death is 4.6% of the solo W1 rent vs 2.1% for 4p. **Resolved (built):** fee × `S_p^0.5` (§9.6).
+6. **Week 2+ supply in Muddlebury (raised 2026-10-21).** Livestock is a one-time stock and the crates don't grow, so a competent crew's W2 crate income is ≈ 80% of W2 rent; carryover, the pumpkin, order bonuses and upgrades must close the gap. Few W2 income sources exist yet (no egg laying, no crops). Re-check in playtests before tuning W2 (`docs/economy/week1-income-model.md` §5).
 
 **Status in build:** n/a.
 
@@ -2329,7 +2346,7 @@ The campaign is a linear chain of regions. Each one is a debt of **5 paid Sunday
 - **Scene:** `HarvestPanic/Assets/Scenes/Muddlebury.unity`, rebuilt reproducibly by `HarvestPanic.World.Editor.BuildMuddlebury.Build` (menu: Harvest Panic → World → Build Muddlebury). It is seeded, so every rebuild produces the same scene.
 - **Coordinates:** metres. +X is east (toward the bridge and market), +Z is north, and the river flows toward −Z. Farm ground is at y = 0, water at y = −4.2, riverbed at y = −6.
 - **Playable bounds:** x −122 to 177, z −148 to 104 (four world-edge colliders), inside a forest ring on the surrounding hills that hides the edge and reads as a cosy bowl.
-- **Ground:** Unity Terrain (320 × 270 m) with painted layers (meadow, road, soil, mud, cobble, bank). The NavMesh covers the whole playable area, including the river channel.
+- **Ground:** Unity Terrain (320 × 270 m playable tile) with painted layers (grass, meadow, road, soil, mud, cobble, bank, forest floor), inside a 3 × 3 grid of scenery tiles (wooded hills, the river valley bending out of sight, a hazy horizon ring). The NavMesh covers the whole playable area, including the river channel. Zone-by-zone build notes: `design/levels/muddlebury-farm.md`, QA: `docs/qa/map-progress.md`.
 - **Design intent:** one level that teaches the whole game in its first 30 seconds. You spawn looking straight at the problem: a road, a bridge, a market, and something squealing to your left.
 
 ### 11.5.2 Schematic map
