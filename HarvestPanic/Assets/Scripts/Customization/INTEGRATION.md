@@ -6,7 +6,9 @@ Rebuild all generated assets: `Unity -batchmode -nographics -quit -projectPath H
 ## Player team: hosting the farmer body
 1. Nest `Assets/Prefabs/Farmer/FarmerBody.prefab` as a child of your player prefab root (the object with the `NetworkObject`).
    Do **not** add a NetworkObject to FarmerBody; its `FarmerLoadoutSync` / `FarmerEmotes` are NetworkBehaviours that NGO
-   picks up from your NetworkObject. Pivot is at the feet, +Z forward, ~1.8 m tall.
+   picks up from your NetworkObject. Pivot is at the feet, +Z forward, 1.75 m tall (hat included). The body is the owner's
+   rigged Tripo hero farmer (Humanoid, `SK_Farmer_Hero`); its straw hat is baked into the mesh and clipped by the shader
+   when another hat (or none) is worn, with a hair-coloured scalp cap filling the crown.
 2. Your root implements `IPlayerHooks` (ClientId, IsLocal, FirstPersonArms, Faint = your ragdoll). Forward the visual members
    to the body, which also implements `IPlayerHooks` (no assembly reference needed):
    ```csharp
@@ -20,6 +22,9 @@ Rebuild all generated assets: `Unity -batchmode -nographics -quit -projectPath H
    FarmerVisual reads `ClientId` / `IsLocal` from the first *other* `IPlayerHooks` above it, so do not forward those back.
 3. Locomotion animation is automatic (FarmerVisual derives `Speed`, `Grounded`, `Jump` from the body's motion). If you prefer to
    drive it, untick `autoLocomotion` and set Animator params `Speed` (m/s, float), `Grounded` (bool), `Jump` (trigger), `Fainted` (bool).
+   Gameplay poses come from Core `IPlayerAnimationSource` on your root (PlayerCharacter implements it): `CarryHands` 1/2 ->
+   one-/two-handed carry on the masked upper-body layer (legs keep walking), `HoldingTool` -> tool pose, `ThrowCharge` -> wind-up,
+   carry ending -> toss, `IsDown` -> limp, then get-up. All members must be valid on remote copies (replicated state).
 4. Local player: body and cosmetics render **shadows only** and the name tag is hidden once `IsLocal` is true
    (FarmerLoadoutSync re-evaluates on spawn / ownership change).
 5. Emotes: keys 5–8 are handled by `FarmerEmotes` (own InputActions, owner only). The server emits the Wave noise
@@ -57,8 +62,13 @@ marker on scene load on every peer, facing the marker's forward; interaction ran
 ## Art pipeline
 - New cosmetics are `CosmeticEntry` assets in the catalogue's `entries` (same slot + id replaces a placeholder). Tripo FBXs:
   HarvestPanic/Cosmetics/Import Tripo Cosmetic (see docs/art/adding-cosmetics.md). Tint-mask shader: `Art/Cosmetics/Shaders/CosmeticTintMask.shader`.
-- `FarmerAssetBuilder.BuildAll` also writes UV'd copies of the farmer meshes (`Art/Cosmetics/Meshes`, for outfit patterns),
-  the Shrug/Salute/Chicken Dance clips, merges new default items into an existing catalogue (`EnsureDefaults`) and builds the
+- Hero body: `tools/tripo/farmer_hero.py` (headless Blender) turns the owner's Tripo FBX + basecolor into
+  `ThirdParty/Tripo/SK_Farmer_Hero/` (1.75 m, 10k tris, weights re-transferred, recolour mask + region map + stats);
+  `tools/tripo/farmer_hero_preview.py` renders the recolour (same maths as the shader) before Unity. Shader
+  `Art/Cosmetics/Shaders/FarmerRecolour.shader` (colour transfer, URP PBR lighting); CPU mirror `FarmerRecolourMath`.
+- `FarmerAssetBuilder.BuildAll` configures both humanoids (`HeroFarmerBuilder`), records the in-house humanoid clips
+  (`Art/Cosmetics/Anim/Humanoid`), builds `FarmerHero.controller`, the body prefab (attach points measured from the mesh,
+  home swatches from the stats), merges new default items into an existing catalogue (`EnsureDefaults`) and builds the
   test-only network prefab `Prefabs/Farmer/Test/FarmerNetTest.prefab` (not in any NetworkPrefabs list).
 
 ## Open requests (need a Core contract or another team)
@@ -67,3 +77,7 @@ marker on scene load on every peer, facing the marker's forward; interaction ran
 - E for the wardrobe may overlap the Player's interact key.
 - Ownership on the server only trusts starter items + `unlockAllCosmetics` (no profile/unlock service yet); `CosmeticCatalog.LocalOwnedKeys` is the client hook.
 - First-person arms get the outfit's sleeve colour through the existing `IFirstPersonArmsSkin` (Muscle Tank = bare arms, Rain Slicker = overalls colour); patterns are not drawn on the arms.
+  Decision (hero body): the existing IK-posed FirstPersonArmsRig is kept and tinted (sleeve, glove = accent, skin, painted colours
+  on home swatches) instead of cutting arms out of the hero mesh: it is already carry/throw-posed, camera-space and cheap, and the
+  hero's short chibi arms would sit outside a first-person view.
+- Head items with an authored mesh cannot hide the hero's single-mesh head; Tripo bodies/outfits are not swappable yet (one hero body).

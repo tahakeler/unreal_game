@@ -54,7 +54,7 @@ Licence verified on each poly.pizza model page on 2026-10-19 (`"Licence":"CC0 1.
 
 | Asset (Unity) | Source model | Author | URL | Licence |
 |---|---|---|---|---|
-| QuaterniusFarmer/Farmer.fbx (body + Idle/Walk/Run/Wave/Death/Point clips; imported as a Generic rig. Dance and Jump clips are authored in-house by `HarvestPanic.Customization.Editor.FarmerAssetBuilder`) | Farmer (animated) | Quaternius | https://poly.pizza/m/7pn3R6hPvE | CC0 1.0 |
+| QuaterniusFarmer/Farmer.fbx (animation source since 2026-10-25: imported as Humanoid, its Idle/Walk/Run/Wave/Death/Idle_Gun_Pointing/Interact/HitRecieve clips are retargeted through Mecanim onto the hero farmer below; its mesh is no longer shown. Jump, fall, dance, shrug, salute, chicken dance, carry, tool, throw, down and get-up clips are authored in-house by `HarvestPanic.Customization.Editor.HeroFarmerBuilder`) | Farmer (animated) | Quaternius | https://poly.pizza/m/7pn3R6hPvE | CC0 1.0 |
 
 ## Tripo3D models (Unity project, `HarvestPanic/Assets/ThirdParty/Tripo/`) — added 2026-10-20
 
@@ -71,6 +71,7 @@ Processed (decimated, rescaled, re-pivoted, basecolor downsized) with headless B
 | `Net` | lacrosse-style net | 19,228 → 2,999 | 1024 basecolor |
 | `MarketStall` | wooden market stall | 48,326 → 5,998 | 2048 basecolor |
 | `PenGate` | wooden gate | 43,209 → 2,999 | 1024 basecolor |
+| `SK_Farmer_Hero` (player character, added 2026-10-25) | owner-delivered rigged farmer `tripo_convert_33425f98-….fbx` (61-bone UE-style rig) + 8k basecolor | 20,038 → 10,000 (weights re-transferred, 4 influences) | 2048 basecolor + generated recolour mask / region map; processed by `tools/tripo/farmer_hero.py` (originals in the git-ignored `Source~/`) |
 
 ## Audio (Unity project, `HarvestPanic/Assets/Audio/`) — added 2026-10-20
 

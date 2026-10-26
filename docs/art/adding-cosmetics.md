@@ -57,12 +57,28 @@ skin beige `#D9B59A`), then add `<Name>_Mask.png` (same UVs): **R** = primary (o
 buttons, buckles). The shader keeps the baked shading: `tint × (albedo luminance / zone grey)`.
 Hats are authored in real colours at VS, so they need no mask. Hair without a mask is tinted whole by the hair colour.
 
+## The hero body (player character)
+
+Every player is the owner's rigged Tripo farmer. To update it from a new Tripo export:
+
+1. `Blender -b --factory-startup --python tools/tripo/farmer_hero.py -- <tripo.fbx> <basecolor> HarvestPanic/Assets/ThirdParty/Tripo/SK_Farmer_Hero [1.75] [10000] [debug_dir]`
+   (scales to 1.75 m, decimates, re-transfers skin weights from the source, writes the mask / region map / stats; keep the
+   originals in `SK_Farmer_Hero/Source~/`, which git and Unity ignore).
+2. Check the recolour before Unity: `Blender -b --factory-startup --python tools/tripo/farmer_hero_preview.py -- <hero_dir> <out.png>`
+   (painted texture, default colourway = identical, mask view, five colourways, body + face close-ups).
+3. `FarmerAssetBuilder.BuildAll` (batchmode), then the EditMode `HeroFarmerEditModeTests` and the PlayMode `HeroFarmerQa`
+   sheets (`HP_QA_DIR`): original vs in-game, 8 colourways, pose sheet of every clip.
+
+Mask rules (automatic): zones come from the dominant bone under each texel + its colour; the eyes are found from the
+sclera and the whole face front is **skin only**, so eyes, brows, the mouth line and nostrils are never tinted; the
+collar and strap tops skinned to the neck follow the shirt / overalls. The recolour is a colour transfer
+(`texel + mask × shade × (swatch − painted mean)`), so a zone on its home swatch shows the painted texture exactly.
+
 ## Not automatic yet
 
-- **Bodies (`SK_Farmer_*`) and outfit meshes (`SK_Outfit_*`)** are imported as Humanoid but not added to the
-  catalogue: the farmer uses the CC0 Quaternius Generic rig and its controller, so a Tripo body needs retargeting
-  (Humanoid controller + clips) by the technical artist before it can replace the body. Until then, body types are
-  proportion variants of the current farmer and outfits are pattern/colour variants (+ a few attached parts).
+- **More bodies (`SK_Farmer_*`) and outfit meshes (`SK_Outfit_*`)** are imported as Humanoid but not added to the
+  catalogue: one hero body is wired (`HeroFarmerBuilder`); a second character needs its own bone map + mask run.
+  Body types are proportion variants of the hero and outfits are pattern/colour variants (+ a few attached parts).
 - The cape is attached as a static mesh (no cloth sim yet).
 - Gloves and overall patterns as separate slots (character-style §4/§8) are not in the loadout yet; patterns live in
   the Outfit slot for now.

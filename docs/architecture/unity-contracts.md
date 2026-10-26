@@ -38,6 +38,7 @@ Cross-talk = register an interface in `Services` (`Services.Register<T>`, `Get<T
 | Impact units | `ImpactUnits` | all (see below) |
 | Run save | `IRunSaveService` (`HasSave`, `Summary`, `ContinueRequested`, `DeleteSave`) | Economy (registered at startup) -> Frontend main menu "Continue Farm" |
 | Character creator | `ICharacterCreator` (`IsOpen`, `NeedsFirstRun`, `Open(CharacterCreatorContext)`, `Closed`) | Customization (registered at startup) -> Frontend main menu (first run, Customize), lobby (C), pause (owns Esc while open) |
+| Player animation state | `IPlayerAnimationSource` (`CarryHands`, `HoldingTool`, `ThrowCharge`, `IsDown`) | Gameplay `PlayerCharacter` (replicated carry/state) -> Customization `FarmerVisual` (third-person body animator on every peer) |
 | Player name | `IPlayerNameService` (`PlayerName`, `SetPlayerName`) | Frontend UI (Settings name + session platform) -> Customization creator Name tab |
 | UI accessibility | `UiAccessibility` static snapshot (`Colorblind` as `UiColorblind`, `ReducedMotion`, `UiScale`, `TextSize`, `Changed`) | Frontend UI writes from settings -> any non-Frontend screen (creator) |
 | Name filter | `NameFilter` (`Check`, `Resolve`, `ContainsProfanity`, `Fallback`; list `Resources/Data/Social/NameFilter.txt`) | Customization creator (Farm Name 3-16 chars) + Networking connection approval (profanity -> "Farmhand #N") |
@@ -134,3 +135,15 @@ registered as `IAudioService` and `IAudioSettingsSink`. Everything is client-loc
   `UiRuntime` registers `IPlayerNameService` and publishes `UiAccessibility`.
 - Networking minimal hook: `ConnectionApproval` replaces profane names with `NameFilter.Fallback(n)`.
 - Loadout v2 is 25 bytes on the wire (budget 32): see `Scripts/Customization/FarmerLoadout.cs` and `INTEGRATION.md`.
+
+## Hero farmer body (feature/character-creator, 2026-10-25)
+- Core add-only: `IPlayerAnimationSource` (carry hands, holding a tool, throw charge, down). Gameplay minimal edit:
+  `PlayerCharacter` implements it from replicated `PlayerCarry` state (`CarryHands`, `HoldingTool`; `ThrowCharge` owner-only)
+  and its existing `IsDown`.
+- Every player (lobby, game, creator turntable) is the owner's rigged Tripo farmer: Humanoid avatar with an enforced T-pose
+  reference, CC0 Quaternius clips retargeted + in-house humanoid clips, controller `Art/Cosmetics/Anim/FarmerHero.controller`
+  (base layer + masked upper-body carry/throw layer whose weight FarmerVisual drives). Animator params: `Speed`, `Grounded`,
+  `Jump`, `Fainted`, `CarryHands` (int), `Tool`, `ThrowCharge`, `Toss`, `Down`, `GetUp`.
+- Costume colours stay in the existing loadout (no wire change): primary = overalls, secondary = shirt, accent = boots/gloves,
+  skin, hair colour, name-tag colour = hat band. `FarmerLoadout.Default` now uses the hero's "home" swatches (Slate, Cream,
+  Rust, Toffee, Mud Brown, Pumpkin tag), which render the painted texture exactly.
