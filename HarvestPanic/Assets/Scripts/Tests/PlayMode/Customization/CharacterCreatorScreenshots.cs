@@ -80,7 +80,7 @@ namespace HarvestPanic.Tests.PlayMode.Customization
         {
             string dir = Dir();
             var cat = Catalog();
-            LoadoutStorage.Save(WardrobeTestLineup.SetA[0]);
+            LoadoutStorage.Save(FarmerLoadout.Default); // the hero as painted: what a new player sees
             var (panel, rt) = OffscreenPanel(cat);
             var ui = WardrobeUI.OpenStandalone(cat, CharacterCreatorContext.FirstRun, panel);
             Assert.That(ui, Is.Not.Null);

@@ -92,7 +92,8 @@ namespace HarvestPanic.Customization
 
         /// <summary>
         /// Loads the saved loadout, sanitised against <paramref name="catalog"/>. A v1 save is migrated and re-saved as v2.
-        /// On first launch (or a corrupt save) generates a random silly loadout and saves it.
+        /// On first launch (or a corrupt save) starts from <see cref="FarmerLoadout.Default"/> - the hero farmer exactly as
+        /// painted - and saves it (Randomize in the creator rolls a silly look on request).
         /// </summary>
         public static FarmerLoadout LoadOrCreate(CosmeticCatalog catalog)
         {
@@ -102,7 +103,7 @@ namespace HarvestPanic.Customization
                 if (version < SaveVersion) Save(clean);
                 return clean;
             }
-            var fresh = catalog != null ? Randomize(catalog, new System.Random(), FarmerLoadout.Default) : FarmerLoadout.Default;
+            var fresh = catalog != null ? LoadoutValidator.Sanitize(FarmerLoadout.Default, catalog, CosmeticCatalog.LocalOwnedKeys, out _) : FarmerLoadout.Default;
             Save(fresh);
             return fresh;
         }

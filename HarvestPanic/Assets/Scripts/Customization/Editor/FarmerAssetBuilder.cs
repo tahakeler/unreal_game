@@ -205,16 +205,17 @@ namespace HarvestPanic.Customization.Editor
                 float heightK = (neck.position.y - hips.position.y) / 0.613f;          // neck-to-hips of the original farmer
                 float bodyK = Mathf.Clamp(Mathf.Sqrt(widthK * heightK), 0.8f, 2f);     // chibi: wide but short torso
 
-                Transform Attach(string n, Transform parent, Vector3 worldPos, float k)
+                Transform Attach(string n, Transform parent, Vector3 worldPos, float k, float yFactor = 1f)
                 {
                     var t = new GameObject(n).transform;
                     t.SetParent(parent, true);
                     t.SetPositionAndRotation(worldPos, Quaternion.identity);
                     var ls = parent.lossyScale;
-                    t.localScale = new Vector3(k / ls.x, k / ls.y, k / ls.z);
+                    t.localScale = new Vector3(k / ls.x, k * yFactor / ls.y, k / ls.z);
                     return t;
                 }
-                var hatAttach = Attach("HatAttach", head, new Vector3(m.headX, m.crownY, m.headZ), headK);
+                // Hats fit the hero's wide head but keep a hat-like height (a toque at full head scale towered ~1 m).
+                var hatAttach = Attach("HatAttach", head, new Vector3(m.headX, m.crownY, m.headZ), headK, 0.72f);
                 var faceAttach = Attach("FaceAttach", head, new Vector3(m.headX, m.eyeY, m.faceZ), headK);
                 var backAttach = Attach("BackAttach", chest, new Vector3(0f, m.chestY, m.backZ), bodyK);
                 var chestAttach = Attach("ChestAttach", chest, new Vector3(0f, m.chestY, (m.frontZ + m.backZ) * 0.5f), bodyK);

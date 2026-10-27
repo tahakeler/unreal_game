@@ -234,6 +234,35 @@ namespace HarvestPanic.Tests.PlayMode.Customization
         }
 
         [UnityTest]
+        public IEnumerator Capture_FaceItemsAndHats_OnTheHero()
+        {
+            yield return Setup();
+#if UNITY_EDITOR
+            var cam = Cam();
+            var probe = SpawnBody(FarmerLoadout.Default);
+            var cat = probe.Catalog;
+            Object.Destroy(probe.gameObject);
+            var looks = new List<FarmerLoadout>();
+            foreach (var f in cat.Items(CosmeticSlot.Face)) { var l = FarmerLoadout.Default; l.Face = f.id; looks.Add(l); }
+            foreach (var h in cat.Items(CosmeticSlot.Hat)) { var l = FarmerLoadout.Default; l.Hat = h.id; looks.Add(l); }
+            const int cols = 6;
+            var sheet = new Sheet(cols, Mathf.CeilToInt(looks.Count / (float)cols), 240, 260);
+            for (int i = 0; i < looks.Count; i++)
+            {
+                var v = SpawnBody(looks[i]);
+                yield return null;
+                Pose(v.BodyAnimator, v.BodyAnimator.runtimeAnimatorController.animationClips.First(c => c.name == "Idle"), 0f);
+                Aim(cam, HeadPoint(v), 25f, 2.4f, 30f);
+                sheet.Put(i, Grab(cam, 240, 260));
+                Object.Destroy(v.gameObject);
+                yield return null;
+            }
+            sheet.Save(Path.Combine(_dir, "hero_face_items_and_hats.png"));
+#endif
+            yield return null;
+        }
+
+        [UnityTest]
         public IEnumerator Capture_PoseSheet_EveryClip_FrontAndSide()
         {
             yield return Setup();

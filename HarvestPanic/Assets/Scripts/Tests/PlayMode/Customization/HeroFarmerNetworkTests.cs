@@ -19,15 +19,10 @@ namespace HarvestPanic.Tests.PlayMode.Customization
     /// </summary>
     public class HeroFarmerNetworkTests
     {
-        ushort _savedPort;
-
         [UnitySetUp]
         public IEnumerator SetUp()
         {
             LogAssert.ignoreFailingMessages = true; // client-side scene/spawn warnings are irrelevant here
-            var cfg = NetworkingConfig.Load();
-            _savedPort = cfg.lanPort;
-            cfg.lanPort = (ushort)Random.Range(20000, 40000);
 #if UNITY_EDITOR
             yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/Scenes/Muddlebury.unity", new LoadSceneParameters(LoadSceneMode.Single));
 #else
@@ -44,7 +39,6 @@ namespace HarvestPanic.Tests.PlayMode.Customization
             foreach (var nm in Object.FindObjectsByType<NetworkManager>(FindObjectsSortMode.None))
                 if (nm != null) Object.Destroy(nm.gameObject);
             yield return null;
-            NetworkingConfig.Load().lanPort = _savedPort;
             LogAssert.ignoreFailingMessages = false;
         }
 
@@ -54,8 +48,10 @@ namespace HarvestPanic.Tests.PlayMode.Customization
             while (!cond() && Time.realtimeSinceStartup < end) yield return null;
         }
 
-        static NetworkManager StartClient(NetworkManager host, ushort port)
+        static NetworkManager StartClient(NetworkManager host)
         {
+            // editor batchmode hosts pick a free port per process (SessionService.Port), so ask the host's transport
+            ushort port = host.NetworkConfig.NetworkTransport is UnityTransport t ? t.ConnectionData.Port : NetworkingConfig.Load().lanPort;
             var go = new GameObject("TestClient Cora");
             go.SetActive(false);
             var utp = go.AddComponent<UnityTransport>();
@@ -115,7 +111,7 @@ namespace HarvestPanic.Tests.PlayMode.Customization
             yield return WaitFor(() => hostSync.Loadout.Equals(look), 5f);
             Assert.That(hostSync.Loadout, Is.EqualTo(look));
 
-            var client = StartClient(session.Manager, cfg.lanPort);
+            var client = StartClient(session.Manager);
             ulong id = hostSync.NetworkObjectId;
             yield return WaitFor(() => client.IsConnectedClient && client.SpawnManager != null && client.SpawnManager.SpawnedObjects.ContainsKey(id));
             Assert.That(client.SpawnManager.SpawnedObjects.ContainsKey(id), "client sees the host's player");

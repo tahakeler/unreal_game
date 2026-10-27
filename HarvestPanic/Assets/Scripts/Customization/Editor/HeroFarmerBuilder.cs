@@ -368,10 +368,11 @@ namespace HarvestPanic.Customization.Editor
             // Both arms forward around a big load (pig, crate) held in front of the chest, clear of the belly:
             // upper arms forward and a little in, forearms level, palms facing each other.
             // (the hero's shoulders sit level with his chin, so the hands stay ~20 cm under them: forearms just below level)
-            r[HumanBodyBones.LeftUpperArm] = Y(14f) * X(-62f - lift - breathe);
-            r[HumanBodyBones.RightUpperArm] = Y(-14f) * X(-62f - lift - breathe);
-            r[HumanBodyBones.LeftLowerArm] = Y(20f) * X(-18f);
-            r[HumanBodyBones.RightLowerArm] = Y(-20f) * X(-18f);
+            // (hands about a crate's width apart: the big gloves must not overlap)
+            r[HumanBodyBones.LeftUpperArm] = Y(6f) * X(-62f - lift - breathe);
+            r[HumanBodyBones.RightUpperArm] = Y(-6f) * X(-62f - lift - breathe);
+            r[HumanBodyBones.LeftLowerArm] = Y(4f) * X(-18f);
+            r[HumanBodyBones.RightLowerArm] = Y(-4f) * X(-18f);
             r[HumanBodyBones.LeftHand] = Z(-20f);
             r[HumanBodyBones.RightHand] = Z(20f);
             r[HumanBodyBones.Chest] = X(-6f);
@@ -711,7 +712,7 @@ namespace HarvestPanic.Customization.Editor
             smr.BakeMesh(mesh, false);
             var verts = mesh.vertices.Select(v => smr.transform.position + smr.transform.rotation * v).ToArray();
             var uvs = smr.sharedMesh.uv;
-            var mask = ReadPng(MaskPath); var reg = ReadPng(RegionsPath);
+            var mask = ReadPng(MaskPath); var reg = ReadPng(RegionsPath); var albedo = ReadPng(BaseColorPath);
             Object.DestroyImmediate(mesh);
             var skin = new List<Vector3>(); var eyes = new List<Vector3>(); var cloth = new List<Vector3>();
             float neckY = neck.position.y, top = float.MinValue;
@@ -720,10 +721,15 @@ namespace HarvestPanic.Customization.Editor
                 var p = verts[i]; top = Mathf.Max(top, p.y);
                 Color m = mask.GetPixelBilinear(uvs[i].x, uvs[i].y), r = reg.GetPixelBilinear(uvs[i].x, uvs[i].y);
                 if (p.y > neckY && (m.a > 0.5f || r.b > 0.5f)) skin.Add(p);
-                else if (p.y > neckY && m.r + m.g + m.b + m.a < 0.2f && r.r + r.g + r.b < 0.2f) eyes.Add(p);
+                else if (p.y > neckY && m.r + m.g + m.b + m.a < 0.2f && r.r + r.g + r.b < 0.2f)
+                {
+                    // eyes = the white sclera only (brows and the mouth line are unmasked too since the face fix)
+                    Color.RGBToHSV(albedo.GetPixelBilinear(uvs[i].x, uvs[i].y), out _, out float sat, out float val);
+                    if (sat < 0.25f && val > 0.7f) eyes.Add(p);
+                }
                 if (m.r > 0.5f || m.g > 0.5f) cloth.Add(p);
             }
-            Object.DestroyImmediate(mask); Object.DestroyImmediate(reg);
+            Object.DestroyImmediate(mask); Object.DestroyImmediate(reg); Object.DestroyImmediate(albedo);
             var me = new Measure();
             me.headWidth = skin.Count > 0 ? skin.Max(v => v.x) - skin.Min(v => v.x) : 0.4f;
             me.headX = skin.Count > 0 ? (skin.Max(v => v.x) + skin.Min(v => v.x)) * 0.5f : 0f;
@@ -731,7 +737,9 @@ namespace HarvestPanic.Customization.Editor
             float skinMidY = skin.Count > 0 ? skin.Average(v => v.y) : neckY + 0.2f;
             var eyeCandidates = eyes.Where(v => v.y > skinMidY && v.z > me.headZ).ToList();
             me.eyeY = eyeCandidates.Count > 0 ? eyeCandidates.Average(v => v.y) : skinMidY + 0.05f;
-            me.faceZ = skin.Where(v => Mathf.Abs(v.y - me.eyeY) < 0.06f && Mathf.Abs(v.x - me.headX) < 0.08f).DefaultIfEmpty(new Vector3(0, 0, me.headZ + 0.15f)).Max(v => v.z);
+            // glasses sit just in front of the eyeballs (the nose tip is further out; the bridge part clears it)
+            me.faceZ = eyeCandidates.Count > 0 ? eyeCandidates.Max(v => v.z) + 0.01f
+                : skin.Where(v => Mathf.Abs(v.y - me.eyeY) < 0.06f && Mathf.Abs(v.x - me.headX) < 0.08f).DefaultIfEmpty(new Vector3(0, 0, me.headZ + 0.15f)).Max(v => v.z);
             me.crownY = me.eyeY + 0.146f * (me.headWidth / 0.22f) * 0.85f;
             me.chestY = chest.position.y;
             var band = cloth.Where(v => Mathf.Abs(v.y - me.chestY) < 0.08f && Mathf.Abs(v.x) < 0.15f).ToList();
