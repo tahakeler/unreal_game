@@ -42,11 +42,11 @@ namespace HarvestPanic.Rendering.Editor
             public Color Shadow;
         }
 
-        static readonly Profile World = new Profile { Name = "world", Outline = false, Rim = 0f, Specular = 0.15f, Variation = 0.06f, MidTone = 0.72f, Softness = 0.10f, Shadow = new Color(0.80f, 0.80f, 0.95f) };
-        static readonly Profile Foliage = new Profile { Name = "foliage", Outline = false, Rim = 0.12f, Specular = 0f, Variation = 0.16f, MidTone = 0.78f, Softness = 0.16f, Shadow = new Color(0.78f, 0.84f, 0.95f) };
-        static readonly Profile Prop = new Profile { Name = "prop", Outline = false, Rim = 0.18f, Specular = 0.25f, Variation = 0f, MidTone = 0.72f, Softness = 0.08f, Shadow = new Color(0.80f, 0.80f, 0.95f) };
-        static readonly Profile Hero = new Profile { Name = "hero", Outline = true, OutlineWidth = 1.3f, Rim = 0.3f, Specular = 0.25f, Variation = 0f, MidTone = 0.74f, Softness = 0.07f, Shadow = new Color(0.82f, 0.80f, 0.95f) };
-        static readonly Profile Critter = new Profile { Name = "critter", Outline = true, OutlineWidth = 1.7f, Rim = 0.4f, Specular = 0.2f, Variation = 0f, MidTone = 0.76f, Softness = 0.08f, Shadow = new Color(0.84f, 0.80f, 0.95f) };
+        static readonly Profile World = new Profile { Name = "world", Outline = false, Rim = 0f, Specular = 0.15f, Variation = 0.06f, MidTone = 0.72f, Softness = 0.10f, Shadow = new Color(0.86f, 0.86f, 0.98f) };
+        static readonly Profile Foliage = new Profile { Name = "foliage", Outline = false, Rim = 0.12f, Specular = 0f, Variation = 0.16f, MidTone = 0.78f, Softness = 0.16f, Shadow = new Color(0.84f, 0.88f, 0.98f) };
+        static readonly Profile Prop = new Profile { Name = "prop", Outline = false, Rim = 0.18f, Specular = 0.25f, Variation = 0f, MidTone = 0.72f, Softness = 0.08f, Shadow = new Color(0.86f, 0.86f, 0.98f) };
+        static readonly Profile Hero = new Profile { Name = "hero", Outline = true, OutlineWidth = 1.3f, Rim = 0.3f, Specular = 0.25f, Variation = 0f, MidTone = 0.74f, Softness = 0.07f, Shadow = new Color(0.88f, 0.86f, 0.98f) };
+        static readonly Profile Critter = new Profile { Name = "critter", Outline = true, OutlineWidth = 1.7f, Rim = 0.4f, Specular = 0.2f, Variation = 0f, MidTone = 0.76f, Softness = 0.08f, Shadow = new Color(0.9f, 0.86f, 0.98f) };
 
         static readonly string[] FoliageNames = { "leaf", "leaves", "hedge", "treeatlas", "grass", "corn", "wheat", "bush", "crop" };
 

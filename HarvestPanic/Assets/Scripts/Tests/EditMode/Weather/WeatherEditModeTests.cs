@@ -109,9 +109,15 @@ namespace HarvestPanic.Tests.EditMode.Weather
             var lateDusk = WeatherLook.ForPhase(DayClockPhase.Dusk, 0.6f);
             Assert.AreEqual(1f, WeatherLook.NightBlend(0.55f), 1e-4f);
             Assert.AreEqual(0f, WeatherLook.NightBlend(0f), 1e-4f);
-            Assert.Less(lateDusk.SunIntensity, 0.2f, "moonlight only");
-            Assert.Less(lateDusk.PostExposure, -0.5f);
-            Assert.Less(lateDusk.Ambient.maxColorComponent, 0.3f, "dark ambient so lanterns matter");
+            // Visual overhaul: night is moonlit and READABLE (owner: "near-black night"), but still far darker than
+            // the day so the lanterns matter: the key light after exposure stays under a fifth of noon's, with a
+            // small ambient floor and stars instead of a black screen.
+            Assert.Less(lateDusk.KeyLightAfterExposure, noon.KeyLightAfterExposure * 0.2f, "moonlight only");
+            Assert.Greater(lateDusk.KeyLightAfterExposure, 0.15f, "moonlit, not black");
+            Assert.Less(lateDusk.PostExposure, -0.2f);
+            Assert.Less(lateDusk.Ambient.maxColorComponent, 0.5f, "dark ambient so lanterns matter");
+            Assert.Greater(lateDusk.AmbientFloor, 0f, "readability floor");
+            Assert.Greater(lateDusk.Stars, 0.5f);
             Assert.Greater(lateDusk.SunColor.b, lateDusk.SunColor.r, "moonlight is cool");
             Assert.Less(lateDusk.FogEnd, noon.FogEnd);
         }

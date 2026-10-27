@@ -76,7 +76,7 @@ namespace HarvestPanic.Tests.PlayMode.World
         {
             const int w = 1280, h = 720;
             cam.enabled = true;
-            var rt = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32); rt.Create();
+            var rt = new RenderTexture(w, h, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4 }; rt.Create(); // MSAA 4x like the game
             var req = new RenderPipeline.StandardRequest { destination = rt };
             for (int i = 0; i < 3; i++)
             {

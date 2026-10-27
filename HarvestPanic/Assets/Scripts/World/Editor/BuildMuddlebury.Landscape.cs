@@ -89,18 +89,7 @@ namespace HarvestPanic.World.Editor
 
         static void Landscape()
         {
-            // Layers: 0 grass, 1 road dirt, 2 tilled soil, 3 mud, 4 cobble, 5 bank sand, 6 meadow, 7 forest floor
-            _layers = new[]
-            {
-                Layer("Grass", WorldTextures.GrassStrokes("GrassPaint", WorldAssets.Hex("86A84E"), WorldAssets.Hex("6E9440"), WorldAssets.Hex("A9C46A"), 2), 6f),
-                Layer("Road", WorldAssets.NoiseTexture("Road", WorldAssets.Hex("C4A272"), WorldAssets.Hex("B08E60"), WorldAssets.Hex("8A6E4A"), 0.04f, seed: 3), 5f),
-                Layer("Soil", WorldAssets.NoiseTexture("Soil", WorldAssets.Hex("8E6640"), WorldAssets.Hex("76522F"), WorldAssets.Hex("A87C52"), 0.02f, seed: 4, stripes: true), 4f),
-                Layer("Mud", WorldAssets.NoiseTexture("Mud", WorldAssets.Hex("6B4A2E"), WorldAssets.Hex("5A3C24"), WorldAssets.Hex("8A6644"), 0.02f, seed: 5), 3f),
-                Layer("Cobble", WorldAssets.CobbleTexture("Cobble", WorldAssets.Hex("C9BBA2"), WorldAssets.Hex("8F8270")), 1.7f),
-                Layer("Bank", WorldAssets.NoiseTexture("Bank", WorldAssets.Hex("B49A72"), WorldAssets.Hex("9C8462"), WorldAssets.Hex("D2BE98"), 0.05f, seed: 6), 4f),
-                Layer("Meadow", WorldTextures.GrassStrokes("MeadowPaint", WorldAssets.Hex("97B05A"), WorldAssets.Hex("82A04C"), WorldAssets.Hex("E3D68A"), 8), 7f),
-                Layer("Forest", WorldAssets.NoiseTexture("ForestFloor", WorldAssets.Hex("5E7A3E"), WorldAssets.Hex("4E6A34"), WorldAssets.Hex("8A7A4A"), 0.05f, seed: 9), 6f),
-            };
+            _layers = CreateLayers();
             // Outer tiles: 4 layers only (one control map -> a single terrain pass); roads, soil, mud and cobble never reach them.
             _outerLayers = new[] { _layers[0], _layers[6], _layers[7], _layers[5] };
             TreeMeshes();
@@ -120,6 +109,28 @@ namespace HarvestPanic.World.Editor
         }
 
         static TerrainLayer[] _outerLayers;
+
+        /// <summary>
+        /// Layers: 0 grass, 1 road dirt, 2 tilled soil, 3 mud, 4 cobble, 5 bank sand, 6 meadow, 7 forest floor.
+        /// Visual overhaul: the noise/cobble maps are generated at 512 px (were 128 px = 25 px/m on the road, a smear at
+        /// first-person distance); the TerrainLayer assets are rewritten in place so terrains keep their references.
+        /// </summary>
+        static TerrainLayer[] CreateLayers()
+        {
+            const int Px = 512;
+            return new[]
+            {
+                Layer("Grass", WorldTextures.GrassStrokes("GrassPaint", WorldAssets.Hex("86A84E"), WorldAssets.Hex("6E9440"), WorldAssets.Hex("A9C46A"), 2), 6f),
+                Layer("Road", WorldAssets.NoiseTexture("Road", WorldAssets.Hex("C4A272"), WorldAssets.Hex("B08E60"), WorldAssets.Hex("8A6E4A"), 0.04f, Px, seed: 3), 5f),
+                Layer("Soil", WorldAssets.NoiseTexture("Soil", WorldAssets.Hex("8E6640"), WorldAssets.Hex("76522F"), WorldAssets.Hex("A87C52"), 0.02f, Px, seed: 4, stripes: true), 4f),
+                Layer("Mud", WorldAssets.NoiseTexture("Mud", WorldAssets.Hex("6B4A2E"), WorldAssets.Hex("5A3C24"), WorldAssets.Hex("8A6644"), 0.02f, Px, seed: 5), 3f),
+                Layer("Cobble", WorldAssets.CobbleTexture("Cobble", WorldAssets.Hex("C9BBA2"), WorldAssets.Hex("8F8270"), Px), 1.7f),
+                Layer("Bank", WorldAssets.NoiseTexture("Bank", WorldAssets.Hex("B49A72"), WorldAssets.Hex("9C8462"), WorldAssets.Hex("D2BE98"), 0.05f, Px, seed: 6), 4f),
+                Layer("Meadow", WorldTextures.GrassStrokes("MeadowPaint", WorldAssets.Hex("97B05A"), WorldAssets.Hex("82A04C"), WorldAssets.Hex("E3D68A"), 8), 7f),
+                Layer("Forest", WorldAssets.NoiseTexture("ForestFloor", WorldAssets.Hex("5E7A3E"), WorldAssets.Hex("4E6A34"), WorldAssets.Hex("8A7A4A"), 0.05f, Px, seed: 9), 6f),
+            };
+        }
+
 
         static TerrainLayer Layer(string name, Texture2D tex, float tile)
         {
@@ -287,7 +298,7 @@ namespace HarvestPanic.World.Editor
             go.transform.position = new Vector3(x0, TY0, z0);
             go.isStatic = true;
             var t = go.GetComponent<Terrain>();
-            var mat = AssetDatabase.LoadAssetAtPath<Material>("Packages/com.unity.render-pipelines.universal/Runtime/Materials/TerrainLit.mat");
+            var mat = TerrainMaterial(); // HarvestPanic/Stylized Terrain (visual overhaul)
             if (mat != null) t.materialTemplate = mat;
             t.drawInstanced = true;          // instanced patches: ~200 fewer draw calls than per-patch terrain rendering
             t.heightmapPixelError = centre ? 4f : 10f;
@@ -395,7 +406,7 @@ namespace HarvestPanic.World.Editor
             var mat = AssetDatabase.LoadAssetAtPath<Material>(hp);
             if (mat == null || mat.shader.name != "HarvestPanic/Horizon") { AssetDatabase.DeleteAsset(hp); mat = new Material(Shader.Find("HarvestPanic/Horizon")); AssetDatabase.CreateAsset(mat, hp); }
             mat.SetColor("_Color", WorldAssets.Hex("8FA89A"));
-            mat.SetFloat("_FogMix", 0.5f);
+            mat.SetFloat("_FogMix", HorizonFogMix);
             EditorUtility.SetDirty(mat);
             float[] radii = { 560f, 660f, 780f, 900f, 985f };
             const int seg = 120;

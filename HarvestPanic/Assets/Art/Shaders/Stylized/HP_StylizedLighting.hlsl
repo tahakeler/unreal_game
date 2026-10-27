@@ -47,7 +47,7 @@ HPStyle HP_DefaultStyle()
     s.rampSoftness = 0.10h;
     s.midTone = 0.72h;
     s.midOffset = 0.30h;
-    s.shadowColor = half3(0.80h, 0.80h, 0.95h);
+    s.shadowColor = half3(0.86h, 0.86h, 0.98h);
     s.specular = 0.0h;
     s.rimColor = half3(1.0h, 0.96h, 0.84h);
     s.rimStrength = 0.0h;

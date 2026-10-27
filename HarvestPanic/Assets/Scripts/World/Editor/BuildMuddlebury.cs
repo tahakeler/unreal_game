@@ -144,61 +144,21 @@ namespace HarvestPanic.World.Editor
 
         static void Lighting()
         {
-            // Matches WeatherLook.ForPhase(None) ("golden afternoon") so WeatherPresenter takes over without a pop.
+            // Matches WeatherLook.ForPhase(None) ("golden afternoon") so WeatherPresenter takes over without a pop
+            // (visual overhaul: one mapping, BuildMuddlebury.Visuals.cs).
             var sunGo = new GameObject("Sun (golden afternoon)");
             sunGo.transform.SetParent(_root);
             var sun = sunGo.AddComponent<Light>();
             sun.type = LightType.Directional;
-            sun.color = WorldAssets.Hex("FFE9C4");
-            sun.intensity = 2.0f;
-            sun.shadows = LightShadows.Soft;
-            sun.shadowStrength = 0.72f;
             sunGo.transform.rotation = Quaternion.Euler(32f, 42f, 0f);
             RenderSettings.sun = sun;
-
-            var sky = AssetDatabase.LoadAssetAtPath<Material>(WorldAssets.MatDir + "/M_World_Sky.mat");
-            if (sky == null) { sky = new Material(Shader.Find("Skybox/Procedural")); AssetDatabase.CreateAsset(sky, WorldAssets.MatDir + "/M_World_Sky.mat"); }
-            sky.SetColor("_SkyTint", WorldAssets.Hex("B3CCE3"));
-            sky.SetColor("_GroundColor", WorldAssets.Hex("C9C7A8"));
-            sky.SetFloat("_AtmosphereThickness", 0.85f);
-            sky.SetFloat("_Exposure", 1.2f);
-            sky.SetFloat("_SunSize", 0.03f);
-            sky.SetFloat("_SunSizeConvergence", 6f);
-            EditorUtility.SetDirty(sky);
-            RenderSettings.skybox = sky;
-
-            RenderSettings.ambientMode = AmbientMode.Trilight;
-            RenderSettings.ambientSkyColor = WorldAssets.Hex("A9C4DC");
-            RenderSettings.ambientEquatorColor = WorldAssets.Hex("D8C3A0");
-            RenderSettings.ambientGroundColor = WorldAssets.Hex("6E5A44");
-            RenderSettings.fog = true;
-            RenderSettings.fogMode = FogMode.Linear;
-            RenderSettings.fogColor = WorldAssets.Hex("E9D9BC");
-            RenderSettings.fogStartDistance = 140f;
-            RenderSettings.fogEndDistance = 700f;
+            ApplySceneLook(sun, BaselineLook);
             RenderSettings.defaultReflectionMode = DefaultReflectionMode.Skybox;
 
             var profilePath = SettingsDir + "/VP_Muddlebury.asset";
             var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(profilePath);
             if (profile == null) { profile = ScriptableObject.CreateInstance<VolumeProfile>(); AssetDatabase.CreateAsset(profile, profilePath); }
-            T Get<T>() where T : VolumeComponent
-            {
-                if (!profile.TryGet<T>(out var c)) { c = profile.Add<T>(true); AssetDatabase.AddObjectToAsset(c, profile); }
-                return c;
-            }
-            Get<Tonemapping>().mode.Override(TonemappingMode.Neutral);
-            var ca = Get<ColorAdjustments>();
-            // Saturation +4 and post exposure 0.1 are the baseline WeatherPresenter's delta volume assumes; keep them.
-            ca.saturation.Override(4f); ca.contrast.Override(10f); ca.postExposure.Override(0.1f);
-            ca.colorFilter.Override(WorldAssets.Hex("FFF6E8"));
-            var wb = Get<WhiteBalance>(); wb.temperature.Override(6f); wb.tint.Override(3f);
-            var bloom = Get<Bloom>(); bloom.intensity.Override(0.4f); bloom.threshold.Override(1.2f); bloom.scatter.Override(0.6f);
-            var smh = Get<ShadowsMidtonesHighlights>();
-            smh.shadows.Override(new Vector4(0.95f, 0.94f, 1.08f, 0.02f)); // violet-tinted, slightly lifted shadows (art bible 5)
-            smh.highlights.Override(new Vector4(1.02f, 1.0f, 0.97f, 0f));
-            var vig = Get<Vignette>(); vig.intensity.Override(0.24f); vig.smoothness.Override(0.45f);
-            var mb = Get<MotionBlur>(); mb.active = false;
-            EditorUtility.SetDirty(profile);
+            ApplyVolumeBaseline(profile, BaselineLook);
 
             var volGo = new GameObject("Global Volume (art bible)");
             volGo.transform.SetParent(_root);

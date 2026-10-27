@@ -20,8 +20,8 @@ Shader "HarvestPanic/Stylized Sky"
         _CloudColor("Cloud Lit", Color) = (1.0, 0.98, 0.94, 1)
         _CloudShadeColor("Cloud Shade", Color) = (0.72, 0.78, 0.88, 1)
         _CloudCover("Cloud Cover", Range(0.0, 1.0)) = 0.38
-        _CloudSoftness("Cloud Edge Softness", Range(0.01, 0.4)) = 0.08
-        _CloudScale("Cloud Scale", Float) = 1.3
+        _CloudSoftness("Cloud Edge Softness", Range(0.005, 0.4)) = 0.035
+        _CloudScale("Cloud Scale", Float) = 2.2
         _CloudSpeed("Cloud Drift (xy)", Vector) = (0.006, 0.002, 0, 0)
         _CloudOpacity("Cloud Opacity", Range(0.0, 1.0)) = 0.95
         _StarIntensity("Stars", Range(0.0, 2.0)) = 0.0
@@ -76,8 +76,8 @@ Shader "HarvestPanic/Stylized Sky"
             float Fbm(float2 p)
             {
                 float v = 0.0, a = 0.5;
-                [unroll] for (int k = 0; k < 4; k++) { v += a * Noise(p); p = p * 2.03 + 17.1; a *= 0.5; }
-                return v / 0.9375;
+                [unroll] for (int k = 0; k < 5; k++) { v += a * Noise(p); p = p * 2.03 + 17.1; a *= 0.5; }
+                return v / 0.96875;
             }
 
             half4 frag(V i) : SV_Target
@@ -114,18 +114,24 @@ Shader "HarvestPanic/Stylized Sky"
                 half disc = smoothstep(discCos - 0.00012, discCos + 0.00012, cosA) * smoothstep(-0.02, 0.02, y);
                 sky = lerp(sky, _SunDiscColor.rgb, disc);
 
-                // Painted clouds on a flattened dome: two tones (lit / shade) with soft edges, drifting.
+                // Painted cumulus on a high flat cloud layer: a slow large-scale "weather" mask clusters them into
+                // islands, a domain-warped fbm gives puffy edges, the threshold is crisp (storybook, not photo), and a
+                // second sample offset toward the light splits each cloud into a bright sun side and a cool shade side.
                 if (y > 0.0 && _CloudCover > 0.001)
                 {
-                    float2 uv = d.xz / (y + 0.18) * _CloudScale + _Time.y * _CloudSpeed.xy;
-                    float n = Fbm(uv);
-                    float edge = 1.0 - _CloudCover;
+                    float2 uv = d.xz / (y + 0.32) * _CloudScale + _Time.y * _CloudSpeed.xy;
+                    float2 warp = float2(Noise(uv * 0.7 + 3.1), Noise(uv * 0.7 + 9.7)) - 0.5;
+                    float2 cuv = uv + warp * 0.55;
+                    float cluster = Noise(uv * 0.23 + 41.0);
+                    float n = Fbm(cuv) * 0.75 + cluster * 0.45 - 0.1;
+                    float edge = 1.0 - _CloudCover * 1.05;   // cover 0.4 ~ a third of the sky, 0.9+ overcast
                     float c = smoothstep(edge, edge + _CloudSoftness, n);
-                    float nSun = Fbm(uv + L.xz * 0.22);
-                    half shade = smoothstep(-0.04, 0.06, n - nSun); // lit where density falls toward the light
-                    half3 cloud = lerp(_CloudShadeColor.rgb, _CloudColor.rgb, shade);
+                    float nSun = Fbm(cuv + L.xz * 0.18) * 0.75 + cluster * 0.45 - 0.1;
+                    half shade = smoothstep(-0.02, 0.05, n - nSun); // density falling toward the light = lit side
+                    half core = smoothstep(edge + 0.05, edge + 0.3, n);  // thick cores slightly darker (volume)
+                    half3 cloud = lerp(_CloudShadeColor.rgb, _CloudColor.rgb, saturate(shade + (1.0 - core) * 0.35));
                     cloud += _SunGlowColor.rgb * glow * 0.6;
-                    half fade = smoothstep(0.0, 0.16, y);
+                    half fade = smoothstep(0.02, 0.2, y);
                     sky = lerp(sky, cloud, c * fade * _CloudOpacity * (1.0 - disc * 0.6));
                 }
 

@@ -74,7 +74,7 @@ namespace HarvestPanic.World.Editor
 
         static void Render(Camera cam, int width, int height, string path)
         {
-            var rt = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32) { antiAliasing = 1 };
+            var rt = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32) { antiAliasing = 4 }; // MSAA 4x like the game (HP_URP)
             rt.Create();
             try
             {

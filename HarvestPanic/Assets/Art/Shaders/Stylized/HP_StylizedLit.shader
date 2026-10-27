@@ -22,7 +22,7 @@ Shader "HarvestPanic/Stylized Lit"
         _RampSoftness("Terminator Softness", Range(0.002, 0.5)) = 0.10
         _RampMidTone("Middle Band Level (1 = two bands)", Range(0.0, 1.0)) = 0.72
         _RampMidOffset("Middle Band Width", Range(0.0, 1.0)) = 0.30
-        _ShadowColor("Shadow Tint", Color) = (0.80, 0.80, 0.95, 1)
+        _ShadowColor("Shadow Tint", Color) = (0.86, 0.86, 0.98, 1)
         _OcclusionStrength("Occlusion Strength", Range(0.0, 1.0)) = 1.0
 
         [Header(Highlights)]

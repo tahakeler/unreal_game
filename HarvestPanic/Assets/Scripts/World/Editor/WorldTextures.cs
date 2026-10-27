@@ -42,9 +42,9 @@ namespace HarvestPanic.World.Editor
             AssetDatabase.ImportAsset(path);
             var imp = (TextureImporter)AssetImporter.GetAtPath(path);
             imp.wrapMode = repeat ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
-            imp.filterMode = point ? FilterMode.Point : FilterMode.Bilinear;
+            imp.filterMode = point ? FilterMode.Point : FilterMode.Trilinear; // visual overhaul texture audit
             imp.mipmapEnabled = !point;
-            imp.anisoLevel = point ? 0 : 4;
+            imp.anisoLevel = point ? 0 : 8;
             imp.maxTextureSize = maxSize;
             imp.textureCompression = TextureImporterCompression.CompressedHQ;
             imp.SaveAndReimport();

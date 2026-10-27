@@ -17,7 +17,7 @@ Shader "HarvestPanic/StylizedWater"
         _Alpha ("Alpha", Range(0, 1)) = 0.9
         _DepthFade ("Depth for full deep colour (m)", Float) = 2.2
         _ShoreFoamDepth ("Shore foam depth (m)", Float) = 0.45
-        _ReflectStrength ("Sky reflection", Range(0, 1)) = 0.45
+        _ReflectStrength ("Sky reflection", Range(0, 1)) = 0.3
         _GlintStrength ("Sun glint", Range(0, 4)) = 1.6
     }
     SubShader
@@ -94,7 +94,7 @@ Shader "HarvestPanic/StylizedWater"
                 // Flowing streaks: stretched noise, stepped for a painted look.
                 float sn = vnoise(float2(across * 38, down * _StripeScale));
                 float sn2 = vnoise(float2(across * 13 + 3, down * _StripeScale * 0.5 + 11));
-                float streak = step(0.78, sn * 0.6 + sn2 * 0.4);
+                float streak = step(0.82, sn * 0.6 + sn2 * 0.4);
 
                 // Lighting: ambient sky + sun with shadows (trees/bridge darken the water), lanterns at night.
                 Light sun = GetMainLight(TransformWorldToShadowCoord(i.wpos));
@@ -120,13 +120,13 @@ Shader "HarvestPanic/StylizedWater"
 
                 // Sky reflection (fresnel) from the ambient probe: the river picks up the sky colour at grazing angles.
                 half3 viewDir = normalize(GetWorldSpaceViewDir(i.wpos));
-                half fres = pow(1.0 - saturate(dot(n, viewDir)), 4.0);
+                half fres = pow(1.0 - saturate(dot(n, viewDir)), 5.0);
                 half3 skyRefl = SampleSH(reflect(-viewDir, n));
-                col = lerp(col, skyRefl, saturate(fres * _ReflectStrength * 1.6));
+                col = lerp(col, skyRefl, saturate(fres * _ReflectStrength));
 
                 // Foam: flow streaks, bank band (UV) and shoreline/contact foam (depth), broken by noise.
                 half3 foam = _FoamColor.rgb * light;
-                col = lerp(col, foam, streak * 0.45);
+                col = lerp(col, foam, streak * 0.22);
                 float edge = min(across, 1 - across);
                 float wob = vnoise(float2(down * 0.8, across * 3)) * 0.04;
                 float bank = step(edge, _BankFoam + wob);

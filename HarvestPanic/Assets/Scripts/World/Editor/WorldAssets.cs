@@ -34,7 +34,23 @@ namespace HarvestPanic.World.Editor
 
         public static Color Hex(string h) { ColorUtility.TryParseHtmlString("#" + h, out var c); return c; }
 
-        /// <summary>Gets or creates a URP Lit palette material (instancing on, rough, non-metallic).</summary>
+        /// <summary>
+        /// Ground/tiling texture import (visual overhaul texture audit): trilinear + 8x anisotropic so the road and fields
+        /// stay crisp at the grazing first-person angle, mips on, high-quality compression (BC7: no banding in the soft
+        /// painted gradients), max size = the generated size.
+        /// </summary>
+        public static void ConfigureGroundImport(TextureImporter imp, int size)
+        {
+            imp.wrapMode = TextureWrapMode.Repeat;
+            imp.mipmapEnabled = true;
+            imp.filterMode = FilterMode.Trilinear;
+            imp.anisoLevel = 8;
+            imp.maxTextureSize = Mathf.Max(256, size);
+            imp.textureCompression = TextureImporterCompression.CompressedHQ;
+            imp.SaveAndReimport();
+        }
+
+        /// <summary>Gets or creates a palette material (HarvestPanic/Stylized Lit; instancing on, rough, non-metallic).</summary>
         public static Material Mat(string name, Color color, float smoothness = 0.12f, Texture2D tex = null, Color? emission = null)
         {
             string path = $"{MatDir}/M_World_{name}.mat";
@@ -42,7 +58,9 @@ namespace HarvestPanic.World.Editor
             Directory.CreateDirectory(MatDir);
             var m = AssetDatabase.LoadAssetAtPath<Material>(path);
             bool create = m == null;
-            if (create) m = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            // Visual overhaul: new palette materials are born stylized (re-run Harvest Panic > Rendering > Convert Materials
+            // to apply the per-folder look profile); existing ones keep whatever shader they have.
+            if (create) m = new Material(Shader.Find("HarvestPanic/Stylized Lit") ?? Shader.Find("Universal Render Pipeline/Lit"));
             m.SetColor("_BaseColor", color);
             m.SetFloat("_Smoothness", smoothness);
             m.SetFloat("_Metallic", 0f);
@@ -100,10 +118,7 @@ namespace HarvestPanic.World.Editor
             Object.DestroyImmediate(tex);
             AssetDatabase.ImportAsset(path);
             var imp = (TextureImporter)AssetImporter.GetAtPath(path);
-            imp.wrapMode = TextureWrapMode.Repeat;
-            imp.filterMode = FilterMode.Bilinear;
-            imp.maxTextureSize = 256;
-            imp.SaveAndReimport();
+            ConfigureGroundImport(imp, size);
             return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
         }
 
@@ -144,7 +159,7 @@ namespace HarvestPanic.World.Editor
             Object.DestroyImmediate(tex);
             AssetDatabase.ImportAsset(path);
             var imp = (TextureImporter)AssetImporter.GetAtPath(path);
-            imp.wrapMode = TextureWrapMode.Repeat; imp.maxTextureSize = 256; imp.SaveAndReimport();
+            ConfigureGroundImport(imp, size);
             return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
         }
 

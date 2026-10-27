@@ -68,49 +68,49 @@ namespace HarvestPanic.Weather
             // Warm key light against cool sky ambient and a violet-blue shadow tint is what gives the stylized shading its form.
             _morning = new WeatherLook
             {
-                SunColor = Hex("FFDDB0"), SunIntensity = 1.75f, SunPitch = 16f,
+                SunColor = Hex("FFDDB0"), SunIntensity = 1.5f, SunPitch = 16f,
                 SkyTint = Hex("7FA8D6"), Horizon = Hex("F4DDBE"), SkyExposure = 1.0f,
-                Ambient = Hex("FFF2E2"), FogColor = Hex("EADCC6"), FogStart = 110f, FogEnd = 820f,
-                Saturation = 8f, PostExposure = 0.05f,
+                Ambient = Hex("FFF2E2") * 1.1f, FogColor = Hex("D6D8D6"), FogStart = 120f, FogEnd = 1400f,
+                Saturation = 2f, PostExposure = -0.12f,
                 CloudCover = 0.36f, Stars = 0f, SunDisc = Hdr("FFE6C0", 7f),
-                ShadowTint = Hex("D2C8EE"), AmbientFloor = 0f, RimBoost = 0f,
-                Contrast = 12f, Lift = new Color(1f, 1f, 1f, 0f), BloomIntensity = 0.38f, BloomThreshold = 1.05f, Vignette = 0.22f, Temperature = 8f,
+                ShadowTint = Hex("F4EEFA"), AmbientFloor = 0f, RimBoost = 0f,
+                Contrast = 14f, Lift = new Color(1f, 1f, 1f, 0f), BloomIntensity = 0.38f, BloomThreshold = 1.05f, Vignette = 0.22f, Temperature = 8f,
             };
             _noon = new WeatherLook
             {
-                SunColor = Hex("FFF1D8"), SunIntensity = 2.15f, SunPitch = 52f,
-                SkyTint = Hex("4C8BD3"), Horizon = Hex("CFE2EC"), SkyExposure = 1.0f,
-                Ambient = Color.white, FogColor = Hex("CFDFE6"), FogStart = 170f, FogEnd = 1050f,
-                Saturation = 12f, PostExposure = 0.0f,
+                SunColor = Hex("FFF1D8"), SunIntensity = 1.8f, SunPitch = 52f,
+                SkyTint = Hex("3A7BCB"), Horizon = Hex("D2E4EE"), SkyExposure = 0.95f,
+                Ambient = Color.white * 1.12f, FogColor = Hex("B8CEE2"), FogStart = 150f, FogEnd = 1800f,
+                Saturation = 6f, PostExposure = -0.18f,
                 CloudCover = 0.42f, Stars = 0f, SunDisc = Hdr("FFF4E0", 8f),
-                ShadowTint = Hex("C8CCF2"), AmbientFloor = 0f, RimBoost = 0f,
-                Contrast = 14f, Lift = new Color(1f, 1f, 1f, 0f), BloomIntensity = 0.32f, BloomThreshold = 1.1f, Vignette = 0.2f, Temperature = 3f,
+                ShadowTint = Hex("EEF0FF"), AmbientFloor = 0f, RimBoost = 0f,
+                Contrast = 18f, Lift = new Color(1f, 1f, 1f, 0f), BloomIntensity = 0.32f, BloomThreshold = 1.1f, Vignette = 0.2f, Temperature = 1f,
             };
             _afternoon = _noon;
-            _afternoon.SunPitch = 32f; _afternoon.SunColor = Hex("FFE6BE"); _afternoon.SunIntensity = 2.05f;
-            _afternoon.SkyTint = Hex("5590D0"); _afternoon.Horizon = Hex("DCE4E2"); _afternoon.FogColor = Hex("D8E0DE");
-            _afternoon.Temperature = 7f;
+            _afternoon.SunPitch = 32f; _afternoon.SunColor = Hex("FFEBCF"); _afternoon.SunIntensity = 1.7f; _afternoon.FogStart = 140f; _afternoon.FogEnd = 1600f;
+            _afternoon.SkyTint = Hex("3F7FCC"); _afternoon.Horizon = Hex("D9E5EB"); _afternoon.FogColor = Hex("BACDDF");
+            _afternoon.Temperature = 3f;
             _dusk = new WeatherLook
             {
-                SunColor = Hex("FF9A66"), SunIntensity = 1.45f, SunPitch = 8f,
+                SunColor = Hex("FF9560"), SunIntensity = 1.5f, SunPitch = 8f,
                 SkyTint = Hex("5D5C9E"), Horizon = Hex("FFB28A"), SkyExposure = 1.0f,
-                Ambient = Hex("C2AED8"), FogColor = Hex("E8A88C"), FogStart = 80f, FogEnd = 620f,
-                Saturation = 16f, PostExposure = 0.0f,
+                Ambient = Hex("B7A0D6"), FogColor = Hex("D99A92"), FogStart = 180f, FogEnd = 1200f,
+                Saturation = 14f, PostExposure = 0.0f,
                 CloudCover = 0.46f, Stars = 0.1f, SunDisc = Hdr("FFB070", 6f),
-                ShadowTint = Hex("B8A2E6"), AmbientFloor = 0.01f, RimBoost = 0.25f,
-                Contrast = 14f, Lift = new Color(1f, 0.98f, 1.04f, 0f), BloomIntensity = 0.5f, BloomThreshold = 1.0f, Vignette = 0.28f, Temperature = 10f,
+                ShadowTint = Hex("D4C4F0"), AmbientFloor = 0.01f, RimBoost = 0.25f,
+                Contrast = 18f, Lift = new Color(1f, 0.98f, 1.04f, 0f), BloomIntensity = 0.5f, BloomThreshold = 1.0f, Vignette = 0.28f, Temperature = 10f,
             };
             // Night (visual overhaul): moonlit and READABLE - a cool moon key, a teal ambient floor so shapes and paths
             // read at the edges, lifted teal blacks, stars and a pale moon disc; the warm lanterns (hand lantern, posts,
             // windows) still carry the colour and bloom. Darkness is for the edges of the screen (art bible 4.3).
             _night = new WeatherLook
             {
-                SunColor = Hex("9EC4FF"), SunIntensity = 0.42f, SunPitch = 34f,
+                SunColor = Hex("9EC4FF"), SunIntensity = 0.38f, SunPitch = 34f,
                 SkyTint = Hex("0C1A33"), Horizon = Hex("1E3850"), SkyExposure = 1.0f,
                 Ambient = Hex("3A5470"), FogColor = Hex("15263A"), FogStart = 30f, FogEnd = 260f,
                 Saturation = -18f, PostExposure = -0.35f,
                 CloudCover = 0.3f, Stars = 1f, SunDisc = Hdr("DCE8FF", 2.6f),
-                ShadowTint = Hex("8FB4CC"), AmbientFloor = 0.035f, RimBoost = 0.8f,
+                ShadowTint = Hex("A8C8DC"), AmbientFloor = 0.035f, RimBoost = 0.8f,
                 Contrast = 8f, Lift = new Color(0.96f, 1.0f, 1.06f, 0.02f), BloomIntensity = 0.85f, BloomThreshold = 0.9f, Vignette = 0.4f, Temperature = -6f,
             };
             _built = true;
