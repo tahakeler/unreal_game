@@ -408,18 +408,27 @@ namespace HarvestPanic.Tests.PlayMode.Tools
             Assert.That(pc.Carry.IsHoldingReplicated, Is.False);
 
             // Holding the net, E on a crate puts the net away and grabs the crate.
-            yield return Farm.Equip(pc, ToolSlot.Net);
+            // The crate is settled upright with bare hands and then pinned before the net comes out: looking ~48 deg down
+            // at it swings the held net's box collider (kinematic, moved with the view) through it, and the next physics
+            // step could knock it past GrabRange between the "E: Grab" prompt and the E press, so E fell through to
+            // "Put away" and HeldId stayed NoObject. The grab makes the body dynamic again (CarryBody), so the swap path
+            // under test is unchanged.
             var crate = Farm.Goods("Product.Crate");
+            var crateBody = crate.GetComponent<Rigidbody>();
             Vector3 fwd = pc.transform.forward;
+            crate.transform.rotation = Quaternion.LookRotation(fwd);
+            crateBody.rotation = crate.transform.rotation;
             Farm.Place(crate, pc.transform.position + fwd * 1.3f + Vector3.up * 0.4f);
             yield return new WaitForSeconds(0.8f);
+            crateBody.isKinematic = true;
+            yield return Farm.Equip(pc, ToolSlot.Net);
             pc.Motor.LookAt(crate.GetComponentInChildren<Collider>().bounds.center);
             yield return null;
             Assert.That(pc.Carry.Prompt, Does.Contain("E: Grab"), "prompt offers the swap");
             yield return Farm.Tap(pc, i => i.Scripted.InteractPressed = true);
             float until = Time.time + 2f;
             while (pc.Carry.HeldId != crate.NetworkObjectId && Time.time < until) yield return null;
-            Assert.That(pc.Carry.HeldId, Is.EqualTo(crate.NetworkObjectId));
+            Assert.That(pc.Carry.HeldId, Is.EqualTo(crate.NetworkObjectId), "E swapped the net for the crate (prompt: '" + pc.Carry.Prompt + "')");
             Assert.That(belt.PocketTool((int)ToolSlot.Net).IsHolstered, Is.True, "net auto-holstered");
         }
 
