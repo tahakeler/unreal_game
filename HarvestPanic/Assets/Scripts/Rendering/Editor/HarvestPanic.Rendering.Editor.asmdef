@@ -1,0 +1,20 @@
+{
+    "name": "HarvestPanic.Rendering.Editor",
+    "rootNamespace": "HarvestPanic.Rendering.Editor",
+    "references": [
+        "HarvestPanic.Core",
+        "Unity.RenderPipelines.Core.Runtime",
+        "Unity.RenderPipelines.Universal.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

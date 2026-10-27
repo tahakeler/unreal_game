@@ -23,7 +23,7 @@ namespace HarvestPanic.Tests.PlayMode.World
     {
         const string ScenePath = "Assets/Scenes/Muddlebury.unity";
 
-        [TearDown] public void Reset() { NightWindows.ForceLit = null; _captured = false; _ca = null; _sky = null; }
+        [TearDown] public void Reset() { NightWindows.ForceLit = null; _applier?.Restore(); _applier = null; }
 
         [UnityTest]
         public IEnumerator Capture_Map_Day_And_Dusk()
@@ -41,11 +41,12 @@ namespace HarvestPanic.Tests.PlayMode.World
             Assert.IsNotNull(root, "QA_Cameras");
             var cams = root.GetComponentsInChildren<Camera>(true);
             int n = 0;
-            foreach (var cam in cams) { Capture(cam, Path.Combine(dir, $"map_day_{cam.name}.png")); n++; }
-
             // The live WeatherPresenter (if a director spawned) re-applies its own look every LateUpdate: park it, and
-            // apply the QA look right before each capture.
+            // apply the QA look (same WeatherLookApplier the presenter uses) right before each capture.
             foreach (var wp in Object.FindObjectsByType<WeatherPresenter>(FindObjectsSortMode.None)) wp.enabled = false;
+            var day = WeatherLook.ForPhase(DayClockPhase.None, 0f);
+            foreach (var cam in cams) { ApplyLook(day); Capture(cam, Path.Combine(dir, $"map_day_{cam.name}.png")); n++; }
+
             NightWindows.ForceLit = true;
             foreach (var nw in Object.FindObjectsByType<NightWindows>(FindObjectsSortMode.None)) nw.Refresh();
             var dusk = WeatherLook.ForPhase(DayClockPhase.Dusk, 0.12f);
@@ -61,42 +62,14 @@ namespace HarvestPanic.Tests.PlayMode.World
             Assert.That(n, Is.GreaterThanOrEqualTo(20));
         }
 
-        static Color _amb0, _amb1, _amb2; static bool _captured;
-        static ColorAdjustments _ca;
-        static Material _sky;
+        static WeatherLookApplier _applier;
 
-        /// <summary>Same mapping as WeatherPresenter.Apply (sun pitch/colour, ambient multiply, fog, sky, grade delta).</summary>
+        /// <summary>Same mapping as the live WeatherPresenter (shared WeatherLookApplier).</summary>
         static void ApplyLook(WeatherLook l)
         {
-            if (!_captured)
-            {
-                _amb0 = RenderSettings.ambientSkyColor; _amb1 = RenderSettings.ambientEquatorColor; _amb2 = RenderSettings.ambientGroundColor;
-                _sky = RenderSettings.skybox != null ? new Material(RenderSettings.skybox) : null;
-                var vgo = new GameObject("QA Weather Volume");
-                var vol = vgo.AddComponent<Volume>(); vol.isGlobal = true; vol.priority = 20;
-                var prof = ScriptableObject.CreateInstance<VolumeProfile>();
-                _ca = prof.Add<ColorAdjustments>(true);
-                vol.profile = prof;
-                _captured = true;
-            }
-            var sun = RenderSettings.sun;
-            if (sun != null)
-            {
-                var e = sun.transform.rotation.eulerAngles;
-                sun.transform.rotation = Quaternion.Euler(l.SunPitch, e.y, 0f);
-                sun.color = l.SunColor; sun.intensity = l.SunIntensity;
-            }
-            RenderSettings.ambientSkyColor = _amb0 * l.Ambient; RenderSettings.ambientEquatorColor = _amb1 * l.Ambient; RenderSettings.ambientGroundColor = _amb2 * l.Ambient;
-            RenderSettings.fog = true; RenderSettings.fogMode = FogMode.Linear;
-            RenderSettings.fogColor = l.FogColor; RenderSettings.fogStartDistance = l.FogStart; RenderSettings.fogEndDistance = l.FogEnd;
-            if (_sky != null)
-            {
-                _sky.SetColor("_SkyTint", l.SkyTint); _sky.SetFloat("_Exposure", l.SkyExposure);
-                _sky.SetColor("_GroundColor", Color.Lerp(l.FogColor, l.SkyTint, 0.3f));
-                RenderSettings.skybox = _sky;
-            }
-            _ca.saturation.Override(l.Saturation - 4f); _ca.postExposure.Override(l.PostExposure - 0.1f);
-            Debug.Log($"[MapQA] look sun={l.SunIntensity:0.00}@{l.SunPitch:0} fog={l.FogStart:0}-{l.FogEnd:0} exp={l.PostExposure:0.00} applied sun={(sun != null ? sun.intensity : -1f):0.00}");
+            if (_applier == null) { _applier = new WeatherLookApplier(); _applier.Capture(null); }
+            _applier.Apply(l);
+            Debug.Log($"[MapQA] look sun={l.SunIntensity:0.00}@{l.SunPitch:0} fog={l.FogStart:0}-{l.FogEnd:0} exp={l.PostExposure:0.00}");
         }
 
         static void Capture(Camera cam, string path)

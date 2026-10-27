@@ -14,7 +14,9 @@ namespace HarvestPanic.World.Editor
     /// Windowless look-dev capture of every camera under "QA_Cameras" in Muddlebury. Needs a GPU, so run batchmode
     /// WITHOUT -nographics (no window opens):
     /// Unity -batchmode -projectPath HarvestPanic -executeMethod HarvestPanic.World.Editor.MuddleburyQa.CaptureAll -qaOutDir /abs/dir -quit -logFile /abs/qa.log
-    /// Options: -qaCams 01,04 (name prefixes), -qaLook Dusk|Night (WeatherLook phase applied like WeatherPresenter, windows lit).
+    /// Options: -qaCams 01,04 (name prefixes), -qaLook Day|Morning|Noon|Dusk|Night (default Day = the no-clock golden
+    /// afternoon; applied through WeatherLookApplier exactly like the live WeatherPresenter; Dusk/Night light the windows),
+    /// -qaWeather Rain|Storm|Fog|Heatwave|Wind (on top of the phase).
     /// </summary>
     public static class MuddleburyQa
     {
@@ -36,12 +38,25 @@ namespace HarvestPanic.World.Editor
             }
             LitText.ApplyAll();
             string suffix = "";
+            WeatherLook l;
+            switch (look)
+            {
+                case "Morning": l = WeatherLook.ForPhase(DayClockPhase.Morning, 0f); break;
+                case "Noon": l = WeatherLook.ForPhase(DayClockPhase.Workday, 0.5f); break;
+                case "Dusk": l = WeatherLook.ForPhase(DayClockPhase.Dusk, 0.12f); break;
+                case "Night": l = WeatherLook.ForPhase(DayClockPhase.Dusk, 0.8f); break;
+                default: l = WeatherLook.ForPhase(DayClockPhase.None, 0f); break;
+            }
+            if (!string.IsNullOrEmpty(look) && look != "Day") suffix = "_" + look;
+            string weather = Arg("-qaWeather");
+            if (!string.IsNullOrEmpty(weather) && Enum.TryParse(weather, out WeatherKind wk)) { l = WeatherLook.WithWeather(l, wk, 0f); suffix += "_" + wk; }
+            var applier = new WeatherLookApplier();
+            applier.Capture(null);
+            applier.Apply(l);
             if (look == "Dusk" || look == "Night")
             {
-                ApplyLook(WeatherLook.ForPhase(DayClockPhase.Dusk, look == "Dusk" ? 0.12f : 0.8f));
                 NightWindows.ForceLit = true;
                 foreach (var nw in UnityEngine.Object.FindObjectsByType<NightWindows>(FindObjectsSortMode.None)) nw.Refresh();
-                suffix = "_" + look;
             }
             int n = 0;
             foreach (var cam in root.GetComponentsInChildren<Camera>(true))
@@ -53,34 +68,8 @@ namespace HarvestPanic.World.Editor
                 n++;
             }
             NightWindows.ForceLit = null;
+            applier.Restore();
             Debug.Log($"[MuddleburyQa] wrote {n} captures to {outDir}");
-        }
-
-        /// <summary>Mirror of WeatherPresenter.Apply for an editor capture (the scene is never saved).</summary>
-        static void ApplyLook(WeatherLook l)
-        {
-            var sun = RenderSettings.sun;
-            if (sun != null)
-            {
-                var e = sun.transform.rotation.eulerAngles;
-                sun.transform.rotation = Quaternion.Euler(l.SunPitch, e.y, 0f);
-                sun.color = l.SunColor; sun.intensity = l.SunIntensity;
-            }
-            RenderSettings.ambientSkyColor *= l.Ambient; RenderSettings.ambientEquatorColor *= l.Ambient; RenderSettings.ambientGroundColor *= l.Ambient;
-            RenderSettings.fogColor = l.FogColor; RenderSettings.fogStartDistance = l.FogStart; RenderSettings.fogEndDistance = l.FogEnd;
-            if (RenderSettings.skybox != null)
-            {
-                var sky = new Material(RenderSettings.skybox);
-                sky.SetColor("_SkyTint", l.SkyTint); sky.SetFloat("_Exposure", l.SkyExposure);
-                sky.SetColor("_GroundColor", Color.Lerp(l.FogColor, l.SkyTint, 0.3f));
-                RenderSettings.skybox = sky;
-            }
-            var vgo = new GameObject("QA Weather Volume");
-            var vol = vgo.AddComponent<Volume>(); vol.isGlobal = true; vol.priority = 20;
-            var prof = ScriptableObject.CreateInstance<VolumeProfile>();
-            var ca = prof.Add<ColorAdjustments>(true);
-            ca.saturation.Override(l.Saturation - 4f); ca.postExposure.Override(l.PostExposure - 0.1f);
-            vol.profile = prof;
         }
 
         static void Render(Camera cam, int width, int height, string path)

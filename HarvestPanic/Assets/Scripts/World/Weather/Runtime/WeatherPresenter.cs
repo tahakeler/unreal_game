@@ -6,8 +6,9 @@ using UnityEngine.Rendering.Universal;
 namespace HarvestPanic.Weather
 {
     /// <summary>
-    /// Local-only weather + day-phase visuals (art bible §4.3): drives RenderSettings.sun, a skybox copy, ambient,
-    /// linear fog and a runtime global Volume (priority 20); rain streaks and wind leaves follow the local camera.
+    /// Local-only weather + day-phase visuals (art bible §4.3): blends toward <see cref="Target"/> and pushes it through
+    /// <see cref="WeatherLookApplier"/> (sun, sky copy, ambient, linear fog, runtime global Volume priority 20, stylized
+    /// shading globals); rain streaks and wind leaves follow the local camera.
     /// Cheap by design: two particle systems with hard caps, no lights, no extra cameras. Restores the scene on destroy.
     /// </summary>
     public sealed class WeatherPresenter : MonoBehaviour
@@ -15,17 +16,11 @@ namespace HarvestPanic.Weather
         const int RainCap = 1200, StormCap = 2000, LeafCap = 60;
 
         WeatherDirector _dir;
-        Material _rainMat, _leafMat, _sky, _sceneSky;
-        Light _sun;
-        Quaternion _sunBaseRot;
-        Color _sunBaseColor, _ambSky, _ambEq, _ambGround, _fogBaseColor;
-        float _sunBaseIntensity, _fogStartBase, _fogEndBase;
-        bool _fogBase; FogMode _fogModeBase;
+        Material _rainMat, _leafMat;
+        readonly WeatherLookApplier _applier = new WeatherLookApplier();
         WeatherLook _look;
         bool _hasLook;
         ParticleSystem _rain, _leaves;
-        Volume _volume;
-        ColorAdjustments _ca;
 
         /// <summary>The blended look currently shown (QA/tests).</summary>
         public WeatherLook CurrentLook => _look;
@@ -37,38 +32,9 @@ namespace HarvestPanic.Weather
         /// <summary>Called once by the director.</summary>
         public void Init(WeatherDirector dir, Material rain, Material leaf) { _dir = dir; _rainMat = rain; _leafMat = leaf; }
 
-        void Start() { CaptureScene(); }
+        void Start() { _applier.Capture(transform); }
 
-        void CaptureScene()
-        {
-            _sun = RenderSettings.sun;
-            if (_sun == null) foreach (var l in FindObjectsByType<Light>(FindObjectsSortMode.None)) if (l.type == LightType.Directional) { _sun = l; break; }
-            if (_sun != null) { _sunBaseRot = _sun.transform.rotation; _sunBaseColor = _sun.color; _sunBaseIntensity = _sun.intensity; }
-            _ambSky = RenderSettings.ambientSkyColor; _ambEq = RenderSettings.ambientEquatorColor; _ambGround = RenderSettings.ambientGroundColor;
-            _fogBase = RenderSettings.fog; _fogModeBase = RenderSettings.fogMode; _fogBaseColor = RenderSettings.fogColor;
-            _fogStartBase = RenderSettings.fogStartDistance; _fogEndBase = RenderSettings.fogEndDistance;
-            _sceneSky = RenderSettings.skybox;
-            if (_sceneSky != null) { _sky = new Material(_sceneSky) { name = _sceneSky.name + " (weather)" }; RenderSettings.skybox = _sky; }
-
-            var vgo = new GameObject("Weather Volume");
-            vgo.transform.SetParent(transform, false);
-            _volume = vgo.AddComponent<Volume>();
-            _volume.isGlobal = true; _volume.priority = 20;
-            var profile = ScriptableObject.CreateInstance<VolumeProfile>();
-            _ca = profile.Add<ColorAdjustments>(true);
-            _volume.profile = profile;
-        }
-
-        void OnDestroy()
-        {
-            if (_sun != null) { _sun.transform.rotation = _sunBaseRot; _sun.color = _sunBaseColor; _sun.intensity = _sunBaseIntensity; }
-            RenderSettings.ambientSkyColor = _ambSky; RenderSettings.ambientEquatorColor = _ambEq; RenderSettings.ambientGroundColor = _ambGround;
-            RenderSettings.fog = _fogBase; RenderSettings.fogMode = _fogModeBase; RenderSettings.fogColor = _fogBaseColor;
-            RenderSettings.fogStartDistance = _fogStartBase; RenderSettings.fogEndDistance = _fogEndBase;
-            if (_sceneSky != null) RenderSettings.skybox = _sceneSky;
-            if (_sky != null) Destroy(_sky);
-            if (_volume != null && _volume.profile != null) Destroy(_volume.profile);
-        }
+        void OnDestroy() { _applier.Restore(); }
 
         /// <summary>Target look for the current phase and weather on this peer.</summary>
         public static WeatherLook Target(IWeatherService w)
@@ -94,29 +60,8 @@ namespace HarvestPanic.Weather
 
         void Apply()
         {
-            if (_sun != null)
-            {
-                var e = _sunBaseRot.eulerAngles;
-                _sun.transform.rotation = Quaternion.Euler(_look.SunPitch, e.y, 0f);
-                _sun.color = _look.SunColor;
-                _sun.intensity = _look.SunIntensity;
-            }
-            var a = _look.Ambient;
-            RenderSettings.ambientSkyColor = _ambSky * a; RenderSettings.ambientEquatorColor = _ambEq * a; RenderSettings.ambientGroundColor = _ambGround * a;
-            RenderSettings.fog = true; RenderSettings.fogMode = FogMode.Linear;
-            RenderSettings.fogColor = _look.FogColor; RenderSettings.fogStartDistance = _look.FogStart; RenderSettings.fogEndDistance = _look.FogEnd;
-            if (_sky != null)
-            {
-                if (_sky.HasProperty("_SkyTint")) _sky.SetColor("_SkyTint", _look.SkyTint);
-                if (_sky.HasProperty("_Exposure")) _sky.SetFloat("_Exposure", _look.SkyExposure);
-                if (_sky.HasProperty("_GroundColor")) _sky.SetColor("_GroundColor", Color.Lerp(_look.FogColor, _look.SkyTint, 0.3f));
-            }
-            if (_ca != null)
-            {
-                // The scene volume already grades +4 saturation; this one carries the delta.
-                _ca.saturation.Override(_look.Saturation - 4f);
-                _ca.postExposure.Override(_look.PostExposure - 0.1f);
-            }
+            if (!_applier.Captured) _applier.Capture(transform);
+            _applier.Apply(_look);
         }
 
         void UpdateParticles(bool snap)
