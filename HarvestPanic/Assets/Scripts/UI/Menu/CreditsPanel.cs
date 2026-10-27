@@ -34,10 +34,11 @@ namespace HarvestPanic.UI
             paper.Add(Scroll);
             foreach (var block in (text ?? CreditsText.Load()).Replace("\r\n", "\n").Split(new[] { "\n\n" }, StringSplitOptions.RemoveEmptyEntries))
             {
-                string b = block.Trim('\n');
-                if (b.Length == 0) continue;
+                string raw = block.Trim('\n');
+                string b = StripRules(raw);
+                if (b.Trim().Length == 0) continue;
                 var l = new Label(b) { enableRichText = false };
-                l.AddToClassList(IsHeading(b) ? "credits-heading" : "credits-para");
+                l.AddToClassList(IsHeading(raw) ? "credits-heading" : "credits-para");
                 l.style.whiteSpace = WhiteSpace.Normal;
                 Scroll.Add(l);
                 _paragraphs.Add(l);
@@ -86,6 +87,21 @@ namespace HarvestPanic.UI
         {
             foreach (var l in _paragraphs) if (l.text.Contains(s)) return true;
             return false;
+        }
+
+        /// <summary>Removes plain-text underline rows ("=====", "-----") that read as noise in the styled card.</summary>
+        static string StripRules(string block)
+        {
+            var lines = block.Split('\n');
+            var keep = new System.Text.StringBuilder();
+            foreach (var l in lines)
+            {
+                string t = l.Trim();
+                if (t.Length >= 3 && t.Trim('=', '-') .Length == 0) continue;
+                if (keep.Length > 0) keep.Append('\n');
+                keep.Append(l);
+            }
+            return keep.ToString();
         }
 
         static bool IsHeading(string block)

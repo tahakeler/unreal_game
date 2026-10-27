@@ -21,6 +21,7 @@
 .toast-text { padding: 10px 34px; font-size: 28px; background-color: var(--paper); border-width: 3px; border-bottom-width: 7px; border-color: var(--ink); border-radius: 14px; rotate: -0.6deg; white-space: normal; max-width: 1100px; -unity-text-align: middle-center; }
 
 .center-stack { position: absolute; left: 0; right: 0; top: 200px; align-items: center; }
+.lobby--crew-open .center-stack { right: 820px; }
 .countdown-label { font-size: 64px; color: var(--paper); -unity-text-outline-width: 6px; -unity-text-outline-color: var(--ink); text-shadow: 0 6px 0 var(--ink); display: none; }
 .countdown-disc {
     display: none; width: 250px; height: 250px; border-radius: 125px; margin-top: 8px;
@@ -48,7 +49,7 @@
 .prompt--pill { margin: 0 10px; padding: 6px 18px 6px 8px; background-color: rgba(246, 235, 211, 0.94); border-width: 3px; border-color: var(--ink); border-radius: 28px; }
 
 /* crew ledger (Tab) */
-.crew-panel { position: absolute; right: 40px; top: 120px; bottom: 110px; width: 760px; display: none; }
+.crew-panel { position: absolute; right: 40px; top: 118px; bottom: 96px; width: 780px; display: none; }
 .crew-panel.is-active { display: flex; }
 .crew-panel.is-entering { opacity: 0; translate: 40px 0; }
 .crew-panel { transition-property: opacity, translate; transition-duration: 0.2s, 0.26s; transition-timing-function: ease-out, ease-out-back; }
@@ -56,11 +57,12 @@
 .crew-head { align-items: flex-end; }
 .crew-title { font-size: 54px; color: var(--ink); }
 .crew-count { font-size: 26px; color: var(--ink-soft); margin-bottom: 8px; }
-.crew-row { flex-direction: row; align-items: center; min-height: 86px; padding: 4px 12px; margin-bottom: 8px; background-color: var(--cream); border-width: 3px; border-bottom-width: 5px; border-color: var(--ink); border-radius: 14px; }
+.crew-row { flex-shrink: 0; flex-direction: row; align-items: center; min-height: 74px; padding: 4px 12px; margin-bottom: 8px; background-color: var(--cream); border-width: 3px; border-bottom-width: 5px; border-color: var(--ink); border-radius: 14px; }
 .crew-row--me { border-left-width: 10px; }
 .crew-row--empty { background-color: rgba(255, 244, 214, 0.45); border-color: rgba(43, 33, 24, 0.35); border-bottom-width: 3px; }
 .crew-names { margin-left: 14px; flex-shrink: 1; }
-.crew-name { font-size: 34px; }
+.crew-name { font-size: 32px; }
+.crew-head, .crew-hint, .host-rules, .rules-row, .rules-buttons, .chat-title, .chat-input, .crew-foot, .crew-card > .ink-underline { flex-shrink: 0; }
 .crew-row .tag { margin-left: 0; margin-right: 6px; margin-top: 2px; }
 .crew-btn { min-width: 110px; min-height: 50px; font-size: 22px; margin: 0 0 0 8px; padding: 0 12px; }
 .crew-row .stamp { margin-right: 10px; }
@@ -70,10 +72,11 @@
 .rules-head { font-size: 24px; color: var(--wood-dark); margin-bottom: 4px; }
 .rules-row { margin-bottom: 6px; }
 .rules-label { min-width: 150px; -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"); }
-.rules-row .hp-chip { min-width: 80px; min-height: 48px; font-size: 22px; margin-bottom: 0; }
+.rules-row .hp-chip { min-width: 84px; min-height: 48px; font-size: 22px; margin-bottom: 0; padding: 0 14px; }
+.rules-row .chip-row { flex-wrap: nowrap; }
 .rules-buttons .hp-btn { margin-bottom: 0; }
 .chat-title { font-size: 30px; color: var(--ink); }
-.chat-log { flex-grow: 1; min-height: 90px; background-color: var(--paper-2); border-width: 2px; border-color: var(--ink-faint); border-radius: 12px; padding: 6px 12px; }
+.chat-log { flex-grow: 1; flex-shrink: 1; min-height: 70px; background-color: var(--paper-2); border-width: 2px; border-color: var(--ink-faint); border-radius: 12px; padding: 6px 12px; }
 .chat-line { align-items: flex-start; margin-bottom: 2px; }
 .chat-name { font-size: 22px; margin-right: 8px; }
 .chat-text { font-size: 22px; white-space: normal; flex-shrink: 1; }

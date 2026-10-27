@@ -14,14 +14,14 @@
                     <ui:Label name="tagline" text="@title.tagline" class="bold tagline" />
                 </ui:VisualElement>
                 <ui:VisualElement name="title-menu" class="paper-card menu-card">
-                    <ui:VisualElement class="masking-tape masking-tape--tl" picking-mode="Ignore" />
-                    <ui:Button name="btn-play" text="@menu.play" class="hp-btn hp-btn--primary menu-btn menu-btn--play" />
+                    <ui:VisualElement class="masking-tape masking-tape--tr" picking-mode="Ignore" />
+                    <ui:Button name="btn-play" text="@menu.play" class="hp-btn menu-btn menu-btn--play" />
                     <ui:Button name="btn-character" text="@menu.character" class="hp-btn menu-btn" />
                     <ui:Button name="btn-settings" text="@menu.settings" class="hp-btn menu-btn" />
                     <ui:Button name="btn-credits" text="@menu.credits" class="hp-btn menu-btn" />
                     <ui:Button name="btn-quit" text="@menu.quit" class="hp-btn menu-btn hp-btn--back" />
                 </ui:VisualElement>
-                <ui:Button name="profile-chip" class="profile-chip">
+                <ui:Button name="profile-chip" class="hp-btn profile-chip">
                     <ui:VisualElement name="profile-badge" class="profile-badge" picking-mode="Ignore" />
                     <ui:VisualElement class="profile-text" picking-mode="Ignore">
                         <ui:Label text="@title.profile.head" class="bold profile-head" picking-mode="Ignore" />
@@ -97,7 +97,7 @@
                     <ui:Label text="@join.sub" class="screen-sub" />
                 </ui:VisualElement>
                 <ui:VisualElement class="paper-card form-card join-card paper-card--tilt-r">
-                    <ui:VisualElement class="masking-tape masking-tape--tl" picking-mode="Ignore" />
+                    <ui:VisualElement class="masking-tape masking-tape--tr" picking-mode="Ignore" />
                     <ui:VisualElement name="join-tabs" class="row tab-row" />
                     <ui:VisualElement name="join-friends" class="join-pane">
                         <ui:VisualElement class="row pane-head">

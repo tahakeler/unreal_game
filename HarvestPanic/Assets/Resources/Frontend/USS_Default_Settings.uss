@@ -1,10 +1,10 @@
 /* Settings ledger (main menu + pause), help and credits cards. */
 .settings-card { width: 1520px; height: 880px; padding: 24px 34px 22px 34px; }
-.settings-head { align-items: center; margin-bottom: 0; }
+.settings-head { align-items: center; margin-bottom: 0; flex-shrink: 0; }
 .settings-title { font-size: 66px; color: var(--ink); }
-.settings-underline { margin: -10px 0 12px 4px; width: 300px; }
+.settings-underline { margin: -10px 0 12px 4px; width: 300px; flex-shrink: 0; }
 .settings-tabs .tab-btn { min-width: 150px; margin: 0 0 0 10px; }
-.settings-body { flex-grow: 1; align-items: stretch; }
+.settings-body { flex-grow: 1; flex-shrink: 1; min-height: 0; align-items: stretch; overflow: hidden; }
 .settings-ledger {
     flex-grow: 1; flex-basis: 0;
     background-color: var(--paper-2); border-width: 3px; border-color: var(--ink); border-radius: 14px;
@@ -24,12 +24,12 @@
 .swatch-cell { width: 50%; margin-bottom: 8px; }
 .swatch { width: 40px; height: 40px; border-radius: 8px; border-width: 3px; border-color: var(--ink); margin-right: 10px; -unity-text-align: middle-center; color: var(--ink); font-size: 22px; -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"); }
 .swatch-label { -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"); }
-.settings-foot { margin-top: 16px; align-items: center; }
+.settings-foot { margin-top: 16px; align-items: center; flex-shrink: 0; }
 .settings-foot .hp-btn { margin-bottom: 0; min-width: 170px; }
 .settings-note { margin: 10px 0 0 4px; }
 
 .setting-row {
-    flex-direction: row; align-items: center; min-height: 74px; padding: 4px 12px 4px 14px; margin: 2px 0;
+    flex-shrink: 0; flex-direction: row; align-items: center; min-height: 74px; padding: 4px 12px 4px 14px; margin: 2px 0;
     border-bottom-width: 2px; border-color: rgba(94, 154, 184, 0.45); border-radius: 0;
     transition-property: background-color, translate; transition-duration: 0.12s;
 }

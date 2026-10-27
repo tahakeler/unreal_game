@@ -10,7 +10,7 @@ using UnityEngine.SceneManagement;
 namespace HarvestPanic.UI.EditorTools
 {
     /// <summary>
-    /// Builds the Frontend scenes (MainMenu, Lobby) and the empty Frontend NetworkPrefabsList from code so they are reproducible:
+    /// Builds the Frontend scenes (MainMenu with the live farm backdrop, Lobby) and the empty Frontend NetworkPrefabsList from code so they are reproducible:
     /// Unity -batchmode -quit -projectPath HarvestPanic -executeMethod HarvestPanic.UI.EditorTools.UiSceneBuilder.BuildAll
     /// </summary>
     public static class UiSceneBuilder
@@ -31,6 +31,24 @@ namespace HarvestPanic.UI.EditorTools
             Debug.Log("[UiSceneBuilder] Built MainMenu + Lobby + Frontend.asset");
         }
 
+        /// <summary>Rebuilds only the MainMenu scene (farm backdrop + menu UI): -executeMethod HarvestPanic.UI.EditorTools.UiSceneBuilder.BuildMainMenuOnly</summary>
+        [MenuItem("HarvestPanic/UI/Build Main Menu Scene")]
+        public static void BuildMainMenuOnly()
+        {
+            try
+            {
+                Directory.CreateDirectory(MatDir);
+                BuildMainMenu();
+                AssetDatabase.SaveAssets();
+                Debug.Log("[UiSceneBuilder] Built MainMenu");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogException(e);
+                if (Application.isBatchMode) EditorApplication.Exit(1);
+            }
+        }
+
         static void BuildNetworkList()
         {
             const string path = "Assets/Resources/NetworkPrefabs/Frontend.asset";
@@ -40,24 +58,34 @@ namespace HarvestPanic.UI.EditorTools
         }
 
         // ------------------------------------------------------------------ MainMenu
+        /// <summary>
+        /// MainMenu = the real farm as a live backdrop: Muddlebury's visual groups are moved into the menu scene (prefab links
+        /// kept, the source scene is never saved), every gameplay script, rigidbody, NetworkObject and audio source is stripped
+        /// (only cosmetic World components stay: instanced forest, windmill spinner, water bobbers, sign text), Muddlebury's
+        /// lighting is copied, a few critter models wander (MenuCritter) and MenuBackdrop eases the camera between one framing
+        /// per menu screen. Re-run after map changes.
+        /// </summary>
         static void BuildMainMenu()
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            SetupLighting(new Color(0.62f, 0.78f, 0.9f));
-            var cam = MakeCamera("Main Camera", new Vector3(-9f, 2.2f, -14f), Quaternion.Euler(8f, 28f, 0f), 50f);
-            MakeSun(Quaternion.Euler(38f, -50f, 0f), 1.5f);
-
-            var root = new GameObject("Backdrop").transform;
-            Block(root, PrimitiveType.Plane, "Ground", new Vector3(0, 0, 0), new Vector3(12, 1, 12), Grass);
-            Block(root, PrimitiveType.Sphere, "HillFar", new Vector3(30, -8, 70), new Vector3(110, 30, 60), Leaf);
-            Block(root, PrimitiveType.Sphere, "HillNear", new Vector3(-40, -6, 55), new Vector3(70, 22, 40), Grass * 0.9f);
-            Barn(root, new Vector3(14f, 0, 14f), 22f);
-            Block(root, PrimitiveType.Cylinder, "Silo", new Vector3(5f, 4f, 20f), new Vector3(4f, 4f, 4f), Cream);
-            Block(root, PrimitiveType.Sphere, "SiloTop", new Vector3(5f, 8f, 20f), new Vector3(4.2f, 2.4f, 4.2f), Slate);
-            Fence(root, new Vector3(-14f, 0, 4f), 8, new Vector3(1.6f, 0, 0.5f));
-            for (int i = 0; i < 6; i++) Tree(root, new Vector3(-26f + i * 9f, 0, 30f + (i % 2) * 6f));
-            Tree(root, new Vector3(-6f, 0, 12f));
-            for (int i = 0; i < 4; i++) Block(root, PrimitiveType.Cube, "Bale" + i, new Vector3(-2f + i * 1.3f, 0.5f, 6f + (i % 2) * 0.8f), new Vector3(1.2f, 0.9f, 0.9f), Hay);
+            var farm = MenuBackdropContent.ImportFarm(scene);
+            var cam = MakeCamera("Menu Camera", MenuBackdropContent.Shots[0].position, Quaternion.Euler(MenuBackdropContent.Shots[0].euler), MenuBackdropContent.Shots[0].fov);
+            cam.clearFlags = CameraClearFlags.Skybox;
+            cam.farClipPlane = 900f;
+            var camData = cam.GetComponent<UniversalAdditionalCameraData>();
+            camData.renderPostProcessing = true;
+            camData.antialiasing = AntialiasingMode.SubpixelMorphologicalAntiAliasing;
+            if (!farm) // Muddlebury missing: fall back to the old primitive diorama so the menu still has a backdrop.
+            {
+                SetupLighting(new Color(0.62f, 0.78f, 0.9f));
+                MakeSun(Quaternion.Euler(38f, -50f, 0f), 1.5f);
+                var root = new GameObject("Backdrop").transform;
+                Block(root, PrimitiveType.Plane, "Ground", new Vector3(0, 0, 0), new Vector3(12, 1, 12), Grass);
+                Barn(root, new Vector3(14f, 0, 14f), 22f);
+            }
+            var rig = new GameObject("Menu Backdrop");
+            rig.AddComponent<MenuBackdrop>().Configure(cam, MenuBackdropContent.Shots);
+            if (farm) MenuBackdropContent.AddCritters(rig.transform);
 
             var ui = new GameObject("MainMenu UI");
             ui.AddComponent<MainMenuController>();

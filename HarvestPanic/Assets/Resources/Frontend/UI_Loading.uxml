@@ -1,5 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
     <ui:VisualElement name="root" class="hp-root loading-root" picking-mode="Ignore">
+        <ui:VisualElement class="loading-vignette" picking-mode="Ignore" />
         <ui:VisualElement name="loading-card" class="paper-card loading-card" picking-mode="Ignore">
             <ui:VisualElement class="masking-tape masking-tape--tl" picking-mode="Ignore" />
             <ui:VisualElement class="masking-tape masking-tape--tr" picking-mode="Ignore" />

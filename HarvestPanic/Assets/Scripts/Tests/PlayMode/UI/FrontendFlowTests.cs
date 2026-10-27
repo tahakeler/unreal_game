@@ -41,7 +41,7 @@ namespace HarvestPanic.Tests.PlayMode.UI
             Assert.NotNull(menu, "MainMenuController in MainMenu scene");
             Assert.AreEqual(MenuScreen.Title, menu.Stack.Current);
             Assert.AreEqual("A co-op farm. Everything has legs.", menu.Panel.Root.Q<Label>("tagline").text);
-            Assert.AreEqual("LAN mode", menu.Panel.Root.Q<Label>("footer-mode").text);
+            Assert.AreEqual(UiText.Get("footer.mode.lan"), menu.Panel.Root.Q<Label>("footer-mode").text);
 
             menu.OpenPlay();
             Assert.AreEqual(MenuScreen.Play, menu.Stack.Current);
@@ -76,7 +76,8 @@ namespace HarvestPanic.Tests.PlayMode.UI
             menu.JoinAddress("fail");
             yield return null;
             Assert.IsFalse(menu.IsConnecting);
-            Assert.IsTrue(menu.Panel.Root.Q("popup-message").ClassListContains("is-active"));
+            Assert.IsTrue(menu.Dialog.IsOpen, "failure shows a dialog");
+            Assert.AreEqual(SessionErrorKind.Unreachable, menu.Dialog.ErrorKind);
             Assert.AreEqual(MenuScreen.Join, menu.Stack.Current);
         }
 

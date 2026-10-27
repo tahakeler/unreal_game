@@ -15,13 +15,17 @@
 
 .menu-card { position: absolute; left: 112px; top: 488px; width: 500px; padding: 26px 26px 14px 26px; rotate: -1deg; }
 .menu-btn { min-height: 66px; margin-bottom: 10px; }
-.menu-btn--play { min-height: 80px; font-size: 44px; }
+.menu-btn--play { min-height: 84px; font-size: 48px; }
+.menu-btn:focus, .pause-btn:focus { background-color: var(--pumpkin-light); border-left-color: var(--ink); }
+.menu-btn:hover, .pause-btn:hover { background-color: var(--cream); }
+.menu-btn:focus:hover, .pause-btn:focus:hover { background-color: var(--pumpkin-light); }
 
 .profile-chip {
     position: absolute; top: 34px; right: 48px; flex-direction: row; align-items: center;
-    min-height: 0; padding: 10px 24px 10px 12px; margin: 0; border-radius: 48px; rotate: 1.2deg;
+    min-height: 0; padding: 10px 26px 10px 12px; margin: 0; border-radius: 48px; rotate: 1.2deg; border-bottom-width: 6px;
 }
-.profile-chip:hover, .profile-chip:focus { translate: -4px 2px; rotate: 0deg; }
+.profile-chip:hover { translate: -4px 2px; rotate: 0deg; }
+.profile-chip:focus { translate: -4px 2px; rotate: 0deg; border-left-width: 3px; border-color: var(--pumpkin); border-bottom-color: var(--ink); border-width: 4px; border-bottom-width: 7px; }
 .profile-text { margin-left: 14px; }
 .profile-head { font-size: 20px; color: var(--ink-soft); letter-spacing: 1px; }
 .profile-name { font-size: 34px; color: var(--ink); margin-top: -4px; }
@@ -82,10 +86,10 @@
 .pane-hint { margin: 6px 0 14px 2px; }
 .pane-btn { align-self: flex-start; }
 .lan-searching { margin-right: 14px; }
-.lan-list { height: 340px; background-color: var(--paper-2); border-width: 3px; border-color: var(--ink); border-radius: 12px; padding: 6px; }
+.lan-list { height: 384px; background-color: var(--paper-2); border-width: 3px; border-color: var(--ink); border-radius: 12px; padding: 6px; }
 .lan-empty { margin-top: 10px; }
 .lan-row {
-    flex-direction: row; align-items: center; min-height: 82px; margin: 0 0 8px 0; padding: 0 18px;
+    flex-direction: row; align-items: center; min-height: 76px; margin: 0 4px 8px 4px; padding: 0 18px;
     border-width: 3px; border-bottom-width: 5px; border-radius: 12px; font-size: 26px;
 }
 .lan-row:hover { translate: 4px 0; rotate: 0deg; }

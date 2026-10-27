@@ -321,6 +321,10 @@ lobby.prompt.wardrobe = Wardrobe
 lobby.prompt.bell = Dinner bell
 lobby.prompt.menu = Menu
 
+# ---------------------------------------------------------------- onboarding tapes
+tape.badge = VHS · 1994
+tape.title = Grandpa's Tape
+
 # ---------------------------------------------------------------- loading
 loading.lobby.title = Heading to the yard
 loading.lobby.sub = Grandpa's putting the kettle on.

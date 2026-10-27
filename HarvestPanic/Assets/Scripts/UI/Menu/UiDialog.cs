@@ -96,6 +96,7 @@ namespace HarvestPanic.UI
             Configure(Primary, cancelKey, cancel, ref _primary);
             Configure(Secondary, null, null, ref _secondary);
             Primary.AddToClassList(UiKit.BackClass);
+            Primary.RemoveFromClassList("hp-btn--primary");
             FocusDefault();
         }
 
@@ -105,6 +106,7 @@ namespace HarvestPanic.UI
         public bool Back()
         {
             if (!IsOpen) return false;
+            UiSounds.Back();
             if (Secondary.style.display != DisplayStyle.None) Run(_secondary);
             else Run(_primary);
             return true;
@@ -140,6 +142,7 @@ namespace HarvestPanic.UI
             _card.EnableInClassList("dialog-card--error", tone == DialogTone.Error);
             _card.EnableInClassList("dialog-card--busy", tone == DialogTone.Busy);
             Primary.RemoveFromClassList(UiKit.BackClass);
+            Primary.AddToClassList("hp-btn--primary");
             _layer.style.display = DisplayStyle.Flex;
             UiKit.ShowScreen(_layer);
         }

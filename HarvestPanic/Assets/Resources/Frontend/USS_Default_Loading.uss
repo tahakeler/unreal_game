@@ -1,4 +1,5 @@
 /* Scene transition card (LoadingScreen). Display only. */
+.loading-vignette { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background-image: url("project:///Assets/Art/UI/Textures/T_UI_Vignette.png"); -unity-background-scale-mode: stretch-to-fill; }
 .loading-root {
     background-color: var(--wood-dark);
     background-image: url("project:///Assets/Art/UI/Textures/T_UI_PaperGrain.png"); background-repeat: repeat; background-size: 256px 256px;

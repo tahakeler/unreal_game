@@ -243,6 +243,7 @@ namespace HarvestPanic.UI
             if (open == CrewOpen) return;
             CrewOpen = open;
             _crewPanel.EnableInClassList("is-open", open);
+            _root.EnableInClassList("lobby--crew-open", open);
             if (open)
             {
                 UiFocus.Push(this);

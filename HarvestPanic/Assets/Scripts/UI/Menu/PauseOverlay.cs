@@ -208,6 +208,7 @@ namespace HarvestPanic.UI
                 var replays = new Button(() => { if (Services.TryGet(out ICamcorderService cc)) { Close(); cc.OpenShelf(); } }) { name = "btn-replays", text = UiText.Get("pause.replays") };
                 foreach (var c in help.GetClasses()) replays.AddToClassList(c);
                 help.parent.Insert(help.parent.IndexOf(help) + 1, replays);
+                UiKit.AddPointer(replays);
             }
             r.Q<Button>("btn-leave").clicked += () => ShowLayer(Layer.Confirm);
             r.Q<Button>("btn-confirm-stay").clicked += () => ShowLayer(Layer.Main);

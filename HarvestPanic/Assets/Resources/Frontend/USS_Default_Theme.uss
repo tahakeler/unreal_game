@@ -139,6 +139,13 @@
 .hp-btn--wide { flex-grow: 1; }
 .hp-btn--selected, .hp-btn.is-selected { background-color: var(--sky); border-bottom-width: 3px; border-width: 5px; translate: 0 3px; }
 .hp-btn--icon { min-width: 58px; padding: 0; -unity-text-align: middle-center; }
+.hp-btn__pointer {
+    position: absolute; left: -38px; top: 50%; width: 22px; height: 22px; margin-top: -11px;
+    background-color: var(--pumpkin); border-width: 3px; border-color: var(--ink); border-radius: 4px;
+    rotate: 45deg; opacity: 0; translate: -10px 0;
+    transition-property: opacity, translate; transition-duration: 0.14s;
+}
+.hp-btn:focus > .hp-btn__pointer { opacity: 1; translate: 0 0; }
 
 /* chips: rounded tags for small choices (crew size, privacy, tabs) */
 .hp-chip {
@@ -217,7 +224,7 @@
 }
 .keycap--pad { border-radius: 22px; min-width: 44px; }
 .prompt-text { font-size: var(--font-size-small); -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"); }
-.prompt--on-dark .prompt-text { color: var(--paper); -unity-text-outline-width: 3px; -unity-text-outline-color: var(--ink); }
+.prompt--on-dark .prompt-text { color: #FFFFFF; -unity-text-outline-width: 3px; -unity-text-outline-color: var(--ink); text-shadow: 0 2px 0 var(--ink); }
 .prompt--off { opacity: 0.42; }
 
 /* ---------- chips / stamps / tags ---------- */

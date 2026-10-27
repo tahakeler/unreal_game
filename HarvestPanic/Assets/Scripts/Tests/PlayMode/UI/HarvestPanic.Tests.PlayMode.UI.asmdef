@@ -1,7 +1,7 @@
 {
     "name": "HarvestPanic.Tests.PlayMode.UI",
     "rootNamespace": "HarvestPanic.Tests.PlayMode.UI",
-    "references": ["HarvestPanic.Core", "HarvestPanic.UI", "Unity.InputSystem", "UnityEngine.TestRunner", "UnityEditor.TestRunner"],
+    "references": ["HarvestPanic.Core", "HarvestPanic.UI", "HarvestPanic.Networking", "Unity.Netcode.Runtime", "Unity.InputSystem", "UnityEngine.TestRunner", "UnityEditor.TestRunner"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

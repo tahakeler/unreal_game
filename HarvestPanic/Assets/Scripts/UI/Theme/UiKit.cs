@@ -57,6 +57,7 @@ namespace HarvestPanic.UI
         /// </summary>
         public static void Decorate(VisualElement root)
         {
+            AddPointers(root);
             UiSounds.AttachFocusSounds(root);
             VisualElement lastHover = null;
             root.RegisterCallback<PointerOverEvent>(e =>
@@ -71,6 +72,21 @@ namespace HarvestPanic.UI
             root.RegisterCallback<NavigationSubmitEvent>(e => PressSound(e.target as VisualElement), TrickleDown.TrickleDown);
             root.RegisterCallback<FocusInEvent>(e => MarkRow(e.target as VisualElement, true), TrickleDown.TrickleDown);
             root.RegisterCallback<FocusOutEvent>(e => MarkRow(e.target as VisualElement, false), TrickleDown.TrickleDown);
+        }
+
+        /// <summary>Adds the focus pointer (a pumpkin diamond left of the button) to vertical-list buttons.</summary>
+        public static void AddPointers(VisualElement root)
+        {
+            root.Query<Button>(className: "menu-btn").ForEach(AddPointer);
+            root.Query<Button>(className: "pause-btn").ForEach(AddPointer);
+        }
+
+        public static void AddPointer(Button b)
+        {
+            if (b == null || b.Q(className: "hp-btn__pointer") != null) return;
+            var p = new VisualElement { pickingMode = PickingMode.Ignore };
+            p.AddToClassList("hp-btn__pointer");
+            b.Add(p);
         }
 
         static void PressSound(VisualElement target)

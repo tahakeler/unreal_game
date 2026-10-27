@@ -2,8 +2,8 @@
     <ui:VisualElement name="root" class="hp-root overlay-root" picking-mode="Ignore">
         <ui:VisualElement name="tape" class="tape" picking-mode="Ignore">
             <ui:VisualElement class="tape-label" picking-mode="Ignore">
-                <ui:Label name="tape-badge" text="VHS · 1994" class="bold tape-badge" picking-mode="Ignore" />
-                <ui:Label name="tape-title" text="Grandpa's Tape" class="display tape-title" picking-mode="Ignore" />
+                <ui:Label name="tape-badge" text="@tape.badge" class="bold tape-badge" picking-mode="Ignore" />
+                <ui:Label name="tape-title" text="@tape.title" class="display tape-title" picking-mode="Ignore" />
             </ui:VisualElement>
             <ui:Label name="tape-body" text="" class="tape-body" picking-mode="Ignore" />
             <ui:Label name="tape-hint" text="" class="small-text tape-hint" picking-mode="Ignore" />

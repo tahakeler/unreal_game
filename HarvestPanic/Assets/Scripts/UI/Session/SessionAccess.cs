@@ -58,6 +58,7 @@ namespace HarvestPanic.UI
             foreach (var item in en)
             {
                 if (item == null) continue;
+                if (item is LanHost lh) { list.Add(lh); continue; }
                 var t = item.GetType();
                 list.Add(new LanHost
                 {
