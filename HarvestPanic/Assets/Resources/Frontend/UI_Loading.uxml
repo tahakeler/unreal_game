@@ -1,0 +1,23 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="root" class="hp-root loading-root" picking-mode="Ignore">
+        <ui:VisualElement name="loading-card" class="paper-card loading-card" picking-mode="Ignore">
+            <ui:VisualElement class="masking-tape masking-tape--tl" picking-mode="Ignore" />
+            <ui:VisualElement class="masking-tape masking-tape--tr" picking-mode="Ignore" />
+            <ui:VisualElement class="row loading-head" picking-mode="Ignore">
+                <ui:Label name="loading-title" text="@loading.generic.title" class="display loading-title" picking-mode="Ignore" />
+                <ui:VisualElement class="spacer" picking-mode="Ignore" />
+                <ui:VisualElement name="loading-wheel" class="loading-wheel" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:Label name="loading-sub" text="@loading.generic.sub" class="loading-sub" picking-mode="Ignore" />
+            <ui:VisualElement name="loading-runner" class="loading-tip-card" picking-mode="Ignore">
+                <ui:Label name="loading-tip-head" text="@loading.tip.head" class="display loading-tip-head" picking-mode="Ignore" />
+                <ui:Label name="loading-tip" text="" class="loading-tip" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement class="row loading-footer" picking-mode="Ignore">
+            <ui:Label text="@title.logo.1" class="display loading-logo" picking-mode="Ignore" />
+            <ui:Label text=" " class="display loading-logo" picking-mode="Ignore" />
+            <ui:Label text="@title.logo.2" class="display loading-logo" picking-mode="Ignore" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

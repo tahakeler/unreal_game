@@ -1,0 +1,83 @@
+/* Settings ledger (main menu + pause), help and credits cards. */
+.settings-card { width: 1520px; height: 880px; padding: 24px 34px 22px 34px; }
+.settings-head { align-items: center; margin-bottom: 0; }
+.settings-title { font-size: 66px; color: var(--ink); }
+.settings-underline { margin: -10px 0 12px 4px; width: 300px; }
+.settings-tabs .tab-btn { min-width: 150px; margin: 0 0 0 10px; }
+.settings-body { flex-grow: 1; align-items: stretch; }
+.settings-ledger {
+    flex-grow: 1; flex-basis: 0;
+    background-color: var(--paper-2); border-width: 3px; border-color: var(--ink); border-radius: 14px;
+    padding: 6px 10px 6px 18px; border-left-width: 10px; border-left-color: var(--wood);
+}
+.settings-scroll { flex-grow: 1; }
+.settings-side {
+    width: 400px; margin-left: 20px; padding: 18px 20px;
+    background-color: var(--cream); border-width: 3px; border-bottom-width: 7px; border-color: var(--ink); border-radius: 14px; rotate: 0.8deg;
+}
+.side-title { font-size: 34px; color: var(--ink); margin-bottom: 6px; white-space: normal; }
+.side-body { color: var(--ink-soft); white-space: normal; -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"); }
+.side-preview { margin-top: 18px; }
+.preview-head { font-size: 24px; color: var(--wood-dark); margin-bottom: 8px; }
+.preview-row { justify-content: space-between; margin-bottom: 12px; }
+.preview-grid { flex-direction: row; flex-wrap: wrap; }
+.swatch-cell { width: 50%; margin-bottom: 8px; }
+.swatch { width: 40px; height: 40px; border-radius: 8px; border-width: 3px; border-color: var(--ink); margin-right: 10px; -unity-text-align: middle-center; color: var(--ink); font-size: 22px; -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"); }
+.swatch-label { -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"); }
+.settings-foot { margin-top: 16px; align-items: center; }
+.settings-foot .hp-btn { margin-bottom: 0; min-width: 170px; }
+.settings-note { margin: 10px 0 0 4px; }
+
+.setting-row {
+    flex-direction: row; align-items: center; min-height: 74px; padding: 4px 12px 4px 14px; margin: 2px 0;
+    border-bottom-width: 2px; border-color: rgba(94, 154, 184, 0.45); border-radius: 0;
+    transition-property: background-color, translate; transition-duration: 0.12s;
+}
+.setting-row.is-focused, .setting-row:focus {
+    background-color: var(--cream); border-radius: 10px; border-width: 3px; border-color: var(--pumpkin); border-left-width: 12px; translate: 4px 0;
+}
+.setting-row:hover { background-color: rgba(255, 244, 214, 0.6); }
+.setting-label { font-size: 28px; min-width: 360px; color: var(--ink); }
+.setting-value { font-size: 26px; min-width: 96px; -unity-text-align: middle-right; }
+.choice-box { align-items: center; }
+.choice-label { font-size: 28px; min-width: 260px; -unity-text-align: middle-center; transition-property: scale; transition-duration: 0.12s; }
+.choice-label--bump { scale: 1.12 1.12; }
+.arrow-btn { min-width: 52px; min-height: 52px; font-size: 34px; margin: 0; padding: 0; border-radius: 26px; }
+.arrow-btn:hover, .arrow-btn:focus { translate: 0 0; rotate: 0deg; }
+.choice-pips { flex-direction: row; justify-content: center; margin-top: 4px; }
+.choice-pip { width: 10px; height: 10px; border-radius: 5px; margin: 0 3px; background-color: var(--ink-faint); }
+.choice-pip--on { background-color: var(--ink); width: 22px; }
+.switch {
+    flex-direction: row; align-items: center; width: 136px; height: 52px; border-radius: 26px; padding: 0 6px;
+    background-color: var(--paper-dark); border-width: 3px; border-bottom-width: 5px; border-color: var(--ink);
+    transition-property: background-color; transition-duration: 0.15s;
+}
+.switch__knob { position: absolute; left: 6px; top: 5px; width: 36px; height: 36px; border-radius: 18px; background-color: var(--cream); border-width: 3px; border-color: var(--ink); transition-property: left; transition-duration: 0.18s; transition-timing-function: ease-out-back; }
+.switch__text { position: absolute; left: 48px; right: 8px; top: 9px; -unity-text-align: middle-center; font-size: 24px; color: var(--ink-soft); -unity-font-definition: url("project:///Assets/Art/UI/Fonts/LilitaOne-Regular.ttf"); }
+.switch--on { background-color: var(--good-fill); }
+.switch--on .switch__knob { left: 86px; background-color: var(--good); }
+.switch--on .switch__text { left: 8px; right: 48px; color: var(--ink); }
+.name-field { width: 440px; margin: 6px 0; }
+.row-btn { margin: 0; }
+.bind-head { border-bottom-width: 4px; border-color: var(--ink); }
+.bind-col { width: 250px; margin-left: 10px; font-size: 24px; -unity-text-align: middle-center; }
+.bind-slot { width: 250px; margin-left: 10px; flex-direction: row; }
+.bind-btn { flex-grow: 1; min-width: 0; min-height: 52px; margin: 0; font-size: var(--font-size-small); }
+.bind-btn--listening { background-color: var(--pumpkin); }
+.bind-warning { color: var(--alert); white-space: normal; margin: 8px 0 0 4px; }
+
+.mic-box { margin-top: 6px; }
+.mic-bar { height: 26px; border-width: 3px; border-color: var(--ink); border-radius: 13px; background-color: var(--paper-dark); overflow: hidden; margin-bottom: 8px; }
+.mic-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background-color: var(--good); }
+.mic-threshold { position: absolute; top: -2px; bottom: -2px; width: 4px; background-color: var(--ink); }
+.mic-status { color: var(--ink-soft); -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"); }
+
+/* help card */
+.help-card { width: 1180px; }
+.help-row { flex-direction: row; align-items: center; min-height: 56px; border-bottom-width: 2px; border-color: rgba(94, 154, 184, 0.45); }
+.help-head { border-bottom-width: 4px; border-color: var(--ink); }
+.help-cell { color: var(--ink); flex-basis: 0; flex-grow: 1; white-space: normal; padding: 4px 10px; }
+.help-cell--action { flex-grow: 1.4; }
+.help-cell .keycap { align-self: flex-start; }
+.help-scroll { max-height: 600px; }
+.help-note { margin: 12px 0 8px 2px; }

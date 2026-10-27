@@ -12,13 +12,14 @@ namespace HarvestPanic.UI
         public HelpPanel(VisualElement host)
         {
             host.Clear();
-            var card = new VisualElement(); card.AddToClassList("sign"); card.AddToClassList("help-card");
-            var title = new Label("Controls") { name = "help-title" }; title.AddToClassList("display"); title.AddToClassList("sign-title");
+            var card = new VisualElement(); card.AddToClassList("paper-card"); card.AddToClassList("help-card");
+            var tape = new VisualElement { pickingMode = PickingMode.Ignore }; tape.AddToClassList("masking-tape"); tape.AddToClassList("masking-tape--top"); card.Add(tape);
+            var title = new Label(UiText.Get("help.title")) { name = "help-title" }; title.AddToClassList("display"); title.AddToClassList("settings-title");
             card.Add(title);
-            var paper = new VisualElement(); paper.AddToClassList("paper-card");
+            var paper = new VisualElement(); paper.AddToClassList("paper-inset");
             var scroll = new ScrollView(ScrollViewMode.Vertical) { name = "help-scroll" }; scroll.AddToClassList("help-scroll");
             paper.Add(scroll);
-            AddRow(scroll, "Action", "Keyboard + mouse", "Gamepad", true);
+            AddRow(scroll, UiText.Get("settings.controls.action"), UiText.Get("settings.controls.kbm"), UiText.Get("settings.controls.pad"), true);
             string lastAction = null;
             for (int i = 0; i < InputBindings.Defaults.Length; i++)
             {
@@ -30,21 +31,21 @@ namespace HarvestPanic.UI
                 {
                     kb = InputBindings.Display(InputBindings.Defaults[0]) + " " + InputBindings.Display(InputBindings.Defaults[2]) + " "
                          + InputBindings.Display(InputBindings.Defaults[1]) + " " + InputBindings.Display(InputBindings.Defaults[3]);
-                    AddRow(scroll, "Move", kb, InputBindings.ActionLabel("Move", true), false);
+                    AddRow(scroll, UiText.Get("help.move"), kb, InputBindings.ActionLabel("Move", true), false);
                     i += 3; continue;
                 }
                 kb = InputBindings.Display(d);
                 pad = InputBindings.ActionLabel(d.Action, true);
                 AddRow(scroll, d.Label, kb, pad, false);
             }
-            AddRow(scroll, "Look", "Mouse", "Right Stick", false);
-            AddRow(scroll, "Pause / back", "Esc", "Start / B", false);
-            AddRow(scroll, "Skip Grandpa's tape", "Backspace", "View", false);
+            AddRow(scroll, UiText.Get("help.look"), UiText.Get("help.look.kbm"), UiText.Get("help.look.pad"), false);
+            AddRow(scroll, UiText.Get("help.pause"), UiText.Get("glyph.key.esc"), UiText.Get("help.pause.pad"), false);
+            AddRow(scroll, UiText.Get("help.skiptape"), UiText.Get("help.skiptape.kbm"), UiText.Get("glyph.pad.view"), false);
             card.Add(paper);
-            var note = new Label("Rebind keys in Settings > Controls."); note.AddToClassList("small-text"); note.AddToClassList("on-dark");
+            var note = new Label(UiText.Get("help.note")); note.AddToClassList("small-text"); note.AddToClassList("muted"); note.AddToClassList("help-note");
             card.Add(note);
-            _back = new Button(() => Closed?.Invoke()) { text = "Back", name = "btn-help-back" };
-            _back.AddToClassList("hp-btn"); _back.AddToClassList("hp-btn--primary"); _back.AddToClassList("hp-btn--small"); _back.AddToClassList("hp-btn--center");
+            _back = new Button(() => Closed?.Invoke()) { text = UiText.Get("common.back"), name = "btn-help-back" };
+            _back.AddToClassList("hp-btn"); _back.AddToClassList("hp-btn--primary"); _back.AddToClassList("hp-btn--small"); _back.AddToClassList("hp-btn--center"); _back.AddToClassList(UiKit.BackClass);
             card.Add(_back);
             host.Add(card);
         }

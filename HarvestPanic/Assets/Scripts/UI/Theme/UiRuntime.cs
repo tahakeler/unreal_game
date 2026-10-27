@@ -2,15 +2,14 @@ using HarvestPanic.Core;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 
 namespace HarvestPanic.UI
 {
     /// <summary>
     /// Persistent frontend plumbing, created automatically after the first scene loads: guarantees an EventSystem with the
     /// Input System UI module (keyboard, mouse and gamepad navigation), a session provider (the Networking one, or the
-    /// <see cref="FakeSessionService"/> dev stand-in), applies <see cref="GameSettings"/> to the engine and owns the pause overlay.
+    /// <see cref="FakeSessionService"/> dev stand-in), applies <see cref="GameSettings"/> to the engine and owns the pause overlay,
+    /// onboarding overlay and the scene-transition <see cref="LoadingScreen"/>.
     /// </summary>
     public sealed class UiRuntime : MonoBehaviour
     {
@@ -51,6 +50,7 @@ namespace HarvestPanic.UI
             EnsureEventSystem();
             gameObject.AddComponent<PauseOverlay>();
             gameObject.AddComponent<OnboardingOverlay>();
+            gameObject.AddComponent<LoadingScreen>();
             InputBindings.Hook();
         }
 
@@ -113,14 +113,7 @@ namespace HarvestPanic.UI
             }
             HarvestPanic.Core.BatchModeSilence.Apply();
             ApplyComfort(s);
-            if (Application.isEditor || Application.isBatchMode) return; // never touch window/URP asset from the editor
-            switch (s.WindowMode)
-            {
-                case WindowModeSetting.Fullscreen: Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen; break;
-                case WindowModeSetting.Borderless: Screen.fullScreenMode = FullScreenMode.FullScreenWindow; break;
-                default: Screen.fullScreenMode = FullScreenMode.Windowed; break;
-            }
-            if (GraphicsSettings.currentRenderPipeline is UniversalRenderPipelineAsset urp) urp.renderScale = s.ResolutionScale;
+            VideoOptions.Apply(s); // player only: never touches the window, quality level or URP asset from the editor
         }
     }
 }

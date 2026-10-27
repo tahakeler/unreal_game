@@ -6,12 +6,14 @@ namespace HarvestPanic.UI
 {
     /// <summary>
     /// Runtime UI Toolkit panel built from Resources/Frontend assets (UXML + USS), kept in sync with <see cref="SettingsService"/>:
-    /// UI scale (80 to 150 percent), text size and reduced motion. One panel per screen group; never mixed with UGUI.
+    /// UI scale (80 to 150 percent), text size, reduced motion and colour-blind mode. "@key" texts are localized through
+    /// <see cref="UiText"/> and the root gets the shared sounds/focus decoration (<see cref="UiKit.Decorate"/>).
+    /// One panel per screen group; never mixed with UGUI.
     /// </summary>
     public sealed class UiPanel : MonoBehaviour
     {
         const string ResPath = "Frontend/";
-        static readonly string[] SharedSheets = { "USS_Default_Theme", "USS_Default_Menu", "USS_Default_Lobby", "USS_Default_Pause", "USS_Default_Onboarding" };
+        static readonly string[] SharedSheets = { "USS_Default_Theme", "USS_Default_Menu", "USS_Default_Settings", "USS_Default_Lobby", "USS_Default_Pause", "USS_Default_Onboarding", "USS_Default_Loading" };
 
         PanelSettings _panel;
         UIDocument _doc;
@@ -54,6 +56,8 @@ namespace HarvestPanic.UI
             }
             p.Root = rootHost.Q("root") ?? rootHost;
             p.Root.style.flexGrow = 1;
+            UiText.Localize(p.Root);
+            UiKit.Decorate(p.Root);
             SettingsService.Changed += p.OnSettings;
             p.OnSettings(SettingsService.Current);
             return p;

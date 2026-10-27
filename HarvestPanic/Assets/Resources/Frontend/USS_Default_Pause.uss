@@ -1,4 +1,14 @@
-.pause-root { background-color: rgba(43, 33, 24, 0.55); }
-.pause-sign { width: 640px; }
-.pause-title { font-size: 56px; color: var(--paper); margin-bottom: 8px; white-space: normal; -unity-text-outline-width: 4px; -unity-text-outline-color: var(--ink); text-shadow: 0 5px 0 var(--ink); }
-.pause-sign .small-text { margin-bottom: 20px; }
+/* Pause overlay: ledger card on the left, crew card on the right, leave confirm. */
+.pause-root { }
+.pause-card { position: absolute; left: 112px; top: 120px; width: 600px; padding: 30px 28px 18px 28px; rotate: -1deg; }
+.pause-title { font-size: 54px; color: var(--ink); white-space: normal; }
+.pause-sub { margin: 2px 0 2px 2px; }
+.pause-btn { min-height: 66px; margin-bottom: 10px; }
+.pause-toast { margin-top: 6px; color: var(--wood-dark); -unity-font-definition: url("project:///Assets/Art/UI/Fonts/Nunito-ExtraBold.ttf"); }
+.pause-players { position: absolute; right: 112px; top: 150px; width: 620px; padding: 28px 28px 18px 28px; }
+.pause-crew-row { min-height: 76px; padding: 4px 10px; margin-bottom: 8px; background-color: var(--paper-2); border-width: 2px; border-color: var(--ink-faint); border-radius: 12px; }
+.pause-crew-name { font-size: 30px; margin-left: 14px; }
+.mute-btn { min-width: 140px; margin: 0 0 0 8px; }
+.tag--talking { background-color: var(--good); color: var(--paper); }
+.confirm-card { width: 760px; padding: 34px 38px 26px 38px; rotate: -0.6deg; }
+.confirm-sub { margin: 8px 0 24px 0; }

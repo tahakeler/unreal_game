@@ -1,122 +1,161 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
-    <ui:VisualElement name="root" class="hp-root">
+    <!-- Title + Play flow. Every text is a string-table key (@...), see Resources/Frontend/Strings/UI_Strings_en.txt. -->
+    <ui:VisualElement name="root" class="hp-root menu-root">
+        <ui:VisualElement name="fade-left" class="fade-left" picking-mode="Ignore" />
+        <ui:VisualElement name="fade-bottom" class="fade-bottom" picking-mode="Ignore" />
 
-        <!-- TITLE -->
-        <ui:VisualElement name="title-screen" class="screen">
-            <ui:VisualElement name="logo-block" class="logo-block">
-                <ui:Label text="HARVEST" class="display logo logo-1" />
-                <ui:Label text="PANIC!" class="display logo logo-2" />
-                <ui:Label name="tagline" text="A co-op farm. Everything has legs." class="bold tagline" />
-            </ui:VisualElement>
-            <ui:VisualElement name="title-menu" class="sign menu-sign">
-                <ui:Button name="btn-play" text="Play" class="hp-btn hp-btn--primary" />
-                <ui:Button name="btn-customize" text="Customize" class="hp-btn" />
-                <ui:Button name="btn-settings" text="Settings" class="hp-btn" />
-                <ui:Button name="btn-credits" text="Credits" class="hp-btn" />
-                <ui:Button name="btn-quit" text="Quit" class="hp-btn" />
-            </ui:VisualElement>
-        </ui:VisualElement>
+        <ui:VisualElement name="screens" class="screens" picking-mode="Ignore">
 
-        <!-- PLAY: host or join -->
-        <ui:VisualElement name="play-screen" class="screen centered">
-            <ui:VisualElement class="sign wide-sign">
-                <ui:Label text="Play" class="display sign-title" />
-                <ui:VisualElement class="row cards">
-                    <ui:Button name="btn-host-card" class="hp-btn card-btn">
-                        <ui:Label text="Host a Farm" class="display card-title" />
-                        <ui:Label name="host-card-sub" text="Start a lobby. Friends join you." class="card-sub" />
-                    </ui:Button>
-                    <ui:Button name="btn-join-card" class="hp-btn card-btn">
-                        <ui:Label text="Join a Farm" class="display card-title" />
-                        <ui:Label text="LAN list, address or Steam friends." class="card-sub" />
-                    </ui:Button>
+            <!-- TITLE -->
+            <ui:VisualElement name="title-screen" class="screen title-screen" picking-mode="Ignore">
+                <ui:VisualElement name="logo-block" class="logo-block" picking-mode="Ignore">
+                    <ui:Label name="logo-1" text="@title.logo.1" class="display logo logo-1" />
+                    <ui:Label name="logo-2" text="@title.logo.2" class="display logo logo-2" />
+                    <ui:Label name="tagline" text="@title.tagline" class="bold tagline" />
                 </ui:VisualElement>
-                <ui:Button name="btn-play-back" text="Back" class="hp-btn hp-btn--small" />
-            </ui:VisualElement>
-        </ui:VisualElement>
-
-        <!-- HOST -->
-        <ui:VisualElement name="host-screen" class="screen centered">
-            <ui:VisualElement class="sign wide-sign">
-                <ui:Label text="Host a Farm" class="display sign-title" />
-                <ui:VisualElement class="paper-card">
-                    <ui:TextField name="host-name" label="Farm name" max-length="24" class="hp-field bold" />
-                    <ui:Label text="Crew size" class="bold small-text" />
-                    <ui:VisualElement name="host-players" class="row players-row" />
-                    <ui:Button name="btn-host-transport" text="Over: LAN" class="hp-btn hp-btn--small" />
-                    <ui:Label name="host-mode" text="Hosting over LAN." class="body-text" />
-                    <ui:Label name="host-continue-info" text="" class="small-text muted" />
-                    <ui:Label name="host-solo" text="Solo is allowed, but the farm is tuned for 2 to 4 farmers." class="small-text muted" />
+                <ui:VisualElement name="title-menu" class="paper-card menu-card">
+                    <ui:VisualElement class="masking-tape masking-tape--tl" picking-mode="Ignore" />
+                    <ui:Button name="btn-play" text="@menu.play" class="hp-btn hp-btn--primary menu-btn menu-btn--play" />
+                    <ui:Button name="btn-character" text="@menu.character" class="hp-btn menu-btn" />
+                    <ui:Button name="btn-settings" text="@menu.settings" class="hp-btn menu-btn" />
+                    <ui:Button name="btn-credits" text="@menu.credits" class="hp-btn menu-btn" />
+                    <ui:Button name="btn-quit" text="@menu.quit" class="hp-btn menu-btn hp-btn--back" />
                 </ui:VisualElement>
-                <ui:VisualElement class="row buttons-row">
-                    <ui:Button name="btn-host-continue" text="Continue Farm" class="hp-btn hp-btn--primary" />
-                    <ui:Button name="btn-host-go" text="Open the Gate" class="hp-btn hp-btn--primary" />
-                    <ui:Button name="btn-host-back" text="Back" class="hp-btn hp-btn--small" />
-                </ui:VisualElement>
-            </ui:VisualElement>
-        </ui:VisualElement>
-
-        <!-- JOIN -->
-        <ui:VisualElement name="join-screen" class="screen centered">
-            <ui:VisualElement class="sign wide-sign">
-                <ui:Label text="Join a Farm" class="display sign-title" />
-                <ui:VisualElement class="paper-card">
-                    <ui:VisualElement class="row">
-                        <ui:Label text="Farms on your network" class="bold heading" />
-                        <ui:VisualElement class="spacer" />
-                        <ui:Button name="btn-refresh" text="Refresh" class="hp-btn hp-btn--small" />
+                <ui:Button name="profile-chip" class="profile-chip">
+                    <ui:VisualElement name="profile-badge" class="profile-badge" picking-mode="Ignore" />
+                    <ui:VisualElement class="profile-text" picking-mode="Ignore">
+                        <ui:Label text="@title.profile.head" class="bold profile-head" picking-mode="Ignore" />
+                        <ui:Label name="profile-name" text="" class="display profile-name" picking-mode="Ignore" />
                     </ui:VisualElement>
-                    <ui:ListView name="lan-list" fixed-item-height="68" selection-type="Single" class="lan-list" />
-                    <ui:Label name="lan-empty" text="No farms found yet. Is your friend hosting on this network?" class="small-text muted" />
-                    <ui:VisualElement class="row join-row">
-                        <ui:TextField name="join-address" label="Or type an address" max-length="64" class="hp-field bold join-field" />
-                        <ui:Button name="btn-join-go" text="Join" class="hp-btn hp-btn--primary hp-btn--small hp-btn--center" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement class="row buttons-row">
-                    <ui:Button name="btn-steam-friends" text="Steam Friends" class="hp-btn" />
-                    <ui:Button name="btn-join-back" text="Back" class="hp-btn hp-btn--small" />
+                </ui:Button>
+                <ui:VisualElement name="note-card" class="note-card" picking-mode="Ignore">
+                    <ui:VisualElement class="masking-tape masking-tape--top" picking-mode="Ignore" />
+                    <ui:Label text="@title.note.head" class="display note-head" picking-mode="Ignore" />
+                    <ui:Label name="note-text" text="" class="note-text" picking-mode="Ignore" />
                 </ui:VisualElement>
             </ui:VisualElement>
-        </ui:VisualElement>
 
-        <!-- SETTINGS (filled by SettingsPanel) -->
-        <ui:VisualElement name="settings-screen" class="screen centered">
-            <ui:VisualElement name="settings-host" class="settings-host" />
-        </ui:VisualElement>
-        <ui:VisualElement name="credits-screen" class="screen centered">
-            <ui:VisualElement name="credits-host" />
+            <!-- PLAY: host / join / continue -->
+            <ui:VisualElement name="play-screen" class="screen play-screen" picking-mode="Ignore">
+                <ui:VisualElement class="screen-header" picking-mode="Ignore">
+                    <ui:Label text="@play.title" class="screen-title" />
+                    <ui:Label text="@play.sub" class="screen-sub" />
+                </ui:VisualElement>
+                <ui:VisualElement name="play-cards" class="row play-cards" picking-mode="Ignore">
+                    <ui:Button name="btn-host-card" class="hp-btn play-card play-card--host">
+                        <ui:VisualElement name="host-card-art" class="play-card__art" picking-mode="Ignore" />
+                        <ui:Label text="@play.host.title" class="display play-card__title" picking-mode="Ignore" />
+                        <ui:Label name="host-card-sub" text="@play.host.sub" class="play-card__sub" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="btn-join-card" class="hp-btn play-card play-card--join">
+                        <ui:VisualElement name="join-card-art" class="play-card__art" picking-mode="Ignore" />
+                        <ui:Label text="@play.join.title" class="display play-card__title" picking-mode="Ignore" />
+                        <ui:Label text="@play.join.sub" class="play-card__sub" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="btn-continue-card" class="hp-btn play-card play-card--continue">
+                        <ui:VisualElement name="continue-card-art" class="play-card__art" picking-mode="Ignore" />
+                        <ui:Label text="@play.continue.title" class="display play-card__title" picking-mode="Ignore" />
+                        <ui:Label name="continue-card-sub" text="@play.continue.none" class="play-card__sub" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+                <ui:VisualElement class="row form-buttons" picking-mode="Ignore">
+                    <ui:Button name="btn-play-back" text="@common.back" class="hp-btn hp-btn--small hp-btn--back hp-btn--center back-btn" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- HOST -->
+            <ui:VisualElement name="host-screen" class="screen form-screen" picking-mode="Ignore">
+                <ui:VisualElement class="screen-header" picking-mode="Ignore">
+                    <ui:Label name="host-title" text="@host.title" class="screen-title" />
+                    <ui:Label name="host-sub" text="@host.sub" class="screen-sub" />
+                </ui:VisualElement>
+                <ui:VisualElement class="paper-card form-card paper-card--tilt-l">
+                    <ui:VisualElement class="masking-tape masking-tape--tr" picking-mode="Ignore" />
+                    <ui:Label text="@host.farmname" class="field-label" />
+                    <ui:TextField name="host-name" max-length="24" class="hp-field farm-field" />
+                    <ui:Label text="@host.crew" class="field-label" />
+                    <ui:VisualElement name="host-players" class="row chip-row" />
+                    <ui:Label name="host-solo" text="@host.solo" class="small-text muted note-line" />
+                    <ui:Label text="@host.privacy" class="field-label" />
+                    <ui:VisualElement name="host-privacy" class="row chip-row" />
+                    <ui:Label name="host-mode" text="" class="small-text muted note-line" />
+                    <ui:VisualElement name="host-continue" class="paper-inset continue-box">
+                        <ui:Label text="@host.continue.head" class="bold continue-head" />
+                        <ui:Label name="host-continue-info" text="" class="body-text" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="row form-buttons" picking-mode="Ignore">
+                    <ui:Button name="btn-host-back" text="@common.back" class="hp-btn hp-btn--small hp-btn--back hp-btn--center back-btn" />
+                    <ui:Button name="btn-host-go" text="@host.go" class="hp-btn hp-btn--primary hp-btn--center go-btn" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- JOIN -->
+            <ui:VisualElement name="join-screen" class="screen form-screen" picking-mode="Ignore">
+                <ui:VisualElement class="screen-header" picking-mode="Ignore">
+                    <ui:Label text="@join.title" class="screen-title" />
+                    <ui:Label text="@join.sub" class="screen-sub" />
+                </ui:VisualElement>
+                <ui:VisualElement class="paper-card form-card join-card paper-card--tilt-r">
+                    <ui:VisualElement class="masking-tape masking-tape--tl" picking-mode="Ignore" />
+                    <ui:VisualElement name="join-tabs" class="row tab-row" />
+                    <ui:VisualElement name="join-friends" class="join-pane">
+                        <ui:VisualElement class="row pane-head">
+                            <ui:VisualElement name="friends-icon" class="pane-icon" />
+                            <ui:Label name="steam-status" text="" class="body-text pane-status" />
+                        </ui:VisualElement>
+                        <ui:Label text="@join.friends.hint" class="small-text muted pane-hint" />
+                        <ui:Button name="btn-steam-friends" text="@join.friends.open" class="hp-btn hp-btn--small pane-btn" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="join-lan" class="join-pane">
+                        <ui:VisualElement class="row pane-head">
+                            <ui:VisualElement name="lan-icon" class="pane-icon pane-icon--small" />
+                            <ui:Label text="@join.lan.heading" class="card-heading" />
+                            <ui:VisualElement class="spacer" />
+                            <ui:Label name="lan-searching" text="@join.lan.searching" class="small-text muted lan-searching" />
+                            <ui:Button name="btn-refresh" text="@join.lan.refresh" class="hp-btn hp-btn--small hp-btn--center" />
+                        </ui:VisualElement>
+                        <ui:ScrollView name="lan-list" class="lan-list" />
+                        <ui:Label name="lan-empty" text="" class="small-text muted lan-empty" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="join-address-pane" class="join-pane">
+                        <ui:VisualElement class="row pane-head">
+                            <ui:VisualElement name="address-icon" class="pane-icon pane-icon--small" />
+                            <ui:Label text="@join.address.heading" class="card-heading" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="row join-row">
+                            <ui:TextField name="join-address" max-length="64" class="hp-field join-field" />
+                            <ui:Button name="btn-join-go" text="@join.go" class="hp-btn hp-btn--primary hp-btn--small hp-btn--center" />
+                        </ui:VisualElement>
+                        <ui:Label text="@join.address.hint" class="small-text muted pane-hint" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="row form-buttons" picking-mode="Ignore">
+                    <ui:Button name="btn-join-back" text="@common.back" class="hp-btn hp-btn--small hp-btn--back hp-btn--center back-btn" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- SETTINGS / CREDITS (filled by SettingsPanel / CreditsPanel) -->
+            <ui:VisualElement name="settings-screen" class="screen centered" picking-mode="Ignore">
+                <ui:VisualElement name="settings-host" class="settings-host" />
+            </ui:VisualElement>
+            <ui:VisualElement name="credits-screen" class="screen centered" picking-mode="Ignore">
+                <ui:VisualElement name="credits-host" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- FOOTER -->
-        <ui:VisualElement name="footer" class="footer">
-            <ui:VisualElement class="chip">
-                <ui:Label name="footer-mode" text="LAN" />
+        <ui:VisualElement name="footer" class="footer" picking-mode="Ignore">
+            <ui:VisualElement name="footer-chip" class="chip mode-chip">
+                <ui:VisualElement name="footer-dot" class="mode-dot" />
+                <ui:Label name="footer-mode" text="" />
             </ui:VisualElement>
             <ui:VisualElement class="spacer" />
-            <ui:Label name="footer-hint" text="" class="bold footer-hint" />
+            <ui:VisualElement name="footer-prompts" class="row footer-prompts" />
             <ui:VisualElement class="spacer" />
-            <ui:Label name="footer-version" text="v0.1" class="bold footer-version" />
+            <ui:Label name="footer-version" text="" class="footer-version" />
         </ui:VisualElement>
 
-        <!-- POPUPS -->
-        <ui:VisualElement name="popup-connecting" class="popup-layer">
-            <ui:VisualElement class="sign popup">
-                <ui:Label name="connecting-title" text="Connecting" class="display heading on-dark" />
-                <ui:Label name="connecting-body" text="Knocking on the farm gate..." class="body-text on-dark" />
-                <ui:Button name="btn-connecting-cancel" text="Cancel" class="hp-btn hp-btn--small" />
-            </ui:VisualElement>
-        </ui:VisualElement>
-
-        <ui:VisualElement name="popup-message" class="popup-layer">
-            <ui:VisualElement class="sign popup">
-                <ui:VisualElement class="row">
-                    <ui:Label name="message-badge" text="!" class="badge" />
-                    <ui:Label name="message-title" text="Message" class="display heading on-dark" />
-                </ui:VisualElement>
-                <ui:Label name="message-body" text="" class="body-text on-dark" />
-                <ui:Button name="btn-message-ok" text="OK" class="hp-btn hp-btn--small" />
-            </ui:VisualElement>
-        </ui:VisualElement>
+        <ui:VisualElement name="dialog-layer" class="dialog-layer" />
     </ui:VisualElement>
 </ui:UXML>

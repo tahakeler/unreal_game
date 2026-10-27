@@ -14,9 +14,9 @@ namespace HarvestPanic.UI
         readonly List<PlayerInfo> _players = new List<PlayerInfo>();
         readonly List<LanHost> _hosts = new List<LanHost>
         {
-            new LanHost { Name = "Grandpa's Farm", Address = "192.168.1.20", Players = 2, MaxPlayers = 4 },
-            new LanHost { Name = "Dave's Pig Sty", Address = "192.168.1.34", Players = 1, MaxPlayers = 4 },
-            new LanHost { Name = "Full House", Address = "192.168.1.51", Players = 4, MaxPlayers = 4 },
+            new LanHost { Name = "Grandpa's Farm", HostName = "Grandpa", Address = "192.168.1.20", Players = 2, MaxPlayers = 4 },
+            new LanHost { Name = "Dave's Pig Sty", HostName = "Dave", Address = "192.168.1.34", Players = 1, MaxPlayers = 3, InProgress = true },
+            new LanHost { Name = "Full House", HostName = "Mabel", Address = "192.168.1.51", Players = 4, MaxPlayers = 4 },
         };
         float _pendingDelay = -1f;
         Action _pending;

@@ -44,6 +44,18 @@ namespace HarvestPanic.UI
         public bool CameraBob = true;
         /// <summary>Impact camera shake 0..1 (default 70%).</summary>
         public float CameraShake = 0.7f;
+        /// <summary>QualitySettings level index; -1 = the project default for this machine.</summary>
+        public int QualityLevel = -1;
+        /// <summary>Window / fullscreen resolution; 0 x 0 = the desktop's native resolution.</summary>
+        public int ResolutionWidth, ResolutionHeight;
+        /// <summary>Vertical sync (on by default: no tearing on the farm).</summary>
+        public bool VSync = true;
+        /// <summary>Frame-rate cap in fps; 0 = uncapped (vsync still applies). One of <see cref="FrameRateCaps"/>.</summary>
+        public int FrameRateCap;
+
+        /// <summary>Selectable frame-rate caps (0 = uncapped).</summary>
+        public static readonly int[] FrameRateCaps = { 0, 30, 60, 90, 120, 144, 165, 240 };
+        public const int MaxQualityLevel = 31, MaxResolution = 16384;
 
         /// <summary>Forces every field into its legal range (NaN becomes the default).</summary>
         public GameSettings Clamp()
@@ -62,12 +74,25 @@ namespace HarvestPanic.UI
             TextSize = Mathf.Clamp(TextSize, 0, 2);
             CaptionBackground = ClampF(CaptionBackground, 0f, 1f, 0.6f);
             CameraShake = ClampF(CameraShake, 0f, 1f, 0.7f);
+            QualityLevel = Mathf.Clamp(QualityLevel, -1, MaxQualityLevel);
+            if (ResolutionWidth < 320 || ResolutionHeight < 200 || ResolutionWidth > MaxResolution || ResolutionHeight > MaxResolution)
+                ResolutionWidth = ResolutionHeight = 0;
+            FrameRateCap = NearestCap(FrameRateCap);
             PlayerName = (PlayerName ?? "").Trim();
             if (PlayerName.Length > 20) PlayerName = PlayerName.Substring(0, 20);
             return this;
         }
 
         public GameSettings Copy() => (GameSettings)MemberwiseClone();
+
+        /// <summary>Snaps any fps value to the closest entry of <see cref="FrameRateCaps"/> (negative = uncapped).</summary>
+        public static int NearestCap(int fps)
+        {
+            if (fps <= 0) return 0;
+            int best = FrameRateCaps[1];
+            foreach (int c in FrameRateCaps) if (c > 0 && Mathf.Abs(c - fps) < Mathf.Abs(best - fps)) best = c;
+            return best;
+        }
 
         static float ClampF(float v, float min, float max, float fallback)
             => float.IsNaN(v) || float.IsInfinity(v) ? fallback : Mathf.Clamp(v, min, max);

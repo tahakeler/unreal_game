@@ -50,7 +50,7 @@ namespace HarvestPanic.UI
             if (plat != null)
             {
                 foreach (var d in plat.LanSessions)
-                    list.Add(new LanHost { Name = string.IsNullOrEmpty(d.LobbyName) ? d.HostName : d.LobbyName, Address = d.Port > 0 ? d.Address + ":" + d.Port : d.Address, Players = d.Players, MaxPlayers = d.MaxPlayers, InProgress = d.InProgress });
+                    list.Add(new LanHost { Name = string.IsNullOrEmpty(d.LobbyName) ? d.HostName : d.LobbyName, HostName = d.HostName, Version = d.Version, Address = d.Port > 0 ? d.Address + ":" + d.Port : d.Address, Players = d.Players, MaxPlayers = d.MaxPlayers, InProgress = d.InProgress });
                 return list;
             }
             var p = svc?.GetType().GetProperty("DiscoveredHosts", Pub);
@@ -116,7 +116,11 @@ namespace HarvestPanic.UI
         public static bool TryOpenSteamOverlay()
         {
             var plat = Platform;
-            if (plat != null) return plat.OpenInviteOverlay();
+            if (plat != null)
+            {
+                if (plat.OpenInviteOverlay()) return true; // in a Steam session: the invite dialog
+                if (!plat.IsSteamAvailable) return false;
+            }
             try
             {
                 var t = FindType("Steamworks.SteamFriends");
@@ -131,6 +135,7 @@ namespace HarvestPanic.UI
         /// <summary>Opens the Customization team's wardrobe if a Core interface named IWardrobeUI is registered. False otherwise.</summary>
         public static bool TryOpenWardrobe()
         {
+            if (Services.TryGet(out ICharacterCreator creator) && creator.Open(CharacterCreatorContext.Wardrobe)) return true;
             try
             {
                 // Customization team: static WardrobeUI.Open(FarmerLoadoutSync) for the local farmer (exists once spawned, e.g. in the Lobby).
